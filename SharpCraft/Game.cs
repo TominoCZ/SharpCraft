@@ -6,13 +6,8 @@ namespace SharpCraft
 {
     class Program
     {
-        [DllImport("kernel32.dll", SetLastError = true, ExactSpelling = true)]
-        static extern bool FreeConsole();
-
         static void Main(string[] args)
         {
-            FreeConsole();
-
             var wnd = new Window();
 
             wnd.Run(60);

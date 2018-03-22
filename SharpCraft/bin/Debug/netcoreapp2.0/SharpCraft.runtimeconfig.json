@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 {
   "runtimeOptions": {
     "tfm": "netcoreapp2.0",
@@ -6,4 +7,14 @@
       "version": "2.0.0"
     }
   }
+=======
+{
+  "runtimeOptions": {
+    "tfm": "netcoreapp2.0",
+    "framework": {
+      "name": "Microsoft.NETCore.App",
+      "version": "2.0.0"
+    }
+  }
+>>>>>>> a8d82a55a6dfe057e93c4777ec3a884304d4c636
 }
