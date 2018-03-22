@@ -24,6 +24,7 @@ bld/
 [Oo]bj/
 [Ll]og/
 *.exe
+netcoreapp2.0/
 
 # Visual Studio 2015 cache/options directory
 .vs/
