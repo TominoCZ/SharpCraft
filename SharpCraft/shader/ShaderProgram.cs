@@ -3,14 +3,14 @@ using OpenTK.Graphics.OpenGL;
 
 namespace OpenG_Basics
 {
-    class ShaderProgram
+    abstract class ShaderProgram
     {
         private int programID;
 
         private int vshID;
         private int fshID;
 
-        public ShaderProgram(string shaderName)
+        protected ShaderProgram(string shaderName)
         {
             loadShader(shaderName);
 
@@ -21,14 +21,21 @@ namespace OpenG_Basics
             GL.AttachShader(programID, vshID);
             GL.AttachShader(programID, fshID);
 
-            //bindAttributes();
+            bindAttributes();
 
             GL.LinkProgram(programID);
             GL.ValidateProgram(programID);
 
             //getAllUniformLocations();
-
             //ShaderManager.registerShader(this);
+        }
+
+        protected abstract void bindAttributes();
+
+        protected void bindAttribute(int attrib, string variable)
+        {
+            //set variable names that the vertex shader will be taking in
+            GL.BindAttribLocation(programID, attrib, variable);
         }
 
         private void loadShader(string shaderName)
