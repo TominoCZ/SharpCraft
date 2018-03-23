@@ -596,9 +596,9 @@ namespace SharpCraft
                                     var blockUnder = world.getBlock(posUnder);
                                     var blockAbove = world.getBlock(pos.offset(EnumFacing.UP));
 
-                                    if (blockUnder == EnumBlock.GRASS)
+                                    if (blockUnder == EnumBlock.GRASS && heldBlock != EnumBlock.GLASS)
                                         world.setBlock(posUnder, EnumBlock.DIRT, 0, false);
-                                    if (blockAbove != EnumBlock.AIR && heldBlock == EnumBlock.GRASS)
+                                    if (blockAbove != EnumBlock.AIR && blockAbove != EnumBlock.GLASS && heldBlock == EnumBlock.GRASS)
                                         world.setBlock(pos, EnumBlock.DIRT, 0, true);
                                     else
                                         world.setBlock(pos, heldBlock, player.getEquippedItemStack().Meta, true);

@@ -4,6 +4,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using OpenTK.Audio.OpenAL;
 
 namespace SharpCraft
 {
@@ -267,7 +268,8 @@ namespace SharpCraft
                     var X = (x + chunkPos.x) / 1.25f;
                     var Y = (z + chunkPos.z) / 1.25f;
 
-                    int peakY = 32 + (int)Math.Abs(MathHelper.Clamp(0.35f + _noiseUtil.GetPerlinFractal(X, Y), 0, 1) * 30);
+                    int peakY = 32 + (int)Math.Abs(MathHelper.Clamp(0.35f + _noiseUtil.GetPerlinFractal(X, Y), 0, 1) * 30) - 5;
+                    peakY -= (int)Math.Abs(MathHelper.Clamp(0.35f + _noiseUtil.GetPerlinFractal(X, Y), 0, 1) * 5);
 
                     for (int y = peakY; y >= 0; y--)
                     {
@@ -281,9 +283,20 @@ namespace SharpCraft
                             chunk.setBlock(p, EnumBlock.BEDROCK, 0);
                         else
                         {
-                            var f = 0.35f + _noiseUtil.GetNoise(X * 32 - y * 16, Y * 32 + x * 16);
+                            var f = _noiseUtil.GetNoise(X * 32 - y * 16, Y * 32 + x * 16);
 
                             chunk.setBlock(p, f >= 0.75f ? EnumBlock.RARE : EnumBlock.STONE, 0);
+                        }
+                    }
+
+                    float treeSeed = Math.Abs(MathHelper.Clamp(_noiseUtil.GetWhiteNoise(X, Y), 0, 1));
+                    float treeSeed2 = Math.Abs(MathHelper.Clamp(0.35f + _noiseUtil.GetPerlinFractal(Y, X), 0, 1));
+
+                    if (treeSeed >= 0.9925f && treeSeed2 >= 0.233f)
+                    {
+                        for (int treeY = 0; treeY < 5; treeY++)
+                        {
+                            chunk.setBlock(new BlockPos(x, peakY + 1 + treeY, z), EnumBlock.RARE, 1);
                         }
                     }
                 }
@@ -318,15 +331,18 @@ namespace SharpCraft
         {
             if (_chunks.TryGetValue(pos.ChunkPos(), out var node))
             {
-                if (!node.chunkGenerated || node.modelGenerating)
-                    return;
-
                 ThreadPool.RunTask(false, () =>
                 {
-                    node.modelGenerating = true;
-                    var model = node.chunk.generateModel(this, node.model);
-                    node.model = model;
-                    node.modelGenerating = false;
+                    lock (node)
+                    {
+                        if (!node.chunkGenerated || node.modelGenerating)
+                            return;
+
+                        node.modelGenerating = true;
+                        var model = node.chunk.generateModel(this, node.model);
+                        node.model = model;
+                        node.modelGenerating = false;
+                    }
                 });
             }
         }

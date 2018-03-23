@@ -49,6 +49,14 @@ namespace SharpCraft
                     return state.Model;
             }
 
+            for (int i = 0; i < states.Count; i++)
+            {
+                var state = states[i];
+
+                if (state.meta == 0)
+                    return state.Model;
+            }
+
             return null;
         }
     }

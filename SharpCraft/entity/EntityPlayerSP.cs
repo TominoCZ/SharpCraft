@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
+using Microsoft.VisualBasic.CompilerServices;
 using OpenTK;
 using OpenTK.Input;
 
@@ -86,7 +87,26 @@ namespace SharpCraft
 
         public void setItemStackInSelectedSlot(ItemStack stack)
         {
-            hotbar[equippedItemHotbarIndex] = stack;
+            int index = -1;
+
+            if (stack?.Item != null)
+            {
+                for (int i = 0; i < 9; i++)
+                {
+                    var v = hotbar[i];
+
+                    if (v != null && v.Item.GetHashCode() == stack.Item.GetHashCode() && v?.Item != null)
+                    {
+                        index = i;
+                        break;
+                    }
+                }
+            }
+
+            if (index == -1)
+                hotbar[equippedItemHotbarIndex] = stack;
+            else
+                equippedItemHotbarIndex = index;
         }
 
         public ItemStack getEquippedItemStack()
@@ -116,7 +136,17 @@ namespace SharpCraft
     [Serializable]
     abstract class Item
     {
-        protected object item { get; }
+        public static bool operator ==(Item i1, Item i2)
+        {
+            return i1?.item == i2?.item;
+        }
+
+        public static bool operator !=(Item i1, Item i2)
+        {
+            return i1?.item != i2?.item;
+        }
+
+        public object item { get; }
 
         string displayName { get; }
 
@@ -136,14 +166,14 @@ namespace SharpCraft
 
         public EnumBlock getBlock()
         {
-            return (EnumBlock) item;
+            return (EnumBlock)item;
         }
     }
 
     class ItemStack
     {
         public Item Item;
-        
+
         public int Count = 1;
         public int Meta;
 

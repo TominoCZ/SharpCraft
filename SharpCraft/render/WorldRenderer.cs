@@ -36,7 +36,7 @@ namespace SharpCraft
             modelLight = new ModelLight(new Vector3(-8, 12, -10f) * 750, Vector3.One);
             _selectionOutline = new ModelCubeOutline(new ShaderBlockOutline());
 
-            RenderDistance = 5;
+            RenderDistance = 8;
 
             updateTimer = Stopwatch.StartNew();
         }
