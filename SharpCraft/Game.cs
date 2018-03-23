@@ -54,8 +54,6 @@ namespace SharpCraft
         public EntityPlayerSP player;
         public World world;
 
-        private int FPS;
-
         public Game()
         {
             INSTANCE = this;
@@ -96,6 +94,8 @@ namespace SharpCraft
             var rareModelUnlit = new ModelBlock(EnumBlock.RARE, shader_unlit, false);
             var glassModel = new ModelBlock(EnumBlock.GLASS, shader, false);
 
+            var xrayModel = new ModelBlock(EnumBlock.XRAY, shader, false);
+
             ModelRegistry.registerBlockModel(stoneModel, 0);
             ModelRegistry.registerBlockModel(grassModel, 0);
             ModelRegistry.registerBlockModel(dirtModel, 0);
@@ -107,6 +107,8 @@ namespace SharpCraft
             ModelRegistry.registerBlockModel(rareModel, 0);
             ModelRegistry.registerBlockModel(rareModelUnlit, 1);
             ModelRegistry.registerBlockModel(glassModel, 0);
+
+            ModelRegistry.registerBlockModel(xrayModel, 0);
 
             SettingsManager.load();
 
@@ -124,10 +126,10 @@ namespace SharpCraft
                 var r = new Random();
 
                 var playerPos = new BlockPos(-100 + (float)r.NextDouble() * 200, 0,
-                    -100 + (float)r.NextDouble() * 200);
+                                    -100 + (float)r.NextDouble() * 200);
 
                 world = new World(0);
-                world.generateChunk(playerPos, true);
+                world.beginGenerateChunk(playerPos);
 
                 player = new EntityPlayerSP(new Vector3(playerPos.x, world.getHeightAtPos(playerPos.x, playerPos.z),
                     playerPos.z));
@@ -139,6 +141,7 @@ namespace SharpCraft
                 player.setItemStackInHotbar(2, new ItemStack(new ItemBlock(EnumBlock.COBBLESTONE)));
                 player.setItemStackInHotbar(3, new ItemStack(new ItemBlock(EnumBlock.PLANKS)));
                 player.setItemStackInHotbar(4, new ItemStack(new ItemBlock(EnumBlock.GLASS)));
+                player.setItemStackInHotbar(5, new ItemStack(new ItemBlock(EnumBlock.XRAY)));
             }
             else
             {
@@ -165,7 +168,7 @@ namespace SharpCraft
                 {
                     if (Visible)
                     {
-                        checkForEmptyChunks();
+                        checkChunks();
                     }
 
                     Thread.Sleep(50);
@@ -233,6 +236,13 @@ namespace SharpCraft
 
         protected override void OnRenderFrame(FrameEventArgs e)
         {
+            if (frameTimer.ElapsedMilliseconds >= 1000)
+            {
+                frameTimer.Restart();
+
+                Console.WriteLine($"{1 / e.Time:F} FPS");
+            }
+
             if (timer.ElapsedMilliseconds >= 50)
             {
                 GameLoop();
@@ -251,23 +261,14 @@ namespace SharpCraft
                 for (int i = 0; i < MAIN_THREAD_QUEUE.Count; i++)
                 {
                     var task = MAIN_THREAD_QUEUE[0];
+                    {
+                        if (task != null)
+                            task.ExecuteCode();
 
-                    task.ExecuteCode();
-
-                    MAIN_THREAD_QUEUE.Remove(task);
+                        MAIN_THREAD_QUEUE.Remove(task);
+                    }
                 }
             }
-
-            if (frameTimer.ElapsedMilliseconds >= 1000)
-            {
-                frameTimer.Restart();
-
-                Console.WriteLine($"{FPS} FPS");
-
-                FPS = 0;
-            }
-
-            FPS++;
         }
 
         private void renderScreen(float partialTicks)
@@ -320,45 +321,41 @@ namespace SharpCraft
             world?.updateEntities();
         }
 
-        private void checkForEmptyChunks()
+        private void checkChunks()
         {
             if (world == null || player == null)
                 return;
 
-            var rDist = worldRenderer.RenderDistance;
-
-            for (int x = -rDist; x < rDist; x++)
+            for (int z = -worldRenderer.RenderDistance; z <= worldRenderer.RenderDistance; z++)
             {
-                for (int z = -rDist; z < rDist; z++)
+                for (int x = -worldRenderer.RenderDistance; x <= worldRenderer.RenderDistance; x++)
                 {
-                    var pos = new BlockPos(x * 16 + player.pos.X, 0, z * 16 + player.pos.Z).ChunkPos() +
-                              new BlockPos(8, 0, 8);
-
+                    var pos = new BlockPos(x * 16 + player.pos.X, 0, z * 16 + player.pos.Z).ChunkPos() + new BlockPos(8, 0, 8);
                     var dist = MathUtil.distance(pos.vector.Xz, Camera.INSTANCE.pos.Xz);
 
-                    if (dist <= rDist * 16)
+                    if (dist <= worldRenderer.RenderDistance * 16)
                     {
-                        var chunk = world.getChunkFromPos(pos);
-
-                        if (chunk == null)
-                        {
-                            ThreadPool.RunTask(false, () =>
-                            {
-                                world.generateChunk(pos, true);
-
-                                //WorldRegionManager.saveChunk(world.getChunkFromPos(pos));
-                            });
-
-                            Console.WriteLine("generated a chunk!");
-                        }
-                        else if (!world.doesChunkHaveModel(pos))
-                        {
-                            ThreadPool.RunTask(false, () => world.updateModelForChunk(pos));
-                        }
-
-                        Thread.Sleep(5);
+                        checkChunk(pos);
                     }
                 }
+            }
+        }
+
+        private void checkChunk(BlockPos pos)
+        {
+            var chunk = world.getChunkFromPos(pos);
+
+            if (chunk == null || !world.isChunkGenerated(pos))
+            {
+                world.beginGenerateChunk(pos);
+            }
+            else if (!world.doesChunkHaveModel(pos))
+            {
+                world.beginUpdateModelForChunk(pos, true);
+            }
+            else if (chunk.isDirty)
+            {
+                world.beginUpdateModelForChunk(pos);
             }
         }
 
@@ -501,8 +498,6 @@ namespace SharpCraft
                 else
                 {
                     openGuiScreen(new GuiScreenIngameMenu());
-
-                    ThreadPool.RunTask(false, () => { WorldLoader.saveWorld(world); });
                 }
             }
 
@@ -647,8 +642,13 @@ namespace SharpCraft
 
         protected override void OnClosing(CancelEventArgs e)
         {
-            ModelManager.cleanup();
             ShaderManager.cleanup();
+
+            ModelManager.cleanup();
+            TextureManager.cleanUp();
+
+            if (world != null)
+                WorldLoader.saveWorld(world);
         }
     }
 

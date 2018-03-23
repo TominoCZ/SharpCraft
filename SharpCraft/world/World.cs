@@ -4,7 +4,6 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using OpenTK.Audio.OpenAL;
 
 namespace SharpCraft
 {
@@ -66,13 +65,22 @@ namespace SharpCraft
             }
         }
 
+        private ChunkData addChunkPlaceholder(BlockPos pos)
+        {
+            var data = new ChunkData(new Chunk(pos.ChunkPos()), new ModelChunk());
+
+            _chunks.TryAdd(pos, data);
+
+            return data;
+        }
+
         public List<AxisAlignedBB> getIntersectingEntitiesBBs(AxisAlignedBB with)
         {
             List<AxisAlignedBB> bbs = new List<AxisAlignedBB>();
 
             for (int i = 0; i < _entities.Count; i++)
             {
-                var bb = _entities[i].getBoundingBox();
+                var bb = _entities[i].getEntityBoundingBox();
 
                 if (bb.intersectsWith(with))
                     bbs.Add(bb);
@@ -120,80 +128,38 @@ namespace SharpCraft
             return _chunks.Values.ToArray();
         }
 
-        public void setBlock(BlockPos pos, EnumBlock blockType, int meta, bool redraw)
+        public void setBlock(BlockPos pos, EnumBlock blockType, int meta, bool markDirty)
         {
             var chunk = getChunkFromPos(pos);
             if (chunk == null)
-            {
-                var chp = pos.ChunkPos();
-
-                ThreadPool.RunTask(true, () =>
-                {
-                    generateChunk(chp, false);
-                    setBlock(pos, blockType, meta, redraw);
-                });
-
                 return;
-            }
 
             chunk.setBlock(pos - chunk.chunkPos, blockType, meta);
 
-            if (redraw)
+            if (markDirty)
             {
-                updateModelForChunk(chunk.chunkPos);
-                markNeighbourChunksForUpdate(chunk, pos);
+                chunk.markDirty();
+                markNeighbourChunksDirty(chunk, pos);
             }
         }
 
-        private void markChunksOnSidesForUpdate(BlockPos pos)
+        public void markNeighbourChunksDirty(BlockPos pos)
         {
-            var sw = Stopwatch.StartNew();
-
-            int chunksUpdated = 0;
-
-            for (var index = 0; index < FacingUtil.SIDES.Length - 2; index++) //TODO - negative 2 with 2D chunks
-            {
-                EnumFacing side = FacingUtil.SIDES[index];
-
-                var p = pos.offsetChunk(side);
-                var ch = getChunkFromPos(p);
-
-                if (ch != null)
-                {
-                    updateModelForChunk(ch.chunkPos);
-                    chunksUpdated++;
-                }
-            }
-
-            sw.Stop();
-
-            Console.WriteLine($"DEBUG: updated chunks on sides [{sw.Elapsed.TotalMilliseconds:F}ms] ({chunksUpdated} {(chunksUpdated > 1 ? "chunks" : "chunk")})");
+            markNeighbourChunksDirty(null, pos, true);
         }
 
-        private void markNeighbourChunksForUpdate(Chunk chunk, BlockPos pos)
+        private void markNeighbourChunksDirty(Chunk chunk, BlockPos pos, bool chunks = false)
         {
-            var sw = Stopwatch.StartNew();
-
-            int chunksUpdated = 1;
-
             for (var index = 0; index < FacingUtil.SIDES.Length - 2; index++)
             {
                 EnumFacing side = FacingUtil.SIDES[index];
 
-                var p = pos.offset(side);
+                var p = chunks ? pos.offsetChunk(side) : pos.offset(side);
                 var ch = getChunkFromPos(p);
 
-                if (ch != chunk && ch != null)
-                {
-                    updateModelForChunk(ch.chunkPos);
-                    chunksUpdated++;
-                }
+                if (ch != chunk)
+                    ch?.markDirty();
             }
-
-            sw.Stop();
-
-            Console.WriteLine(
-                $"DEBUG: built terrain model [{sw.Elapsed.TotalMilliseconds:F}ms] ({chunksUpdated} {(chunksUpdated > 1 ? "chunks" : "chunk")})");
         }
 
         public EnumBlock getBlock(BlockPos pos)
@@ -224,23 +190,27 @@ namespace SharpCraft
 
             if (redraw)
             {
-                updateModelForChunk(chunk.chunkPos);
-                markNeighbourChunksForUpdate(chunk, pos);
+                chunk.markDirty();
+                markNeighbourChunksDirty(chunk, pos);
             }
         }
 
-        public int getHeightAtPos(int x, int z)
+        public int getHeightAtPos(float x, float z)
         {
+            //TODO this code only for 2D
+
+            var pos = new BlockPos(x, 256, z);
+
+            var chunk = getChunkFromPos(new BlockPos(pos.x, 0, pos.z));
+
+            if (chunk == null)
+                return 0;//ThreadPool.ScheduleTask(false, () => generateChunk(pos));
+
+            var lastPos = pos;
+
             for (int y = BuildHeight - 1; y >= 0; y--)
             {
-                var pos = new BlockPos(x, y, z);
-
-                var chunk = getChunkFromPos(pos);
-
-                if (chunk == null)
-                    ThreadPool.RunTask(false, () => generateChunk(pos, false));
-
-                var block = getBlock(pos);
+                var block = getBlock(lastPos = lastPos.offset(EnumFacing.DOWN));
 
                 if (block != EnumBlock.AIR)
                     return y + 1;
@@ -249,101 +219,70 @@ namespace SharpCraft
             return 0;
         }
 
-        public void generateChunk(BlockPos pos, bool redraw)
+        public void beginGenerateChunk(BlockPos pos)
         {
             var chunkPos = pos.ChunkPos();
 
             if (_chunks.ContainsKey(chunkPos))
                 return;
 
-            var chunk = new Chunk(chunkPos);
-            var data = new ChunkData(chunk, new ModelChunk());
+            var data = addChunkPlaceholder(pos);
 
-            _chunks.TryAdd(chunkPos, data);
-
-            for (int z = 0; z < 16; z++)
+            ThreadPool.ScheduleTask(false, () =>
             {
-                for (int x = 0; x < 16; x++)
+                for (int z = 0; z < 16; z++)
                 {
-                    var X = (x + chunkPos.x) / 1.25f;
-                    var Y = (z + chunkPos.z) / 1.25f;
-
-                    int peakY = 32 + (int)Math.Abs(MathHelper.Clamp(0.35f + _noiseUtil.GetPerlinFractal(X, Y), 0, 1) * 30) - 5;
-                    peakY -= (int)Math.Abs(MathHelper.Clamp(0.35f + _noiseUtil.GetPerlinFractal(X, Y), 0, 1) * 5);
-
-                    for (int y = peakY; y >= 0; y--)
+                    for (int x = 0; x < 16; x++)
                     {
-                        var p = new BlockPos(x, y, z);
+                        var X = (x + chunkPos.x) / 1.25f;
+                        var Y = (z + chunkPos.z) / 1.25f;
 
-                        if (y == peakY)
-                            chunk.setBlock(p, EnumBlock.GRASS, 0);
-                        else if (y > 0 && peakY - y > 0 && peakY - y < 3) // for 2 blocks
-                            chunk.setBlock(p, EnumBlock.DIRT, 0);
-                        else if (y == 0)
-                            chunk.setBlock(p, EnumBlock.BEDROCK, 0);
-                        else
+                        int peakY = 32 + (int)Math.Abs(
+                                        MathHelper.Clamp(0.35f + _noiseUtil.GetPerlinFractal(X, Y), 0, 1) * 30);
+
+                        for (int y = peakY; y >= 0; y--)
                         {
-                            var f = _noiseUtil.GetNoise(X * 32 - y * 16, Y * 32 + x * 16);
+                            var p = new BlockPos(x, y, z);
 
-                            chunk.setBlock(p, f >= 0.75f ? EnumBlock.RARE : EnumBlock.STONE, 0);
+                            if (y == peakY)
+                                data.chunk.setBlock(p, EnumBlock.GRASS, 0);
+                            else if (y > 0 && peakY - y > 0 && peakY - y < 3) // for 2 blocks
+                                data.chunk.setBlock(p, EnumBlock.DIRT, 0);
+                            else if (y == 0)
+                                data.chunk.setBlock(p, EnumBlock.BEDROCK, 0);
+                            else
+                            {
+                                var f = _noiseUtil.GetNoise(X * 32 - y * 16, Y * 32 + x * 16);
+
+                                data.chunk.setBlock(p, f >= 0.75f ? EnumBlock.RARE : EnumBlock.STONE, 0);
+                            }
                         }
-                    }
 
-                    float treeSeed = Math.Abs(MathHelper.Clamp(_noiseUtil.GetWhiteNoise(X, Y), 0, 1));
-                    float treeSeed2 = Math.Abs(MathHelper.Clamp(0.35f + _noiseUtil.GetPerlinFractal(Y, X), 0, 1));
+                        float treeSeed = Math.Abs(MathHelper.Clamp(_noiseUtil.GetWhiteNoise(X, Y), 0, 1));
+                        float treeSeed2 = Math.Abs(MathHelper.Clamp(0.35f + _noiseUtil.GetPerlinFractal(Y, X), 0, 1));
 
-                    if (treeSeed >= 0.9925f && treeSeed2 >= 0.233f)
-                    {
-                        for (int treeY = 0; treeY < 5; treeY++)
+                        if (treeSeed >= 0.995f && treeSeed2 >= 0.233f)
                         {
-                            chunk.setBlock(new BlockPos(x, peakY + 1 + treeY, z), EnumBlock.RARE, 1);
+                            for (int treeY = 0; treeY < 5; treeY++)
+                            {
+                                data.chunk.setBlock(new BlockPos(x, peakY + 1 + treeY, z), EnumBlock.RARE, 1);
+                            }
                         }
                     }
                 }
-            }
 
-            if (redraw)
-            {
-                updateModelForChunk(chunkPos);
+                _chunks.TryAdd(chunkPos, data);
 
-                markChunksOnSidesForUpdate(chunkPos);
-            }
-
-            data.chunkGenerated = true;
-
-            /* var sides = (EnumFacing[]) Enum.GetValues(typeof(EnumFacing));
-
-             for (var index = 0; index < sides.Length - 2; index++)
-             {
-                 var side = sides[index];
-
-                 var vec = new BlockPos().offset(side).vector;
-                 var offset = new BlockPos(vec * 16);
-
-                 var c = getChunkFromPos(offset + chunkPos);
-
-                 if (c != null)
-                     updateModelForChunk(c.chunkPos);
-             }*/
+                data.chunkGenerated = true;
+                data.chunk.markDirty();
+            });
         }
 
-        public void updateModelForChunk(BlockPos pos)
+        public void beginUpdateModelForChunk(BlockPos pos, bool updateContainingEntities = false)
         {
             if (_chunks.TryGetValue(pos.ChunkPos(), out var node))
             {
-                ThreadPool.RunTask(false, () =>
-                {
-                    lock (node)
-                    {
-                        if (!node.chunkGenerated || node.modelGenerating)
-                            return;
-
-                        node.modelGenerating = true;
-                        var model = node.chunk.generateModel(this, node.model);
-                        node.model = model;
-                        node.modelGenerating = false;
-                    }
-                });
+                node.beginUpdateModel(this, updateContainingEntities);
             }
         }
 
@@ -352,6 +291,13 @@ namespace SharpCraft
             var n = _chunks[pos.ChunkPos()];
 
             return n.chunkGenerated && n.model.isGenerated;
+        }
+
+        public bool isChunkGenerated(BlockPos pos)
+        {
+            var n = _chunks[pos.ChunkPos()];
+
+            return n.chunkGenerated;
         }
     }
 }

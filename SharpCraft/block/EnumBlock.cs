@@ -2,6 +2,7 @@
 {
     public enum EnumBlock
     {
+        XRAY = -2,
         MISSING = -1,
         AIR = 0,
         STONE = 1,

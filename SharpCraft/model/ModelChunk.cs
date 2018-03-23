@@ -34,5 +34,11 @@ namespace SharpCraft
         {
             return shaders;
         }
+
+        public void overrideModel(ModelChunk newModel)
+        {
+            fragmentPerShader = newModel.fragmentPerShader;
+            shaders = newModel.shaders;
+        }
     }
 }

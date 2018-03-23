@@ -21,8 +21,8 @@ namespace SharpCraft
         {
             Camera.INSTANCE.pos = pos;
 
-            boundingBox =
-                new AxisAlignedBB(new Vector3(-0.3f, 0, -0.3f), new Vector3(0.3f, 1.65f, 0.3f)).offset(lastPos = pos);
+            collisionBoundingBox = new AxisAlignedBB(new Vector3(-0.3f, 0, -0.3f), new Vector3(0.3f, 1.65f, 0.3f));
+            boundingBox = collisionBoundingBox.offset(lastPos = pos);
 
             hotbar = new ItemStack[9];
         }
@@ -87,26 +87,7 @@ namespace SharpCraft
 
         public void setItemStackInSelectedSlot(ItemStack stack)
         {
-            int index = -1;
-
-            if (stack?.Item != null)
-            {
-                for (int i = 0; i < 9; i++)
-                {
-                    var v = hotbar[i];
-
-                    if (v != null && v.Item.GetHashCode() == stack.Item.GetHashCode() && v?.Item != null)
-                    {
-                        index = i;
-                        break;
-                    }
-                }
-            }
-
-            if (index == -1)
-                hotbar[equippedItemHotbarIndex] = stack;
-            else
-                equippedItemHotbarIndex = index;
+            hotbar[equippedItemHotbarIndex] = stack;
         }
 
         public ItemStack getEquippedItemStack()
@@ -170,6 +151,7 @@ namespace SharpCraft
         }
     }
 
+    [Serializable]
     class ItemStack
     {
         public Item Item;

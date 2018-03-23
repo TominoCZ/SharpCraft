@@ -5,9 +5,11 @@ using System.Linq;
 
 namespace SharpCraft
 {
-    internal class Chunk
+    class Chunk
     {
-        private short[,,] chunkBlocks;
+        private short[,,] _chunkBlocks;
+
+        public bool isDirty { get; private set; }
 
         public BlockPos chunkPos { get; }
 
@@ -19,7 +21,7 @@ namespace SharpCraft
             boundingBox =
                 new AxisAlignedBB(Vector3.Zero, Vector3.One * 16 + Vector3.UnitY * 240).offset(chunkPos.vector);
 
-            chunkBlocks = new short[16, 256, 16];
+            _chunkBlocks = new short[16, 256, 16];
         }
 
         private Chunk(ChunkCache cache)
@@ -28,7 +30,7 @@ namespace SharpCraft
             boundingBox =
                 new AxisAlignedBB(Vector3.Zero, Vector3.One * 16 + Vector3.UnitY * 240).offset(chunkPos.vector);
 
-            chunkBlocks = cache.chunkBlocks;
+            _chunkBlocks = cache.chunkBlocks;
         }
 
         public static Chunk CreateFromCache(ChunkCache cache)
@@ -40,13 +42,13 @@ namespace SharpCraft
         {
             short id = (short)((short)blockType << 4 | meta);
 
-            chunkBlocks[pos.x, pos.y, pos.z] = id;
+            _chunkBlocks[pos.x, pos.y, pos.z] = id;
         }
 
         public EnumBlock getBlock(World w, BlockPos pos)
         {
             if (isPosInChunk(pos))
-                return (EnumBlock)(chunkBlocks[pos.x, pos.y, pos.z] >> 4);
+                return (EnumBlock)(_chunkBlocks[pos.x, pos.y, pos.z] >> 4);
 
             var block = w.getBlock(pos + chunkPos);
 
@@ -56,7 +58,7 @@ namespace SharpCraft
         public int getMetadata(World w, BlockPos pos)
         {
             if (isPosInChunk(pos))
-                return chunkBlocks[pos.x, pos.y, pos.z] & 15;
+                return _chunkBlocks[pos.x, pos.y, pos.z] & 15;
 
             return w.getMetadata(pos + chunkPos);
         }
@@ -65,9 +67,9 @@ namespace SharpCraft
         {
             if (isPosInChunk(pos))
             {
-                var id = chunkBlocks[pos.x, pos.y, pos.z];
+                var id = _chunkBlocks[pos.x, pos.y, pos.z];
 
-                chunkBlocks[pos.x, pos.y, pos.z] = (short)(id & 4095 | meta);
+                _chunkBlocks[pos.x, pos.y, pos.z] = (short)(id & 4095 | meta);
             }
 
             w.setMetadata(pos + chunkPos, meta, redraw);
@@ -81,9 +83,9 @@ namespace SharpCraft
                 pos.z >= 0 && pos.z < 16;
         }
 
-        public ModelChunk generateModel(World w, ModelChunk previousChunkModel)
+        public ModelChunk createChunkModel(World w, ModelChunk previousChunkModel, bool updateContainingEntities)
         {
-            List<RawQuad> quads; 
+            List<RawQuad> quads;
 
             var MODEL_RAW = new Dictionary<ShaderProgram, List<RawQuad>>();
 
@@ -158,12 +160,40 @@ namespace SharpCraft
             Game.MAIN_THREAD_QUEUE.Add(finish);
             finish.WaitFor();
 
+            if (updateContainingEntities)
+            {
+                w.markNeighbourChunksDirty(chunkPos);
+
+                for (var index = 0; index < w._entities.Count; index++)
+                {
+                    var entity = w._entities[index];
+
+                    var pos1 = chunkPos.ChunkPos();
+                    var pos2 = new BlockPos(entity.pos).ChunkPos();
+
+                    if (pos1.x == pos2.x && pos1.z == pos2.z)
+                    {
+                        int height = w.getHeightAtPos(entity.pos.X, entity.pos.Z);
+
+                        if (entity.pos.Y < height)
+                            entity.teleportTo(new Vector3(entity.pos.X, entity.lastPos.Y = height, entity.pos.Z));
+                    }
+                }
+            }
+
+            isDirty = false;
+
             return previousChunkModel;
+        }
+
+        public void markDirty()
+        {
+            isDirty = true;
         }
 
         public ChunkCache createChunkCache()
         {
-            return new ChunkCache(chunkPos, chunkBlocks);
+            return new ChunkCache(chunkPos, _chunkBlocks);
         }
     }
 

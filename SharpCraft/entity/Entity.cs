@@ -6,7 +6,7 @@ namespace SharpCraft
 {
     internal class Entity
     {
-        protected AxisAlignedBB boundingBox;
+        protected AxisAlignedBB boundingBox, collisionBoundingBox;
 
         public Vector3 pos;
         public Vector3 lastPos;
@@ -18,7 +18,9 @@ namespace SharpCraft
         protected Entity(Vector3 pos)
         {
             this.pos = pos;
-            boundingBox = AxisAlignedBB.BLOCK_FULL.offset(Vector3.One * -0.5f).offset(pos);
+
+            collisionBoundingBox = AxisAlignedBB.BLOCK_FULL.offset(Vector3.One * -0.5f);
+            boundingBox = collisionBoundingBox.offset(pos);
         }
 
         public virtual void Update()
@@ -84,9 +86,21 @@ namespace SharpCraft
         {
         }
 
-        public AxisAlignedBB getBoundingBox()
+        public void teleportTo(Vector3 pos)
+        {
+            this.pos = lastPos = pos;
+
+            boundingBox = collisionBoundingBox.offset(pos);
+        }
+
+        public AxisAlignedBB getEntityBoundingBox()
         {
             return boundingBox;
+        }
+
+        public AxisAlignedBB getCollisionBoundingBox()
+        {
+            return collisionBoundingBox;
         }
 
         protected void setPositionToBB()

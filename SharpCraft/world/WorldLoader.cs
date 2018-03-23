@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 
 namespace SharpCraft
@@ -31,14 +32,15 @@ namespace SharpCraft
                 }
 
                 var wpn = new WorldPlayerNode(Game.INSTANCE.player);
-
+                
                 using (var fs = File.OpenWrite(dir + "/player.dat"))
                 {
                     bf.Serialize(fs, wpn);
                 }
             }
-            catch
+            catch(Exception e)
             {
+                Console.WriteLine(e.StackTrace);
             }
 
             saving = false;
@@ -83,8 +85,9 @@ namespace SharpCraft
 
                 Game.INSTANCE.player = player;
             }
-            catch
+            catch (Exception e)
             {
+                Console.WriteLine(e.StackTrace);
             }
 
             return world;

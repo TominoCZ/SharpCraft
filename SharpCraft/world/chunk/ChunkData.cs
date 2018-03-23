@@ -13,5 +13,19 @@
             this.chunk = chunk;
             this.model = model;
         }
+
+        public void beginUpdateModel(World w, bool updateContainingEntities)
+        {
+            if (!chunkGenerated || modelGenerating)
+                return;
+
+            modelGenerating = true;
+
+            ThreadPool.ScheduleTask(false, () =>
+            {
+                chunk.createChunkModel(w, model, updateContainingEntities);
+                modelGenerating = false;
+            });
+        }
     }
 }

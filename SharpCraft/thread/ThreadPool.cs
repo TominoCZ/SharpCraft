@@ -28,10 +28,6 @@ namespace SharpCraft
             for (int i = 0; i < threads; i++)
             {
                 _workers.Add(new Worker());
-            }
-
-            for (int i = 0; i < threads; i++)
-            {
                 _workersHigh.Add(new Worker());
             }
 
@@ -40,7 +36,7 @@ namespace SharpCraft
             _queueThread.Start();
         }
 
-        public static void RunTask(bool highPriority, Worker.Method f)
+        public static void ScheduleTask(bool highPriority, Worker.Method f)
         {
             var worker = getAvailableWorker(highPriority);
 

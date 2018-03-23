@@ -75,5 +75,10 @@ namespace SharpCraft
 
             return new BlockPos(X, Y, Z);
         }
+
+        public override string ToString()
+        {
+            return $"BlockPos [{_x},{_y},{_z}]";
+        }
     }
 }
