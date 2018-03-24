@@ -94,7 +94,7 @@ namespace SharpCraft
 
             if (Game.INSTANCE.player != null)
             {
-                renderSelectedBlock(Matrix4.Identity);
+                renderSelectedItemBlock();
             }
         }
 
@@ -138,7 +138,7 @@ namespace SharpCraft
             _selectionOutline.unbind();
         }
 
-        private void renderSelectedBlock(Matrix4 viewMatrix)
+        private void renderSelectedItemBlock() //TODO figure out why atlas texture is rendered here
         {
             var stack = Game.INSTANCE.player.getEquippedItemStack();
 
@@ -156,6 +156,9 @@ namespace SharpCraft
                     0.045f));
 
                 GL.Enable(EnableCap.DepthClamp);
+
+                GL.ActiveTexture(TextureUnit.Texture0);
+                GL.BindTexture(TextureTarget.Texture2D, TextureManager.blockTextureAtlasID);
                 GL.DrawArrays(model.shader.renderType, 0, model.rawModel.vertexCount);
 
                 model.unbind();

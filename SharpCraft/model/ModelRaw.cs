@@ -10,8 +10,6 @@ namespace SharpCraft
         public int vaoID { get; }
         public int[] bufferIDs { get; }
         public int vertexCount { get; protected set; }
-        public bool hasUVs { get; protected set; }
-        public bool hasNormals { get; protected set; }
 
         public List<RawQuad> quads;
 
@@ -23,17 +21,7 @@ namespace SharpCraft
             this.bufferIDs = bufferIDs;
 
             foreach (var quad in quads)
-            {
                 vertexCount += quad.vertices.Length / valuesPerVertice;
-
-                var uv = quads[0].UVs.Length > 0;
-                var normal = quads[0].normal.Length > 0;
-
-                if (uv)
-                    hasUVs = true;
-                if (normal)
-                    hasNormals = true;
-            }
         }
     }
 }
