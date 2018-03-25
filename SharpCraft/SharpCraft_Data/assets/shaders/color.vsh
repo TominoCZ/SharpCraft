@@ -9,9 +9,9 @@ uniform mat4 projectionMatrix;
 uniform mat4 viewMatrix;
 uniform vec4 colorIn;
 
-void main(void){
-	vec4 worldPos = transformationMatrix * vec4(position,1.0);
+void main(void) {
+	vec4 worldPos = transformationMatrix * vec4(position, 1.0);
 	gl_Position = projectionMatrix * viewMatrix * worldPos;
-	
+
 	pass_color = colorIn;
 }

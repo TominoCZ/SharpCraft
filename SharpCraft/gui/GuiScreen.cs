@@ -1,9 +1,9 @@
-﻿using System.Collections.Generic;
-using OpenTK;
+﻿using OpenTK;
+using System.Collections.Generic;
 
 namespace SharpCraft
 {
-    class GuiScreen : Gui
+    internal class GuiScreen : Gui
     {
         private GuiTexture background;
 
@@ -56,7 +56,6 @@ namespace SharpCraft
 
         protected virtual void buttonClicked(GuiButton btn)
         {
-
         }
 
         public virtual void onClose()

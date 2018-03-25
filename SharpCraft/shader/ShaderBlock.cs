@@ -1,18 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using OpenTK;
-using OpenTK.Graphics.OpenGL;
+﻿using OpenTK.Graphics.OpenGL;
 
 namespace SharpCraft
 {
-    class ShaderBlock : ShaderProgram
+    internal class ShaderBlock : ShaderProgram
     {
         public ShaderBlock(string shaderName, PrimitiveType renderType) : base(shaderName, renderType)
         {
-
         }
-        
+
         protected override void onBindAttributes()
         {
             bindAttribute(0, "position");

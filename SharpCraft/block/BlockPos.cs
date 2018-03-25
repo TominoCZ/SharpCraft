@@ -6,79 +6,60 @@ namespace SharpCraft
     [Serializable]
     public struct BlockPos
     {
-        private readonly int _x;
-        private readonly int _y;
-        private readonly int _z;
+        public int x { get; }
+        public int y { get; }
+        public int z { get; }
 
-        public int x => _x;
-        public int y => _y;
-        public int z => _z;
+        public Vector3 vector { get; }
 
-        public Vector3 vector => new Vector3(x, y, z);
+        public static BlockPos operator +(BlockPos p1, BlockPos p2) => new BlockPos(p1.x + p2.x, p1.y + p2.y, p1.z + p2.z);
 
-        public static BlockPos operator -(BlockPos p1, BlockPos p2)
-        {
-            return new BlockPos(p1.x - p2.x, p1.y - p2.y, p1.z - p2.z);
-        }
-
-        public static BlockPos operator +(BlockPos p1, BlockPos p2)
-        {
-            return new BlockPos(p1.x + p2.x, p1.y + p2.y, p1.z + p2.z);
-        }
-
-        public static bool operator ==(BlockPos p1, BlockPos p2)
-        {
-            return p1.x == p2.x && p1.y == p2.y && p1.z == p2.z;
-        }
-
-        public static bool operator !=(BlockPos p1, BlockPos p2)
-        {
-            return p1.x != p2.x || p1.y != p2.y || p1.z != p2.z;
-        }
+        public static BlockPos operator -(BlockPos p1, BlockPos p2) => new BlockPos(p1.x - p2.x, p1.y - p2.y, p1.z - p2.z);
 
         public BlockPos(int x, int y, int z)
         {
-            _x = x;
-            _y = y;
-            _z = z;
+            this.x = x;
+            this.y = y;
+            this.z = z;
+
+            vector = new Vector3(this.x, this.y, this.z);
         }
 
-        public BlockPos(float x, float y, float z)
+        public BlockPos(float x, float y, float z) : this((int)Math.Floor(x), (int)Math.Floor(y), (int)Math.Floor(z))
         {
-            _x = (int)Math.Floor(x);
-            _y = (int)Math.Floor(y);
-            _z = (int)Math.Floor(z);
         }
 
-        public BlockPos(Vector3 vec)
+        public BlockPos(Vector3 vec) : this((int)Math.Floor(vec.X), (int)Math.Floor(vec.Y), (int)Math.Floor(vec.Z))
         {
-            _x = (int)Math.Floor(vec.X);
-            _y = (int)Math.Floor(vec.Y);
-            _z = (int)Math.Floor(vec.Z);
         }
 
         public BlockPos offset(EnumFacing dir)
         {
-            return new BlockPos(new Vector3(_x, _y, _z) + ModelHelper.getFacingVector(dir));
+            return new BlockPos(new Vector3(x, y, z) + ModelHelper.getFacingVector(dir));
+        }
+
+        public BlockPos offset(float x, float y, float z)
+        {
+            return new BlockPos(this.x + x, this.y + y, this.z + z);
         }
 
         public BlockPos offsetChunk(EnumFacing dir)
         {
-            return new BlockPos(new Vector3(_x, _y, _z) + ModelHelper.getFacingVector(dir) * 16);
+            return new BlockPos(new Vector3(x, y, z) + ModelHelper.getFacingVector(dir) * 16);
         }
 
         public BlockPos ChunkPos()
         {
-            var X = (int)Math.Floor(_x / 16f) * 16;
-            var Y = (int)Math.Floor(_y / 256f) * 256f;
-            var Z = (int)Math.Floor(_z / 16f) * 16;
+            var X = (int)Math.Floor(x / 16f) * 16;
+            var Y = (int)Math.Floor(y / 256f) * 256f;
+            var Z = (int)Math.Floor(z / 16f) * 16;
 
             return new BlockPos(X, Y, Z);
         }
 
         public override string ToString()
         {
-            return $"BlockPos [{_x},{_y},{_z}]";
+            return $"BlockPos[{x},{y},{z}]";
         }
     }
 }

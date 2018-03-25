@@ -1,14 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using OpenTK;
-using OpenTK.Graphics.OpenGL;
+﻿using OpenTK;
 
 namespace SharpCraft
 {
-    class GuiHUD : Gui
+    internal class GuiHUD : Gui
     {
         private GuiTexture slot;
         private GuiTexture slot_selected;

@@ -1,13 +1,11 @@
-﻿using OpenTK;
-using OpenTK.Graphics.OpenGL;
+﻿using OpenTK.Graphics.OpenGL;
 
 namespace SharpCraft
 {
-    class ShaderGui : ShaderProgram
+    internal class ShaderGui : ShaderProgram
     {
         public ShaderGui(string shaderName) : base(shaderName, PrimitiveType.TriangleStrip)
         {
-
         }
 
         protected override void onBindAttributes()
@@ -17,7 +15,6 @@ namespace SharpCraft
 
         protected override void onRegisterUniforms()
         {
-
         }
     }
 }

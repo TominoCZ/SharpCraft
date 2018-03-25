@@ -20,9 +20,6 @@ namespace SharpCraft
 
         private int hue;
 
-        /// <summary>
-        /// Render distance radius in chunks
-        /// </summary>
         private int _renderDistance;
 
         public int RenderDistance
@@ -36,7 +33,7 @@ namespace SharpCraft
             modelLight = new ModelLight(new Vector3(-8, 12, -10f) * 750, Vector3.One);
             _selectionOutline = new ModelCubeOutline(new ShaderBlockOutline());
 
-            RenderDistance = 8;
+            RenderDistance = SettingsManager.getInt("renderdistance");
 
             updateTimer = Stopwatch.StartNew();
         }
@@ -60,12 +57,7 @@ namespace SharpCraft
                 if (node == null)
                     continue;
 
-                var pos = node.chunk.chunkPos +
-                          new BlockPos(8, 0, 8);
-
-                var dist = MathUtil.distance(pos.vector.Xz, Camera.INSTANCE.pos.Xz);
-
-                if (dist > _renderDistance * 16)
+                if (!node.chunk.isWithinRenderDistance())
                     continue;
 
                 var shaders = node.model.getShadersPresent();
@@ -75,6 +67,8 @@ namespace SharpCraft
                     var shader = shaders[j];
 
                     var chunkFragmentModel = node.model.getFragmentModelWithShader(shader);
+                    if (chunkFragmentModel == null)
+                        continue;
 
                     chunkFragmentModel.bind();
 
@@ -138,7 +132,7 @@ namespace SharpCraft
             _selectionOutline.unbind();
         }
 
-        private void renderSelectedItemBlock() //TODO figure out why atlas texture is rendered here
+        private void renderSelectedItemBlock()
         {
             var stack = Game.INSTANCE.player.getEquippedItemStack();
 
@@ -151,7 +145,7 @@ namespace SharpCraft
                 model.shader.loadViewMatrix(Matrix4.Identity);
 
                 model.shader.loadTransformationMatrix(MatrixHelper.createTransformationMatrix(
-                    new Vector3(0.04f, -0.065f, -0.1f),
+                    new Vector3(0.04f, -0.065f, -0.1f) + Camera.INSTANCE.getLookVec() / 200,
                     new Vector3(-2, -10, 0),
                     0.045f));
 

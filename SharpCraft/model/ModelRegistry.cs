@@ -1,10 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 
 namespace SharpCraft
 {
-    class ModelRegistry
+    internal class ModelRegistry
     {
         private static Dictionary<EnumBlock, List<BlockState>> models = new Dictionary<EnumBlock, List<BlockState>>();
 
@@ -61,7 +59,7 @@ namespace SharpCraft
         }
     }
 
-    class BlockState
+    internal class BlockState
     {
         public ModelBlock Model { get; }
         public int meta { get; }

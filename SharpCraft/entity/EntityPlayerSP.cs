@@ -1,14 +1,10 @@
-﻿using System;
-using System.Diagnostics;
-using System.Drawing;
-using System.Linq;
-using Microsoft.VisualBasic.CompilerServices;
-using OpenTK;
+﻿using OpenTK;
 using OpenTK.Input;
+using System;
 
 namespace SharpCraft
 {
-    class EntityPlayerSP : Entity
+    internal class EntityPlayerSP : Entity
     {
         public float maxMoveSpeed = 0.25f;
         public float moveSpeed;
@@ -115,7 +111,7 @@ namespace SharpCraft
     }
 
     [Serializable]
-    abstract class Item
+    internal abstract class Item
     {
         public static bool operator ==(Item i1, Item i2)
         {
@@ -129,7 +125,7 @@ namespace SharpCraft
 
         public object item { get; }
 
-        string displayName { get; }
+        private string displayName { get; }
 
         protected Item(string displayName, object item)
         {
@@ -139,7 +135,7 @@ namespace SharpCraft
     }
 
     [Serializable]
-    class ItemBlock : Item
+    internal class ItemBlock : Item
     {
         public ItemBlock(EnumBlock block) : base(block.ToString(), block)
         {
@@ -152,7 +148,7 @@ namespace SharpCraft
     }
 
     [Serializable]
-    class ItemStack
+    internal class ItemStack
     {
         public Item Item;
 

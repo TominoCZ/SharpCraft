@@ -5,9 +5,11 @@ using System.Linq;
 
 namespace SharpCraft
 {
-    class Chunk
+    internal class Chunk
     {
         private short[,,] _chunkBlocks;
+
+        private bool withinRenderDistance;
 
         public bool isDirty { get; private set; }
 
@@ -36,6 +38,15 @@ namespace SharpCraft
         public static Chunk CreateFromCache(ChunkCache cache)
         {
             return new Chunk(cache);
+        }
+
+        public void tick()
+        {
+            var pos = chunkPos.offset(8, 0, 8);
+
+            var dist = MathUtil.distance(pos.vector.Xz, Camera.INSTANCE.pos.Xz);
+
+            withinRenderDistance = dist <= Game.INSTANCE.worldRenderer.RenderDistance * 16;
         }
 
         public void setBlock(BlockPos pos, EnumBlock blockType, int meta)
@@ -83,7 +94,7 @@ namespace SharpCraft
                 pos.z >= 0 && pos.z < 16;
         }
 
-        public ModelChunk createChunkModel(World w, ModelChunk previousChunkModel, bool updateContainingEntities)
+        public void buildChunkModel(World w, ModelChunk previousChunkModel, bool updateContainingEntities)
         {
             List<RawQuad> quads;
 
@@ -127,42 +138,40 @@ namespace SharpCraft
 
             var previousShaders = previousChunkModel.getShadersPresent();
 
-            var finish = new ThreadLock(() =>
+            var newShaders = MODEL_RAW.Keys.ToArray();
+
+            for (int i = 0; i < previousShaders.Count; i++)
             {
-                var newShaders = MODEL_RAW.Keys.ToArray();
+                var oldShader = previousShaders[i];
 
-                for (int i = 0; i < previousShaders.Count; i++)
+                if (!newShaders.Contains(oldShader))
                 {
-                    var oldShader = previousShaders[i];
-
-                    if (!newShaders.Contains(oldShader))
-                    {
-                        previousChunkModel.getFragmentModelWithShader(oldShader).overrideData(new List<RawQuad>());
-                    }
+                    Game.INSTANCE.runGlContext(() => previousChunkModel.destroyFragmentModelWithShader(oldShader));
                 }
+            }
 
-                foreach (var value in MODEL_RAW)
+            foreach (var value in MODEL_RAW)
+            {
+                var newShader = value.Key;
+                var newData = value.Value;
+
+                if (!previousShaders.Contains(newShader))
                 {
-                    var newShader = value.Key;
-                    var newData = value.Value;
-
-                    if (!previousShaders.Contains(newShader))
+                    Game.INSTANCE.runGlContext(() =>
                     {
                         var newFragment = new ModelChunkFragment(newShader, newData);
                         previousChunkModel.setFragmentModelWithShader(newShader, newFragment);
-                    }
-                    else
-                    {
-                        previousChunkModel.getFragmentModelWithShader(newShader).overrideData(newData);
-                    }
+                    });
                 }
-            });
-            Game.MAIN_THREAD_QUEUE.Add(finish);
-            finish.WaitFor();
+                else
+                {
+                    Game.INSTANCE.runGlContext(() => previousChunkModel.getFragmentModelWithShader(newShader)?.overrideData(newData));
+                }
+            }
 
             if (updateContainingEntities)
             {
-                w.markNeighbourChunksDirty(chunkPos);
+                // w.markNeighbourChunksDirty(chunkPos);
 
                 for (var index = 0; index < w._entities.Count; index++)
                 {
@@ -182,8 +191,6 @@ namespace SharpCraft
             }
 
             isDirty = false;
-
-            return previousChunkModel;
         }
 
         public void markDirty()
@@ -194,6 +201,11 @@ namespace SharpCraft
         public ChunkCache createChunkCache()
         {
             return new ChunkCache(chunkPos, _chunkBlocks);
+        }
+
+        public bool isWithinRenderDistance()
+        {
+            return withinRenderDistance;
         }
     }
 

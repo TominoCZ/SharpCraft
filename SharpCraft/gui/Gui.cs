@@ -1,16 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Security;
-using System.Text;
-using System.Threading.Tasks;
-using OpenTK;
+﻿using OpenTK;
 using OpenTK.Graphics.OpenGL;
 
 namespace SharpCraft
 {
-    class Gui
+    internal class Gui
     {
         private static ModelGuiItem _item;
 
@@ -21,7 +14,6 @@ namespace SharpCraft
 
         public virtual void render(ShaderGui shader, int mouseX, int mouseY)
         {
-
         }
 
         protected virtual void renderTexture(ShaderGui shader, GuiTexture tex)

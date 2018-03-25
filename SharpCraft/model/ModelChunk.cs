@@ -1,44 +1,56 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections.Concurrent;
+using System.Collections.Generic;
 
 namespace SharpCraft
 {
     internal class ModelChunk
     {
-        private Dictionary<ShaderProgram, ModelChunkFragment> fragmentPerShader;
+        private ConcurrentDictionary<ShaderProgram, ModelChunkFragment> fragmentPerShader;
 
-        private List<ShaderProgram> shaders;
+        private List<ShaderProgram> _shaders;
 
-        public bool isGenerated => shaders.Count > 0;
+        public bool isGenerated => fragmentPerShader.Keys.Count > 0;
 
         public ModelChunk()
         {
-            fragmentPerShader = new Dictionary<ShaderProgram, ModelChunkFragment>();
-            shaders = new List<ShaderProgram>();
+            fragmentPerShader = new ConcurrentDictionary<ShaderProgram, ModelChunkFragment>();
+            _shaders = new List<ShaderProgram>();
         }
 
         public void setFragmentModelWithShader(ShaderProgram shader, ModelChunkFragment model)
         {
-            //if (fragmentPerShader.ContainsKey(shader))
-            fragmentPerShader.Remove(shader);
+            fragmentPerShader.TryRemove(shader, out var removed);
 
-            fragmentPerShader.Add(shader, model);
-            shaders.Add(shader);
+            _shaders.Add(shader);
+
+            fragmentPerShader.TryAdd(shader, model);
         }
 
         public ModelChunkFragment getFragmentModelWithShader(ShaderProgram shader)
         {
-            return fragmentPerShader[shader];
+            return fragmentPerShader.TryGetValue(shader, out var model) ? model : null;
+        }
+
+        public void destroyFragmentModelWithShader(ShaderProgram shader)
+        {
+            if (fragmentPerShader.TryRemove(shader, out var removed))
+            {
+                removed.destroy();
+                _shaders.Remove(shader);
+            }
         }
 
         public List<ShaderProgram> getShadersPresent()
         {
-            return shaders;
+            return _shaders;
         }
 
-        public void overrideModel(ModelChunk newModel)
+        public void destroy()
         {
-            fragmentPerShader = newModel.fragmentPerShader;
-            shaders = newModel.shaders;
+            while (_shaders.Count > 0)
+            {
+                destroyFragmentModelWithShader(_shaders[0]);
+            }
         }
     }
 }

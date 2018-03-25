@@ -32,13 +32,13 @@ namespace SharpCraft
                 }
 
                 var wpn = new WorldPlayerNode(Game.INSTANCE.player);
-                
+
                 using (var fs = File.OpenWrite(dir + "/player.dat"))
                 {
                     bf.Serialize(fs, wpn);
                 }
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 Console.WriteLine(e.StackTrace);
             }

@@ -2,7 +2,7 @@
 
 namespace SharpCraft
 {
-    class MouseOverObject
+    internal class MouseOverObject
     {
         public EnumFacing sideHit;
 

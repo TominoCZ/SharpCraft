@@ -1,6 +1,6 @@
 ﻿namespace SharpCraft
 {
-    class RawQuad
+    internal class RawQuad
     {
         public float[] vertices { get; }
         public float[] normal { get; }
@@ -15,14 +15,12 @@
 
         public RawQuad(float[] vertices, float[] UVs) : this(vertices, UVs, new float[0])
         {
-
         }
 
         public RawQuad(float[] vertices) : this(vertices, new float[0], new float[0])
         {
-
         }
-        
+
         public RawQuad offset(BlockPos pos)
         {
             float[] newVertices = new float[vertices.Length];

@@ -1,19 +1,19 @@
-﻿using System;
+﻿using OpenTK;
 using System.Collections.Generic;
-using System.Text;
-using OpenTK;
 
 namespace SharpCraft
 {
-    static class ShaderManager
+    internal static class ShaderManager
     {
         private static List<ShaderProgram> shaders = new List<ShaderProgram>();
 
         private static Matrix4 projectionMatrix;
 
-        [Obsolete]
         public static void registerShader(ShaderProgram shader)
         {
+            if (shaders.Contains(shader))
+                return;
+
             shader.bind();
             shader.loadProjectionMatrix(projectionMatrix);
             shader.unbind();
@@ -33,6 +33,18 @@ namespace SharpCraft
                 shader.loadProjectionMatrix(projectionMatrix);
                 shader.unbind();
             }
+        }
+
+        public static void reload()
+        {
+            for (int i = 0; i < shaders.Count; i++)
+            {
+                var shader = shaders[i];
+
+                shader.reload();
+            }
+
+            updateProjectionMatrix();
         }
 
         public static void cleanup()

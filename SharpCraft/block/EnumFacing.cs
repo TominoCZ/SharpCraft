@@ -1,6 +1,4 @@
-﻿using OpenTK;
-
-namespace SharpCraft
+﻿namespace SharpCraft
 {
     public enum EnumFacing
     {

@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using OpenTK.Graphics.OpenGL;
+﻿using OpenTK.Graphics.OpenGL;
 
 namespace SharpCraft
 {
-    class ModelBaked : IModelBaked
+    internal class ModelBaked : IModelBaked
     {
         public IModelRaw rawModel { get; protected set; }
         public ShaderProgram shader { get; }
@@ -44,6 +41,24 @@ namespace SharpCraft
             GL.BindVertexArray(0);
 
             shader.unbind();
+        }
+
+        public void destroy()
+        {
+            shader.unbind();
+
+            for (var index = 0; index < rawModel.bufferIDs.Length; index++)
+            {
+                var bufferId = rawModel.bufferIDs[index];
+
+                GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
+                GL.DisableVertexAttribArray(index);
+
+                GL.DeleteBuffer(bufferId);
+            }
+
+            GL.BindVertexArray(0);
+            GL.DeleteVertexArray(rawModel.vaoID);
         }
     }
 }

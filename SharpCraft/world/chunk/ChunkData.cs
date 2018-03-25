@@ -1,4 +1,6 @@
-﻿namespace SharpCraft
+﻿using System.Threading;
+
+namespace SharpCraft
 {
     internal class ChunkData
     {
@@ -21,9 +23,9 @@
 
             modelGenerating = true;
 
-            ThreadPool.ScheduleTask(false, () =>
+            ThreadPool.QueueUserWorkItem(e =>
             {
-                chunk.createChunkModel(w, model, updateContainingEntities);
+                chunk.buildChunkModel(w, model, updateContainingEntities);
                 modelGenerating = false;
             });
         }

@@ -1,9 +1,9 @@
-﻿using System;
-using OpenTK;
+﻿using OpenTK;
+using System;
 
 namespace SharpCraft
 {
-    class Camera
+    internal class Camera
     {
         private float _pitch = MathHelper.PiOver6, _yaw = MathHelper.PiOver2 + MathHelper.PiOver4;
 
@@ -29,7 +29,7 @@ namespace SharpCraft
 
             set => _yaw = value;
         }
-        
+
         public Vector3 getLookVec()
         {
             return rotate(Vector3.UnitZ, _pitch, _yaw, 0).Normalized();

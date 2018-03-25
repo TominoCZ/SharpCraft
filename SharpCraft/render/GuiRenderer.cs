@@ -1,10 +1,10 @@
-﻿using System.Collections.Generic;
-using OpenTK;
+﻿using OpenTK;
 using OpenTK.Graphics.OpenGL;
+using System.Collections.Generic;
 
 namespace SharpCraft
 {
-    class GuiRenderer
+    internal class GuiRenderer
     {
         public static ModelRaw GUIquad;
 

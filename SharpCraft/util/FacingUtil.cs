@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace SharpCraft
 {
-    class FacingUtil
+    internal class FacingUtil
     {
         public static EnumFacing[] SIDES;
 

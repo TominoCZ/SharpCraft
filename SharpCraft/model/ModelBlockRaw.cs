@@ -3,7 +3,7 @@ using System.Linq;
 
 namespace SharpCraft
 {
-    class ModelBlockRaw : ModelRaw
+    internal class ModelBlockRaw : ModelRaw
     {
         private Dictionary<EnumFacing, RawQuad> _quads;
 

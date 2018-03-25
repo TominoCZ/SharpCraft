@@ -1,6 +1,6 @@
 ﻿namespace SharpCraft
 {
-    class ModelBlock : ModelBaked
+    internal class ModelBlock : ModelBaked
     {
         public EnumBlock block { get; }
 

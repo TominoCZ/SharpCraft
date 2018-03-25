@@ -1,10 +1,8 @@
-﻿
-
-using System.Drawing;
+﻿using System.Drawing;
 
 namespace SharpCraft
 {
-    class Texture
+    internal class Texture
     {
         public int textureID { get; }
         public Size textureSize { get; }

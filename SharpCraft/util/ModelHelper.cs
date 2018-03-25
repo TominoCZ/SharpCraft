@@ -1,13 +1,9 @@
-﻿using System;
+﻿using OpenTK;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using OpenTK;
 
 namespace SharpCraft
 {
-    class ModelHelper
+    internal class ModelHelper
     {
         private static Vector3 V0, V1, V2, NORMAL;
 
@@ -96,16 +92,22 @@ namespace SharpCraft
             {
                 case EnumFacing.NORTH:
                     return -Vector3.UnitZ;
+
                 case EnumFacing.SOUTH:
                     return Vector3.UnitZ;
+
                 case EnumFacing.EAST:
                     return Vector3.UnitX;
+
                 case EnumFacing.WEST:
                     return -Vector3.UnitX;
+
                 case EnumFacing.UP:
                     return Vector3.UnitY;
+
                 case EnumFacing.DOWN:
                     return -Vector3.UnitY;
+
                 default:
                     return Vector3.Zero;
             }

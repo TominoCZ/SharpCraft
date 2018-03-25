@@ -1,22 +1,18 @@
-﻿using System;
+﻿using OpenTK;
+using OpenTK.Graphics.OpenGL;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Schema;
-using OpenTK;
-using OpenTK.Graphics.OpenGL;
 using Bitmap = System.Drawing.Bitmap;
 using Image = System.Drawing.Image;
 using Rectangle = System.Drawing.Rectangle;
 
 namespace SharpCraft
 {
-    class TextureManager
+    internal class TextureManager
     {
         private static Dictionary<EnumBlock, TextureBlockUV> UVs;
 
@@ -169,6 +165,7 @@ namespace SharpCraft
                 }
 
                 #region fuj
+
                 /*
                 foreach (EnumBlock block in blocks)
                 {
@@ -263,7 +260,9 @@ namespace SharpCraft
                         Uv.Add(block, uvs);
                     }
                 }*/
-                #endregion
+
+                #endregion fuj
+
                 map.Save("terrain_debug.png");
 
                 return (Bitmap)map.Clone();
@@ -389,18 +388,23 @@ namespace SharpCraft
                     case EnumFacing.NORTH:
                         target = TextureTarget.TextureCubeMapNegativeZ;
                         break;
+
                     case EnumFacing.SOUTH:
                         target = TextureTarget.TextureCubeMapPositiveZ;
                         break;
+
                     case EnumFacing.EAST:
                         target = TextureTarget.TextureCubeMapPositiveX;
                         break;
+
                     case EnumFacing.WEST:
                         target = TextureTarget.TextureCubeMapNegativeX;
                         break;
+
                     case EnumFacing.UP:
                         target = TextureTarget.TextureCubeMapPositiveY;
                         break;
+
                     case EnumFacing.DOWN:
                         target = TextureTarget.TextureCubeMapNegativeY;
                         break;

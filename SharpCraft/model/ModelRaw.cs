@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Xml.Schema;
+﻿using System.Collections.Generic;
 
 namespace SharpCraft
 {
-    class ModelRaw : IModelRaw
+    internal class ModelRaw : IModelRaw
     {
         public int vaoID { get; }
         public int[] bufferIDs { get; }

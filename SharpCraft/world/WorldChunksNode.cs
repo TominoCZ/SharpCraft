@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace SharpCraft
 {
     [Serializable]
-    class WorldChunksNode
+    internal class WorldChunksNode
     {
         public List<ChunkCache> caches { get; }
         public int seed { get; }

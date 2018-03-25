@@ -1,12 +1,9 @@
-﻿using System;
+﻿using OpenTK.Graphics.OpenGL;
 using System.Collections.Generic;
-using System.Diagnostics;
-using OpenTK;
-using OpenTK.Graphics.OpenGL;
 
 namespace SharpCraft
 {
-    class ModelManager
+    internal class ModelManager
     {
         private static List<int> VAOs = new List<int>();
         private static List<int> VBOs = new List<int>();
@@ -119,17 +116,11 @@ namespace SharpCraft
             VBOs.Add(vboID);
 
             GL.BindBuffer(BufferTarget.ArrayBuffer, vboID);
-            GL.BufferData(BufferTarget.ArrayBuffer, sizeof(float) * data.Length, data, BufferUsageHint.DynamicDraw);
+            GL.BufferData(BufferTarget.ArrayBuffer, sizeof(float) * data.Length, data, BufferUsageHint.StreamDraw);
             GL.VertexAttribPointer(attrib, coordSize, VertexAttribPointerType.Float, false, 0, 0);
             GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
 
             return vboID;
-        }
-
-        private static void destroyModel(IModelBaked model)
-        {
-            GL.BindVertexArray(model.rawModel.vaoID);
-            model.shader.destroy();
         }
 
         public static void cleanup()

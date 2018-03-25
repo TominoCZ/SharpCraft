@@ -1,18 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using OpenTK;
-using OpenTK.Graphics.OpenGL;
+﻿using OpenTK.Graphics.OpenGL;
 
 namespace SharpCraft
 {
-    class ShaderBlockUnlit : ShaderProgram
+    internal class ShaderBlockUnlit : ShaderProgram
     {
         public ShaderBlockUnlit(string shaderName, PrimitiveType renderType) : base(shaderName, renderType)
         {
-
         }
 
         protected override void onBindAttributes()
@@ -23,7 +16,6 @@ namespace SharpCraft
 
         protected override void onRegisterUniforms()
         {
-
         }
     }
 }

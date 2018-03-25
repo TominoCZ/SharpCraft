@@ -1,1 +1,3 @@
+sensitivity=1
 renderdistance=8
+worldseed=yeet

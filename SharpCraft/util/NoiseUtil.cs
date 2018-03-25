@@ -1,7 +1,9 @@
 ﻿#if FN_USE_DOUBLES
 using FN_DECIMAL = System.Double;
 #else
+
 using FN_DECIMAL = System.Single;
+
 #endif
 
 using System;
@@ -15,9 +17,13 @@ namespace SharpCraft
         private const int FN_CELLULAR_INDEX_MAX = 3;
 
         public enum NoiseType { Value, ValueFractal, Perlin, PerlinFractal, Simplex, SimplexFractal, Cellular, WhiteNoise, Cubic, CubicFractal };
+
         public enum Interp { Linear, Hermite, Quintic };
+
         public enum FractalType { FBM, Billow, RigidMulti };
+
         public enum CellularDistanceFunction { Euclidean, Manhattan, Natural };
+
         public enum CellularReturnType { CellValue, NoiseLookup, Distance, Distance2, Distance2Add, Distance2Sub, Distance2Mul, Distance2Div };
 
         private int m_seed = 1337;
@@ -74,7 +80,6 @@ namespace SharpCraft
         // Default: Simplex
         public void SetNoiseType(NoiseType noiseType) { m_noiseType = noiseType; }
 
-
         // Sets octave count for all fractal noise types
         // Default: 3
         public void SetFractalOctaves(int octaves) { m_octaves = octaves; CalculateFractalBounding(); }
@@ -90,7 +95,6 @@ namespace SharpCraft
         // Sets method for combining octaves in all fractal noise types
         // Default: FBM
         public void SetFractalType(FractalType fractalType) { m_fractalType = fractalType; }
-
 
         // Sets return type from cellular noise calculations
         // Note: NoiseLookup requires another FastNoise object be set with SetCellularNoiseLookup() to function
@@ -123,7 +127,6 @@ namespace SharpCraft
         // The lookup value is acquired through GetNoise() so ensure you SetNoiseType() on the noise lookup, value, gradient or simplex is recommended
         public void SetCellularNoiseLookup(NoiseUtil noiseUtil) { _mCellularNoiseUtilLookup = noiseUtil; }
 
-
         // Sets the maximum perturb distance from original location when using GradientPerturb{Fractal}(...)
         // Default: 1.0
         public void SetGradientPerturbAmp(FN_DECIMAL gradientPerturbAmp) { m_gradientPerturbAmp = gradientPerturbAmp; }
@@ -131,6 +134,7 @@ namespace SharpCraft
         private struct Float2
         {
             public readonly FN_DECIMAL x, y;
+
             public Float2(FN_DECIMAL x, FN_DECIMAL y)
             {
                 this.x = x;
@@ -141,6 +145,7 @@ namespace SharpCraft
         private struct Float3
         {
             public readonly FN_DECIMAL x, y, z;
+
             public Float3(FN_DECIMAL x, FN_DECIMAL y, FN_DECIMAL z)
             {
                 this.x = x;
@@ -269,6 +274,7 @@ namespace SharpCraft
 
         // Hashing
         private const int X_PRIME = 1619;
+
         private const int Y_PRIME = 31337;
         private const int Z_PRIME = 6971;
         private const int W_PRIME = 1013;
@@ -412,43 +418,55 @@ namespace SharpCraft
             {
                 case NoiseType.Value:
                     return SingleValue(m_seed, x, y, z);
+
                 case NoiseType.ValueFractal:
                     switch (m_fractalType)
                     {
                         case FractalType.FBM:
                             return SingleValueFractalFBM(x, y, z);
+
                         case FractalType.Billow:
                             return SingleValueFractalBillow(x, y, z);
+
                         case FractalType.RigidMulti:
                             return SingleValueFractalRigidMulti(x, y, z);
+
                         default:
                             return 0;
                     }
                 case NoiseType.Perlin:
                     return SinglePerlin(m_seed, x, y, z);
+
                 case NoiseType.PerlinFractal:
                     switch (m_fractalType)
                     {
                         case FractalType.FBM:
                             return SinglePerlinFractalFBM(x, y, z);
+
                         case FractalType.Billow:
                             return SinglePerlinFractalBillow(x, y, z);
+
                         case FractalType.RigidMulti:
                             return SinglePerlinFractalRigidMulti(x, y, z);
+
                         default:
                             return 0;
                     }
                 case NoiseType.Simplex:
                     return SingleSimplex(m_seed, x, y, z);
+
                 case NoiseType.SimplexFractal:
                     switch (m_fractalType)
                     {
                         case FractalType.FBM:
                             return SingleSimplexFractalFBM(x, y, z);
+
                         case FractalType.Billow:
                             return SingleSimplexFractalBillow(x, y, z);
+
                         case FractalType.RigidMulti:
                             return SingleSimplexFractalRigidMulti(x, y, z);
+
                         default:
                             return 0;
                     }
@@ -459,22 +477,28 @@ namespace SharpCraft
                         case CellularReturnType.NoiseLookup:
                         case CellularReturnType.Distance:
                             return SingleCellular(x, y, z);
+
                         default:
                             return SingleCellular2Edge(x, y, z);
                     }
                 case NoiseType.WhiteNoise:
                     return GetWhiteNoise(x, y, z);
+
                 case NoiseType.Cubic:
                     return SingleCubic(m_seed, x, y, z);
+
                 case NoiseType.CubicFractal:
                     switch (m_fractalType)
                     {
                         case FractalType.FBM:
                             return SingleCubicFractalFBM(x, y, z);
+
                         case FractalType.Billow:
                             return SingleCubicFractalBillow(x, y, z);
+
                         case FractalType.RigidMulti:
                             return SingleCubicFractalRigidMulti(x, y, z);
+
                         default:
                             return 0;
                     }
@@ -492,43 +516,55 @@ namespace SharpCraft
             {
                 case NoiseType.Value:
                     return SingleValue(m_seed, x, y);
+
                 case NoiseType.ValueFractal:
                     switch (m_fractalType)
                     {
                         case FractalType.FBM:
                             return SingleValueFractalFBM(x, y);
+
                         case FractalType.Billow:
                             return SingleValueFractalBillow(x, y);
+
                         case FractalType.RigidMulti:
                             return SingleValueFractalRigidMulti(x, y);
+
                         default:
                             return 0;
                     }
                 case NoiseType.Perlin:
                     return SinglePerlin(m_seed, x, y);
+
                 case NoiseType.PerlinFractal:
                     switch (m_fractalType)
                     {
                         case FractalType.FBM:
                             return SinglePerlinFractalFBM(x, y);
+
                         case FractalType.Billow:
                             return SinglePerlinFractalBillow(x, y);
+
                         case FractalType.RigidMulti:
                             return SinglePerlinFractalRigidMulti(x, y);
+
                         default:
                             return 0;
                     }
                 case NoiseType.Simplex:
                     return SingleSimplex(m_seed, x, y);
+
                 case NoiseType.SimplexFractal:
                     switch (m_fractalType)
                     {
                         case FractalType.FBM:
                             return SingleSimplexFractalFBM(x, y);
+
                         case FractalType.Billow:
                             return SingleSimplexFractalBillow(x, y);
+
                         case FractalType.RigidMulti:
                             return SingleSimplexFractalRigidMulti(x, y);
+
                         default:
                             return 0;
                     }
@@ -539,22 +575,28 @@ namespace SharpCraft
                         case CellularReturnType.NoiseLookup:
                         case CellularReturnType.Distance:
                             return SingleCellular(x, y);
+
                         default:
                             return SingleCellular2Edge(x, y);
                     }
                 case NoiseType.WhiteNoise:
                     return GetWhiteNoise(x, y);
+
                 case NoiseType.Cubic:
                     return SingleCubic(m_seed, x, y);
+
                 case NoiseType.CubicFractal:
                     switch (m_fractalType)
                     {
                         case FractalType.FBM:
                             return SingleCubicFractalFBM(x, y);
+
                         case FractalType.Billow:
                             return SingleCubicFractalBillow(x, y);
+
                         case FractalType.RigidMulti:
                             return SingleCubicFractalRigidMulti(x, y);
+
                         default:
                             return 0;
                     }
@@ -625,10 +667,13 @@ namespace SharpCraft
             {
                 case FractalType.FBM:
                     return SingleValueFractalFBM(x, y, z);
+
                 case FractalType.Billow:
                     return SingleValueFractalBillow(x, y, z);
+
                 case FractalType.RigidMulti:
                     return SingleValueFractalRigidMulti(x, y, z);
+
                 default:
                     return 0;
             }
@@ -714,11 +759,13 @@ namespace SharpCraft
                     ys = y - y0;
                     zs = z - z0;
                     break;
+
                 case Interp.Hermite:
                     xs = InterpHermiteFunc(x - x0);
                     ys = InterpHermiteFunc(y - y0);
                     zs = InterpHermiteFunc(z - z0);
                     break;
+
                 case Interp.Quintic:
                     xs = InterpQuinticFunc(x - x0);
                     ys = InterpQuinticFunc(y - y0);
@@ -746,10 +793,13 @@ namespace SharpCraft
             {
                 case FractalType.FBM:
                     return SingleValueFractalFBM(x, y);
+
                 case FractalType.Billow:
                     return SingleValueFractalBillow(x, y);
+
                 case FractalType.RigidMulti:
                     return SingleValueFractalRigidMulti(x, y);
+
                 default:
                     return 0;
             }
@@ -828,10 +878,12 @@ namespace SharpCraft
                     xs = x - x0;
                     ys = y - y0;
                     break;
+
                 case Interp.Hermite:
                     xs = InterpHermiteFunc(x - x0);
                     ys = InterpHermiteFunc(y - y0);
                     break;
+
                 case Interp.Quintic:
                     xs = InterpQuinticFunc(x - x0);
                     ys = InterpQuinticFunc(y - y0);
@@ -855,10 +907,13 @@ namespace SharpCraft
             {
                 case FractalType.FBM:
                     return SinglePerlinFractalFBM(x, y, z);
+
                 case FractalType.Billow:
                     return SinglePerlinFractalBillow(x, y, z);
+
                 case FractalType.RigidMulti:
                     return SinglePerlinFractalRigidMulti(x, y, z);
+
                 default:
                     return 0;
             }
@@ -944,11 +999,13 @@ namespace SharpCraft
                     ys = y - y0;
                     zs = z - z0;
                     break;
+
                 case Interp.Hermite:
                     xs = InterpHermiteFunc(x - x0);
                     ys = InterpHermiteFunc(y - y0);
                     zs = InterpHermiteFunc(z - z0);
                     break;
+
                 case Interp.Quintic:
                     xs = InterpQuinticFunc(x - x0);
                     ys = InterpQuinticFunc(y - y0);
@@ -983,10 +1040,13 @@ namespace SharpCraft
             {
                 case FractalType.FBM:
                     return SinglePerlinFractalFBM(x, y);
+
                 case FractalType.Billow:
                     return SinglePerlinFractalBillow(x, y);
+
                 case FractalType.RigidMulti:
                     return SinglePerlinFractalRigidMulti(x, y);
+
                 default:
                     return 0;
             }
@@ -1066,10 +1126,12 @@ namespace SharpCraft
                     xs = x - x0;
                     ys = y - y0;
                     break;
+
                 case Interp.Hermite:
                     xs = InterpHermiteFunc(x - x0);
                     ys = InterpHermiteFunc(y - y0);
                     break;
+
                 case Interp.Quintic:
                     xs = InterpQuinticFunc(x - x0);
                     ys = InterpQuinticFunc(y - y0);
@@ -1098,10 +1160,13 @@ namespace SharpCraft
             {
                 case FractalType.FBM:
                     return SingleSimplexFractalFBM(x, y, z);
+
                 case FractalType.Billow:
                     return SingleSimplexFractalBillow(x, y, z);
+
                 case FractalType.RigidMulti:
                     return SingleSimplexFractalRigidMulti(x, y, z);
+
                 default:
                     return 0;
             }
@@ -1275,10 +1340,13 @@ namespace SharpCraft
             {
                 case FractalType.FBM:
                     return SingleSimplexFractalFBM(x, y);
+
                 case FractalType.Billow:
                     return SingleSimplexFractalBillow(x, y);
+
                 case FractalType.RigidMulti:
                     return SingleSimplexFractalRigidMulti(x, y);
+
                 default:
                     return 0;
             }
@@ -1529,10 +1597,13 @@ namespace SharpCraft
             {
                 case FractalType.FBM:
                     return SingleCubicFractalFBM(x, y, z);
+
                 case FractalType.Billow:
                     return SingleCubicFractalBillow(x, y, z);
+
                 case FractalType.RigidMulti:
                     return SingleCubicFractalRigidMulti(x, y, z);
+
                 default:
                     return 0;
             }
@@ -1653,7 +1724,6 @@ namespace SharpCraft
                 zs) * CUBIC_3D_BOUNDING;
         }
 
-
         public FN_DECIMAL GetCubicFractal(FN_DECIMAL x, FN_DECIMAL y)
         {
             x *= m_frequency;
@@ -1663,10 +1733,13 @@ namespace SharpCraft
             {
                 case FractalType.FBM:
                     return SingleCubicFractalFBM(x, y);
+
                 case FractalType.Billow:
                     return SingleCubicFractalBillow(x, y);
+
                 case FractalType.RigidMulti:
                     return SingleCubicFractalRigidMulti(x, y);
+
                 default:
                     return 0;
             }
@@ -1779,6 +1852,7 @@ namespace SharpCraft
                 case CellularReturnType.NoiseLookup:
                 case CellularReturnType.Distance:
                     return SingleCellular(x, y, z);
+
                 default:
                     return SingleCellular2Edge(x, y, z);
             }
@@ -1821,6 +1895,7 @@ namespace SharpCraft
                         }
                     }
                     break;
+
                 case CellularDistanceFunction.Manhattan:
                     for (int xi = xr - 1; xi <= xr + 1; xi++)
                     {
@@ -1847,6 +1922,7 @@ namespace SharpCraft
                         }
                     }
                     break;
+
                 case CellularDistanceFunction.Natural:
                     for (int xi = xr - 1; xi <= xr + 1; xi++)
                     {
@@ -1886,6 +1962,7 @@ namespace SharpCraft
 
                 case CellularReturnType.Distance:
                     return distance;
+
                 default:
                     return 0;
             }
@@ -1923,6 +2000,7 @@ namespace SharpCraft
                         }
                     }
                     break;
+
                 case CellularDistanceFunction.Manhattan:
                     for (int xi = xr - 1; xi <= xr + 1; xi++)
                     {
@@ -1945,6 +2023,7 @@ namespace SharpCraft
                         }
                     }
                     break;
+
                 case CellularDistanceFunction.Natural:
                     for (int xi = xr - 1; xi <= xr + 1; xi++)
                     {
@@ -1967,6 +2046,7 @@ namespace SharpCraft
                         }
                     }
                     break;
+
                 default:
                     break;
             }
@@ -1975,14 +2055,19 @@ namespace SharpCraft
             {
                 case CellularReturnType.Distance2:
                     return distance[m_cellularDistanceIndex1];
+
                 case CellularReturnType.Distance2Add:
                     return distance[m_cellularDistanceIndex1] + distance[m_cellularDistanceIndex0];
+
                 case CellularReturnType.Distance2Sub:
                     return distance[m_cellularDistanceIndex1] - distance[m_cellularDistanceIndex0];
+
                 case CellularReturnType.Distance2Mul:
                     return distance[m_cellularDistanceIndex1] * distance[m_cellularDistanceIndex0];
+
                 case CellularReturnType.Distance2Div:
                     return distance[m_cellularDistanceIndex0] / distance[m_cellularDistanceIndex1];
+
                 default:
                     return 0;
             }
@@ -1999,6 +2084,7 @@ namespace SharpCraft
                 case CellularReturnType.NoiseLookup:
                 case CellularReturnType.Distance:
                     return SingleCellular(x, y);
+
                 default:
                     return SingleCellular2Edge(x, y);
             }
@@ -2036,6 +2122,7 @@ namespace SharpCraft
                         }
                     }
                     break;
+
                 case CellularDistanceFunction.Manhattan:
                     for (int xi = xr - 1; xi <= xr + 1; xi++)
                     {
@@ -2057,6 +2144,7 @@ namespace SharpCraft
                         }
                     }
                     break;
+
                 case CellularDistanceFunction.Natural:
                     for (int xi = xr - 1; xi <= xr + 1; xi++)
                     {
@@ -2091,6 +2179,7 @@ namespace SharpCraft
 
                 case CellularReturnType.Distance:
                     return distance;
+
                 default:
                     return 0;
             }
@@ -2124,6 +2213,7 @@ namespace SharpCraft
                         }
                     }
                     break;
+
                 case CellularDistanceFunction.Manhattan:
                     for (int xi = xr - 1; xi <= xr + 1; xi++)
                     {
@@ -2142,6 +2232,7 @@ namespace SharpCraft
                         }
                     }
                     break;
+
                 case CellularDistanceFunction.Natural:
                     for (int xi = xr - 1; xi <= xr + 1; xi++)
                     {
@@ -2166,14 +2257,19 @@ namespace SharpCraft
             {
                 case CellularReturnType.Distance2:
                     return distance[m_cellularDistanceIndex1];
+
                 case CellularReturnType.Distance2Add:
                     return distance[m_cellularDistanceIndex1] + distance[m_cellularDistanceIndex0];
+
                 case CellularReturnType.Distance2Sub:
                     return distance[m_cellularDistanceIndex1] - distance[m_cellularDistanceIndex0];
+
                 case CellularReturnType.Distance2Mul:
                     return distance[m_cellularDistanceIndex1] * distance[m_cellularDistanceIndex0];
+
                 case CellularReturnType.Distance2Div:
                     return distance[m_cellularDistanceIndex0] / distance[m_cellularDistanceIndex1];
+
                 default:
                     return 0;
             }
@@ -2222,11 +2318,13 @@ namespace SharpCraft
                     ys = yf - y0;
                     zs = zf - z0;
                     break;
+
                 case Interp.Hermite:
                     xs = InterpHermiteFunc(xf - x0);
                     ys = InterpHermiteFunc(yf - y0);
                     zs = InterpHermiteFunc(zf - z0);
                     break;
+
                 case Interp.Quintic:
                     xs = InterpQuinticFunc(xf - x0);
                     ys = InterpQuinticFunc(yf - y0);
@@ -2310,10 +2408,12 @@ namespace SharpCraft
                     xs = xf - x0;
                     ys = yf - y0;
                     break;
+
                 case Interp.Hermite:
                     xs = InterpHermiteFunc(xf - x0);
                     ys = InterpHermiteFunc(yf - y0);
                     break;
+
                 case Interp.Quintic:
                     xs = InterpQuinticFunc(xf - x0);
                     ys = InterpQuinticFunc(yf - y0);
@@ -2335,6 +2435,5 @@ namespace SharpCraft
             x += Lerp(lx0x, lx1x, ys) * perturbAmp;
             y += Lerp(ly0x, ly1x, ys) * perturbAmp;
         }
-
     }
 }

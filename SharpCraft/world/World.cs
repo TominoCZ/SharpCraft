@@ -2,8 +2,8 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
+using System.Threading;
 
 namespace SharpCraft
 {
@@ -67,7 +67,7 @@ namespace SharpCraft
 
         private ChunkData addChunkPlaceholder(BlockPos pos)
         {
-            var data = new ChunkData(new Chunk(pos.ChunkPos()), new ModelChunk());
+            var data = new ChunkData(new Chunk(pos = pos.ChunkPos()), new ModelChunk());
 
             _chunks.TryAdd(pos, data);
 
@@ -128,6 +128,15 @@ namespace SharpCraft
             return _chunks.Values.ToArray();
         }
 
+        public EnumBlock getBlock(BlockPos pos)
+        {
+            var chunk = getChunkFromPos(pos);
+            if (chunk == null)
+                return EnumBlock.AIR;
+
+            return chunk.getBlock(this, pos - chunk.chunkPos);
+        }
+
         public void setBlock(BlockPos pos, EnumBlock blockType, int meta, bool markDirty)
         {
             var chunk = getChunkFromPos(pos);
@@ -138,17 +147,31 @@ namespace SharpCraft
 
             if (markDirty)
             {
-                chunk.markDirty();
-                markNeighbourChunksDirty(chunk, pos);
+                beginUpdateModelForChunk(pos);
+                markNeighbourChunksDirty(pos);
             }
         }
 
-        public void markNeighbourChunksDirty(BlockPos pos)
+        public void unloadChunk(BlockPos pos)
         {
-            markNeighbourChunksDirty(null, pos, true);
+            var chunkPos = pos.ChunkPos();
+
+            if (_chunks.TryGetValue(chunkPos, out var data))
+                data.model.destroy();
         }
 
-        private void markNeighbourChunksDirty(Chunk chunk, BlockPos pos, bool chunks = false)
+        public void destroyChunkModels()
+        {
+            var data = getChunkDataNodes();
+
+            for (var index = 0; index < data.Length; index++)
+            {
+                var chunkData = data[index];
+                chunkData.model.destroy();
+            }
+        }
+
+        private void markNeighbourChunksDirty(BlockPos pos, bool chunks = false)
         {
             for (var index = 0; index < FacingUtil.SIDES.Length - 2; index++)
             {
@@ -157,18 +180,8 @@ namespace SharpCraft
                 var p = chunks ? pos.offsetChunk(side) : pos.offset(side);
                 var ch = getChunkFromPos(p);
 
-                if (ch != chunk)
-                    ch?.markDirty();
+                ch?.markDirty();
             }
-        }
-
-        public EnumBlock getBlock(BlockPos pos)
-        {
-            var chunk = getChunkFromPos(pos);
-            if (chunk == null)
-                return EnumBlock.AIR;
-
-            return chunk.getBlock(this, pos - chunk.chunkPos);
         }
 
         public int getMetadata(BlockPos pos)
@@ -191,7 +204,7 @@ namespace SharpCraft
             if (redraw)
             {
                 chunk.markDirty();
-                markNeighbourChunksDirty(chunk, pos);
+                markNeighbourChunksDirty(pos);
             }
         }
 
@@ -226,9 +239,9 @@ namespace SharpCraft
             if (_chunks.ContainsKey(chunkPos))
                 return;
 
-            var data = addChunkPlaceholder(pos);
+            var data = addChunkPlaceholder(chunkPos);
 
-            ThreadPool.ScheduleTask(false, () =>
+            ThreadPool.QueueUserWorkItem(e =>
             {
                 for (int z = 0; z < 16; z++)
                 {
@@ -271,19 +284,33 @@ namespace SharpCraft
                     }
                 }
 
-                _chunks.TryAdd(chunkPos, data);
-
                 data.chunkGenerated = true;
-                data.chunk.markDirty();
             });
         }
 
         public void beginUpdateModelForChunk(BlockPos pos, bool updateContainingEntities = false)
         {
-            if (_chunks.TryGetValue(pos.ChunkPos(), out var node))
+            pos = pos.ChunkPos();
+
+            if (_chunks.TryGetValue(pos, out var node))
             {
                 node.beginUpdateModel(this, updateContainingEntities);
             }
+        }
+
+        public bool areNeighbourChunksGenerated(BlockPos pos)
+        {
+            pos = pos.ChunkPos();
+
+            for (var index = 0; index < FacingUtil.SIDES.Length - 2; index++)
+            {
+                var face = FacingUtil.SIDES[index];
+
+                if (!isChunkGenerated(pos.offsetChunk(face)))
+                    return false;
+            }
+
+            return true;
         }
 
         public bool doesChunkHaveModel(BlockPos pos)
@@ -295,9 +322,10 @@ namespace SharpCraft
 
         public bool isChunkGenerated(BlockPos pos)
         {
-            var n = _chunks[pos.ChunkPos()];
+            if (_chunks.TryGetValue(pos.ChunkPos(), out var n))
+                return n.chunkGenerated;
 
-            return n.chunkGenerated;
+            return false;
         }
     }
 }

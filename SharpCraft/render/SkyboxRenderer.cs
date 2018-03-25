@@ -1,11 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using OpenTK;
+﻿using OpenTK;
 using OpenTK.Graphics.OpenGL;
+using System.Collections.Generic;
 
 namespace SharpCraft
 {
-    class SkyboxRenderer
+    internal class SkyboxRenderer
     {
         private static float SIZE = 500f;
 

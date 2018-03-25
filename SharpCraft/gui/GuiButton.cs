@@ -1,14 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Policy;
-using System.Text;
-using System.Threading.Tasks;
-using OpenTK;
+﻿using OpenTK;
 
 namespace SharpCraft
 {
-    class GuiButton : Gui
+    internal class GuiButton : Gui
     {
         public static GuiTexture GUI_BUTTON;
         public static GuiTexture GUI_BUTTON_HOVER;
@@ -59,7 +53,6 @@ namespace SharpCraft
 
         public virtual void Dispose()
         {
-
         }
 
         internal bool isMouseOver(int x, int y)

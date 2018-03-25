@@ -1,19 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Transactions;
-using OpenTK;
+﻿using OpenTK;
 using OpenTK.Graphics.OpenGL;
 
 namespace SharpCraft
 {
-    class SkyboxShader : ShaderProgram
+    internal class SkyboxShader : ShaderProgram
     {
         public SkyboxShader() : base("skybox", PrimitiveType.Triangles)
         {
-
         }
 
         protected override void onBindAttributes()
@@ -23,7 +16,6 @@ namespace SharpCraft
 
         protected override void onRegisterUniforms()
         {
-
         }
 
         public override void loadViewMatrix(Matrix4 mat)

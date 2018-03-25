@@ -1,10 +1,9 @@
-﻿using System;
+﻿using OpenTK;
 using System.Collections.Generic;
-using OpenTK;
 
 namespace SharpCraft
 {
-    class TextureBlockUV
+    internal class TextureBlockUV
     {
         private Dictionary<EnumFacing, TextureUVNode> UVs;
 

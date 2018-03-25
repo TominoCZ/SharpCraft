@@ -1,9 +1,9 @@
-﻿using System;
-using OpenTK;
+﻿using OpenTK;
+using System;
 
 namespace SharpCraft
 {
-    class AxisAlignedBB
+    internal class AxisAlignedBB
     {
         public static AxisAlignedBB BLOCK_FULL { get; } = new AxisAlignedBB(Vector3.Zero, Vector3.One);
         public static AxisAlignedBB NULL { get; } = new AxisAlignedBB(Vector3.Zero, Vector3.Zero);
@@ -33,7 +33,6 @@ namespace SharpCraft
 
         public AxisAlignedBB(float minX, float minY, float minZ, float maxX, float maxY, float maxZ) : this(new Vector3(minX, minY, minZ), new Vector3(maxX, maxY, maxZ))
         {
-
         }
 
         public AxisAlignedBB offset(Vector3 by)

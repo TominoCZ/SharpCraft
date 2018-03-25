@@ -1,6 +1,6 @@
 ﻿namespace SharpCraft
 {
-    interface IModelRaw
+    internal interface IModelRaw
     {
         int vaoID { get; }
         int vertexCount { get; }

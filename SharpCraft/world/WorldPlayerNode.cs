@@ -1,10 +1,10 @@
-﻿using System;
-using OpenTK;
+﻿using OpenTK;
+using System;
 
 namespace SharpCraft
 {
     [Serializable]
-    class WorldPlayerNode
+    internal class WorldPlayerNode
     {
         public float pitch;
         public float yaw;

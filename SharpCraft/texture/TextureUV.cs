@@ -2,7 +2,7 @@
 
 namespace SharpCraft
 {
-    class TextureUVNode
+    internal class TextureUVNode
     {
         public Vector2 start;
         public Vector2 end;

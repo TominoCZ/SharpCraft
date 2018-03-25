@@ -1,11 +1,11 @@
-﻿using System.Collections.Generic;
-using System.IO;
-using OpenTK;
+﻿using OpenTK;
 using OpenTK.Graphics.OpenGL;
+using System.Collections.Generic;
+using System.IO;
 
 namespace SharpCraft
 {
-    abstract class ShaderProgram
+    internal abstract class ShaderProgram
     {
         public PrimitiveType renderType;
 
@@ -16,12 +16,26 @@ namespace SharpCraft
         private int vshID;
         private int fshID;
 
+        private string shaderName;
+
         protected ShaderProgram(string shaderName, PrimitiveType renderType)
         {
             uniforms = new Dictionary<string, int>();
 
             this.renderType = renderType;
+            this.shaderName = shaderName;
 
+            init();
+
+            registerUniforms("transformationMatrix", "projectionMatrix", "viewMatrix");
+
+            onRegisterUniforms();
+
+            ShaderManager.registerShader(this);
+        }
+
+        private void init()
+        {
             loadShader(shaderName);
 
             //creates and ID for this program
@@ -35,12 +49,6 @@ namespace SharpCraft
 
             GL.LinkProgram(programID);
             GL.ValidateProgram(programID);
-
-            registerUniforms("transformationMatrix", "projectionMatrix", "viewMatrix");
-
-            onRegisterUniforms();
-
-            ShaderManager.registerShader(this);
         }
 
         protected abstract void onRegisterUniforms();
@@ -122,6 +130,13 @@ namespace SharpCraft
             GL.CompileShader(fshID);
         }
 
+        public void reload()
+        {
+            destroy();
+
+            init();
+        }
+
         public void bind()
         {
             GL.UseProgram(programID);
@@ -131,14 +146,14 @@ namespace SharpCraft
         {
             GL.UseProgram(0);
         }
-        
+
         public void destroy()
         {
             unbind();
 
             GL.DetachShader(programID, vshID);
             GL.DetachShader(programID, fshID);
-            
+
             GL.DeleteShader(vshID);
             GL.DeleteShader(fshID);
 

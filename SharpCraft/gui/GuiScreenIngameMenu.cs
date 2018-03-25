@@ -1,13 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using OpenTK;
+﻿using OpenTK;
 
 namespace SharpCraft
 {
-    class GuiScreenIngameMenu : GuiScreen
+    internal class GuiScreenIngameMenu : GuiScreen
     {
         private GuiTexture background;
 
