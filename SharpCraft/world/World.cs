@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
@@ -156,11 +157,12 @@ namespace SharpCraft
             _chunkManager.WriteChunkData(new []{chunk.chunk.chunkPos.x,chunk.chunk.chunkPos.z},data);   
         }
 
-        public void loadChunk(BlockPos pos)
+        public bool loadChunk(BlockPos pos)
         {
             var chunkPos = pos.chunkPos();
             
             var data = _chunkManager.GetChunkData(new[] {pos.x, pos.z});
+            if (data == null) return false;
             
             var blockData = new short[16,256,16];
             Buffer.BlockCopy(data,0,blockData,0, blockData.Length);
@@ -170,6 +172,7 @@ namespace SharpCraft
             var chunkData = addChunkPlaceholder(chunkPos);
             chunkData.chunk = chunk;
             chunkData.chunkGenerated = true;
+            return true;
         }
 
         public void saveAllChunks()
