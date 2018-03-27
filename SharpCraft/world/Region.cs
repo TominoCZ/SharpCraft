@@ -39,7 +39,6 @@ namespace SharpCraft.world
 
 			if (!File.Exists(_filePath)) populateBlank(chunkCount);
 			cacheFlags(chunkCount);
-			Console.WriteLine("Allocated chunk at: "+_filePath);
 		}
 
 		private void cacheFlags(int chunkCount)
@@ -64,6 +63,7 @@ namespace SharpCraft.world
 
 		private void populateBlank(int chunkCount)
 		{
+			Console.WriteLine("Allocating chunk at: "+_filePath);
 			using (FileStream newFile = File.Create(_filePath))
 			{
 				byte[] blankChunk = new byte[info.ChunkByteSize + 1];
@@ -127,14 +127,14 @@ namespace SharpCraft.world
 			//it's ok to have multiple reads at once but you can't mix read and write streams at once so locks are here for that
 			while (_writeLock) Thread.Sleep(1); //file is currently written to, can't read or you'll get corrupted data
 			_readLock++;
-			return File.Open(_filePath, FileMode.Open, FileAccess.Read);
+			return new FileStream(_filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
 		}
 
 		private FileStream Write()
 		{
 			_writeLock = true; //ok no more reads can be called, those that are reading need to finish then this can run
 			while (_readLock > 0) Thread.Sleep(1);
-			return File.Open(_filePath, FileMode.Open, FileAccess.Write);
+			return new FileStream(_filePath, FileMode.Open, FileAccess.Write, FileShare.ReadWrite);
 		}
 
 		public override bool Equals(object obj)

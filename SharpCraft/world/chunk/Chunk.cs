@@ -23,23 +23,25 @@ namespace SharpCraft
         public Chunk(BlockPos chunkPos, World world)
         {
             this.chunkPos = chunkPos;
-            boundingBox =new AxisAlignedBB(Vector3.Zero, Vector3.One * 16 + Vector3.UnitY * 240).offset(chunkPos.vector);
+            this.world = world;
+            
+            boundingBox = new AxisAlignedBB(Vector3.Zero, Vector3.One * 16 + Vector3.UnitY * 240).offset(chunkPos.vector);
 
             _chunkBlocks = new short[16, 256, 16];
         }
 
-        private Chunk(BlockPos chunkPos, short[,,] blockData)
+        private Chunk(BlockPos chunkPos, World world, short[,,] blockData)
         {
             this.chunkPos = chunkPos;
-            boundingBox =
-                new AxisAlignedBB(Vector3.Zero, Vector3.One * 16 + Vector3.UnitY * 240).offset(chunkPos.vector);
+            this.world = world;
+            boundingBox = new AxisAlignedBB(Vector3.Zero, Vector3.One * 16 + Vector3.UnitY * 240).offset(chunkPos.vector);
 
             _chunkBlocks = blockData;
         }
 
-        public static Chunk CreateWithData(BlockPos chunkPos, short[,,] blockData)
+        public static Chunk CreateWithData(BlockPos chunkPos, World world, short[,,] blockData)
         {
-            return new Chunk(chunkPos, blockData);
+            return new Chunk(chunkPos, world, blockData);
         }
 
         public void tick()

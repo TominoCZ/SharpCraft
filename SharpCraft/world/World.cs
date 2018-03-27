@@ -24,10 +24,10 @@ namespace SharpCraft
         public readonly string levelName;
 
         private NoiseUtil _noiseUtil;
-        private int dimension=0;
+        private int dimension = 0;
         private ChunkDataManager _chunkManager;
         public readonly String saveRoot;
-        
+
         public World(string saveName, string levelName, int seed)
         {
             Chunks = new ConcurrentDictionary<BlockPos, ChunkData>();
@@ -39,8 +39,8 @@ namespace SharpCraft
             this.seed = seed;
             this.levelName = levelName;
             saveRoot = $"SharpCraft_Data/saves/{saveName}/";
-            _chunkManager = new ChunkDataManager($"{saveRoot}{dimension}/chunks", 
-                                                 new RegionInfo(new[]{8,8}, 2*16*256*16));
+            _chunkManager = new ChunkDataManager($"{saveRoot}{dimension}/chunks",
+                new RegionInfo(new[] {8, 8}, 2 * 16 * 256 * 16));
         }
 
         public void addEntity(Entity e)
@@ -87,11 +87,11 @@ namespace SharpCraft
 
             var bb = box.union(box);
 
-            for (int x = (int)bb.min.X, maxX = (int)bb.max.X; x < maxX; x++)
+            for (int x = (int) bb.min.X, maxX = (int) bb.max.X; x < maxX; x++)
             {
-                for (int y = (int)bb.min.Y, maxY = (int)bb.max.Y; y < maxY; y++)
+                for (int y = (int) bb.min.Y, maxY = (int) bb.max.Y; y < maxY; y++)
                 {
-                    for (int z = (int)bb.min.Z, maxZ = (int)bb.max.Z; z < maxZ; z++)
+                    for (int z = (int) bb.min.Z, maxZ = (int) bb.max.Z; z < maxZ; z++)
                     {
                         var pos = new BlockPos(x, y, z);
                         var block = Game.INSTANCE.world.getBlock(pos);
@@ -121,7 +121,7 @@ namespace SharpCraft
             if (chunk == null)
                 return EnumBlock.AIR;
 
-            return chunk.getBlock( pos - chunk.chunkPos);
+            return chunk.getBlock(pos - chunk.chunkPos);
         }
 
         public void setBlock(BlockPos pos, EnumBlock blockType, int meta, bool markDirty)
@@ -142,37 +142,40 @@ namespace SharpCraft
 
         public void unloadChunk(BlockPos pos)
         {
-            if (Chunks.TryRemove(pos, out var data))// && data.model.isGenerated)
+            if (Chunks.TryRemove(pos, out var data)) // && data.model.isGenerated)
             {
                 data.model.destroy();
 
-                ThreadPool.QueueUserWorkItem(e => saveChunk(data));
+                saveChunk(data);
             }
         }
 
         private void saveChunk(ChunkData chunk)
         {
             byte[] data = new byte[_chunkManager.Info.ChunkByteSize];
-            Buffer.BlockCopy(chunk.chunk._chunkBlocks,0,data,0, data.Length);
-            _chunkManager.WriteChunkData(new []{chunk.chunk.chunkPos.x,chunk.chunk.chunkPos.z},data);   
+            Buffer.BlockCopy(chunk.chunk._chunkBlocks, 0, data, 0, data.Length);
+            _chunkManager.WriteChunkData(new[] {chunk.chunk.chunkPos.x, chunk.chunk.chunkPos.z}, data);
         }
 
         public bool loadChunk(BlockPos pos)
         {
             var chunkPos = pos.chunkPos();
-            
+
             var data = _chunkManager.GetChunkData(new[] {pos.x, pos.z});
             //System.Environment.Exit(1);
             if (data == null) return false;
-            
-            var blockData = new short[16,256,16];
-            Buffer.BlockCopy(data,0,blockData,0, blockData.Length);
-            
-            var chunk = Chunk.CreateWithData(chunkPos, blockData);
 
             var chunkData = addChunkPlaceholder(chunkPos);
+
+            var blockData = new short[16, 256, 16];
+            Buffer.BlockCopy(data, 0, blockData, 0, data.Length);
+
+            var chunk = Chunk.CreateWithData(chunkPos, this, blockData);
+
             chunkData.chunk = chunk;
             chunkData.chunkGenerated = true;
+
+            Console.WriteLine($"loaded chunk at {chunkPos}");
             
             return true;
         }
@@ -243,7 +246,7 @@ namespace SharpCraft
             var chunk = getChunkFromPos(new BlockPos(pos.x, 0, pos.z));
 
             if (chunk == null)
-                return 0;//ThreadPool.ScheduleTask(false, () => generateChunk(pos));
+                return 0; //ThreadPool.ScheduleTask(false, () => generateChunk(pos));
 
             var lastPos = pos;
 
@@ -276,7 +279,7 @@ namespace SharpCraft
                         var X = (x + chunkPos.x) / 1.25f;
                         var Y = (z + chunkPos.z) / 1.25f;
 
-                        int peakY = 32 + (int)Math.Abs(
+                        int peakY = 32 + (int) Math.Abs(
                                         MathHelper.Clamp(0.35f + _noiseUtil.GetPerlinFractal(X, Y), 0, 1) * 30);
 
                         for (int y = peakY; y >= 0; y--)
