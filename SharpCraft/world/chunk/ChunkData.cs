@@ -17,7 +17,7 @@ namespace SharpCraft
             this.model = model;
         }
 
-        public void beginUpdateModel(World w)
+        public void beginUpdateModel()
         {
             if (!chunkGenerated || modelGenerating)
                 return;
@@ -26,7 +26,7 @@ namespace SharpCraft
 
             ThreadPool.QueueUserWorkItem(e =>
             {
-                chunk.buildChunkModel(w, model);
+                chunk.buildChunkModel(model);
                 modelGenerating = false;
             });
         }

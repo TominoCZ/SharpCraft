@@ -15,8 +15,8 @@ namespace SharpCraft
 
         public WorldPlayerNode(EntityPlayerSP player)
         {
-            pitch = Camera.INSTANCE.pitch;
-            yaw = Camera.INSTANCE.yaw;
+            pitch = Game.INSTANCE.Camera.pitch;
+            yaw = Game.INSTANCE.Camera.yaw;
             pos = player.pos;
             hotbar = player.hotbar;
         }

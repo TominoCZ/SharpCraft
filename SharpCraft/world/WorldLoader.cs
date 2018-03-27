@@ -15,11 +15,6 @@ namespace SharpCraft
 
             var bf = new BinaryFormatter();
 
-            var dir = w.saveDirectory;
-
-            if (!Directory.Exists(dir))
-                Directory.CreateDirectory(dir);
-
             w.saveAllChunks();
 
             try
@@ -27,12 +22,12 @@ namespace SharpCraft
                 var wpn = new WorldPlayerNode(Game.INSTANCE.player);
                 var wdn = new WorldDataNode(w);
 
-                using (var fs = File.OpenWrite(dir + "/player.dat"))
+                using (var fs = File.OpenWrite(w.saveRoot + "/player.dat"))
                 {
                     bf.Serialize(fs, wpn);
                 }
 
-                using (var fs = File.OpenWrite(dir + "/level.dat"))
+                using (var fs = File.OpenWrite(w.saveRoot + "/level.dat"))
                 {
                     bf.Serialize(fs, wdn);
                 }
@@ -72,8 +67,8 @@ namespace SharpCraft
                 world = new World(saveName, wdn.levelName, wdn.seed);
 
                 var player = new EntityPlayerSP(wpn.pos);
-                Camera.INSTANCE.pitch = wpn.pitch;
-                Camera.INSTANCE.yaw = wpn.yaw;
+                Game.INSTANCE.Camera.pitch = wpn.pitch;
+                Game.INSTANCE.Camera.yaw = wpn.yaw;
 
                 for (int i = 0; i < wpn.hotbar.Length; i++)
                 {

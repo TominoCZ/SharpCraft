@@ -7,6 +7,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using SharpCraft.world;
 
 namespace SharpCraft
 {
@@ -20,10 +21,12 @@ namespace SharpCraft
 
         public readonly int seed;
         public readonly string levelName;
-        public readonly string saveDirectory;
 
         private NoiseUtil _noiseUtil;
-
+        private int dimension=0;
+        private ChunkDataManager _chunkManager;
+        public readonly String saveRoot;
+        
         public World(string saveName, string levelName, int seed)
         {
             Chunks = new ConcurrentDictionary<BlockPos, ChunkData>();
@@ -34,8 +37,9 @@ namespace SharpCraft
 
             this.seed = seed;
             this.levelName = levelName;
-
-            saveDirectory = $"SharpCraft_Data/saves/{saveName}";
+            saveRoot = $"SharpCraft_Data/saves/{saveName}/";
+            _chunkManager = new ChunkDataManager($"{saveRoot}{dimension}/chunks", 
+                                                 new RegionInfo(new[]{8,8}, sizeof(short)*16*256*16));
         }
 
         public void addEntity(Entity e)
@@ -54,7 +58,7 @@ namespace SharpCraft
 
         private ChunkData addChunkPlaceholder(BlockPos pos)
         {
-            var data = new ChunkData(new Chunk(pos = pos.chunkPos()), new ModelChunk());
+            var data = new ChunkData(new Chunk(pos = pos.chunkPos(), this), new ModelChunk());
 
             Chunks.TryAdd(pos, data);
 
@@ -116,7 +120,7 @@ namespace SharpCraft
             if (chunk == null)
                 return EnumBlock.AIR;
 
-            return chunk.getBlock(this, pos - chunk.chunkPos);
+            return chunk.getBlock( pos - chunk.chunkPos);
         }
 
         public void setBlock(BlockPos pos, EnumBlock blockType, int meta, bool markDirty)
@@ -145,56 +149,27 @@ namespace SharpCraft
             }
         }
 
-        private void saveChunk(ChunkData data)
+        private void saveChunk(ChunkData chunk)
         {
-            var dir = $"{saveDirectory}/chunks";
-
-            var file = $"{dir}/ch_{data.chunk.chunkPos.x / 16}.{data.chunk.chunkPos.z / 16}.dat";
-
-            if (!Directory.Exists(dir))
-                Directory.CreateDirectory(dir);
-
-            using (var fs = new FileStream(file, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite))
-            {
-                var bf = new BinaryFormatter();
-
-                bf.Serialize(fs, data.chunk.createChunkCache());
-            }
+            byte[] data = new byte[_chunkManager.Info.ChunkByteSize];
+            Buffer.BlockCopy(chunk.chunk._chunkBlocks,0,data,0, data.Length);
+            _chunkManager.WriteChunkData(new []{chunk.chunk.chunkPos.x,chunk.chunk.chunkPos.z},data);   
         }
 
-        public bool loadChunk(BlockPos pos)
+        public void loadChunk(BlockPos pos)
         {
             var chunkPos = pos.chunkPos();
+            
+            var data = _chunkManager.GetChunkData(new[] {pos.x, pos.z});
+            
+            var blockData = new short[16,256,16];
+            Buffer.BlockCopy(data,0,blockData,0, blockData.Length);
+            
+            var chunk = Chunk.CreateWithData(chunkPos, blockData);
 
-            var dir = $"{saveDirectory}/chunks";
-            var file = $"{dir}/ch_{chunkPos.x / 16}.{chunkPos.z / 16}.dat";
-
-            if (!File.Exists(file))
-                return false;
-
-            try
-            {
-                using (var fs = new FileStream(file, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite))
-                {
-                    var bf = new BinaryFormatter();
-
-                    var chunk = Chunk.CreateFromCache(chunkPos, (ChunkCache)bf.Deserialize(fs));
-
-                    var data = addChunkPlaceholder(chunkPos);
-                    data.chunk = chunk;
-                    data.chunkGenerated = true;
-
-                    Console.WriteLine("DEBUG: chunk loaded");
-
-                    return true;
-                }
-            }
-            catch
-            {
-
-            }
-
-            return false;
+            var chunkData = addChunkPlaceholder(chunkPos);
+            chunkData.chunk = chunk;
+            chunkData.chunkGenerated = true;
         }
 
         public void saveAllChunks()
@@ -236,7 +211,7 @@ namespace SharpCraft
             if (chunk == null)
                 return 0;
 
-            return chunk.getMetadata(this, pos - chunk.chunkPos);
+            return chunk.getMetadata(pos - chunk.chunkPos);
         }
 
         public void setMetadata(BlockPos pos, int meta, bool redraw)
@@ -245,7 +220,7 @@ namespace SharpCraft
             if (chunk == null)
                 return;
 
-            chunk.setMetadata(this, pos - chunk.chunkPos, meta, redraw);
+            chunk.setMetadata(pos - chunk.chunkPos, meta, redraw);
 
             if (redraw)
             {
@@ -363,7 +338,7 @@ namespace SharpCraft
 
             if (Chunks.TryGetValue(pos, out var node))
             {
-                node.beginUpdateModel(this);
+                node.beginUpdateModel();
             }
         }
 
