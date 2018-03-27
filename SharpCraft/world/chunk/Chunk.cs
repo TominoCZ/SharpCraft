@@ -119,12 +119,12 @@ namespace SharpCraft
                     {
                         var pos = new BlockPos(x, y, z);
 
-                        var block = getBlock(w, pos);
+                        var block = getBlock(pos);
 
                         if (block == EnumBlock.AIR)
                             continue;
 
-                        var blockModel = ModelRegistry.getModelForBlock(block, getMetadata(w, pos));
+                        var blockModel = ModelRegistry.getModelForBlock(block, getMetadata(pos));
 
                         if (!MODEL_RAW.TryGetValue(blockModel.shader, out quads))
                             MODEL_RAW.Add(blockModel.shader, quads = new List<RawQuad>());
@@ -132,7 +132,7 @@ namespace SharpCraft
                         for (int i = 0; i < FacingUtil.SIDES.Length; i++)
                         {
                             var dir = FacingUtil.SIDES[i];
-                            var block_o = getBlock(w, pos.offset(dir));
+                            var block_o = getBlock(pos.offset(dir));
 
                             if (block_o == EnumBlock.AIR || block_o == EnumBlock.GLASS && block != EnumBlock.GLASS)
                             {
