@@ -154,14 +154,14 @@ namespace SharpCraft
         {
             byte[] data = new byte[_chunkManager.Info.ChunkByteSize];
             Buffer.BlockCopy(chunk.chunk._chunkBlocks, 0, data, 0, data.Length);
-            _chunkManager.WriteChunkData(new[] {chunk.chunk.chunkPos.x, chunk.chunk.chunkPos.z}, data);
+            _chunkManager.WriteChunkData(new[] {chunk.chunk.chunkPos.x / 16, chunk.chunk.chunkPos.z / 16}, data);
         }
 
         public bool loadChunk(BlockPos pos)
         {
             var chunkPos = pos.chunkPos();
 
-            var data = _chunkManager.GetChunkData(new[] {pos.x, pos.z});
+            var data = _chunkManager.GetChunkData(new[] {chunkPos.x / 16, chunkPos.z / 16});
             //System.Environment.Exit(1);
             if (data == null) return false;
 
@@ -176,7 +176,7 @@ namespace SharpCraft
             chunkData.chunkGenerated = true;
 
             Console.WriteLine($"loaded chunk at {chunkPos}");
-            
+
             return true;
         }
 

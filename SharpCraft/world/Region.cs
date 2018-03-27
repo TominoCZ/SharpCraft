@@ -6,151 +6,160 @@ using System.Threading;
 
 namespace SharpCraft.world
 {
-	public class Region
-	{
-		public static readonly byte BLANK_CHUNK = 0b00000001;
+    public class Region
+    {
+        public static readonly byte BLANK_CHUNK = 0b00000001;
 
-		private readonly RegionInfo info;
-		private readonly int[] cordinate;
-		private readonly int _hash;
+        private readonly RegionInfo info;
+        private readonly int[] cordinate;
+        private readonly int _hash;
 
-		private readonly string _filePath;
-		private int _readLock;
-		private bool _writeLock;
-		private byte[] _cacheFlags;
+        private readonly string _filePath;
 
-		public Region(RegionInfo info, int[] cordinate, string DataRoot)
-		{
-			this.info = info;
-			_hash = info.CoordHash(cordinate);
+        //private int _readLock;
+        //private bool _writeLock;
+        private byte[] _cacheFlags;
 
-			this.cordinate = cordinate;
-			_filePath = $"{DataRoot}/.reg_{string.Join(".", cordinate)}.bin";
-			CreateAndPopulate();
-		}
+        private object _locker = new object();
 
-		private void CreateAndPopulate()
-		{
-			var chunkCount = 1;
-			for (var i = 0; i < cordinate.Length; i++)
-			{
-				chunkCount *= info.DimSize(i);
-			}
+        public Region(RegionInfo info, int[] cordinate, string DataRoot)
+        {
+            this.info = info;
+            _hash = info.CoordHash(cordinate);
 
-			if (!File.Exists(_filePath)) populateBlank(chunkCount);
-			cacheFlags(chunkCount);
-		}
+            this.cordinate = cordinate;
+            _filePath = $"{DataRoot}/.reg_{string.Join(".", cordinate)}.bin";
+            CreateAndPopulate();
+        }
 
-		private void cacheFlags(int chunkCount)
-		{
-			_cacheFlags = new byte[chunkCount];
-			FileStream stream = null;
-			try
-			{
-				stream = Read();
-				for (int i = 0; i < chunkCount; i++)
-				{
-					stream.Seek((info.ChunkByteSize + 1) * i, SeekOrigin.Begin);
-					_cacheFlags[i] = (byte) stream.ReadByte();
-				}
-			}
-			finally
-			{
-				stream?.Close();
-				_readLock--;
-			}
-		}
+        private void CreateAndPopulate()
+        {
+            var chunkCount = 1;
+            for (var i = 0; i < cordinate.Length; i++)
+            {
+                chunkCount *= info.DimSize(i);
+            }
 
-		private void populateBlank(int chunkCount)
-		{
-			Console.WriteLine("Allocating chunk at: "+_filePath);
-			using (FileStream newFile = File.Create(_filePath))
-			{
-				byte[] blankChunk = new byte[info.ChunkByteSize + 1];
-				blankChunk[0] |= BLANK_CHUNK;
+            if (!File.Exists(_filePath)) populateBlank(chunkCount);
+            cacheFlags(chunkCount);
+        }
+
+        private void cacheFlags(int chunkCount)
+        {
+            _cacheFlags = new byte[chunkCount];
+            FileStream stream = null;
+            try
+            {
+                stream = Read();
+                for (int i = 0; i < chunkCount; i++)
+                {
+                    stream.Seek((info.ChunkByteSize + 1) * i, SeekOrigin.Begin);
+                    _cacheFlags[i] = (byte) stream.ReadByte();
+                }
+            }
+            finally
+            {
+                stream?.Close();
+                //_readLock--;
+            }
+        }
+
+        private void populateBlank(int chunkCount)
+        {
+            Console.WriteLine("Allocating chunk at: " + _filePath);
+            using (FileStream newFile = File.Create(_filePath))
+            {
+                byte[] blankChunk = new byte[info.ChunkByteSize + 1];
+                blankChunk[0] |= BLANK_CHUNK;
 
 
-				for (var i = 0; i < chunkCount; i++)
-				{
-					newFile.Write(blankChunk, 0, blankChunk.Length);
-				}
-			}
-		}
+                for (var i = 0; i < chunkCount; i++)
+                {
+                    newFile.Write(blankChunk, 0, blankChunk.Length);
+                }
+            }
+        }
 
-		public void WriteChunkData(int id, byte[] data)
-		{
-			FileStream stream = null;
-			try
-			{
-				stream = Write();
-				stream.Seek((info.ChunkByteSize + 1) * id, SeekOrigin.Begin);
-				//stream.WriteByte((byte) (_cacheFlags[id]&NotFlag(BLANK_CHUNK)));
-				stream.WriteByte(2);
-				
-				stream.Write(data, 0, data.Length);
-			}
-			finally
-			{
-				stream?.Close();
-				_writeLock = false;
-			}
-		}
+        public void WriteChunkData(int id, byte[] data)
+        {
+            FileStream stream = null;
+            try
+            {
+                stream = Write();
+                stream.Seek((info.ChunkByteSize + 1) * id, SeekOrigin.Begin);
+                //stream.WriteByte((byte) (_cacheFlags[id]&NotFlag(BLANK_CHUNK)));
+                stream.WriteByte(2);
 
-		public byte[] ReadChunkData(int id)
-		{
-			FileStream stream = null;
-			try
-			{
-				stream = Read();
-				stream.Seek((info.ChunkByteSize + 1) * id, SeekOrigin.Begin);
+                stream.Write(data, 0, data.Length);
+            }
+            finally
+            {
+                stream?.Close();
+                //_writeLock = false;
+            }
+        }
 
-				byte flags = _cacheFlags[id] = (byte) stream.ReadByte();
+        public byte[] ReadChunkData(int id)
+        {
+            FileStream stream = null;
+            try
+            {
+                stream = Read();
+                stream.Seek((info.ChunkByteSize + 1) * id, SeekOrigin.Begin);
 
-				if ((flags & BLANK_CHUNK) == BLANK_CHUNK)
-				{
-					return null;
-				}
+                byte flags = _cacheFlags[id] = (byte) stream.ReadByte();
 
-				var data = new byte[info.ChunkByteSize];
-				stream.Read(data, 0, data.Length);
-				return data;
-			}
-			finally
-			{
-				stream?.Close();
-				_readLock--;
-			}
-		}
+                if ((flags & BLANK_CHUNK) == BLANK_CHUNK)
+                {
+                    return null;
+                }
 
-		private FileStream Read()
-		{
-			//it's ok to have multiple reads at once but you can't mix read and write streams at once so locks are here for that
-			while (_writeLock) Thread.Sleep(1); //file is currently written to, can't read or you'll get corrupted data
-			_readLock++;
-			return new FileStream(_filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
-		}
+                var data = new byte[info.ChunkByteSize];
+                stream.Read(data, 0, data.Length);
+                return data;
+            }
+            finally
+            {
+                stream?.Close();
+                //_readLock--;
+            }
+        }
 
-		private FileStream Write()
-		{
-			_writeLock = true; //ok no more reads can be called, those that are reading need to finish then this can run
-			while (_readLock > 0) Thread.Sleep(1);
-			return new FileStream(_filePath, FileMode.Open, FileAccess.Write, FileShare.ReadWrite);
-		}
+        private FileStream Read()
+        {
+            lock (_locker)
+            {
+                //it's ok to have multiple reads at once but you can't mix read and write streams at once so locks are here for that
+                //while (_writeLock) Thread.Sleep(1); //file is currently written to, can't read or you'll get corrupted data
+                //_readLock++;
+                return new FileStream(_filePath, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite);
+            }
+        }
 
-		public override bool Equals(object obj)
-		{
-			Region other = obj as Region;
-			return other != null && other.cordinate.Equals(cordinate);
-		}
+        private FileStream Write()
+        {
+            lock (_locker)
+            {
+                //_writeLock = true; //ok no more reads can be called, those that are reading need to finish then this can run
+                //while (_readLock > 0) Thread.Sleep(1);
+                return new FileStream(_filePath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite);
+            }
+        }
 
-		public override int GetHashCode()
-		{
-			return _hash;
-		}
+        public override bool Equals(object obj)
+        {
+            Region other = obj as Region;
+            return other != null && other.cordinate.Equals(cordinate);
+        }
 
-		private byte NotFlag(byte flag)
-		{
-			return (byte) (~flag & 0xFF);
-		}
-	}
+        public override int GetHashCode()
+        {
+            return _hash;
+        }
+
+        private byte NotFlag(byte flag)
+        {
+            return (byte) (~flag & 0xFF);
+        }
+    }
 }
