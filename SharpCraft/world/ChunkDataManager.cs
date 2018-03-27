@@ -34,7 +34,8 @@ namespace SharpCraft.world
 				var size = Info.DimSize(i);
 				var cord = coordinate[i];
 				regionCoord[i] = cord / size;
-				regionLocalCoord[i] = cord % size;
+				if (cord < 0) regionCoord[i]--;
+				regionLocalCoord[i] = cord-regionCoord[i]*size;
 			}
 
 			Region r=GetRegion(Info.CoordHash(regionCoord));
