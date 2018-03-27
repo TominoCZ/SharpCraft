@@ -27,10 +27,6 @@ namespace SharpCraft
 
             init();
 
-            registerUniforms("transformationMatrix", "projectionMatrix", "viewMatrix");
-
-            onRegisterUniforms();
-
             ShaderManager.registerShader(this);
         }
 
@@ -49,6 +45,10 @@ namespace SharpCraft
 
             GL.LinkProgram(programID);
             GL.ValidateProgram(programID);
+
+            registerUniforms("transformationMatrix", "projectionMatrix", "viewMatrix");
+
+            onRegisterUniforms();
         }
 
         protected abstract void onRegisterUniforms();
@@ -68,7 +68,6 @@ namespace SharpCraft
 
         protected void bindAttribute(int attrib, string variable)
         {
-            //set variable names that the vertex shader will be taking in
             GL.BindAttribLocation(programID, attrib, variable);
         }
 
@@ -158,6 +157,8 @@ namespace SharpCraft
             GL.DeleteShader(fshID);
 
             GL.DeleteProgram(programID);
+
+            uniforms.Clear();
         }
     }
 }

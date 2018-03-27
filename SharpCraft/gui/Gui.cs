@@ -37,7 +37,7 @@ namespace SharpCraft
         {
             shader.bind();
             GL.BindVertexArray(GuiRenderer.GUIquad.vaoID);
-            GL.EnableVertexAttribArray(0);
+
             var unit = new Vector2(1f / Game.INSTANCE.ClientSize.Width, 1f / Game.INSTANCE.ClientSize.Height);
 
             float width = tex.textureSize.Width;
@@ -56,9 +56,11 @@ namespace SharpCraft
 
             GL.ActiveTexture(TextureUnit.Texture0);
             GL.BindTexture(TextureTarget.Texture2D, tex.textureID);
+
             GL.DrawArrays(shader.renderType, 0, 4);
-            GL.DisableVertexAttribArray(0);
+
             GL.BindVertexArray(0);
+
             shader.unbind();
         }
 

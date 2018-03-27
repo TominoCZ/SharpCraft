@@ -1,6 +1,7 @@
 ﻿using OpenTK;
 using OpenTK.Graphics.OpenGL;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using GL = OpenTK.Graphics.OpenGL.GL;
 using TextureTarget = OpenTK.Graphics.OpenGL.TextureTarget;
@@ -14,8 +15,6 @@ namespace SharpCraft
 
         private Vector4 selectionOutlineColor;
 
-        private ModelLight modelLight;
-
         private Stopwatch updateTimer;
 
         private int hue;
@@ -25,15 +24,16 @@ namespace SharpCraft
         public int RenderDistance
         {
             get => _renderDistance;
-            set => _renderDistance = MathHelper.Clamp(value, 2, int.MaxValue);
+            set => _renderDistance = MathHelper.Clamp(value, 3, int.MaxValue);
         }
+
+        public bool AltRenderMethod;
 
         public WorldRenderer()
         {
-            modelLight = new ModelLight(new Vector3(-8, 12, -10f) * 750, Vector3.One);
             _selectionOutline = new ModelCubeOutline(new ShaderBlockOutline());
 
-            RenderDistance = SettingsManager.getInt("renderdistance");
+            RenderDistance = 8;
 
             updateTimer = Stopwatch.StartNew();
         }
@@ -43,53 +43,88 @@ namespace SharpCraft
             if (Game.INSTANCE.world == null)
                 return;
 
+            GL.ActiveTexture(TextureUnit.Texture0);
+            GL.BindTexture(TextureTarget.Texture2D, TextureManager.blockTextureAtlasID);
+
             var hit = Game.INSTANCE.mouseOverObject;
 
             if (hit.hit != null && hit.hit is EnumBlock block && block != EnumBlock.AIR)
                 renderBlockSelectionOutline(viewMatrix, block, hit.blockPos);
 
-            var nodes = Game.INSTANCE.world.getChunkDataNodes();
+            if (AltRenderMethod)
+                renderWorld2(viewMatrix);
+            else
+                renderWorld(viewMatrix);
 
-            for (var index = 0; index < nodes.Length; index++)
+            if (Game.INSTANCE.player != null)
             {
-                var node = nodes[index];
+                renderSelectedItemBlock();
+            }
+        }
 
-                if (node == null)
+        private void renderWorld(Matrix4 viewMatrix)
+        {
+            foreach (var data in Game.INSTANCE.world.Chunks.Values)
+            {
+                if (!data.chunk.isWithinRenderDistance())
                     continue;
 
-                if (!node.chunk.isWithinRenderDistance())
-                    continue;
-
-                var shaders = node.model.getShadersPresent();
-
-                for (int j = 0; j < shaders.Count; j++)
+                foreach (var shader in data.model.fragmentPerShader.Keys)
                 {
-                    var shader = shaders[j];
-
-                    var chunkFragmentModel = node.model.getFragmentModelWithShader(shader);
+                    var chunkFragmentModel = data.model.getFragmentModelWithShader(shader);
                     if (chunkFragmentModel == null)
                         continue;
 
                     chunkFragmentModel.bind();
 
-                    shader.loadLight(modelLight);
+                    shader.loadVec3(Vector3.One, "lightColor");
                     shader.loadViewMatrix(viewMatrix);
 
                     shader.loadTransformationMatrix(
-                        MatrixHelper.createTransformationMatrix(node.chunk.chunkPos.vector));
+                        MatrixHelper.createTransformationMatrix(data.chunk.chunkPos.vector));
 
-                    GL.ActiveTexture(TextureUnit.Texture0);
-                    GL.BindTexture(TextureTarget.Texture2D, TextureManager.blockTextureAtlasID);
+                    GL.DrawArrays(shader.renderType, 0, chunkFragmentModel.rawModel.vertexCount);
+
+                    chunkFragmentModel.unbind();
+                }
+            }
+        }
+
+        private void renderWorld2(Matrix4 viewMatrix)
+        {
+            List<ChunkData> visibleChunks = new List<ChunkData>(100);
+
+            foreach (var data in Game.INSTANCE.world.Chunks.Values)
+            {
+                if (data.chunk.isWithinRenderDistance())
+                    visibleChunks.Add(data);
+            }
+
+            for (int i = 0; i < visibleChunks.Count; i++)
+            {
+                var data = visibleChunks[i];
+
+                var mat = MatrixHelper.createTransformationMatrix(data.chunk.chunkPos.vector);
+
+                foreach (var shader in data.model.fragmentPerShader.Keys)
+                {
+                    var chunkFragmentModel = data.model.getFragmentModelWithShader(shader);
+                    if (chunkFragmentModel == null)
+                        continue;
+
+                    chunkFragmentModel.bind();
+
+                    shader.loadVec3(Vector3.One, "lightColor");
+                    shader.loadViewMatrix(viewMatrix);
+                    shader.loadTransformationMatrix(mat);
+
                     GL.DrawArrays(shader.renderType, 0, chunkFragmentModel.rawModel.vertexCount);
 
                     chunkFragmentModel.unbind();
                 }
             }
 
-            if (Game.INSTANCE.player != null)
-            {
-                renderSelectedItemBlock();
-            }
+            visibleChunks.Clear();
         }
 
         private void renderBlockSelectionOutline(Matrix4 viewMatrix, EnumBlock block, BlockPos pos)
@@ -103,23 +138,19 @@ namespace SharpCraft
                 updateTimer.Restart();
             }
 
-            GL.ActiveTexture(TextureUnit.Texture0);
-            GL.BindTexture(TextureTarget.Texture2D, TextureManager.blockTextureAtlasID);
-
             var shader = (ShaderBlockOutline)_selectionOutline.shader;
             var bb = ModelRegistry.getModelForBlock(block, Game.INSTANCE.world.getMetadata(pos))?.boundingBox;
 
             if (bb == null)
                 return;
 
-            var size = bb.size + Vector3.One * 0.005f;
+            var size = bb.size + Vector3.One * 0.0025f;
 
             _selectionOutline.bind();
 
             shader.loadVec4(selectionOutlineColor, "colorIn");
             shader.loadViewMatrix(viewMatrix);
-            shader.loadTransformationMatrix(
-                MatrixHelper.createTransformationMatrix(pos.vector - Vector3.One * 0.0025f, size));
+            shader.loadTransformationMatrix(MatrixHelper.createTransformationMatrix(pos.vector - Vector3.One * 0.00175f, size));
 
             GL.Disable(EnableCap.CullFace);
             GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
@@ -141,18 +172,13 @@ namespace SharpCraft
                 var model = ModelRegistry.getModelForBlock(itemBlock.getBlock(), stack.Meta);
 
                 model.bind();
-                model.shader.loadLight(modelLight);
+                model.shader.loadVec3(Vector3.One, "lightColor");
                 model.shader.loadViewMatrix(Matrix4.Identity);
 
                 model.shader.loadTransformationMatrix(MatrixHelper.createTransformationMatrix(
-                    new Vector3(0.04f, -0.065f, -0.1f) + Camera.INSTANCE.getLookVec() / 200,
-                    new Vector3(-2, -10, 0),
-                    0.045f));
+                    new Vector3(0.04125f, -0.065f, -0.1f) + Camera.INSTANCE.getLookVec() / 200,
+                    new Vector3(-2, -11, 0), 0.045f));
 
-                GL.Enable(EnableCap.DepthClamp);
-
-                GL.ActiveTexture(TextureUnit.Texture0);
-                GL.BindTexture(TextureTarget.Texture2D, TextureManager.blockTextureAtlasID);
                 GL.DrawArrays(model.shader.renderType, 0, model.rawModel.vertexCount);
 
                 model.unbind();

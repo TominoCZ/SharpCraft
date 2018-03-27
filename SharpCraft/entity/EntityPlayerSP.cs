@@ -15,7 +15,7 @@ namespace SharpCraft
 
         public EntityPlayerSP(Vector3 pos) : base(pos)
         {
-            Camera.INSTANCE.pos = pos;
+            Camera.INSTANCE.pos = (pos += Vector3.UnitY);
 
             collisionBoundingBox = new AxisAlignedBB(new Vector3(-0.3f, 0, -0.3f), new Vector3(0.3f, 1.65f, 0.3f));
             boundingBox = collisionBoundingBox.offset(lastPos = pos);

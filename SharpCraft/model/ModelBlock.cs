@@ -1,4 +1,7 @@
-﻿namespace SharpCraft
+﻿using System.Drawing;
+using OpenTK;
+
+namespace SharpCraft
 {
     internal class ModelBlock : ModelBaked
     {

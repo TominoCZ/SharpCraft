@@ -10,6 +10,9 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using System.Xml.Schema;
+using OpenTK.Graphics;
+using OpenTK.Platform.Windows;
 
 namespace SharpCraft
 {
@@ -36,16 +39,23 @@ namespace SharpCraft
 
         private bool wasSpaceDown;
         private float sensitivity = 1;
+        private double lastRenderTime;
 
-        public Game()
+        private string glVersion;
+
+        private static string title;
+
+        public Game() : base(640, 480, GraphicsMode.Default, title, GameWindowFlags.Default, DisplayDevice.Default, 3, 3, GraphicsContextFlags.ForwardCompatible)
         {
             INSTANCE = this;
 
-            Title = "SharpCraft Alpha 0.0.1";
-            CursorVisible = false;
-
             VSync = VSyncMode.Off;
             MakeCurrent();
+
+            glVersion = GL.GetString(StringName.ShadingLanguageVersion);
+            Title = title = $"SharpCraft Alpha 0.0.2 [GLSL {glVersion}]";
+
+            TargetRenderFrequency = 300;
 
             worldRenderer = new WorldRenderer();
             entityRenderer = new EntityRenderer();
@@ -119,7 +129,7 @@ namespace SharpCraft
 
         public void startGame()
         {
-            var loadedWorld = WorldLoader.loadWorld();
+            var loadedWorld = WorldLoader.loadWorld("MyWorld");
 
             if (loadedWorld == null)
             {
@@ -130,8 +140,7 @@ namespace SharpCraft
                 var playerPos = new BlockPos(-100 + (float)r.NextDouble() * 200, 0,
                                     -100 + (float)r.NextDouble() * 200);
 
-                world = new World(SettingsManager.getValue("worldseed").GetHashCode());
-                world.beginGenerateChunk(playerPos);
+                world = new World("MyWorld", "Tomlow's Fuckaround", SettingsManager.getValue("worldseed").GetHashCode());
 
                 player = new EntityPlayerSP(new Vector3(playerPos.x, world.getHeightAtPos(playerPos.x, playerPos.z),
                     playerPos.z));
@@ -183,28 +192,45 @@ namespace SharpCraft
             if (!keysDown.Contains(e.Key))
                 keysDown.Add(e.Key);
 
-            if (e.Shift && e.Control && e.Key == Key.R)
+            switch (e.Key)
             {
-                ShaderManager.reload();
-                SettingsManager.load();
+                case Key.R:
+                    if (e.Control)
+                    {
+                        ShaderManager.reload();
+                        SettingsManager.load();
 
-                worldRenderer.RenderDistance = SettingsManager.getInt("renderdistance");
-                sensitivity = SettingsManager.getFloat("sensitivity");
+                        worldRenderer.RenderDistance = SettingsManager.getInt("renderdistance");
+                        worldRenderer.AltRenderMethod = SettingsManager.getBool("altrendermethod");
+                        sensitivity = SettingsManager.getFloat("sensitivity");
 
-                world?.destroyChunkModels();
-            }
+                        if (e.Shift)
+                        {
+                            TextureManager.reload();
+                            world?.destroyChunkModels();
+                        }
+                    }
+                    break;
+                case Key.Escape:
+                    if (guiScreen is GuiScreenMainMenu)
+                        return;
 
-            if (e.Key == Key.Escape)
-            {
-                if (guiScreen is GuiScreenMainMenu)
-                    return;
-
-                if (guiScreen != null)
-                    closeGuiScreen();
-                else
-                {
-                    openGuiScreen(new GuiScreenIngameMenu());
-                }
+                    if (guiScreen != null)
+                        closeGuiScreen();
+                    else
+                    {
+                        openGuiScreen(new GuiScreenIngameMenu());
+                    }
+                    break;
+                case Key.F11:
+                    if (WindowState != WindowState.Fullscreen)
+                    {
+                        lastWindowState = WindowState;
+                        WindowState = WindowState.Fullscreen;
+                    }
+                    else
+                        WindowState = lastWindowState;
+                    break;
             }
 
             if (guiScreen == null)
@@ -222,17 +248,6 @@ namespace SharpCraft
 
             if (e.Key == (Key.LAlt | Key.F4))
                 Exit();
-
-            if (e.Key == Key.F11)
-            {
-                if (WindowState != WindowState.Fullscreen)
-                {
-                    lastWindowState = WindowState;
-                    WindowState = WindowState.Fullscreen;
-                }
-                else
-                    WindowState = lastWindowState;
-            }
         }
 
         protected override void OnKeyUp(KeyboardKeyEventArgs e)
@@ -326,36 +341,21 @@ namespace SharpCraft
 
         protected override void OnRenderFrame(FrameEventArgs e)
         {
-            if (keysDown.Contains(Key.Space) && !wasSpaceDown && player.onGround)
-            {
-                wasSpaceDown = true;
-                player.motion.Y = 0.475F;
-            }
-            else if ((!keysDown.Contains(Key.Space) || player.onGround) && wasSpaceDown)
-                wasSpaceDown = false;
+            lastRenderTime = e.Time;
 
-            if (frameTimer.ElapsedMilliseconds >= 1000)
+            while (_glContextQueue.Count > 0)
             {
-                frameTimer.Restart();
-
-                Console.WriteLine($"{1 / e.Time:F} FPS");
+                if (_glContextQueue.TryDequeue(out var func))
+                    func?.Invoke();
             }
 
-            if (timer.ElapsedMilliseconds >= 50)
+            if (timer.ElapsedMilliseconds > 50 - e.Time * 1000)
             {
                 GameLoop();
                 timer.Restart();
             }
 
-            while (_glContextQueue.Count > 0)
-            {
-                if (_glContextQueue.TryDequeue(out var func))
-                    func.Invoke();
-            }
-
-            float partialTicks = getRenderPartialTicks();
-
-            renderScreen(partialTicks);
+            renderScreen(getRenderPartialTicks());
 
             SwapBuffers();
             ProcessEvents(false);
@@ -378,24 +378,6 @@ namespace SharpCraft
             ShaderManager.updateProjectionMatrix();
         }
 
-        private void checkChunk(BlockPos pos)
-        {
-            var chunk = world.getChunkFromPos(pos);
-
-            if (chunk == null || !world.isChunkGenerated(pos))
-            {
-                world.beginGenerateChunk(pos);
-            }
-            else if (!world.doesChunkHaveModel(pos) && world.areNeighbourChunksGenerated(pos))
-            {
-                world.beginUpdateModelForChunk(pos, true);
-            }
-            else if (chunk.isDirty)
-            {
-                world.beginUpdateModelForChunk(pos);
-            }
-        }
-
         private void checkChunks()
         {
             if (world == null || player == null)
@@ -405,7 +387,7 @@ namespace SharpCraft
             {
                 for (int x = -worldRenderer.RenderDistance; x <= worldRenderer.RenderDistance; x++)
                 {
-                    var pos = new BlockPos(x * 16 + player.pos.X, 0, z * 16 + player.pos.Z).ChunkPos().offset(8, 0, 8);
+                    var pos = new BlockPos(x * 16 + player.pos.X, 0, z * 16 + player.pos.Z).chunkPos().offset(8, 0, 8);
                     var dist = MathUtil.distance(pos.vector.Xz, Camera.INSTANCE.pos.Xz);
 
                     if (dist <= worldRenderer.RenderDistance * 16)
@@ -413,6 +395,24 @@ namespace SharpCraft
                         checkChunk(pos);
                     }
                 }
+            }
+        }
+
+        private void checkChunk(BlockPos pos)
+        {
+            var chunk = world.getChunkFromPos(pos);
+
+            if (chunk == null)// || !world.isChunkGenerated(pos)))
+            {
+                if (!world.loadChunk(pos.chunkPos()))
+                {
+                    world.beginGenerateChunk(pos, true);
+                    Console.WriteLine("DEBUG: chunk generated");
+                }
+            }
+            else if (chunk.isDirty || !world.doesChunkHaveModel(pos) && world.areNeighbourChunksGenerated(pos))
+            {
+                world.beginUpdateModelForChunk(pos);
             }
         }
 
@@ -431,7 +431,7 @@ namespace SharpCraft
                     player.selectPreviousItem();
 
                 if (world?.getChunkFromPos(new BlockPos(player.pos)) == null)
-                    player.motion = Vector3.UnitY;
+                    player.motion = Vector3.Zero;
             }
 
             mouseWheelLast = wheelValue;
@@ -532,8 +532,8 @@ namespace SharpCraft
             var furnaceModel = new ModelBlock(EnumBlock.FURNACE, shader, true);
             var bedrockModel = new ModelBlock(EnumBlock.BEDROCK, shader, false);
             var rareModel = new ModelBlock(EnumBlock.RARE, shader, false);
-            var rareModelUnlit = new ModelBlock(EnumBlock.RARE, shader_unlit, false);
             var glassModel = new ModelBlock(EnumBlock.GLASS, shader, false);
+            var logModel = new ModelBlock(EnumBlock.LOG, shader, false);
 
             var xrayModel = new ModelBlock(EnumBlock.XRAY, shader, false);
 
@@ -544,9 +544,10 @@ namespace SharpCraft
             ModelRegistry.registerBlockModel(planksModel, 0);
             ModelRegistry.registerBlockModel(craftingTableModel, 0);
             ModelRegistry.registerBlockModel(furnaceModel, 0);
+
             ModelRegistry.registerBlockModel(bedrockModel, 0);
             ModelRegistry.registerBlockModel(rareModel, 0);
-            ModelRegistry.registerBlockModel(rareModelUnlit, 1);
+            ModelRegistry.registerBlockModel(logModel, 0);
             ModelRegistry.registerBlockModel(glassModel, 0);
 
             ModelRegistry.registerBlockModel(xrayModel, 0);
@@ -554,6 +555,8 @@ namespace SharpCraft
             SettingsManager.load();
 
             sensitivity = SettingsManager.getFloat("sensitivity");
+            worldRenderer.RenderDistance = SettingsManager.getInt("renderdistance");
+            worldRenderer.AltRenderMethod = SettingsManager.getBool("altrendermethod");
 
             openGuiScreen(new GuiScreenMainMenu());
         }
@@ -605,33 +608,27 @@ namespace SharpCraft
         private void runUpdateThreads()
         {
             new Thread(() =>
-            {
-                while (true)
                 {
-                    if (Visible)
+                    while (true)
                     {
-                        checkChunks();
-
-                        getMouseOverObject();
-
-                        var datas = world.getChunkDataNodes();
-
-                        for (int i = 0; i < datas.Length; i++)
+                        if (Visible)
                         {
-                            var chunk = datas[i].chunk;
-                            if (chunk != null)
-                            {
-                                chunk.tick();
+                            checkChunks();
 
-                                if (!chunk.isWithinRenderDistance())
-                                    _glContextQueue.Enqueue(() => world.unloadChunk(chunk.chunkPos));
+                            getMouseOverObject();
+
+                            foreach (var data in world.Chunks.Values)
+                            {
+                                data.chunk.tick();
+
+                                if (!data.chunk.isWithinRenderDistance())
+                                    _glContextQueue.Enqueue(() => world.unloadChunk(data.chunk.chunkPos));
                             }
                         }
-                    }
 
-                    Thread.Sleep(50);
-                }
-            })
+                        Thread.Sleep(50);
+                    }
+                })
             { IsBackground = true }.Start();
 
             new Thread(() =>
@@ -655,8 +652,23 @@ namespace SharpCraft
                             }
 
                             mouseLast = point;
+
+                            if (keysDown.Contains(Key.Space) && !wasSpaceDown && player.onGround)
+                            {
+                                wasSpaceDown = true;
+                                player.motion.Y = 0.475F;
+                            }
+                            else if ((!keysDown.Contains(Key.Space) || player.onGround) && wasSpaceDown)
+                                wasSpaceDown = false;
+
+                            if (frameTimer.ElapsedMilliseconds >= 80)
+                            {
+                                frameTimer.Restart();
+
+                                Title = $"{title} - FPS: {1f / lastRenderTime:0}";
+                            }
                         }
-                        Thread.Sleep(4);
+                        Thread.Sleep(3);
                     }
                 })
             { IsBackground = true }.Start();
@@ -671,7 +683,8 @@ namespace SharpCraft
         {
             _settings.Add("sensitivity", "1");
             _settings.Add("renderdistance", "8");
-            _settings.Add("worldseed", "0");
+            _settings.Add("worldseed", "yeet");
+            _settings.Add("altrendermethod", "false");
         }
 
         public static void load()
@@ -748,18 +761,34 @@ namespace SharpCraft
         {
             return float.Parse(getValue(variable));
         }
+
+        public static bool getBool(string variable)
+        {
+            return bool.Parse(getValue(variable));
+        }
     }
 
     internal class Start
     {
+        [STAThread]
         private static void Main(string[] args)
         {
-            if (!ThreadPool.SetMinThreads(4, 4))
-                ThreadPool.SetMinThreads(1, 2);
+            int threads = 1;
 
-            var wnd = new Game();
+            while (ThreadPool.SetMinThreads(threads, 5) && threads++ < 4)
+            {
 
-            wnd.Run(60);
+            }
+
+            while (ThreadPool.SetMaxThreads(threads, 5) && threads++ < 8)
+            {
+
+            }
+
+            using (Game game = new Game())
+            {
+                game.Run(30.0);
+            }
         }
     }
 }

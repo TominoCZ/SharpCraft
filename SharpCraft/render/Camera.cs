@@ -32,19 +32,7 @@ namespace SharpCraft
 
         public Vector3 getLookVec()
         {
-            return rotate(Vector3.UnitZ, _pitch, _yaw, 0).Normalized();
-        }
-
-        private Vector3 rotate(Vector3 vec, float AngleX, float AngleY, float AngleZ)
-        {
-            Vector3 sin = new Vector3((float)Math.Sin(AngleX), (float)Math.Sin(AngleY), (float)Math.Sin(AngleZ));
-            Vector3 cos = new Vector3((float)Math.Cos(AngleX), (float)Math.Cos(AngleY), (float)Math.Cos(AngleZ));
-
-            vec = new Vector3(vec.X, vec.Y * cos.X - vec.Z * sin.X, vec.Y * sin.X + vec.Z * cos.X);
-            vec = new Vector3(vec.X * cos.Y + vec.Z * sin.Y, vec.Y, vec.X * sin.Y - vec.Z * cos.Y);
-            vec = new Vector3(vec.X * cos.Z - vec.Y * sin.Z, vec.X * sin.Z + vec.Y * cos.Z, vec.Z);
-
-            return vec;
+            return MathUtil.Rotate(Vector3.UnitZ, _pitch, _yaw, 0).Normalized();
         }
 
         public Vector2 left

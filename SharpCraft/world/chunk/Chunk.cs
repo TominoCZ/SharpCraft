@@ -1,6 +1,7 @@
 ﻿using OpenTK;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 namespace SharpCraft
@@ -26,18 +27,18 @@ namespace SharpCraft
             _chunkBlocks = new short[16, 256, 16];
         }
 
-        private Chunk(ChunkCache cache)
+        private Chunk(BlockPos chunkPos, ChunkCache cache)
         {
-            chunkPos = cache.chunkPos;
+            this.chunkPos = chunkPos;
             boundingBox =
                 new AxisAlignedBB(Vector3.Zero, Vector3.One * 16 + Vector3.UnitY * 240).offset(chunkPos.vector);
 
             _chunkBlocks = cache.chunkBlocks;
         }
 
-        public static Chunk CreateFromCache(ChunkCache cache)
+        public static Chunk CreateFromCache(BlockPos chunkPos, ChunkCache cache)
         {
-            return new Chunk(cache);
+            return new Chunk(chunkPos, cache);
         }
 
         public void tick()
@@ -53,17 +54,23 @@ namespace SharpCraft
         {
             short id = (short)((short)blockType << 4 | meta);
 
-            _chunkBlocks[pos.x, pos.y, pos.z] = id;
+            if (isPosInChunk(pos))
+                _chunkBlocks[pos.x, pos.y, pos.z] = id;
         }
 
         public EnumBlock getBlock(World w, BlockPos pos)
         {
-            if (isPosInChunk(pos))
-                return (EnumBlock)(_chunkBlocks[pos.x, pos.y, pos.z] >> 4);
+            if (pos.y >= 0 && pos.y < 256)
+            {
+                if (isPosInChunk(pos))
+                    return (EnumBlock)(_chunkBlocks[pos.x, pos.y, pos.z] >> 4);
 
-            var block = w.getBlock(pos + chunkPos);
+                var block = w.getBlock(pos + chunkPos);
 
-            return block;
+                return block;
+            }
+
+            return EnumBlock.AIR;
         }
 
         public int getMetadata(World w, BlockPos pos)
@@ -94,11 +101,13 @@ namespace SharpCraft
                 pos.z >= 0 && pos.z < 16;
         }
 
-        public void buildChunkModel(World w, ModelChunk previousChunkModel, bool updateContainingEntities)
+        public void buildChunkModel(World w, ModelChunk previousChunkModel)
         {
+            var MODEL_RAW = new Dictionary<ShaderProgram, List<RawQuad>>();
+
             List<RawQuad> quads;
 
-            var MODEL_RAW = new Dictionary<ShaderProgram, List<RawQuad>>();
+            var sw = Stopwatch.StartNew();
 
             //generate the model / fill MODEL_RAW
             for (int z = 0; z < 16; z++)
@@ -124,7 +133,7 @@ namespace SharpCraft
                             var dir = FacingUtil.SIDES[i];
                             var block_o = getBlock(w, pos.offset(dir));
 
-                            if (block_o == EnumBlock.AIR || (block_o == EnumBlock.GLASS && block != EnumBlock.GLASS))
+                            if (block_o == EnumBlock.AIR || block_o == EnumBlock.GLASS && block != EnumBlock.GLASS)
                             {
                                 var quad = ((ModelBlockRaw)blockModel.rawModel)?.getQuadForSide(dir)?.offset(pos);
 
@@ -136,15 +145,14 @@ namespace SharpCraft
                 }
             }
 
-            var previousShaders = previousChunkModel.getShadersPresent();
+            sw.Stop();
+            Console.WriteLine($"DEBUG: built chunk model [{sw.Elapsed.TotalMilliseconds:F}ms]");
 
-            var newShaders = MODEL_RAW.Keys.ToArray();
+            //var newShaders = MODEL_RAW.Keys.ToArray();
 
-            for (int i = 0; i < previousShaders.Count; i++)
+            foreach (var oldShader in previousChunkModel.fragmentPerShader.Keys)
             {
-                var oldShader = previousShaders[i];
-
-                if (!newShaders.Contains(oldShader))
+                if (!MODEL_RAW.Keys.Contains(oldShader))
                 {
                     Game.INSTANCE.runGlContext(() => previousChunkModel.destroyFragmentModelWithShader(oldShader));
                 }
@@ -155,7 +163,7 @@ namespace SharpCraft
                 var newShader = value.Key;
                 var newData = value.Value;
 
-                if (!previousShaders.Contains(newShader))
+                if (!previousChunkModel.fragmentPerShader.Keys.Contains(newShader))
                 {
                     Game.INSTANCE.runGlContext(() =>
                     {
@@ -169,27 +177,6 @@ namespace SharpCraft
                 }
             }
 
-            if (updateContainingEntities)
-            {
-                // w.markNeighbourChunksDirty(chunkPos);
-
-                for (var index = 0; index < w._entities.Count; index++)
-                {
-                    var entity = w._entities[index];
-
-                    var pos1 = chunkPos.ChunkPos();
-                    var pos2 = new BlockPos(entity.pos).ChunkPos();
-
-                    if (pos1.x == pos2.x && pos1.z == pos2.z)
-                    {
-                        int height = w.getHeightAtPos(entity.pos.X, entity.pos.Z);
-
-                        if (entity.pos.Y < height)
-                            entity.teleportTo(new Vector3(entity.pos.X, entity.lastPos.Y = height, entity.pos.Z));
-                    }
-                }
-            }
-
             isDirty = false;
         }
 
@@ -200,7 +187,7 @@ namespace SharpCraft
 
         public ChunkCache createChunkCache()
         {
-            return new ChunkCache(chunkPos, _chunkBlocks);
+            return new ChunkCache(_chunkBlocks);
         }
 
         public bool isWithinRenderDistance()
@@ -212,16 +199,11 @@ namespace SharpCraft
     [Serializable]
     internal struct ChunkCache
     {
-        private readonly BlockPos _chunkPos;
-        private readonly short[,,] _chunkBlocks;
+        public short[,,] chunkBlocks { get; }
 
-        public BlockPos chunkPos => _chunkPos;
-        public short[,,] chunkBlocks => _chunkBlocks;
-
-        public ChunkCache(BlockPos chunkPos, short[,,] chunkBlocks)
+        public ChunkCache(short[,,] chunkBlocks)
         {
-            _chunkPos = chunkPos;
-            _chunkBlocks = chunkBlocks;
+            this.chunkBlocks = chunkBlocks;
         }
     }
 }

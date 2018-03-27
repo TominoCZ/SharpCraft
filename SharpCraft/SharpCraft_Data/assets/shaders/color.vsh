@@ -1,4 +1,4 @@
-#version 400 core
+#version 330
 
 in vec3 position;
 

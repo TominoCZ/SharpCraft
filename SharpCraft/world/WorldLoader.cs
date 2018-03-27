@@ -6,49 +6,48 @@ namespace SharpCraft
 {
     internal class WorldLoader
     {
-        private static string dir = "SharpCraft_Data/saves/world";
-
-        private static bool saving;
+        private static string savesFolder = "SharpCraft_Data/saves";
 
         public static void saveWorld(World w)
         {
-            if (w == null || saving)
+            if (w == null)
                 return;
 
-            saving = true;
-
             var bf = new BinaryFormatter();
+
+            var dir = w.saveDirectory;
 
             if (!Directory.Exists(dir))
                 Directory.CreateDirectory(dir);
 
+            w.saveAllChunks();
+
             try
             {
-                var wcn = new WorldChunksNode(w);
-
-                using (var fs = File.OpenWrite(dir + "/chunks.dat"))
-                {
-                    bf.Serialize(fs, wcn);
-                }
-
                 var wpn = new WorldPlayerNode(Game.INSTANCE.player);
+                var wdn = new WorldDataNode(w);
 
                 using (var fs = File.OpenWrite(dir + "/player.dat"))
                 {
                     bf.Serialize(fs, wpn);
+                }
+
+                using (var fs = File.OpenWrite(dir + "/level.dat"))
+                {
+                    bf.Serialize(fs, wdn);
                 }
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.StackTrace);
             }
-
-            saving = false;
         }
 
-        public static World loadWorld()
+        public static World loadWorld(string saveName)
         {
             var bf = new BinaryFormatter();
+
+            var dir = $"{savesFolder}/{saveName}";
 
             if (!Directory.Exists(dir))
                 return null;
@@ -57,20 +56,20 @@ namespace SharpCraft
 
             try
             {
-                WorldChunksNode wcn;
+                WorldDataNode wdn;
                 WorldPlayerNode wpn;
-
-                using (var fs = File.OpenRead(dir + "/chunks.dat"))
-                {
-                    wcn = (WorldChunksNode)bf.Deserialize(fs);
-                }
 
                 using (var fs = File.OpenRead(dir + "/player.dat"))
                 {
                     wpn = (WorldPlayerNode)bf.Deserialize(fs);
                 }
 
-                world = World.Create(wcn.seed, wcn.caches);
+                using (var fs = File.OpenRead(dir + "/level.dat"))
+                {
+                    wdn = (WorldDataNode)bf.Deserialize(fs);
+                }
+
+                world = new World(saveName, wdn.levelName, wdn.seed);
 
                 var player = new EntityPlayerSP(wpn.pos);
                 Camera.INSTANCE.pitch = wpn.pitch;
@@ -82,7 +81,7 @@ namespace SharpCraft
                 }
 
                 world.addEntity(player);
-
+                world.loadChunk(new BlockPos(player.pos));
                 Game.INSTANCE.player = player;
             }
             catch (Exception e)

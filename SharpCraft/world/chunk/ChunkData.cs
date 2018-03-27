@@ -7,7 +7,8 @@ namespace SharpCraft
         public Chunk chunk;
         public ModelChunk model;
 
-        public bool modelGenerating;
+        public bool modelGenerating { get; set; }
+    
         public bool chunkGenerated;
 
         public ChunkData(Chunk chunk, ModelChunk model)
@@ -16,7 +17,7 @@ namespace SharpCraft
             this.model = model;
         }
 
-        public void beginUpdateModel(World w, bool updateContainingEntities)
+        public void beginUpdateModel(World w)
         {
             if (!chunkGenerated || modelGenerating)
                 return;
@@ -25,7 +26,7 @@ namespace SharpCraft
 
             ThreadPool.QueueUserWorkItem(e =>
             {
-                chunk.buildChunkModel(w, model, updateContainingEntities);
+                chunk.buildChunkModel(w, model);
                 modelGenerating = false;
             });
         }

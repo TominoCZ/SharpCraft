@@ -8,6 +8,13 @@
     <StartupObject>SharpCraft.Start</StartupObject>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <GenerateSerializationAssemblies>Auto</GenerateSerializationAssemblies>
+    <Optimize>false</Optimize>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="OpenTK.NETCore" Version="1.1.2749.6433" />
     <PackageReference Include="System.Drawing.Common" Version="4.5.0-preview1-26216-02" />

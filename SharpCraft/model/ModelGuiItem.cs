@@ -15,7 +15,7 @@ namespace SharpCraft
                 0, 0,
                 1, 0,
                 1, 1,
-                0, 1});
+                0, 1}, 2);
 
             rawModel = ModelManager.loadModelToVAO(new List<RawQuad> { rawQuad }, 2);
         }

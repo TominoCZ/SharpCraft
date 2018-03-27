@@ -19,7 +19,7 @@ namespace SharpCraft
                 -1,  1,
                 -1, -1,
                 1, 1,
-                1, -1 });
+                1, -1 }, 2);
 
             GUIquad = ModelManager.loadModelToVAO(new List<RawQuad> { rawQuad }, 2);
         }
@@ -52,13 +52,17 @@ namespace SharpCraft
 
             GL.BindVertexArray(GUIquad.vaoID);
             GL.EnableVertexAttribArray(0);
+            GL.EnableVertexAttribArray(1);
+            GL.EnableVertexAttribArray(2);
 
             var state = OpenTK.Input.Mouse.GetCursorState();
-            var mouse = Game.INSTANCE.PointToClient(new OpenTK.Point(state.X, state.Y));
+            var mouse = Game.INSTANCE.PointToClient(new Point(state.X, state.Y));
 
             gui.render(shader, mouse.X, mouse.Y);
 
             GL.DisableVertexAttribArray(0);
+            GL.DisableVertexAttribArray(1);
+            GL.DisableVertexAttribArray(2);
             GL.BindVertexArray(0);
 
             GL.Enable(EnableCap.DepthTest);

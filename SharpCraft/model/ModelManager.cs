@@ -116,7 +116,7 @@ namespace SharpCraft
             VBOs.Add(vboID);
 
             GL.BindBuffer(BufferTarget.ArrayBuffer, vboID);
-            GL.BufferData(BufferTarget.ArrayBuffer, sizeof(float) * data.Length, data, BufferUsageHint.StreamDraw);
+            GL.BufferData(BufferTarget.ArrayBuffer, sizeof(float) * data.Length, data, BufferUsageHint.DynamicDraw);
             GL.VertexAttribPointer(attrib, coordSize, VertexAttribPointerType.Float, false, 0, 0);
             GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
 

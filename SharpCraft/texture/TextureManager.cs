@@ -14,16 +14,11 @@ namespace SharpCraft
 {
     internal class TextureManager
     {
-        private static Dictionary<EnumBlock, TextureBlockUV> UVs;
+        private static Dictionary<EnumBlock, TextureBlockUV> UVs = new Dictionary<EnumBlock, TextureBlockUV>();
 
         private static List<int> textures = new List<int>();
 
         private static Bitmap missing = createMissingBMP();
-
-        static TextureManager()
-        {
-            UVs = new Dictionary<EnumBlock, TextureBlockUV>();
-        }
 
         public static int blockTextureAtlasID;
 
@@ -475,6 +470,15 @@ namespace SharpCraft
         public static void destroyTexture(int ID)
         {
             GL.DeleteTexture(ID);
+        }
+
+        public static void reload()
+        {
+            destroyTexture(blockTextureAtlasID);
+
+            UVs.Clear();
+
+            stitchTextures();
         }
 
         public static void cleanUp()

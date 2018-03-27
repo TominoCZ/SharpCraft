@@ -69,7 +69,7 @@ namespace SharpCraft
                     vertices[j] = VERTICES[i + j];
                 }
 
-                quads.Add(new RawQuad(vertices));
+                quads.Add(new RawQuad(vertices, 3));
             }
 
             var shader = new SkyboxShader();

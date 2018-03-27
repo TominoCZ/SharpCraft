@@ -88,7 +88,7 @@ namespace SharpCraft
 
         public static Chunk loadChunk(BlockPos pos)
         {
-            var chunkPos = pos.ChunkPos();
+            var chunkPos = pos.chunkPos();
 
             var regionPos = new BlockPos(chunkPos.x / (4 * 16), 0, chunkPos.z / (4 * 16));
             var fileName = $"r.{regionPos.x}.{regionPos.z}.region";
@@ -115,7 +115,7 @@ namespace SharpCraft
 
                     var cc = (ChunkCache)bf.Deserialize(fs);
 
-                    return Chunk.CreateFromCache(cc);
+                    return Chunk.CreateFromCache(chunkPos, cc);
                 }
             }
             catch

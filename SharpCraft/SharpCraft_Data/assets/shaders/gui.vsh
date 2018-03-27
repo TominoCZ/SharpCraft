@@ -1,6 +1,7 @@
-#version 140
+#version 330
 
 in vec2 position;
+
 out vec2 textureCoords;
 
 uniform mat4 transformationMatrix;

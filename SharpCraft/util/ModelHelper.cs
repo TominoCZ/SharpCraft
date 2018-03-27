@@ -1,5 +1,6 @@
 ﻿using OpenTK;
 using System.Collections.Generic;
+using OpenTK.Audio.OpenAL;
 
 namespace SharpCraft
 {
@@ -86,33 +87,6 @@ namespace SharpCraft
             return normals;
         }
 
-        public static Vector3 getFacingVector(EnumFacing dir)
-        {
-            switch (dir)
-            {
-                case EnumFacing.NORTH:
-                    return -Vector3.UnitZ;
-
-                case EnumFacing.SOUTH:
-                    return Vector3.UnitZ;
-
-                case EnumFacing.EAST:
-                    return Vector3.UnitX;
-
-                case EnumFacing.WEST:
-                    return -Vector3.UnitX;
-
-                case EnumFacing.UP:
-                    return Vector3.UnitY;
-
-                case EnumFacing.DOWN:
-                    return -Vector3.UnitY;
-
-                default:
-                    return Vector3.Zero;
-            }
-        }
-
         public static Dictionary<EnumFacing, RawQuad> createTexturedCubeModel(EnumBlock block)
         {
             var quads = new Dictionary<EnumFacing, RawQuad>();
@@ -125,7 +99,11 @@ namespace SharpCraft
                     var uvNode = uvs.getUVForSide(face);
 
                     if (uvNode != null)
-                        quads.Add(face, new RawQuad(data, uvNode.ToArray(), ModelHelper.calculateNormals(data)));
+                    {
+                        var quad = new RawQuad(data, uvNode.ToArray(), calculateNormals(data), 3);
+
+                        quads.Add(face, quad);
+                    }
                 }
             }
 
@@ -140,20 +118,8 @@ namespace SharpCraft
             {
                 if (CUBE.TryGetValue(face, out var vertices))
                 {
-                    quads.Add(new RawQuad(vertices));
+                    quads.Add(new RawQuad(vertices, 3));
                 }
-            }
-
-            return quads;
-        }
-
-        public static List<RawQuad> createCubeModelFace(EnumFacing face)
-        {
-            var quads = new List<RawQuad>();
-
-            if (CUBE.TryGetValue(face, out var vertices))
-            {
-                quads.Add(new RawQuad(vertices));
             }
 
             return quads;

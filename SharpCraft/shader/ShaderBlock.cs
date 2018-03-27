@@ -17,7 +17,7 @@ namespace SharpCraft
 
         protected override void onRegisterUniforms()
         {
-            registerUniforms("lightPosition", "lightColor");
+            registerUniforms("lightColor");
         }
     }
 }

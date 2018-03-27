@@ -22,10 +22,9 @@ namespace SharpCraft
 
             GL.BindVertexArray(rawModel.vaoID);
 
-            for (int i = 0; i < rawModel.bufferIDs.Length; i++)
-            {
-                GL.EnableVertexAttribArray(i);
-            }
+            GL.EnableVertexAttribArray(0);
+            GL.EnableVertexAttribArray(1);
+            GL.EnableVertexAttribArray(2);
         }
 
         public void unbind()
@@ -33,12 +32,11 @@ namespace SharpCraft
             if (rawModel == null)
                 return;
 
-            for (int i = 0; i < rawModel.bufferIDs.Length; i++)
-            {
-                GL.DisableVertexAttribArray(i);
-            }
-
             GL.BindVertexArray(0);
+
+            GL.EnableVertexAttribArray(0);
+            GL.EnableVertexAttribArray(1);
+            GL.EnableVertexAttribArray(2);
 
             shader.unbind();
         }

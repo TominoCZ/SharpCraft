@@ -5,19 +5,22 @@
         public float[] vertices { get; }
         public float[] normal { get; }
         public float[] UVs { get; }
+        public int valuesPerVertice { get; }
 
-        public RawQuad(float[] vertices, float[] UVs, float[] normal)
+        public RawQuad(float[] vertices, float[] UVs, float[] normal, int valuesPerVertice)
         {
             this.vertices = vertices;
             this.normal = normal;
             this.UVs = UVs;
+
+            this.valuesPerVertice = valuesPerVertice;
         }
 
-        public RawQuad(float[] vertices, float[] UVs) : this(vertices, UVs, new float[0])
+        public RawQuad(float[] vertices, float[] UVs, int valuesPerVertice) : this(vertices, UVs, new float[0], valuesPerVertice)
         {
         }
 
-        public RawQuad(float[] vertices) : this(vertices, new float[0], new float[0])
+        public RawQuad(float[] vertices, int valuesPerVertice) : this(vertices, new float[0], new float[0], valuesPerVertice)
         {
         }
 
@@ -32,7 +35,7 @@
                 newVertices[i + 2] = vertices[i + 2] + pos.z;
             }
 
-            return new RawQuad(newVertices, UVs, normal);
+            return new RawQuad(newVertices, UVs, normal, valuesPerVertice);
         }
     }
 }

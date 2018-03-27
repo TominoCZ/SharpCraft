@@ -2,74 +2,61 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Linq;
+using System.IO;
+using System.Runtime.Serialization.Formatters.Binary;
+using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace SharpCraft
 {
     internal class World
     {
-        private ConcurrentDictionary<BlockPos, ChunkData> _chunks;
+        public ConcurrentDictionary<BlockPos, ChunkData> Chunks { get; }
 
-        public List<Entity> _entities;
+        public List<Entity> Entities;
 
         public int BuildHeight = 256;
 
         public readonly int seed;
+        public readonly string levelName;
+        public readonly string saveDirectory;
 
         private NoiseUtil _noiseUtil;
 
-        public World(int seed)
+        public World(string saveName, string levelName, int seed)
         {
-            _chunks = new ConcurrentDictionary<BlockPos, ChunkData>();
-            _entities = new List<Entity>();
+            Chunks = new ConcurrentDictionary<BlockPos, ChunkData>();
+            Entities = new List<Entity>();
 
             _noiseUtil = new NoiseUtil(seed);
             _noiseUtil.SetFractalType(NoiseUtil.FractalType.FBM);
 
             this.seed = seed;
-        }
+            this.levelName = levelName;
 
-        private World(int seed, List<ChunkCache> caches) : this(seed)
-        {
-            foreach (var cache in caches)
-            {
-                var pos = cache.chunkPos;
-
-                var chunk = Chunk.CreateFromCache(cache);
-                var model = new ModelChunk();
-
-                var data = new ChunkData(chunk, model);
-                data.chunkGenerated = true;
-
-                _chunks.TryAdd(pos, data);
-            }
-        }
-
-        public static World Create(int seed, List<ChunkCache> caches)
-        {
-            return new World(seed, caches);
+            saveDirectory = $"SharpCraft_Data/saves/{saveName}";
         }
 
         public void addEntity(Entity e)
         {
-            if (!_entities.Contains(e))
-                _entities.Add(e);
+            if (!Entities.Contains(e))
+                Entities.Add(e);
         }
 
         public void updateEntities()
         {
-            for (int i = 0; i < _entities.Count; i++)
+            for (int i = 0; i < Entities.Count; i++)
             {
-                _entities[i].Update();
+                Entities[i].Update();
             }
         }
 
         private ChunkData addChunkPlaceholder(BlockPos pos)
         {
-            var data = new ChunkData(new Chunk(pos = pos.ChunkPos()), new ModelChunk());
+            var data = new ChunkData(new Chunk(pos = pos.chunkPos()), new ModelChunk());
 
-            _chunks.TryAdd(pos, data);
+            Chunks.TryAdd(pos, data);
 
             return data;
         }
@@ -78,9 +65,9 @@ namespace SharpCraft
         {
             List<AxisAlignedBB> bbs = new List<AxisAlignedBB>();
 
-            for (int i = 0; i < _entities.Count; i++)
+            for (int i = 0; i < Entities.Count; i++)
             {
-                var bb = _entities[i].getEntityBoundingBox();
+                var bb = Entities[i].getEntityBoundingBox();
 
                 if (bb.intersectsWith(with))
                     bbs.Add(bb);
@@ -117,15 +104,10 @@ namespace SharpCraft
 
         public Chunk getChunkFromPos(BlockPos pos)
         {
-            if (!_chunks.TryGetValue(pos.ChunkPos(), out var chunkData))
+            if (!Chunks.TryGetValue(pos.chunkPos(), out var chunkData))
                 return null;
 
             return chunkData?.chunk;
-        }
-
-        public ChunkData[] getChunkDataNodes()
-        {
-            return _chunks.Values.ToArray();
         }
 
         public EnumBlock getBlock(BlockPos pos)
@@ -148,39 +130,103 @@ namespace SharpCraft
             if (markDirty)
             {
                 beginUpdateModelForChunk(pos);
+
                 markNeighbourChunksDirty(pos);
             }
         }
 
         public void unloadChunk(BlockPos pos)
         {
-            var chunkPos = pos.ChunkPos();
-
-            if (_chunks.TryGetValue(chunkPos, out var data))
+            if (Chunks.TryRemove(pos, out var data))// && data.model.isGenerated)
+            {
                 data.model.destroy();
+
+                ThreadPool.QueueUserWorkItem(e => saveChunk(data));
+            }
+        }
+
+        private void saveChunk(ChunkData data)
+        {
+            var dir = $"{saveDirectory}/chunks";
+
+            var file = $"{dir}/ch_{data.chunk.chunkPos.x / 16}.{data.chunk.chunkPos.z / 16}.dat";
+
+            if (!Directory.Exists(dir))
+                Directory.CreateDirectory(dir);
+
+            using (var fs = new FileStream(file, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite))
+            {
+                var bf = new BinaryFormatter();
+
+                bf.Serialize(fs, data.chunk.createChunkCache());
+            }
+        }
+
+        public bool loadChunk(BlockPos pos)
+        {
+            var chunkPos = pos.chunkPos();
+
+            var dir = $"{saveDirectory}/chunks";
+            var file = $"{dir}/ch_{chunkPos.x / 16}.{chunkPos.z / 16}.dat";
+
+            if (!File.Exists(file))
+                return false;
+
+            try
+            {
+                using (var fs = new FileStream(file, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite))
+                {
+                    var bf = new BinaryFormatter();
+
+                    var chunk = Chunk.CreateFromCache(chunkPos, (ChunkCache)bf.Deserialize(fs));
+
+                    var data = addChunkPlaceholder(chunkPos);
+                    data.chunk = chunk;
+                    data.chunkGenerated = true;
+
+                    Console.WriteLine("DEBUG: chunk loaded");
+
+                    return true;
+                }
+            }
+            catch
+            {
+
+            }
+
+            return false;
+        }
+
+        public void saveAllChunks()
+        {
+            foreach (var data in Chunks.Values)
+            {
+                saveChunk(data);
+            }
         }
 
         public void destroyChunkModels()
         {
-            var data = getChunkDataNodes();
-
-            for (var index = 0; index < data.Length; index++)
+            foreach (var data in Chunks)
             {
-                var chunkData = data[index];
-                chunkData.model.destroy();
+                if (!data.Value.modelGenerating && data.Value.model.isGenerated)
+                    data.Value.model.destroy();
             }
         }
 
-        private void markNeighbourChunksDirty(BlockPos pos, bool chunks = false)
+        private void markNeighbourChunksDirty(BlockPos pos)
         {
+            var chunk = getChunkFromPos(pos);
+
             for (var index = 0; index < FacingUtil.SIDES.Length - 2; index++)
             {
                 EnumFacing side = FacingUtil.SIDES[index];
 
-                var p = chunks ? pos.offsetChunk(side) : pos.offset(side);
+                var p = pos.offset(side);
                 var ch = getChunkFromPos(p);
 
-                ch?.markDirty();
+                if (ch != chunk)
+                    ch?.markDirty();
             }
         }
 
@@ -232,11 +278,11 @@ namespace SharpCraft
             return 0;
         }
 
-        public void beginGenerateChunk(BlockPos pos)
+        public void beginGenerateChunk(BlockPos pos, bool updateContainingEntities)
         {
-            var chunkPos = pos.ChunkPos();
+            var chunkPos = pos.chunkPos();
 
-            if (_chunks.ContainsKey(chunkPos))
+            if (Chunks.ContainsKey(chunkPos))
                 return;
 
             var data = addChunkPlaceholder(chunkPos);
@@ -278,29 +324,52 @@ namespace SharpCraft
                         {
                             for (int treeY = 0; treeY < 5; treeY++)
                             {
-                                data.chunk.setBlock(new BlockPos(x, peakY + 1 + treeY, z), EnumBlock.RARE, 1);
+                                data.chunk.setBlock(new BlockPos(x, peakY + 1 + treeY, z), EnumBlock.LOG, 0);
                             }
                         }
                     }
                 }
 
                 data.chunkGenerated = true;
+
+                if (updateContainingEntities)
+                {
+                    // w.markNeighbourChunksDirty(chunkPos);
+
+                    for (var index = 0; index < Entities.Count; index++)
+                    {
+                        var entity = Entities[index];
+
+                        var pos1 = chunkPos.chunkPos();
+                        var pos2 = new BlockPos(entity.pos).chunkPos();
+
+                        if (pos1.x == pos2.x && pos1.z == pos2.z)
+                        {
+                            int height = getHeightAtPos(entity.pos.X, entity.pos.Z);
+
+                            if (entity.pos.Y < height)
+                                entity.teleportTo(new Vector3(entity.pos.X, entity.lastPos.Y = height, entity.pos.Z));
+                        }
+                    }
+                }
+
+                saveChunk(data);
             });
         }
 
-        public void beginUpdateModelForChunk(BlockPos pos, bool updateContainingEntities = false)
+        public void beginUpdateModelForChunk(BlockPos pos)
         {
-            pos = pos.ChunkPos();
+            pos = pos.chunkPos();
 
-            if (_chunks.TryGetValue(pos, out var node))
+            if (Chunks.TryGetValue(pos, out var node))
             {
-                node.beginUpdateModel(this, updateContainingEntities);
+                node.beginUpdateModel(this);
             }
         }
 
         public bool areNeighbourChunksGenerated(BlockPos pos)
         {
-            pos = pos.ChunkPos();
+            pos = pos.chunkPos();
 
             for (var index = 0; index < FacingUtil.SIDES.Length - 2; index++)
             {
@@ -315,14 +384,14 @@ namespace SharpCraft
 
         public bool doesChunkHaveModel(BlockPos pos)
         {
-            var n = _chunks[pos.ChunkPos()];
+            var n = Chunks[pos.chunkPos()];
 
             return n.chunkGenerated && n.model.isGenerated;
         }
 
         public bool isChunkGenerated(BlockPos pos)
         {
-            if (_chunks.TryGetValue(pos.ChunkPos(), out var n))
+            if (Chunks.TryGetValue(pos.chunkPos(), out var n))
                 return n.chunkGenerated;
 
             return false;

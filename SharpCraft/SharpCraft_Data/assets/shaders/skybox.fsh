@@ -1,6 +1,7 @@
-#version 400 core
+#version 330
 
 in vec3 textureCoords;
+
 out vec4 out_Color;
 
 uniform samplerCube cubeMap;

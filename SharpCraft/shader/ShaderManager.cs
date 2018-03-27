@@ -39,9 +39,7 @@ namespace SharpCraft
         {
             for (int i = 0; i < shaders.Count; i++)
             {
-                var shader = shaders[i];
-
-                shader.reload();
+                shaders[i].reload();
             }
 
             updateProjectionMatrix();

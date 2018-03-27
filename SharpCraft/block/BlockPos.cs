@@ -4,7 +4,7 @@ using System;
 namespace SharpCraft
 {
     [Serializable]
-    public struct BlockPos
+    struct BlockPos
     {
         public int x { get; }
         public int y { get; }
@@ -35,7 +35,7 @@ namespace SharpCraft
 
         public BlockPos offset(EnumFacing dir)
         {
-            return new BlockPos(new Vector3(x, y, z) + ModelHelper.getFacingVector(dir));
+            return new BlockPos(new Vector3(x, y, z) + FacingUtil.getFacingVector(dir));
         }
 
         public BlockPos offset(float x, float y, float z)
@@ -45,16 +45,12 @@ namespace SharpCraft
 
         public BlockPos offsetChunk(EnumFacing dir)
         {
-            return new BlockPos(new Vector3(x, y, z) + ModelHelper.getFacingVector(dir) * 16);
+            return new BlockPos(new Vector3(x, y, z) + FacingUtil.getFacingVector(dir) * 16);
         }
 
-        public BlockPos ChunkPos()
+        public BlockPos chunkPos()
         {
-            var X = (int)Math.Floor(x / 16f) * 16;
-            var Y = (int)Math.Floor(y / 256f) * 256f;
-            var Z = (int)Math.Floor(z / 16f) * 16;
-
-            return new BlockPos(X, Y, Z);
+            return new BlockPos((int)Math.Floor(x / 16f) * 16, 0, (int)Math.Floor(z / 16f) * 16);
         }
 
         public override string ToString()
