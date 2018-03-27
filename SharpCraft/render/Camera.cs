@@ -3,18 +3,13 @@ using System;
 
 namespace SharpCraft
 {
-    internal class Camera
+    public class Camera
     {
         private float _pitch = MathHelper.PiOver6, _yaw = MathHelper.PiOver2 + MathHelper.PiOver4;
 
         public Vector3 pos;
 
-        public static Camera INSTANCE;
-
-        static Camera()
-        {
-            INSTANCE = new Camera();
-        }
+        //public static Camera INSTANCE;
 
         public float pitch
         {
@@ -54,6 +49,17 @@ namespace SharpCraft
                 var c = -(float)Math.Cos(_yaw);
 
                 return new Vector2(s, c).Normalized();
+            }
+        }
+        public Matrix4 View
+        {
+            get
+            {
+                    var x = Matrix4.CreateRotationX(pitch);
+                    var y = Matrix4.CreateRotationY(yaw);
+
+                    var t = Matrix4.CreateTranslation(-pos);
+                return  t * y * x;
             }
         }
     }

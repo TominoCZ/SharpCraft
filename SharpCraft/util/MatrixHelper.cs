@@ -48,15 +48,5 @@ namespace SharpCraft
         {
             return Matrix4.CreateTranslation(translation);
         }
-
-        public static Matrix4 createViewMatrix(Camera c)
-        {
-            var x = Matrix4.CreateRotationX(c.pitch);
-            var y = Matrix4.CreateRotationY(c.yaw);
-
-            var t = Matrix4.CreateTranslation(-c.pos);
-
-            return t * y * x;
-        }
     }
 }

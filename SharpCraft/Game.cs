@@ -33,6 +33,8 @@ namespace SharpCraft
         private Stopwatch frameTimer = Stopwatch.StartNew();
         private WindowState lastWindowState;
 
+        public Camera Camera=new Camera();
+        
         private Point mouseLast;
         private float mouseWheelLast;
         private Stopwatch timer = Stopwatch.StartNew();
@@ -388,7 +390,7 @@ namespace SharpCraft
                 for (int x = -worldRenderer.RenderDistance; x <= worldRenderer.RenderDistance; x++)
                 {
                     var pos = new BlockPos(x * 16 + player.pos.X, 0, z * 16 + player.pos.Z).chunkPos().offset(8, 0, 8);
-                    var dist = MathUtil.distance(pos.vector.Xz, Camera.INSTANCE.pos.Xz);
+                    var dist = MathUtil.distance(pos.vector.Xz, Camera.pos.Xz);
 
                     if (dist <= worldRenderer.RenderDistance * 16)
                     {
@@ -447,7 +449,7 @@ namespace SharpCraft
 
             float dist = float.MaxValue;
 
-            var camPos = Vector3.One * 0.5f + Camera.INSTANCE.pos;
+            var camPos = Vector3.One * 0.5f + Camera.pos;
 
             for (int z = -radius; z <= radius; z++)
             {
@@ -460,7 +462,7 @@ namespace SharpCraft
                         vec.Y += y;
                         vec.Z += z;
 
-                        float f = (vec - Camera.INSTANCE.pos).LengthFast;
+                        float f = (vec - Camera.pos).LengthFast;
 
                         if (f <= radius + 0.5f)
                         {
@@ -472,8 +474,8 @@ namespace SharpCraft
                                 var model = ModelRegistry.getModelForBlock(block, world.getMetadata(pos));
                                 var bb = model.boundingBox.offset(pos.vector);
 
-                                var hitSomething = RayHelper.rayIntersectsBB(Camera.INSTANCE.pos,
-                                    Camera.INSTANCE.getLookVec(), bb, out var hitPos, out var normal);
+                                var hitSomething = RayHelper.rayIntersectsBB(Camera.pos,
+                                    Camera.getLookVec(), bb, out var hitPos, out var normal);
 
                                 if (hitSomething)
                                 {
@@ -494,7 +496,7 @@ namespace SharpCraft
 
                                     var p = new BlockPos(hitPos - normal * 0.5f);
 
-                                    var l = Math.Abs((Camera.INSTANCE.pos - (p.vector + Vector3.One * 0.5f)).Length);
+                                    var l = Math.Abs((Camera.pos - (p.vector + Vector3.One * 0.5f)).Length);
 
                                     if (l < dist)
                                     {
@@ -574,10 +576,11 @@ namespace SharpCraft
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
             prepare();
 
-            var viewMatrix = MatrixHelper.createViewMatrix(Camera.INSTANCE);
 
             if (world != null)
             {
+                var viewMatrix = Camera.View;
+                
                 worldRenderer.render(viewMatrix);
                 entityRenderer.render(partialTicks);
 
@@ -645,8 +648,8 @@ namespace SharpCraft
                             {
                                 var delta = new Point(mouseLast.X - point.X, mouseLast.Y - point.Y);
 
-                                Camera.INSTANCE.yaw -= delta.X / 1000f * sensitivity;
-                                Camera.INSTANCE.pitch -= delta.Y / 1000f * sensitivity;
+                                Camera.yaw -= delta.X / 1000f * sensitivity;
+                                Camera.pitch -= delta.Y / 1000f * sensitivity;
 
                                 resetMouse();
                             }

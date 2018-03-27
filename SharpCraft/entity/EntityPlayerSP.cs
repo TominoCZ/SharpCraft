@@ -15,7 +15,7 @@ namespace SharpCraft
 
         public EntityPlayerSP(Vector3 pos) : base(pos)
         {
-            Camera.INSTANCE.pos = (pos += Vector3.UnitY);
+            Game.INSTANCE.Camera.pos = (pos += Vector3.UnitY);
 
             collisionBoundingBox = new AxisAlignedBB(new Vector3(-0.3f, 0, -0.3f), new Vector3(0.3f, 1.65f, 0.3f));
             boundingBox = collisionBoundingBox.offset(lastPos = pos);
@@ -39,7 +39,7 @@ namespace SharpCraft
         {
             var interpolatedPos = lastPos + (pos - lastPos) * particalTicks;
 
-            Camera.INSTANCE.pos = interpolatedPos + Vector3.UnitY * 1.625f;
+            Game.INSTANCE.Camera.pos = interpolatedPos + Vector3.UnitY * 1.625f;
         }
 
         private void UpdateCameraMovement()
@@ -52,14 +52,14 @@ namespace SharpCraft
             Vector2 dirVec = Vector2.Zero;
 
             if (state.Contains(Key.W))
-                dirVec += Camera.INSTANCE.forward;
+                dirVec += Game.INSTANCE.Camera.forward;
             if (state.Contains(Key.S))
-                dirVec += -Camera.INSTANCE.forward;
+                dirVec += -Game.INSTANCE.Camera.forward;
 
             if (state.Contains(Key.A))
-                dirVec += Camera.INSTANCE.left;
+                dirVec += Game.INSTANCE.Camera.left;
             if (state.Contains(Key.D))
-                dirVec += -Camera.INSTANCE.left;
+                dirVec += -Game.INSTANCE.Camera.left;
 
             float mult = 1;
 

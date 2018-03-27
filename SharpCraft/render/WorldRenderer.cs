@@ -176,7 +176,7 @@ namespace SharpCraft
                 model.shader.loadViewMatrix(Matrix4.Identity);
 
                 model.shader.loadTransformationMatrix(MatrixHelper.createTransformationMatrix(
-                    new Vector3(0.04125f, -0.065f, -0.1f) + Camera.INSTANCE.getLookVec() / 200,
+                    new Vector3(0.04125f, -0.065f, -0.1f) + Game.INSTANCE.Camera.getLookVec() / 200,
                     new Vector3(-2, -11, 0), 0.045f));
 
                 GL.DrawArrays(model.shader.renderType, 0, model.rawModel.vertexCount);
