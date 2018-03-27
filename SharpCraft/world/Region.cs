@@ -39,6 +39,7 @@ namespace SharpCraft.world
 
 			if (!File.Exists(_filePath)) populateBlank(chunkCount);
 			cacheFlags(chunkCount);
+			Console.WriteLine("Allocated chunk at: "+_filePath);
 		}
 
 		private void cacheFlags(int chunkCount)

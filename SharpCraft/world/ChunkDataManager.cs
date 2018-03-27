@@ -3,7 +3,9 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Security.Permissions;
+using OpenTK.Audio.OpenAL;
 
 namespace SharpCraft.world
 {
@@ -35,11 +37,14 @@ namespace SharpCraft.world
 				regionLocalCoord[i] = cord % size;
 			}
 
-			GetRegion(Info.CoordHash(regionCoord), regionCoord).WriteChunkData(Info.CoordHash(regionLocalCoord),data);
+			Region r=GetRegion(Info.CoordHash(regionCoord));
+			if (r == null) r = createRegion(regionCoord);
+			r.WriteChunkData(Info.CoordHash(regionLocalCoord),data);
 		}
 
 		public byte[] GetChunkData(int[] coordinate)
 		{
+			
 			var regionCoord = new int[coordinate.Length];
 			var regionLocalCoord = new int[coordinate.Length];
 
@@ -51,20 +56,26 @@ namespace SharpCraft.world
 				regionLocalCoord[i] = cord % size;
 			}
 
-			return GetRegion(Info.CoordHash(regionCoord), regionCoord).ReadChunkData(Info.CoordHash(regionLocalCoord));
+			return GetRegion(Info.CoordHash(regionCoord))?.ReadChunkData(Info.CoordHash(regionLocalCoord));
 		}
 
-		private Region GetRegion(int hash, int[] regionCoord)
+		private Region GetRegion(int hash)
 		{
 			var pos = _regions.BinarySearch(null, Comparer<Region>.Create((x, y) => x.GetHashCode().CompareTo(hash)));
-			if (pos == -1)
+			if (pos <= -1||_regions[pos].GetHashCode()!=hash)
 			{
-				_regions.Add(new Region(Info, (int[]) regionCoord.Clone(), DataRoot));
-				_regions.Sort((x, y) => x.GetHashCode().CompareTo(y.GetHashCode()));
-				return GetRegion(hash, regionCoord);
+				return null;
 			}
-
+			
 			return _regions[pos];
+		}
+
+		private Region createRegion(int[] regionCoord)
+		{
+			Region r = new Region(Info, (int[]) regionCoord.Clone(), DataRoot);
+			_regions.Add(r);
+			_regions.Sort((x, y) => x.GetHashCode().CompareTo(y.GetHashCode()));
+			return r;
 		}
 	}
 

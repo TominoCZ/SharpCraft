@@ -40,7 +40,7 @@ namespace SharpCraft
             this.levelName = levelName;
             saveRoot = $"SharpCraft_Data/saves/{saveName}/";
             _chunkManager = new ChunkDataManager($"{saveRoot}{dimension}/chunks", 
-                                                 new RegionInfo(new[]{8,8}, sizeof(short)*16*256*16));
+                                                 new RegionInfo(new[]{8,8}, 2*16*256*16));
         }
 
         public void addEntity(Entity e)
@@ -162,6 +162,7 @@ namespace SharpCraft
             var chunkPos = pos.chunkPos();
             
             var data = _chunkManager.GetChunkData(new[] {pos.x, pos.z});
+            //System.Environment.Exit(1);
             if (data == null) return false;
             
             var blockData = new short[16,256,16];
@@ -172,6 +173,7 @@ namespace SharpCraft
             var chunkData = addChunkPlaceholder(chunkPos);
             chunkData.chunk = chunk;
             chunkData.chunkGenerated = true;
+            
             return true;
         }
 
