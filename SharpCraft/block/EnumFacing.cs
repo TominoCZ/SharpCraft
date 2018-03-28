@@ -1,4 +1,4 @@
-﻿namespace SharpCraft
+﻿namespace SharpCraft.block
 {
     public enum EnumFacing
     {

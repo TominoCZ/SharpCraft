@@ -1,16 +1,18 @@
-﻿using OpenTK;
-using OpenTK.Graphics.OpenGL;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
+using OpenTK;
+using OpenTK.Graphics.OpenGL;
+using SharpCraft.block;
+using SharpCraft.util;
 using Bitmap = System.Drawing.Bitmap;
 using Image = System.Drawing.Image;
 using Rectangle = System.Drawing.Rectangle;
 
-namespace SharpCraft
+namespace SharpCraft.texture
 {
     internal class TextureManager
     {
@@ -352,7 +354,7 @@ namespace SharpCraft
                 {
                     var file = $"{dir}/sky_{sideName}.png";
 
-                    bitmaps.Add(side, (Bitmap)Bitmap.FromFile(file));
+                    bitmaps.Add(side, (Bitmap)Image.FromFile(file));
                 }
                 else
                 {

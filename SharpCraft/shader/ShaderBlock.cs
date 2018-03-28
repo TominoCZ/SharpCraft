@@ -1,6 +1,6 @@
 ﻿using OpenTK.Graphics.OpenGL;
 
-namespace SharpCraft
+namespace SharpCraft.shader
 {
     internal class ShaderBlock : ShaderProgram
     {

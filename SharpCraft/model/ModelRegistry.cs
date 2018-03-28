@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
+using SharpCraft.block;
 
-namespace SharpCraft
+namespace SharpCraft.model
 {
     internal class ModelRegistry
     {

@@ -1,9 +1,10 @@
-﻿using OpenTK;
-using OpenTK.Graphics.OpenGL;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
+using OpenTK;
+using OpenTK.Graphics.OpenGL;
+using SharpCraft.model;
 
-namespace SharpCraft
+namespace SharpCraft.shader
 {
     internal abstract class ShaderProgram
     {

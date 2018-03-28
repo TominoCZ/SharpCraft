@@ -1,6 +1,7 @@
 ﻿using OpenTK.Graphics.OpenGL;
+using SharpCraft.shader;
 
-namespace SharpCraft
+namespace SharpCraft.model
 {
     internal class ModelBaked : IModelBaked
     {

@@ -1,6 +1,7 @@
 ﻿using OpenTK;
+using SharpCraft.block;
 
-namespace SharpCraft
+namespace SharpCraft.entity
 {
     internal class MouseOverObject
     {

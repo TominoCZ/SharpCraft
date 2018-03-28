@@ -1,6 +1,6 @@
 ﻿using OpenTK;
 
-namespace SharpCraft
+namespace SharpCraft.texture
 {
     internal class TextureUVNode
     {

@@ -1,4 +1,7 @@
-﻿namespace SharpCraft
+﻿using SharpCraft.shader;
+using SharpCraft.util;
+
+namespace SharpCraft.model
 {
     internal class ModelCubeOutline : ModelBaked
     {

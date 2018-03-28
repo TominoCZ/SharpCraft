@@ -1,13 +1,20 @@
-﻿using OpenTK;
-using OpenTK.Graphics.OpenGL;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using OpenTK;
+using OpenTK.Graphics.OpenGL;
+using SharpCraft.block;
+using SharpCraft.entity;
+using SharpCraft.model;
+using SharpCraft.shader;
+using SharpCraft.texture;
+using SharpCraft.util;
+using SharpCraft.world.chunk;
 using GL = OpenTK.Graphics.OpenGL.GL;
 using TextureTarget = OpenTK.Graphics.OpenGL.TextureTarget;
 using TextureUnit = OpenTK.Graphics.OpenGL.TextureUnit;
 
-namespace SharpCraft
+namespace SharpCraft.render
 {
     internal class WorldRenderer
     {
@@ -40,13 +47,13 @@ namespace SharpCraft
 
         public void render(Matrix4 viewMatrix)
         {
-            if (Game.INSTANCE.world == null)
+            if (Game.Instance.World == null)
                 return;
 
             GL.ActiveTexture(TextureUnit.Texture0);
             GL.BindTexture(TextureTarget.Texture2D, TextureManager.blockTextureAtlasID);
 
-            var hit = Game.INSTANCE.mouseOverObject;
+            var hit = Game.Instance.MouseOverObject;
 
             if (hit.hit != null && hit.hit is EnumBlock block && block != EnumBlock.AIR)
                 renderBlockSelectionOutline(viewMatrix, block, hit.blockPos);
@@ -56,7 +63,7 @@ namespace SharpCraft
             else
                 renderWorld(viewMatrix);
 
-            if (Game.INSTANCE.player != null)
+            if (Game.Instance.Player != null)
             {
                 renderSelectedItemBlock();
             }
@@ -64,14 +71,14 @@ namespace SharpCraft
 
         private void renderWorld(Matrix4 viewMatrix)
         {
-            foreach (var data in Game.INSTANCE.world.Chunks.Values)
+            foreach (var data in Game.Instance.World.Chunks.Values)
             {
-                if (!data.chunk.isWithinRenderDistance())
+                if (!data.Chunk.IsWithinRenderDistance())
                     continue;
 
-                foreach (var shader in data.model.fragmentPerShader.Keys)
+                foreach (var shader in data.Model.fragmentPerShader.Keys)
                 {
-                    var chunkFragmentModel = data.model.getFragmentModelWithShader(shader);
+                    var chunkFragmentModel = data.Model.getFragmentModelWithShader(shader);
                     if (chunkFragmentModel == null)
                         continue;
 
@@ -81,7 +88,7 @@ namespace SharpCraft
                     shader.loadViewMatrix(viewMatrix);
 
                     shader.loadTransformationMatrix(
-                        MatrixHelper.createTransformationMatrix(data.chunk.chunkPos.vector));
+                        MatrixHelper.createTransformationMatrix(data.Chunk.ChunkPos.toVec()));
 
                     GL.DrawArrays(shader.renderType, 0, chunkFragmentModel.rawModel.vertexCount);
 
@@ -94,9 +101,9 @@ namespace SharpCraft
         {
             List<ChunkData> visibleChunks = new List<ChunkData>(100);
 
-            foreach (var data in Game.INSTANCE.world.Chunks.Values)
+            foreach (var data in Game.Instance.World.Chunks.Values)
             {
-                if (data.chunk.isWithinRenderDistance())
+                if (data.Chunk.IsWithinRenderDistance())
                     visibleChunks.Add(data);
             }
 
@@ -104,11 +111,11 @@ namespace SharpCraft
             {
                 var data = visibleChunks[i];
 
-                var mat = MatrixHelper.createTransformationMatrix(data.chunk.chunkPos.vector);
+                var mat = MatrixHelper.createTransformationMatrix(data.Chunk.ChunkPos.toVec());
 
-                foreach (var shader in data.model.fragmentPerShader.Keys)
+                foreach (var shader in data.Model.fragmentPerShader.Keys)
                 {
-                    var chunkFragmentModel = data.model.getFragmentModelWithShader(shader);
+                    var chunkFragmentModel = data.Model.getFragmentModelWithShader(shader);
                     if (chunkFragmentModel == null)
                         continue;
 
@@ -139,7 +146,7 @@ namespace SharpCraft
             }
 
             var shader = (ShaderBlockOutline)_selectionOutline.shader;
-            var bb = ModelRegistry.getModelForBlock(block, Game.INSTANCE.world.getMetadata(pos))?.boundingBox;
+            var bb = ModelRegistry.getModelForBlock(block, Game.Instance.World.GetMetadata(pos))?.boundingBox;
 
             if (bb == null)
                 return;
@@ -150,7 +157,7 @@ namespace SharpCraft
 
             shader.loadVec4(selectionOutlineColor, "colorIn");
             shader.loadViewMatrix(viewMatrix);
-            shader.loadTransformationMatrix(MatrixHelper.createTransformationMatrix(pos.vector - Vector3.One * 0.00175f, size));
+            shader.loadTransformationMatrix(MatrixHelper.createTransformationMatrix(pos.toVec() - Vector3.One * 0.00175f, size));
 
             GL.Disable(EnableCap.CullFace);
             GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
@@ -165,7 +172,7 @@ namespace SharpCraft
 
         private void renderSelectedItemBlock()
         {
-            var stack = Game.INSTANCE.player.getEquippedItemStack();
+            var stack = Game.Instance.Player.getEquippedItemStack();
 
             if (stack?.Item is ItemBlock itemBlock)
             {
@@ -176,7 +183,7 @@ namespace SharpCraft
                 model.shader.loadViewMatrix(Matrix4.Identity);
 
                 model.shader.loadTransformationMatrix(MatrixHelper.createTransformationMatrix(
-                    new Vector3(0.04125f, -0.065f, -0.1f) + Game.INSTANCE.Camera.getLookVec() / 200,
+                    new Vector3(0.04125f, -0.065f, -0.1f) + Game.Instance.Camera.getLookVec() / 200,
                     new Vector3(-2, -11, 0), 0.045f));
 
                 GL.DrawArrays(model.shader.renderType, 0, model.rawModel.vertexCount);

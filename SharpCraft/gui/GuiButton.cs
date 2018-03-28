@@ -1,6 +1,8 @@
 ﻿using OpenTK;
+using SharpCraft.shader;
+using SharpCraft.texture;
 
-namespace SharpCraft
+namespace SharpCraft.gui
 {
     internal class GuiButton : Gui
     {
@@ -44,7 +46,7 @@ namespace SharpCraft
 
             if (centered)
             {
-                posX = (int)(Game.INSTANCE.ClientSize.Width / 2f - tex.textureSize.Width * scale.X / 2f);
+                posX = (int)(Game.Instance.ClientSize.Width / 2f - tex.textureSize.Width * scale.X / 2f);
                 renderTexture(shader, tex, scale, posX, posY);
             }
             else

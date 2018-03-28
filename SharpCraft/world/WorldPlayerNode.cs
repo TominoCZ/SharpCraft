@@ -1,7 +1,8 @@
-﻿using OpenTK;
-using System;
+﻿using System;
+using OpenTK;
+using SharpCraft.entity;
 
-namespace SharpCraft
+namespace SharpCraft.world
 {
     [Serializable]
     internal class WorldPlayerNode
@@ -15,8 +16,8 @@ namespace SharpCraft
 
         public WorldPlayerNode(EntityPlayerSP player)
         {
-            pitch = Game.INSTANCE.Camera.pitch;
-            yaw = Game.INSTANCE.Camera.yaw;
+            pitch = Game.Instance.Camera.pitch;
+            yaw = Game.Instance.Camera.yaw;
             pos = player.pos;
             hotbar = player.hotbar;
         }

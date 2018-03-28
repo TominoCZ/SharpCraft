@@ -1,8 +1,8 @@
-﻿using OpenTK;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using OpenTK;
 
-namespace SharpCraft
+namespace SharpCraft.entity
 {
     internal class Entity
     {
@@ -43,7 +43,7 @@ namespace SharpCraft
         {
             var bb_o = boundingBox.union(boundingBox.offset(motion));
 
-            List<AxisAlignedBB> list = Game.INSTANCE.world.getBlockCollisionBoxes(bb_o);
+            List<AxisAlignedBB> list = Game.Instance.World.GetBlockCollisionBoxes(bb_o);
 
             var m_orig = motion;
 

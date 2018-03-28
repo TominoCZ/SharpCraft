@@ -1,7 +1,7 @@
 ﻿using OpenTK;
 using OpenTK.Graphics.OpenGL;
 
-namespace SharpCraft
+namespace SharpCraft.shader
 {
     internal class SkyboxShader : ShaderProgram
     {

@@ -1,6 +1,6 @@
 ﻿using OpenTK;
 
-namespace SharpCraft
+namespace SharpCraft.model
 {
     public class ModelLight
     {

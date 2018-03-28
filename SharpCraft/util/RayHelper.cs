@@ -1,7 +1,8 @@
-﻿using OpenTK;
-using System;
+﻿using System;
+using OpenTK;
+using SharpCraft.entity;
 
-namespace SharpCraft
+namespace SharpCraft.util
 {
     internal class RayHelper
     {
@@ -70,25 +71,25 @@ namespace SharpCraft
                 return false;
             }
 
-            float t = tmin;
+            var t = tmin;
             hitPosition = origin + t * direction;
 
-            Vector3 AABBCenter = (bb.min + bb.max) * 0.5f;
+            var AABBCenter = (bb.min + bb.max) * 0.5f;
 
-            Vector3 dir = hitPosition - AABBCenter;
+            var dir = hitPosition - AABBCenter;
 
-            Vector3 width = bb.max - bb.min;
+            var width = bb.max - bb.min;
             width.X = Math.Abs(width.X);
             width.Y = Math.Abs(width.Y);
             width.Z = Math.Abs(width.Z);
 
-            Vector3 ratio = Vector3.One;
+            var ratio = Vector3.One;
             ratio.X = Math.Abs(dir.X / width.X);
             ratio.Y = Math.Abs(dir.Y / width.Y);
             ratio.Z = Math.Abs(dir.Z / width.Z);
 
             hitNormal = Vector3.Zero;
-            int maxDir = 0; // x
+            var maxDir = 0; // x
             if (ratio.X >= ratio.Y && ratio.X >= ratio.Z)
             { // x is the greatest
                 maxDir = 0;

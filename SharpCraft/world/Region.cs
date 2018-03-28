@@ -7,7 +7,7 @@ namespace SharpCraft.world
 	public class Region
 	{
 		private static readonly byte BlankChunk = 0b00000001;
-		private static readonly object _createLock=new object();
+		private static readonly object CreateLock=new object();
 
 		private readonly RegionInfo _info;
 		private readonly int[] _cordinate;
@@ -16,6 +16,7 @@ namespace SharpCraft.world
 		private readonly string _filePath;
 
 		private byte[] _cacheFlags;
+		private bool _hasFile;
 
 		private readonly ReaderWriterLockSlim _rwLock = new ReaderWriterLockSlim();
 		public Region(RegionInfo info, int[] cordinate, string dataRoot)
@@ -25,20 +26,24 @@ namespace SharpCraft.world
 
 			_cordinate = cordinate;
 			_filePath = $"{dataRoot}/.reg_{string.Join(".", cordinate)}.bin";
-			lock (_createLock)
-			{
-				CreateAndPopulate();
-			}
+			_hasFile = File.Exists(_filePath);
+			if(_hasFile)CacheFlags(CalcChunkCount());
 		}
 
-		private void CreateAndPopulate()
+		private int CalcChunkCount()
 		{
+			
 			var chunkCount = 1;
 			for (var i = 0; i < _cordinate.Length; i++)
 			{
 				chunkCount *= _info.DimSize(i);
 			}
 
+			return chunkCount;
+		}
+		private void CreateAndPopulate()
+		{
+			var chunkCount = CalcChunkCount();
 			PopulateBlank(chunkCount);
 			CacheFlags(chunkCount);
 		}
@@ -47,21 +52,12 @@ namespace SharpCraft.world
 		{
 			_cacheFlags = new byte[chunkCount];
 
-			FileStream stream = null;
-			try
-			{
-				stream = Read();
-				_rwLock.EnterReadLock();
-				for (int i = 0; i < chunkCount; i++)
+			using(FileStream stream  =Read()){
+				for (var i = 0; i < chunkCount; i++)
 				{
 					stream.Seek((_info.ChunkByteSize + 1) * i, SeekOrigin.Begin);
 					_cacheFlags[i] = (byte) stream.ReadByte();
 				}
-			}
-			finally
-			{
-				stream?.Close();
-				_rwLock.ExitReadLock();
 			}
 		}
 
@@ -72,7 +68,7 @@ namespace SharpCraft.world
 			using (FileStream newFile = File.Create(_filePath))
 			{
 				byte[] blankChunk = new byte[_info.ChunkByteSize + 1];
-				blankChunk[0] |= BlankChunk;
+				blankChunk[0] = BlankChunk;
 
 
 				for (var i = 0; i < chunkCount; i++)
@@ -84,37 +80,27 @@ namespace SharpCraft.world
 
 		public void WriteChunkData(int id, byte[] data)
 		{
-			FileStream stream = null;
-			try
+			using(FileStream stream = Write())
 			{
-				stream = Write();
-				_rwLock.EnterWriteLock();
-				if (id < 0)
-				{
-					Console.WriteLine(id);
-				}
-
+				_cacheFlags[id] = (byte) (_cacheFlags[id] & NotFlag(BlankChunk));
+				
 				stream.Seek((_info.ChunkByteSize + 1) * id, SeekOrigin.Begin);
-				stream.WriteByte(2);
-
+				stream.WriteByte(_cacheFlags[id]);
 				stream.Write(data, 0, data.Length);
-			}
-			finally
-			{
-				stream?.Close();
-				_rwLock.ExitWriteLock();
+				stream.Close();
 			}
 		}
+		private byte NotFlag(byte flag) 
+		{ 
+			return (byte) (~flag & 0xFF); 
+		} 
 
 		public byte[] ReadChunkData(int id)
 		{
 			if (IsBlank(id)) return null;
 
-			FileStream stream = null;
-			try
+			using(var stream =Read())
 			{
-				stream = Read();
-				_rwLock.EnterReadLock();
 				stream.Seek((_info.ChunkByteSize + 1) * id, SeekOrigin.Begin);
 
 				_cacheFlags[id] = (byte) stream.ReadByte();
@@ -122,30 +108,14 @@ namespace SharpCraft.world
 
 				var data = new byte[_info.ChunkByteSize];
 				stream.Read(data, 0, data.Length);
+				stream.Close();
 				return data;
-			}
-			finally
-			{
-				stream?.Close();
-				_rwLock.ExitReadLock();
 			}
 		}
 
 		private bool IsBlank(int id)
 		{
-			return (_cacheFlags[id] & BlankChunk) == BlankChunk;
-		}
-
-		private FileStream Read()
-		{
-			var fs = new FileStream(_filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
-			return fs;
-		}
-
-		private FileStream Write()
-		{
-			var fs = new FileStream(_filePath, FileMode.Open, FileAccess.Write, FileShare.Write);
-			return fs;
+			return !_hasFile||(_cacheFlags[id] & BlankChunk) == BlankChunk;
 		}
 
 		public override bool Equals(object obj)
@@ -157,6 +127,71 @@ namespace SharpCraft.world
 		public override int GetHashCode()
 		{
 			return _hash;
+		}
+
+		private void checkCreateFile()
+		{
+			lock (CreateLock)
+			{
+				if(_hasFile)return;
+				CreateAndPopulate();
+				_hasFile = true;
+			}
+		}
+		////////////// PAIN BEGINS HERE, READ WITH PROTTECTIVE GOGGLES ////////////////
+
+		private FileStream Write()
+		{
+			checkCreateFile();
+			_rwLock.EnterWriteLock();
+			while (true)
+			{
+				try
+				{
+					return new WriteC(this);
+				}
+				catch{}
+			}
+		}
+		private FileStream Read()
+		{
+			_rwLock.EnterReadLock();
+			while (true)
+			{
+				try
+				{
+					return new ReadC(this);
+				}
+				catch{}
+			}
+		}
+		protected  class WriteC : FileStream
+		{
+			private Region r;
+			public WriteC(Region r):base(r._filePath, FileMode.Open, FileAccess.Write, FileShare.Write)
+			{
+				this.r = r;
+			}
+
+			public override void Close()
+			{
+				base.Close();
+				if(r._rwLock.IsWriteLockHeld)r._rwLock.ExitWriteLock();
+			}
+		}
+		protected  class ReadC : FileStream
+		{
+			private Region r;
+			public ReadC(Region r):base(r._filePath, FileMode.Open, FileAccess.Read, FileShare.Read)
+			{
+				this.r = r;
+			}
+
+			public override void Close()
+			{
+				base.Close();
+				if(r._rwLock.IsReadLockHeld)r._rwLock.ExitReadLock();
+			}
 		}
 	}
 }

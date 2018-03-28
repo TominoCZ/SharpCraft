@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
+using SharpCraft.shader;
 
-namespace SharpCraft
+namespace SharpCraft.model
 {
     internal class ModelChunkFragment : ModelBaked
     {

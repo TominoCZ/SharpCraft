@@ -1,33 +1,35 @@
 ﻿using System;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
+using SharpCraft.block;
+using SharpCraft.entity;
 
-namespace SharpCraft
+namespace SharpCraft.world
 {
     internal class WorldLoader
     {
-        private static string savesFolder = "SharpCraft_Data/saves";
+        private static string _savesFolder = "SharpCraft_Data/saves";
 
-        public static void saveWorld(World w)
+        public static void SaveWorld(World w)
         {
             if (w == null)
                 return;
 
             var bf = new BinaryFormatter();
 
-            w.saveAllChunks();
+            w.SaveAllChunks();
 
             try
             {
-                var wpn = new WorldPlayerNode(Game.INSTANCE.player);
+                var wpn = new WorldPlayerNode(Game.Instance.Player);
                 var wdn = new WorldDataNode(w);
 
-                using (var fs = File.OpenWrite(w.saveRoot + "/player.dat"))
+                using (var fs = File.OpenWrite(w.SaveRoot + "/player.dat"))
                 {
                     bf.Serialize(fs, wpn);
                 }
 
-                using (var fs = File.OpenWrite(w.saveRoot + "/level.dat"))
+                using (var fs = File.OpenWrite(w.SaveRoot + "/level.dat"))
                 {
                     bf.Serialize(fs, wdn);
                 }
@@ -38,11 +40,11 @@ namespace SharpCraft
             }
         }
 
-        public static World loadWorld(string saveName)
+        public static World LoadWorld(string saveName)
         {
             var bf = new BinaryFormatter();
 
-            var dir = $"{savesFolder}/{saveName}";
+            var dir = $"{_savesFolder}/{saveName}";
 
             if (!Directory.Exists(dir))
                 return null;
@@ -67,17 +69,17 @@ namespace SharpCraft
                 world = new World(saveName, wdn.levelName, wdn.seed);
 
                 var player = new EntityPlayerSP(wpn.pos);
-                Game.INSTANCE.Camera.pitch = wpn.pitch;
-                Game.INSTANCE.Camera.yaw = wpn.yaw;
+                Game.Instance.Camera.pitch = wpn.pitch;
+                Game.Instance.Camera.yaw = wpn.yaw;
 
                 for (int i = 0; i < wpn.hotbar.Length; i++)
                 {
                     player.hotbar[i] = wpn.hotbar[i];
                 }
 
-                world.addEntity(player);
-                world.loadChunk(new BlockPos(player.pos));
-                Game.INSTANCE.player = player;
+                world.AddEntity(player);
+                world.LoadChunk(new BlockPos(player.pos));
+                Game.Instance.Player = player;
             }
             catch (Exception e)
             {

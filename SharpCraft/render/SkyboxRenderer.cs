@@ -1,8 +1,11 @@
-﻿using OpenTK;
+﻿using System.Collections.Generic;
+using OpenTK;
 using OpenTK.Graphics.OpenGL;
-using System.Collections.Generic;
+using SharpCraft.model;
+using SharpCraft.shader;
+using SharpCraft.texture;
 
-namespace SharpCraft
+namespace SharpCraft.render
 {
     internal class SkyboxRenderer
     {

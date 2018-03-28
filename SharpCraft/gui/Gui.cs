@@ -1,7 +1,13 @@
 ﻿using OpenTK;
 using OpenTK.Graphics.OpenGL;
+using SharpCraft.block;
+using SharpCraft.model;
+using SharpCraft.render;
+using SharpCraft.shader;
+using SharpCraft.texture;
+using SharpCraft.util;
 
-namespace SharpCraft
+namespace SharpCraft.gui
 {
     internal class Gui
     {
@@ -18,7 +24,7 @@ namespace SharpCraft
 
         protected virtual void renderTexture(ShaderGui shader, GuiTexture tex)
         {
-            var ratio = new Vector2((float)tex.textureSize.Width / Game.INSTANCE.ClientSize.Width, (float)tex.textureSize.Height / Game.INSTANCE.ClientSize.Height);
+            var ratio = new Vector2((float)tex.textureSize.Width / Game.Instance.ClientSize.Width, (float)tex.textureSize.Height / Game.Instance.ClientSize.Height);
 
             var mat = MatrixHelper.createTransformationMatrix(tex.pos * 2, tex.scale * ratio);
             shader.loadTransformationMatrix(mat);
@@ -38,7 +44,7 @@ namespace SharpCraft
             shader.bind();
             GL.BindVertexArray(GuiRenderer.GUIquad.vaoID);
 
-            var unit = new Vector2(1f / Game.INSTANCE.ClientSize.Width, 1f / Game.INSTANCE.ClientSize.Height);
+            var unit = new Vector2(1f / Game.Instance.ClientSize.Width, 1f / Game.Instance.ClientSize.Height);
 
             float width = tex.textureSize.Width;
             float height = tex.textureSize.Height;
@@ -69,7 +75,7 @@ namespace SharpCraft
             var UVs = TextureManager.getUVsFromBlock(block);
             ModelManager.overrideModelUVsInVAO(_item.rawModel.bufferIDs[1], UVs.getUVForSide(EnumFacing.SOUTH).ToArray());
 
-            var unit = new Vector2(1f / Game.INSTANCE.ClientSize.Width, 1f / Game.INSTANCE.ClientSize.Height);
+            var unit = new Vector2(1f / Game.Instance.ClientSize.Width, 1f / Game.Instance.ClientSize.Height);
 
             float width = 16;
             float height = 16;

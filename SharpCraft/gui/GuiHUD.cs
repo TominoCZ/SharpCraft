@@ -1,6 +1,9 @@
 ﻿using OpenTK;
+using SharpCraft.entity;
+using SharpCraft.shader;
+using SharpCraft.texture;
 
-namespace SharpCraft
+namespace SharpCraft.gui
 {
     internal class GuiHUD : Gui
     {
@@ -20,7 +23,7 @@ namespace SharpCraft
 
         public override void render(ShaderGui shader, int mouseX, int mouseY)
         {
-            var size = Game.INSTANCE.ClientSize;
+            var size = Game.Instance.ClientSize;
 
             int space = 5;
 
@@ -33,14 +36,14 @@ namespace SharpCraft
 
             for (int i = 0; i < 9; i++)
             {
-                var b = i == Game.INSTANCE.player.equippedItemHotbarIndex;
+                var b = i == Game.Instance.Player.equippedItemHotbarIndex;
 
                 var x = startPos + i * (scaledWidth + space);
                 var y = size.Height - 20 - scaledHeight;
 
                 renderTexture(shader, b ? slot_selected : slot, x, y);
 
-                var stack = Game.INSTANCE.player.hotbar[i];
+                var stack = Game.Instance.Player.hotbar[i];
 
                 if (stack != null && stack.Item is ItemBlock itemBlock)
                 {

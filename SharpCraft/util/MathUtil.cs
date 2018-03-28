@@ -1,14 +1,14 @@
-﻿using OpenTK;
-using System;
+﻿using System;
+using OpenTK;
 
-namespace SharpCraft
+namespace SharpCraft.util
 {
     internal class MathUtil
     {
-        public static Vector3 Rotate(Vector3 vec, float AngleX, float AngleY, float AngleZ)
+        public static Vector3 Rotate(Vector3 vec, float angleX, float angleY, float angleZ)
         {
-            Vector3 sin = new Vector3((float)Math.Sin(AngleX), (float)Math.Sin(AngleY), (float)Math.Sin(AngleZ));
-            Vector3 cos = new Vector3((float)Math.Cos(AngleX), (float)Math.Cos(AngleY), (float)Math.Cos(AngleZ));
+            var sin = new Vector3((float)Math.Sin(angleX), (float)Math.Sin(angleY), (float)Math.Sin(angleZ));
+            var cos = new Vector3((float)Math.Cos(angleX), (float)Math.Cos(angleY), (float)Math.Cos(angleZ));
 
             vec = new Vector3(vec.X, vec.Y * cos.X - vec.Z * sin.X, vec.Y * sin.X + vec.Z * cos.X);
             vec = new Vector3(vec.X * cos.Y + vec.Z * sin.Y, vec.Y, vec.X * sin.Y - vec.Z * cos.Y);
@@ -21,7 +21,7 @@ namespace SharpCraft
         {
             var min = float.MaxValue;
 
-            for (int i = 0; i < values.Length; i++)
+            for (var i = 0; i < values.Length; i++)
             {
                 min = Math.Min(min, values[i]);
             }
@@ -33,7 +33,7 @@ namespace SharpCraft
         {
             var max = float.MinValue;
 
-            for (int i = 0; i < values.Length; i++)
+            for (var i = 0; i < values.Length; i++)
             {
                 max = Math.Max(max, values[i]);
             }
@@ -41,9 +41,9 @@ namespace SharpCraft
             return max;
         }
 
-        public static float distance(Vector2 v1, Vector2 v2)
+        public static float Distance(Vector2 v1, Vector2 v2)
         {
-            return (v1 - v2).LengthFast;
+            return (v1 - v2).Length;
         }
     }
 }

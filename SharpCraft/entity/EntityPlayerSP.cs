@@ -1,8 +1,9 @@
-﻿using OpenTK;
+﻿using System;
+using OpenTK;
 using OpenTK.Input;
-using System;
+using SharpCraft.block;
 
-namespace SharpCraft
+namespace SharpCraft.entity
 {
     internal class EntityPlayerSP : Entity
     {
@@ -15,7 +16,7 @@ namespace SharpCraft
 
         public EntityPlayerSP(Vector3 pos) : base(pos)
         {
-            Game.INSTANCE.Camera.pos = (pos += Vector3.UnitY);
+            Game.Instance.Camera.pos = (pos += Vector3.UnitY);
 
             collisionBoundingBox = new AxisAlignedBB(new Vector3(-0.3f, 0, -0.3f), new Vector3(0.3f, 1.65f, 0.3f));
             boundingBox = collisionBoundingBox.offset(lastPos = pos);
@@ -29,7 +30,7 @@ namespace SharpCraft
 
         public override void Update()
         {
-            if (Game.INSTANCE.Focused)
+            if (Game.Instance.Focused)
                 UpdateCameraMovement();
 
             base.Update();
@@ -39,27 +40,27 @@ namespace SharpCraft
         {
             var interpolatedPos = lastPos + (pos - lastPos) * particalTicks;
 
-            Game.INSTANCE.Camera.pos = interpolatedPos + Vector3.UnitY * 1.625f;
+            Game.Instance.Camera.pos = interpolatedPos + Vector3.UnitY * 1.625f;
         }
 
         private void UpdateCameraMovement()
         {
-            if (Game.INSTANCE.guiScreen != null)
+            if (Game.Instance.GuiScreen != null)
                 return;
 
-            var state = Game.INSTANCE.keysDown;
+            var state = Game.Instance.KeysDown;
 
             Vector2 dirVec = Vector2.Zero;
 
             if (state.Contains(Key.W))
-                dirVec += Game.INSTANCE.Camera.forward;
+                dirVec += Game.Instance.Camera.forward;
             if (state.Contains(Key.S))
-                dirVec += -Game.INSTANCE.Camera.forward;
+                dirVec += -Game.Instance.Camera.forward;
 
             if (state.Contains(Key.A))
-                dirVec += Game.INSTANCE.Camera.left;
+                dirVec += Game.Instance.Camera.left;
             if (state.Contains(Key.D))
-                dirVec += -Game.INSTANCE.Camera.left;
+                dirVec += -Game.Instance.Camera.left;
 
             float mult = 1;
 

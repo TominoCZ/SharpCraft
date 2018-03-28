@@ -1,7 +1,8 @@
-﻿using OpenTK;
-using System;
+﻿using System;
+using OpenTK;
+using SharpCraft.util;
 
-namespace SharpCraft
+namespace SharpCraft.entity
 {
     internal class AxisAlignedBB
     {
@@ -72,7 +73,7 @@ namespace SharpCraft
                         offset = d1;
                     }
                 }
-                else if (offset < 0.0D && other.min.Y >= this.max.Y)
+                else if (offset < 0.0D && other.min.Y >= max.Y)
                 {
                     float d0 = max.Y - other.min.Y;
 

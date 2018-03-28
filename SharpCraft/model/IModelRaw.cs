@@ -1,4 +1,4 @@
-﻿namespace SharpCraft
+﻿namespace SharpCraft.model
 {
     internal interface IModelRaw
     {

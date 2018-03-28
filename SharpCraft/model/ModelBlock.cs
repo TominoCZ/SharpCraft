@@ -1,7 +1,9 @@
-﻿using System.Drawing;
-using OpenTK;
+﻿using SharpCraft.block;
+using SharpCraft.entity;
+using SharpCraft.shader;
+using SharpCraft.util;
 
-namespace SharpCraft
+namespace SharpCraft.model
 {
     internal class ModelBlock : ModelBaked
     {

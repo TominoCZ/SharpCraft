@@ -1,8 +1,12 @@
-﻿using OpenTK;
+﻿using System.Collections.Generic;
+using OpenTK;
 using OpenTK.Graphics.OpenGL;
-using System.Collections.Generic;
+using SharpCraft.gui;
+using SharpCraft.model;
+using SharpCraft.shader;
+using SharpCraft.texture;
 
-namespace SharpCraft
+namespace SharpCraft.render
 {
     internal class GuiRenderer
     {
@@ -56,7 +60,7 @@ namespace SharpCraft
             GL.EnableVertexAttribArray(2);
 
             var state = OpenTK.Input.Mouse.GetCursorState();
-            var mouse = Game.INSTANCE.PointToClient(new Point(state.X, state.Y));
+            var mouse = Game.Instance.PointToClient(new Point(state.X, state.Y));
 
             gui.render(shader, mouse.X, mouse.Y);
 

@@ -1,33 +1,34 @@
 ﻿using System.Threading;
+using SharpCraft.model;
 
-namespace SharpCraft
+namespace SharpCraft.world.chunk
 {
     internal class ChunkData
     {
-        public Chunk chunk;
-        public ModelChunk model;
+        public Chunk Chunk;
+        public ModelChunk Model;
 
-        public bool modelGenerating { get; set; }
+        public bool ModelGenerating { get; set; }
     
-        public bool chunkGenerated;
+        public bool ChunkGenerated;
 
         public ChunkData(Chunk chunk, ModelChunk model)
         {
-            this.chunk = chunk;
-            this.model = model;
+            Chunk = chunk;
+            Model = model;
         }
 
-        public void beginUpdateModel()
+        public void BeginUpdateModel()
         {
-            if (!chunkGenerated || modelGenerating)
+            if (!ChunkGenerated || ModelGenerating)
                 return;
 
-            modelGenerating = true;
+            ModelGenerating = true;
 
             ThreadPool.QueueUserWorkItem(e =>
             {
-                chunk.buildChunkModel(model);
-                modelGenerating = false;
+                Chunk.BuildChunkModel(Model);
+                ModelGenerating = false;
             });
         }
     }

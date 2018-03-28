@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace SharpCraft
+namespace SharpCraft.model
 {
     internal class ModelRaw : IModelRaw
     {

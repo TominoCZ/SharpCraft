@@ -1,7 +1,9 @@
-﻿using OpenTK;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using OpenTK;
+using SharpCraft.shader;
+using SharpCraft.texture;
 
-namespace SharpCraft
+namespace SharpCraft.gui
 {
     internal class GuiScreen : Gui
     {
@@ -28,8 +30,8 @@ namespace SharpCraft
             var sizeX = tex.textureSize.Width * tex.scale.X;
             var sizeY = tex.textureSize.Height * tex.scale.Y;
 
-            var countX = Game.INSTANCE.ClientSize.Width / sizeX;
-            var countY = Game.INSTANCE.ClientSize.Height / sizeY;
+            var countX = Game.Instance.ClientSize.Width / sizeX;
+            var countY = Game.Instance.ClientSize.Height / sizeY;
 
             for (int x = 0; x <= countX; x++)
             {

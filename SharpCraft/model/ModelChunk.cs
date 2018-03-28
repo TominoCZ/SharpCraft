@@ -1,7 +1,7 @@
 ﻿using System.Collections.Concurrent;
-using System.Collections.Generic;
+using SharpCraft.shader;
 
-namespace SharpCraft
+namespace SharpCraft.model
 {
     internal class ModelChunk
     {

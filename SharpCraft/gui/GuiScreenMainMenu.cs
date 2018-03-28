@@ -1,6 +1,8 @@
 ﻿using OpenTK;
+using SharpCraft.shader;
+using SharpCraft.texture;
 
-namespace SharpCraft
+namespace SharpCraft.gui
 {
     internal class GuiScreenMainMenu : GuiScreen
     {
@@ -24,8 +26,8 @@ namespace SharpCraft
             switch (btn.ID)
             {
                 case 0:
-                    Game.INSTANCE.closeGuiScreen();
-                    Game.INSTANCE.startGame();
+                    Game.Instance.CloseGuiScreen();
+                    Game.Instance.StartGame();
                     break;
             }
         }

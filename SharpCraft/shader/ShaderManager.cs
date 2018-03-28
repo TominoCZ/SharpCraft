@@ -1,7 +1,7 @@
-﻿using OpenTK;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using OpenTK;
 
-namespace SharpCraft
+namespace SharpCraft.shader
 {
     internal static class ShaderManager
     {
@@ -23,7 +23,7 @@ namespace SharpCraft
 
         public static void updateProjectionMatrix()
         {
-            projectionMatrix = Game.INSTANCE.createProjectionMatrix();
+            projectionMatrix = Game.Instance.CreateProjectionMatrix();
 
             for (int i = 0; i < shaders.Count; i++)
             {

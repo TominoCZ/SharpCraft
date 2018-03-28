@@ -1,11 +1,7 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
-using System.Runtime.CompilerServices;
-using System.Security.Permissions;
-using OpenTK.Audio.OpenAL;
+using System.Runtime.InteropServices.ComTypes;
 
 namespace SharpCraft.world
 {
@@ -26,58 +22,47 @@ namespace SharpCraft.world
 
 		public void WriteChunkData(int[] coordinate, byte[] data)
 		{
-			var regionCoord = new int[coordinate.Length];
-			var regionLocalCoord = new int[coordinate.Length];
-
-			for (var i = 0; i < regionCoord.Length; i++)
-			{
-				var size = Info.DimSize(i);
-				var cord = coordinate[i];
-				regionCoord[i] = cord / size;
-				if (cord < 0) regionCoord[i]--;
-				regionLocalCoord[i] = cord-regionCoord[i]*size;
-			}
-
-			Region r=GetRegion(Info.CoordHash(regionCoord));
-			if (r == null) r = createRegion(regionCoord);
-			r.WriteChunkData(Info.CoordHash(regionLocalCoord),data);
+			calcCord(coordinate,out var regionCoord,out var regionLocalCoord);
+			GetRegion(Info.CoordHash(regionCoord),regionCoord).WriteChunkData(Info.CoordHash(regionLocalCoord),data);
 		}
 
 		public byte[] GetChunkData(int[] coordinate)
 		{
-			
-			var regionCoord = new int[coordinate.Length];
-			var regionLocalCoord = new int[coordinate.Length];
+			calcCord(coordinate,out var regionCoord,out var regionLocalCoord);
+			return GetRegion(Info.CoordHash(regionCoord),regionCoord).ReadChunkData(Info.CoordHash(regionLocalCoord));
+		}
+
+		private void calcCord(int[] coordinate,out int[] regionCoord,out int[] regionLocalCoord)
+		{
+			regionCoord = new int[coordinate.Length];
+			regionLocalCoord = new int[coordinate.Length];
 
 			for (var i = 0; i < regionCoord.Length; i++)
 			{
 				var size = Info.DimSize(i);
 				var cord = coordinate[i];
 				regionCoord[i] = cord / size;
-				regionLocalCoord[i] = cord % size;
-				if (regionLocalCoord[i] < 0) regionLocalCoord[i] += Info.DimSize(i);
+				if (cord < 0)
+				{
+					if(cord % size!=0)regionCoord[i]--;
+					regionLocalCoord[i] = cord-regionCoord[i]*size;
+				}
+				else regionLocalCoord[i] = cord % size;
 			}
-
-			return GetRegion(Info.CoordHash(regionCoord))?.ReadChunkData(Info.CoordHash(regionLocalCoord));
 		}
 
-		private Region GetRegion(int hash)
+		private Region GetRegion(int hash, int[] regionCoord)
 		{
 			var pos = _regions.BinarySearch(null, Comparer<Region>.Create((x, y) => x.GetHashCode().CompareTo(hash)));
 			if (pos <= -1||_regions[pos].GetHashCode()!=hash)
 			{
-				return null;
+				Region r = new Region(Info, (int[]) regionCoord.Clone(), DataRoot);
+				_regions.Add(r);
+				_regions.Sort((x, y) => x.GetHashCode().CompareTo(y.GetHashCode()));
+				return r;
 			}
 			
 			return _regions[pos];
-		}
-
-		private Region createRegion(int[] regionCoord)
-		{
-			Region r = new Region(Info, (int[]) regionCoord.Clone(), DataRoot);
-			_regions.Add(r);
-			_regions.Sort((x, y) => x.GetHashCode().CompareTo(y.GetHashCode()));
-			return r;
 		}
 	}
 

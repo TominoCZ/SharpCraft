@@ -1,7 +1,9 @@
-﻿using OpenTK;
-using System;
+﻿using System;
+using OpenTK;
+using OpenTK.Graphics.OpenGL;
+using SharpCraft.util;
 
-namespace SharpCraft
+namespace SharpCraft.block
 {
     [Serializable]
     struct BlockPos
@@ -9,8 +11,11 @@ namespace SharpCraft
         public int x { get; }
         public int y { get; }
         public int z { get; }
-
-        public Vector3 vector { get; }
+        
+        public Vector3 toVec()
+        {
+            return new Vector3(x,y,z);
+        }
 
         public static BlockPos operator +(BlockPos p1, BlockPos p2) => new BlockPos(p1.x + p2.x, p1.y + p2.y, p1.z + p2.z);
 
@@ -21,8 +26,6 @@ namespace SharpCraft
             this.x = x;
             this.y = y;
             this.z = z;
-
-            vector = new Vector3(this.x, this.y, this.z);
         }
 
         public BlockPos(float x, float y, float z) : this((int)Math.Floor(x), (int)Math.Floor(y), (int)Math.Floor(z))

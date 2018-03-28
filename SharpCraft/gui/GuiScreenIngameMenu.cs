@@ -1,6 +1,8 @@
 ﻿using OpenTK;
+using SharpCraft.shader;
+using SharpCraft.texture;
 
-namespace SharpCraft
+namespace SharpCraft.gui
 {
     internal class GuiScreenIngameMenu : GuiScreen
     {

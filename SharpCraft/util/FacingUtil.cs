@@ -1,7 +1,8 @@
 ﻿using System;
 using OpenTK;
+using SharpCraft.block;
 
-namespace SharpCraft
+namespace SharpCraft.util
 {
     internal class FacingUtil
     {

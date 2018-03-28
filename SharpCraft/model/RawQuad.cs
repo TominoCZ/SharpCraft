@@ -1,4 +1,6 @@
-﻿namespace SharpCraft
+﻿using SharpCraft.block;
+
+namespace SharpCraft.model
 {
     internal class RawQuad
     {

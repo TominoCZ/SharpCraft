@@ -1,7 +1,9 @@
-﻿using OpenTK;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using OpenTK;
+using SharpCraft.block;
+using SharpCraft.util;
 
-namespace SharpCraft
+namespace SharpCraft.texture
 {
     internal class TextureBlockUV
     {

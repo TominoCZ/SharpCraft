@@ -1,8 +1,10 @@
-﻿using OpenTK;
-using System.Collections.Generic;
-using OpenTK.Audio.OpenAL;
+﻿using System.Collections.Generic;
+using OpenTK;
+using SharpCraft.block;
+using SharpCraft.model;
+using SharpCraft.texture;
 
-namespace SharpCraft
+namespace SharpCraft.util
 {
     internal class ModelHelper
     {
@@ -58,9 +60,9 @@ namespace SharpCraft
 
         public static float[] calculateNormals(float[] vertices)
         {
-            float[] normals = new float[vertices.Length];
+            var normals = new float[vertices.Length];
 
-            for (int i = 0; i < vertices.Length; i += 12)
+            for (var i = 0; i < vertices.Length; i += 12)
             {
                 V0.Z = vertices[i];
                 V0.Y = vertices[i + 1];
@@ -76,7 +78,7 @@ namespace SharpCraft
 
                 NORMAL = Vector3.Cross(V1 - V2, V0 - V1);
 
-                for (int j = 0; j < 4; j++)
+                for (var j = 0; j < 4; j++)
                 {
                     normals[i + j * 3] = NORMAL.X;
                     normals[i + j * 3 + 1] = NORMAL.Y;

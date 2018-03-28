@@ -1,7 +1,8 @@
-﻿using OpenTK;
-using System;
+﻿using System;
+using OpenTK;
+using SharpCraft.util;
 
-namespace SharpCraft
+namespace SharpCraft.render
 {
     public class Camera
     {

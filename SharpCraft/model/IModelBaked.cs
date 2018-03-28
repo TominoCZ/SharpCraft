@@ -1,4 +1,6 @@
-﻿namespace SharpCraft
+﻿using SharpCraft.shader;
+
+namespace SharpCraft.model
 {
     internal interface IModelBaked
     {

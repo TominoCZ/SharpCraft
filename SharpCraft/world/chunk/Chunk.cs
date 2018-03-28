@@ -1,42 +1,48 @@
-﻿using OpenTK;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using OpenTK;
+using SharpCraft.block;
+using SharpCraft.entity;
+using SharpCraft.model;
+using SharpCraft.shader;
+using SharpCraft.util;
 
-namespace SharpCraft
+namespace SharpCraft.world.chunk
 {
     internal class Chunk
     {
-        internal short[,,] _chunkBlocks;
+        internal short[,,] ChunkBlocks;
 
-        private bool withinRenderDistance;
+        private bool _withinRenderDistance;
 
-        public bool isDirty { get; private set; }
+        public bool IsDirty { get; private set; }
+        public bool NeedsSave { get; set; }
 
-        public BlockPos chunkPos { get; }
+        public BlockPos ChunkPos { get; }
 
-        public AxisAlignedBB boundingBox { get; }
+        public AxisAlignedBB BoundingBox { get; }
 
-        public World world { get; }
+        public World World { get; }
 
         public Chunk(BlockPos chunkPos, World world)
         {
-            this.chunkPos = chunkPos;
-            this.world = world;
+            ChunkPos = chunkPos;
+            World = world;
             
-            boundingBox = new AxisAlignedBB(Vector3.Zero, Vector3.One * 16 + Vector3.UnitY * 240).offset(chunkPos.vector);
+            BoundingBox = new AxisAlignedBB(Vector3.Zero, Vector3.One * 16 + Vector3.UnitY * 240).offset(chunkPos.toVec());
 
-            _chunkBlocks = new short[16, 256, 16];
+            ChunkBlocks = new short[16, 256, 16];
         }
 
         private Chunk(BlockPos chunkPos, World world, short[,,] blockData)
         {
-            this.chunkPos = chunkPos;
-            this.world = world;
-            boundingBox = new AxisAlignedBB(Vector3.Zero, Vector3.One * 16 + Vector3.UnitY * 240).offset(chunkPos.vector);
+            ChunkPos = chunkPos;
+            World = world;
+            BoundingBox = new AxisAlignedBB(Vector3.Zero, Vector3.One * 16 + Vector3.UnitY * 240).offset(chunkPos.toVec());
 
-            _chunkBlocks = blockData;
+            ChunkBlocks = blockData;
         }
 
         public static Chunk CreateWithData(BlockPos chunkPos, World world, short[,,] blockData)
@@ -44,31 +50,34 @@ namespace SharpCraft
             return new Chunk(chunkPos, world, blockData);
         }
 
-        public void tick()
+        public void Tick()
         {
-            var pos = chunkPos.offset(8, 0, 8);
+            var pos = ChunkPos.offset(8, 0, 8);
             
-            var dist = MathUtil.distance(pos.vector.Xz, Game.INSTANCE.Camera.pos.Xz);
+            var dist = MathUtil.Distance(pos.toVec().Xz, Game.Instance.Camera.pos.Xz);
 
-            withinRenderDistance = dist <= Game.INSTANCE.worldRenderer.RenderDistance * 16;
+            _withinRenderDistance = dist <= Game.Instance.WorldRenderer.RenderDistance * 16;
         }
 
-        public void setBlock(BlockPos pos, EnumBlock blockType, int meta)
+        public void SetBlock(BlockPos pos, EnumBlock blockType, int meta)
         {
             short id = (short)((short)blockType << 4 | meta);
 
-            if (isPosInChunk(pos))
-                _chunkBlocks[pos.x, pos.y, pos.z] = id;
+            if (IsPosInChunk(pos))
+            {
+                ChunkBlocks[pos.x, pos.y, pos.z] = id;
+                NeedsSave = true;
+            }
         }
 
-        public EnumBlock getBlock(BlockPos pos)
+        public EnumBlock GetBlock(BlockPos pos)
         {
             if (pos.y >= 0 && pos.y < 256)
             {
-                if (isPosInChunk(pos))
-                    return (EnumBlock)(_chunkBlocks[pos.x, pos.y, pos.z] >> 4);
+                if (IsPosInChunk(pos))
+                    return (EnumBlock)(ChunkBlocks[pos.x, pos.y, pos.z] >> 4);
 
-                var block = world.getBlock(pos + chunkPos);
+                var block = World.GetBlock(pos + ChunkPos);
 
                 return block;
             }
@@ -76,27 +85,27 @@ namespace SharpCraft
             return EnumBlock.AIR;
         }
 
-        public int getMetadata(BlockPos pos)
+        public int GetMetadata(BlockPos pos)
         {
-            if (isPosInChunk(pos))
-                return _chunkBlocks[pos.x, pos.y, pos.z] & 15;
+            if (IsPosInChunk(pos))
+                return ChunkBlocks[pos.x, pos.y, pos.z] & 15;
 
-            return world.getMetadata(pos + chunkPos);
+            return World.GetMetadata(pos + ChunkPos);
         }
 
-        public void setMetadata(BlockPos pos, int meta, bool redraw)
+        public void SetMetadata(BlockPos pos, int meta, bool redraw)
         {
-            if (isPosInChunk(pos))
+            if (IsPosInChunk(pos))
             {
-                var id = _chunkBlocks[pos.x, pos.y, pos.z];
+                var id = ChunkBlocks[pos.x, pos.y, pos.z];
 
-                _chunkBlocks[pos.x, pos.y, pos.z] = (short)(id & 4095 | meta);
+                ChunkBlocks[pos.x, pos.y, pos.z] = (short)(id & 4095 | meta);
             }
 
-            world.setMetadata(pos + chunkPos, meta, redraw);
+            World.SetMetadata(pos + ChunkPos, meta, redraw);
         }
 
-        private bool isPosInChunk(BlockPos pos)
+        private bool IsPosInChunk(BlockPos pos)
         {
             return
                 pos.x >= 0 && pos.x < 16 &&
@@ -104,9 +113,9 @@ namespace SharpCraft
                 pos.z >= 0 && pos.z < 16;
         }
 
-        public void buildChunkModel(ModelChunk previousChunkModel)
+        public void BuildChunkModel(ModelChunk previousChunkModel)
         {
-            var MODEL_RAW = new Dictionary<ShaderProgram, List<RawQuad>>();
+            var modelRaw = new Dictionary<ShaderProgram, List<RawQuad>>();
 
             List<RawQuad> quads;
 
@@ -121,22 +130,22 @@ namespace SharpCraft
                     {
                         var pos = new BlockPos(x, y, z);
 
-                        var block = getBlock(pos);
+                        var block = GetBlock(pos);
 
                         if (block == EnumBlock.AIR)
                             continue;
 
-                        var blockModel = ModelRegistry.getModelForBlock(block, getMetadata(pos));
+                        var blockModel = ModelRegistry.getModelForBlock(block, GetMetadata(pos));
 
-                        if (!MODEL_RAW.TryGetValue(blockModel.shader, out quads))
-                            MODEL_RAW.Add(blockModel.shader, quads = new List<RawQuad>());
+                        if (!modelRaw.TryGetValue(blockModel.shader, out quads))
+                            modelRaw.Add(blockModel.shader, quads = new List<RawQuad>());
 
                         for (int i = 0; i < FacingUtil.SIDES.Length; i++)
                         {
                             var dir = FacingUtil.SIDES[i];
-                            var block_o = getBlock(pos.offset(dir));
+                            var blockO = GetBlock(pos.offset(dir));
 
-                            if (block_o == EnumBlock.AIR || block_o == EnumBlock.GLASS && block != EnumBlock.GLASS)
+                            if (blockO == EnumBlock.AIR || blockO == EnumBlock.GLASS && block != EnumBlock.GLASS)
                             {
                                 var quad = ((ModelBlockRaw)blockModel.rawModel)?.getQuadForSide(dir)?.offset(pos);
 
@@ -149,26 +158,26 @@ namespace SharpCraft
             }
 
             sw.Stop();
-            Console.WriteLine($"DEBUG: built chunk model [{sw.Elapsed.TotalMilliseconds:F}ms]");
+            //Console.WriteLine($"DEBUG: built chunk model [{sw.Elapsed.TotalMilliseconds:F}ms]");
 
             //var newShaders = MODEL_RAW.Keys.ToArray();
 
             foreach (var oldShader in previousChunkModel.fragmentPerShader.Keys)
             {
-                if (!MODEL_RAW.Keys.Contains(oldShader))
+                if (!modelRaw.Keys.Contains(oldShader))
                 {
-                    Game.INSTANCE.runGlContext(() => previousChunkModel.destroyFragmentModelWithShader(oldShader));
+                    Game.Instance.RunGlContext(() => previousChunkModel.destroyFragmentModelWithShader(oldShader));
                 }
             }
 
-            foreach (var value in MODEL_RAW)
+            foreach (var value in modelRaw)
             {
                 var newShader = value.Key;
                 var newData = value.Value;
 
                 if (!previousChunkModel.fragmentPerShader.Keys.Contains(newShader))
                 {
-                    Game.INSTANCE.runGlContext(() =>
+                    Game.Instance.RunGlContext(() =>
                     {
                         var newFragment = new ModelChunkFragment(newShader, newData);
                         previousChunkModel.setFragmentModelWithShader(newShader, newFragment);
@@ -176,21 +185,21 @@ namespace SharpCraft
                 }
                 else
                 {
-                    Game.INSTANCE.runGlContext(() => previousChunkModel.getFragmentModelWithShader(newShader)?.overrideData(newData));
+                    Game.Instance.RunGlContext(() => previousChunkModel.getFragmentModelWithShader(newShader)?.overrideData(newData));
                 }
             }
 
-            isDirty = false;
+            IsDirty = false;
         }
 
-        public void markDirty()
+        public void MarkDirty()
         {
-            isDirty = true;
+            IsDirty = true;
         }
 
-        public bool isWithinRenderDistance()
+        public bool IsWithinRenderDistance()
         {
-            return withinRenderDistance;
+            return _withinRenderDistance;
         }
     }
 

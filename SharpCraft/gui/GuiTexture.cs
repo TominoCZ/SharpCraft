@@ -1,7 +1,8 @@
 ﻿using OpenTK;
+using SharpCraft.util;
 using Size = System.Drawing.Size;
 
-namespace SharpCraft
+namespace SharpCraft.gui
 {
     internal class GuiTexture : Texture
     {

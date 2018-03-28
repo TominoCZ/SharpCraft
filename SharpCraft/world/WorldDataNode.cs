@@ -1,7 +1,6 @@
 using System;
-using System.Collections.Generic;
 
-namespace SharpCraft
+namespace SharpCraft.world
 {
     [Serializable]
     internal class WorldDataNode
@@ -10,8 +9,8 @@ namespace SharpCraft
         public string levelName { get; }
         public WorldDataNode(World w)
         {
-            levelName = w.levelName;
-            seed = w.seed;
+            levelName = w.LevelName;
+            seed = w.Seed;
         }
     }
 }
