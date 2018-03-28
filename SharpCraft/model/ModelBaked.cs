@@ -3,7 +3,7 @@ using SharpCraft.shader;
 
 namespace SharpCraft.model
 {
-    internal class ModelBaked : IModelBaked
+    public class ModelBaked : IModelBaked
     {
         public IModelRaw rawModel { get; protected set; }
         public ShaderProgram shader { get; }

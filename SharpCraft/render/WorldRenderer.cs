@@ -71,14 +71,14 @@ namespace SharpCraft.render
 
         private void renderWorld(Matrix4 viewMatrix)
         {
-            foreach (var data in Game.Instance.World.Chunks.Values)
+            foreach (var chunk in Game.Instance.World.Chunks.Values)
             {
-                if (!data.Chunk.IsWithinRenderDistance())
+                if (!chunk.IsWithinRenderDistance())
                     continue;
 
-                foreach (var shader in data.Model.fragmentPerShader.Keys)
+                foreach (var shader in chunk.fragmentPerShader.Keys)
                 {
-                    var chunkFragmentModel = data.Model.getFragmentModelWithShader(shader);
+                    var chunkFragmentModel = chunk.getFragmentModelWithShader(shader);
                     if (chunkFragmentModel == null)
                         continue;
 
@@ -88,7 +88,7 @@ namespace SharpCraft.render
                     shader.loadViewMatrix(viewMatrix);
 
                     shader.loadTransformationMatrix(
-                        MatrixHelper.createTransformationMatrix(data.Chunk.ChunkPos.toVec()));
+                        MatrixHelper.createTransformationMatrix(chunk.Chunk.ChunkPos.toVec()));
 
                     GL.DrawArrays(shader.renderType, 0, chunkFragmentModel.rawModel.vertexCount);
 
@@ -99,11 +99,11 @@ namespace SharpCraft.render
 
         private void renderWorld2(Matrix4 viewMatrix)
         {
-            List<ChunkData> visibleChunks = new List<ChunkData>(100);
+            List<Chunk> visibleChunks = new List<Chunk>(100);
 
             foreach (var data in Game.Instance.World.Chunks.Values)
             {
-                if (data.Chunk.IsWithinRenderDistance())
+                if (data.IsWithinRenderDistance())
                     visibleChunks.Add(data);
             }
 

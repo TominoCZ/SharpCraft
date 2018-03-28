@@ -6,7 +6,7 @@ using SharpCraft.model;
 
 namespace SharpCraft.shader
 {
-    internal abstract class ShaderProgram
+    public abstract class ShaderProgram
     {
         public PrimitiveType renderType;
 

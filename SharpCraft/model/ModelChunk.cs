@@ -3,7 +3,7 @@ using SharpCraft.shader;
 
 namespace SharpCraft.model
 {
-    internal class ModelChunk
+    public class ModelChunk
     {
         public ConcurrentDictionary<ShaderProgram, ModelChunkFragment> fragmentPerShader { get; }
 

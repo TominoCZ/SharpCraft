@@ -6,6 +6,7 @@ namespace SharpCraft.model
     {
         public int vaoID { get; }
         public int[] bufferIDs { get; }
+
         public int vertexCount { get; protected set; }
 
         public List<RawQuad> quads;
@@ -20,5 +21,7 @@ namespace SharpCraft.model
             foreach (var quad in quads)
                 vertexCount += quad.vertices.Length / valuesPerVertice;
         }
+
+        public bool hasLocalData() => true;
     }
 }

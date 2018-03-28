@@ -4,7 +4,7 @@ using OpenTK;
 
 namespace SharpCraft.entity
 {
-    internal class Entity
+    public class Entity
     {
         protected AxisAlignedBB boundingBox, collisionBoundingBox;
 

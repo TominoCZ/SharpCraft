@@ -66,7 +66,7 @@ namespace SharpCraft
 			_glVersion = GL.GetString(StringName.ShadingLanguageVersion);
 			Title = _title = $"SharpCraft Alpha 0.0.2 [GLSL {_glVersion}]";
 
-			TargetRenderFrequency = 300;
+			TargetRenderFrequency = 30000;
 
 			WorldRenderer = new WorldRenderer();
 			EntityRenderer = new EntityRenderer();
@@ -642,12 +642,12 @@ namespace SharpCraft
 
 							GetMouseOverObject();
 
-							foreach (var data in World.Chunks.Values)
+							foreach (var chunk in World.Chunks.Values)
 							{
-								data.Chunk.Tick();
+								chunk.Tick();
 
-								if (!data.Chunk.IsWithinRenderDistance())
-									_glContextQueue.Enqueue(() => World.UnloadChunk(data.Chunk.ChunkPos));
+								if (!chunk.IsWithinRenderDistance())
+									_glContextQueue.Enqueue(() => World.UnloadChunk(chunk.ChunkPos));
 							}
 						}
 

@@ -6,7 +6,7 @@ using SharpCraft.util;
 namespace SharpCraft.block
 {
     [Serializable]
-    struct BlockPos
+    public struct BlockPos
     {
         public int x { get; }
         public int y { get; }

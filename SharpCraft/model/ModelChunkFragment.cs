@@ -3,7 +3,7 @@ using SharpCraft.shader;
 
 namespace SharpCraft.model
 {
-    internal class ModelChunkFragment : ModelBaked
+    public class ModelChunkFragment : ModelBaked
     {
         public ModelChunkFragment(ShaderProgram shader, List<RawQuad> quads) : base(null, shader)
         {

@@ -4,7 +4,7 @@ using SharpCraft.util;
 
 namespace SharpCraft.entity
 {
-    internal class AxisAlignedBB
+    public class AxisAlignedBB
     {
         public static AxisAlignedBB BLOCK_FULL { get; } = new AxisAlignedBB(Vector3.Zero, Vector3.One);
         public static AxisAlignedBB NULL { get; } = new AxisAlignedBB(Vector3.Zero, Vector3.Zero);

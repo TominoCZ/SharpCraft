@@ -2,7 +2,7 @@
 
 namespace SharpCraft.model
 {
-    internal class RawQuad
+    public class RawQuad
     {
         public float[] vertices { get; }
         public float[] normal { get; }
