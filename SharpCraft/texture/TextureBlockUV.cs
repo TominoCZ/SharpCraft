@@ -7,14 +7,14 @@ namespace SharpCraft.texture
 {
     internal class TextureBlockUV
     {
-        private Dictionary<EnumFacing, TextureUVNode> UVs;
+        private Dictionary<FaceSides, TextureUVNode> UVs;
 
         public TextureBlockUV()
         {
-            UVs = new Dictionary<EnumFacing, TextureUVNode>();
+            UVs = new Dictionary<FaceSides, TextureUVNode>();
         }
 
-        public void setUVForSide(EnumFacing side, Vector2 from, Vector2 to)
+        public void setUVForSide(FaceSides side, Vector2 from, Vector2 to)
         {
             if (UVs.ContainsKey(side))
                 UVs.Remove(side);
@@ -22,7 +22,7 @@ namespace SharpCraft.texture
             UVs.Add(side, new TextureUVNode(from, to));
         }
 
-        public TextureUVNode getUVForSide(EnumFacing side)
+        public TextureUVNode getUVForSide(FaceSides side)
         {
             UVs.TryGetValue(side, out var uv);
 
@@ -31,7 +31,7 @@ namespace SharpCraft.texture
 
         public void fill(Vector2 from, Vector2 to)
         {
-            foreach (EnumFacing side in FacingUtil.SIDES)
+            foreach (FaceSides side in FaceSides.AllSides)
             {
                 setUVForSide(side, from, to);
             }
@@ -39,7 +39,7 @@ namespace SharpCraft.texture
 
         public void fillEmptySides(TextureUVNode with)
         {
-            foreach (EnumFacing side in FacingUtil.SIDES)
+            foreach (FaceSides side in FaceSides.AllSides)
             {
                 if (getUVForSide(side) == null)
                     setUVForSide(side, with.start, with.end);

@@ -88,7 +88,7 @@ namespace SharpCraft.render
 
             GL.ActiveTexture(TextureUnit.Texture0);
             GL.BindTexture(TextureTarget.TextureCubeMap, texture);
-            GL.DrawArrays(cube.shader.renderType, 0, cube.rawModel.vertexCount);
+	        cube.rawModel.Render(cube.shader.renderType);
 
             cube.unbind();
         }

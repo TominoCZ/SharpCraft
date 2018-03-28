@@ -1,4 +1,6 @@
-﻿namespace SharpCraft.model
+﻿using OpenTK.Graphics.OpenGL;
+
+namespace SharpCraft.model
 {
     public interface IModelRaw
     {
@@ -7,5 +9,6 @@
         int[] bufferIDs { get; }
         
         bool hasLocalData();
+	    void Render(PrimitiveType shaderRenderType);
     }
 }

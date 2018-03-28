@@ -6,14 +6,14 @@ namespace SharpCraft.model
 {
     internal class ModelBlockRaw : ModelRaw
     {
-        private Dictionary<EnumFacing, RawQuad> _quads;
+        private Dictionary<FaceSides, RawQuad> _quads;
 
-        public ModelBlockRaw(int vaoID, Dictionary<EnumFacing, RawQuad> _quads, params int[] bufferIDs) : base(vaoID, 3, _quads.Values.ToList(), bufferIDs)
+        public ModelBlockRaw(int vaoID, Dictionary<FaceSides, RawQuad> _quads, params int[] bufferIDs) : base(vaoID, 3, _quads.Values.ToList(), bufferIDs)
         {
             this._quads = _quads;
         }
 
-        public RawQuad getQuadForSide(EnumFacing side)
+        public RawQuad getQuadForSide(FaceSides side)
         {
             _quads.TryGetValue(side, out var quad);
 

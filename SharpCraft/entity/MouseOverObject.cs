@@ -5,7 +5,7 @@ namespace SharpCraft.entity
 {
     internal class MouseOverObject
     {
-        public EnumFacing sideHit;
+        public FaceSides sideHit;
 
         public Vector3 hitVec;
 

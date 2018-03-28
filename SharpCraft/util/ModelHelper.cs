@@ -10,46 +10,46 @@ namespace SharpCraft.util
     {
         private static Vector3 V0, V1, V2, NORMAL;
 
-        private static Dictionary<EnumFacing, float[]> CUBE = new Dictionary<EnumFacing, float[]>();
+        private static Dictionary<FaceSides, float[]> CUBE = new Dictionary<FaceSides, float[]>();
 
         static ModelHelper()
         {
-            CUBE.Add(EnumFacing.NORTH, new float[]
+            CUBE.Add(FaceSides.North, new float[]
             {
                 1, 1, 0,
                 1, 0, 0,
                 0, 0, 0,
                 0, 1, 0
             });
-            CUBE.Add(EnumFacing.SOUTH, new float[]
+            CUBE.Add(FaceSides.South, new float[]
             {
                 0, 1, 1,
                 0, 0, 1,
                 1, 0, 1,
                 1, 1, 1
             });
-            CUBE.Add(EnumFacing.EAST, new float[]
+            CUBE.Add(FaceSides.East, new float[]
             {
                 1, 1, 1,
                 1, 0, 1,
                 1, 0, 0,
                 1, 1, 0
             });
-            CUBE.Add(EnumFacing.WEST, new float[]
+            CUBE.Add(FaceSides.West, new float[]
             {
                 0, 1, 0,
                 0, 0, 0,
                 0, 0, 1,
                 0, 1, 1
             });
-            CUBE.Add(EnumFacing.UP, new float[]
+            CUBE.Add(FaceSides.Up, new float[]
             {
                 0, 1, 0,
                 0, 1, 1,
                 1, 1, 1,
                 1, 1, 0
             });
-            CUBE.Add(EnumFacing.DOWN, new float[]
+            CUBE.Add(FaceSides.Down, new float[]
             {
                 0, 0, 1,
                 0, 0, 0,
@@ -89,9 +89,9 @@ namespace SharpCraft.util
             return normals;
         }
 
-        public static Dictionary<EnumFacing, RawQuad> createTexturedCubeModel(EnumBlock block)
+        public static Dictionary<FaceSides, RawQuad> createTexturedCubeModel(EnumBlock block)
         {
-            var quads = new Dictionary<EnumFacing, RawQuad>();
+            var quads = new Dictionary<FaceSides, RawQuad>();
             var uvs = TextureManager.getUVsFromBlock(block);
 
             foreach (var face in CUBE.Keys)

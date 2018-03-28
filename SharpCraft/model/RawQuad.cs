@@ -32,9 +32,9 @@ namespace SharpCraft.model
 
             for (int i = 0; i < newVertices.Length; i += 3)
             {
-                newVertices[i] = vertices[i] + pos.x;
-                newVertices[i + 1] = vertices[i + 1] + pos.y;
-                newVertices[i + 2] = vertices[i + 2] + pos.z;
+                newVertices[i] = vertices[i] + pos.X;
+                newVertices[i + 1] = vertices[i + 1] + pos.Y;
+                newVertices[i + 2] = vertices[i + 2] + pos.Z;
             }
 
             return new RawQuad(newVertices, UVs, normal, valuesPerVertice);

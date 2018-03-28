@@ -45,5 +45,32 @@ namespace SharpCraft.util
         {
             return (v1 - v2).Length;
         }
+
+	    public static int MinMax(int val,int min,int max)
+	    {
+		    if (val > max) return max;
+		    return val < min ? min : val;
+	    }
+
+	    public static void ToLocal(int pos,int partSize, out int localPos, out int partPos)
+	    {
+		    if (pos >= 0)
+		    {
+			    partPos = pos / partSize;
+			    localPos=pos % partSize;
+			    return;
+		    }
+
+		    partPos = (pos + 1) / pos - 1;
+		    localPos = pos - partPos * partSize;
+	    }
+
+	    public static int ToLocal(int pos,int partSize)
+	    {
+		    if (pos >= 0) return pos % partSize;
+
+		    var partPos = (pos + 1) / pos - 1;
+		    return pos - partPos * partSize;
+	    }
     }
 }

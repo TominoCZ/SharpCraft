@@ -21,6 +21,7 @@ using SharpCraft.shader;
 using SharpCraft.texture;
 using SharpCraft.util;
 using SharpCraft.world;
+using SharpCraft.world.chunk;
 
 namespace SharpCraft
 {
@@ -153,8 +154,8 @@ namespace SharpCraft
 
 				World = new World("MyWorld", "Tomlow's Fuckaround", SettingsManager.GetValue("worldseed").GetHashCode());
 
-				Player = new EntityPlayerSP(new Vector3(playerPos.x, World.GetHeightAtPos(playerPos.x, playerPos.z),
-					playerPos.z));
+				Player = new EntityPlayerSP(new Vector3(playerPos.X, World.GetHeightAtPos(playerPos.X, playerPos.Z),
+					playerPos.Z));
 
 				World.AddEntity(Player);
 
@@ -212,7 +213,6 @@ namespace SharpCraft
 						SettingsManager.Load();
 
 						WorldRenderer.RenderDistance = SettingsManager.GetInt("renderdistance");
-						WorldRenderer.AltRenderMethod = SettingsManager.GetBool("altrendermethod");
 						_sensitivity = SettingsManager.GetFloat("sensitivity");
 
 						if (e.Shift)
@@ -313,34 +313,34 @@ namespace SharpCraft
 							}
 							else if (Player.getEquippedItemStack()?.Item is ItemBlock itemBlock)
 							{
-								pos = pos.offset(MouseOverObject.sideHit);
+								pos = pos.Offset(MouseOverObject.sideHit);
 
 								var blockAtPos = World.GetBlock(pos);
 
 								var heldBlock = itemBlock.getBlock();
 								var blockBb = ModelRegistry.getModelForBlock(heldBlock, World.GetMetadata(pos))
-									.boundingBox.offset(pos.toVec());
+									.boundingBox.offset(pos.ToVec());
 
 								if (blockAtPos == EnumBlock.AIR && World.GetIntersectingEntitiesBBs(blockBb).Count == 0)
 								{
-									var posUnder = pos.offset(EnumFacing.DOWN);
+									var posUnder = pos.Offset(FaceSides.Down);
 
 									var blockUnder = World.GetBlock(posUnder);
-									var blockAbove = World.GetBlock(pos.offset(EnumFacing.UP));
+									var blockAbove = World.GetBlock(pos.Offset(FaceSides.Up));
 
 									if (blockUnder == EnumBlock.GRASS && heldBlock != EnumBlock.GLASS)
-										World.SetBlock(posUnder, EnumBlock.DIRT, 0, false);
+										World.SetBlock(posUnder, EnumBlock.DIRT, 0);
 									if (blockAbove != EnumBlock.AIR && blockAbove != EnumBlock.GLASS && heldBlock == EnumBlock.GRASS)
-										World.SetBlock(pos, EnumBlock.DIRT, 0, true);
+										World.SetBlock(pos, EnumBlock.DIRT, 0);
 									else
-										World.SetBlock(pos, heldBlock, Player.getEquippedItemStack().Meta, true);
+										World.SetBlock(pos, heldBlock, Player.getEquippedItemStack().Meta);
 								}
 							}
 						}
 
 						//break
 						if (e.Button == MouseButton.Left)
-							World.SetBlock(pos, EnumBlock.AIR, 0, true);
+							World.SetBlock(pos, EnumBlock.AIR, 0);
 					}
 				}
 				else
@@ -392,7 +392,7 @@ namespace SharpCraft
 			ShaderManager.updateProjectionMatrix();
 		}
 
-		private List<BlockPos> _toCheck = new List<BlockPos>();
+		private List<ChunkPos> _toCheck = new List<ChunkPos>();
 
 		private void CheckChunks()
 		{
@@ -404,39 +404,32 @@ namespace SharpCraft
 			{
 				for (var x = -WorldRenderer.RenderDistance; x <= WorldRenderer.RenderDistance; x++)
 				{
-					var xPos = x * 16 + Player.pos.X;
-					var zPos = z * 16 + Player.pos.Z;
-					
-					var pos = new BlockPos(xPos, 0,zPos).chunkPos().offset(8, 0, 8);
-					_toCheck.Add(pos);
+					_toCheck.Add(new ChunkPos((int) (x + Player.pos.X/16), (int) (z + Player.pos.Z/16)));
 				}
 			}
-			
-			Func<BlockPos, float> dist=c=>MathUtil.Distance(c.toVec().Xz, Camera.pos.Xz);
+
 			_toCheck
-				.Where(c => dist(c) < WorldRenderer.RenderDistance * 16)
-				.OrderBy(dist)
+				.Where(c => c.DistanceTo(Camera.pos.Xz) < WorldRenderer.RenderDistance * 16)
+				.OrderBy(c => c.DistanceTo(Camera.pos.Xz))
 				.AsParallel()
 				.ForAll(CheckChunk);
-			
+
 			_toCheck.Clear();
 		}
 
-		private void CheckChunk(BlockPos pos)
+		private void CheckChunk(ChunkPos pos)
 		{
-			var chunk = World.GetChunkFromPos(pos);
-			
+			var chunk = World.GetChunk(pos);
+
 			if (chunk == null) // || !world.isChunkGenerated(pos)))
 			{
-				if (World.LoadChunk(pos.chunkPos())) ;//Console.WriteLine($"loaded chunk @ {pos}");
-				else{//chunk does not exist, generate it
-					World.BeginGenerateChunk(pos, true);
-					Console.WriteLine($"DEBUG: chunk generated @ {pos.x} x {pos.y}");
+				if (World.LoadChunk(pos)) ; //Console.WriteLine($"loaded chunk @ {pos}");
+				else
+				{
+					//chunk does not exist, generate it
+					World.GenerateChunk(pos, true);
+					Console.WriteLine($"DEBUG: chunk generated @ {pos.x} x {pos.z}");
 				}
-			}
-			else if (chunk.IsDirty || !World.DoesChunkHaveModel(pos) && World.AreNeighbourChunksGenerated(pos))
-			{
-				World.BeginUpdateModelForChunk(pos);
 			}
 		}
 
@@ -454,7 +447,7 @@ namespace SharpCraft
 				else if (wheelValue > _mouseWheelLast)
 					Player.selectPreviousItem();
 
-				if (World?.GetChunkFromPos(new BlockPos(Player.pos)) == null)
+				if (World?.GetChunk(new BlockPos(Player.pos).ChunkPos()) == null)
 					Player.motion = Vector3.Zero;
 			}
 
@@ -494,31 +487,31 @@ namespace SharpCraft
 							if (block != EnumBlock.AIR)
 							{
 								var model = ModelRegistry.getModelForBlock(block, World.GetMetadata(pos));
-								var bb = model.boundingBox.offset(pos.toVec());
+								var bb = model.boundingBox.offset(pos.ToVec());
 
 								var hitSomething = RayHelper.rayIntersectsBB(Camera.pos,
 									Camera.getLookVec(), bb, out var hitPos, out var normal);
 
 								if (hitSomething)
 								{
-									var sideHit = EnumFacing.UP;
+									var sideHit = FaceSides.Up;
 
 									if (normal.X < 0)
-										sideHit = EnumFacing.WEST;
+										sideHit = FaceSides.West;
 									else if (normal.X > 0)
-										sideHit = EnumFacing.EAST;
+										sideHit = FaceSides.East;
 									if (normal.Y < 0)
-										sideHit = EnumFacing.DOWN;
+										sideHit = FaceSides.Down;
 									else if (normal.Y > 0)
-										sideHit = EnumFacing.UP;
+										sideHit = FaceSides.Up;
 									if (normal.Z < 0)
-										sideHit = EnumFacing.NORTH;
+										sideHit = FaceSides.North;
 									else if (normal.Z > 0)
-										sideHit = EnumFacing.SOUTH;
+										sideHit = FaceSides.South;
 
 									var p = new BlockPos(hitPos - normal * 0.5f);
 
-									var l = Math.Abs((Camera.pos - (p.toVec() + Vector3.One * 0.5f)).Length);
+									var l = Math.Abs((Camera.pos - (p.ToVec() + Vector3.One * 0.5f)).Length);
 
 									if (l < dist)
 									{
@@ -580,7 +573,6 @@ namespace SharpCraft
 
 			_sensitivity = SettingsManager.GetFloat("sensitivity");
 			WorldRenderer.RenderDistance = SettingsManager.GetInt("renderdistance");
-			WorldRenderer.AltRenderMethod = SettingsManager.GetBool("altrendermethod");
 
 			OpenGuiScreen(new GuiScreenMainMenu());
 		}
@@ -603,7 +595,7 @@ namespace SharpCraft
 			{
 				var viewMatrix = Camera.View;
 
-				WorldRenderer.render(viewMatrix);
+				WorldRenderer.Render(World,viewMatrix);
 				EntityRenderer.render(partialTicks);
 
 				SkyboxRenderer.render(viewMatrix);
@@ -646,8 +638,8 @@ namespace SharpCraft
 							{
 								chunk.Tick();
 
-								if (!chunk.IsWithinRenderDistance())
-									_glContextQueue.Enqueue(() => World.UnloadChunk(chunk.ChunkPos));
+								if (chunk.Pos.DistanceTo(Camera.pos.Xz)>WorldRenderer.RenderDistance*Chunk.ChunkSize+50)
+									_glContextQueue.Enqueue(() => World.UnloadChunk(chunk.Pos));
 							}
 						}
 

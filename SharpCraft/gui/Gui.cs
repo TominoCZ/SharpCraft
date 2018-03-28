@@ -73,7 +73,7 @@ namespace SharpCraft.gui
         protected virtual void renderBlock(EnumBlock block, float scale, int x, int y)
         {
             var UVs = TextureManager.getUVsFromBlock(block);
-            ModelManager.overrideModelUVsInVAO(_item.rawModel.bufferIDs[1], UVs.getUVForSide(EnumFacing.SOUTH).ToArray());
+            ModelManager.overrideModelUVsInVAO(_item.rawModel.bufferIDs[1], UVs.getUVForSide(FaceSides.South).ToArray());
 
             var unit = new Vector2(1f / Game.Instance.ClientSize.Width, 1f / Game.Instance.ClientSize.Height);
 

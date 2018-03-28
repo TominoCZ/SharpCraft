@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices.ComTypes;
+using SharpCraft.util;
 
 namespace SharpCraft.world
 {
@@ -34,20 +35,19 @@ namespace SharpCraft.world
 
 		private void calcCord(int[] coordinate,out int[] regionCoord,out int[] regionLocalCoord)
 		{
+			//  .| . . . . . . . .| . . . . . . . .| . .
+			// -9 -8-7-6-5-4-3-2-1  0 1 2 3 4 5 6 7  8 9 global pos
+			// -2        -1               0           1  region pos
+			//  7  0 1 2 3 4 5 6 7  0 1 2 3 4 5 6 7  0 1 part pos
+
 			regionCoord = new int[coordinate.Length];
 			regionLocalCoord = new int[coordinate.Length];
 
 			for (var i = 0; i < regionCoord.Length; i++)
 			{
-				var size = Info.DimSize(i);
-				var cord = coordinate[i];
-				regionCoord[i] = cord / size;
-				if (cord < 0)
-				{
-					if(cord % size!=0)regionCoord[i]--;
-					regionLocalCoord[i] = cord-regionCoord[i]*size;
-				}
-				else regionLocalCoord[i] = cord % size;
+				MathUtil.ToLocal(coordinate[i], Info.DimSize(i), out var localPos, out var partPos);
+				regionLocalCoord[i] = localPos;
+				regionCoord[i] = partPos;
 			}
 		}
 
@@ -56,7 +56,7 @@ namespace SharpCraft.world
 			var pos = _regions.BinarySearch(null, Comparer<Region>.Create((x, y) => x.GetHashCode().CompareTo(hash)));
 			if (pos <= -1||_regions[pos].GetHashCode()!=hash)
 			{
-				Region r = new Region(Info, (int[]) regionCoord.Clone(), DataRoot);
+				var r = new Region(Info, (int[]) regionCoord.Clone(), DataRoot);
 				_regions.Add(r);
 				_regions.Sort((x, y) => x.GetHashCode().CompareTo(y.GetHashCode()));
 				return r;

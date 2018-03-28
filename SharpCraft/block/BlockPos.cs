@@ -2,63 +2,65 @@
 using OpenTK;
 using OpenTK.Graphics.OpenGL;
 using SharpCraft.util;
+using SharpCraft.world.chunk;
 
 namespace SharpCraft.block
 {
-    [Serializable]
-    public struct BlockPos
-    {
-        public int x { get; }
-        public int y { get; }
-        public int z { get; }
-        
-        public Vector3 toVec()
-        {
-            return new Vector3(x,y,z);
-        }
+	[Serializable]
+	public struct BlockPos
+	{
+		public int X { get; }
+		public int Y { get; }
+		public int Z { get; }
 
-        public static BlockPos operator +(BlockPos p1, BlockPos p2) => new BlockPos(p1.x + p2.x, p1.y + p2.y, p1.z + p2.z);
+		public Vector3 ToVec()
+		{
+			return new Vector3(X, Y, Z);
+		}
 
-        public static BlockPos operator -(BlockPos p1, BlockPos p2) => new BlockPos(p1.x - p2.x, p1.y - p2.y, p1.z - p2.z);
+		public static BlockPos operator +(BlockPos p1, BlockPos p2) => new BlockPos(p1.X + p2.X, p1.Y + p2.Y, p1.Z + p2.Z);
+		public static BlockPos operator +(BlockPos p1, Vector3  p2) => new BlockPos(p1.X + p2.X, p1.Y + p2.Y, p1.Z + p2.Z);
 
-        public BlockPos(int x, int y, int z)
-        {
-            this.x = x;
-            this.y = y;
-            this.z = z;
-        }
+		public static BlockPos operator -(BlockPos p1, BlockPos p2) => new BlockPos(p1.X - p2.X, p1.Y - p2.Y, p1.Z - p2.Z);
 
-        public BlockPos(float x, float y, float z) : this((int)Math.Floor(x), (int)Math.Floor(y), (int)Math.Floor(z))
-        {
-        }
+		public BlockPos(int x, int y, int z)
+		{
+			X = x;
+			Y = y;
+			Z = z;
+		}
 
-        public BlockPos(Vector3 vec) : this((int)Math.Floor(vec.X), (int)Math.Floor(vec.Y), (int)Math.Floor(vec.Z))
-        {
-        }
+		public BlockPos(float x, float y, float z) : this((int) Math.Floor(x), (int) Math.Floor(y), (int) Math.Floor(z))
+		{
+		}
 
-        public BlockPos offset(EnumFacing dir)
-        {
-            return new BlockPos(new Vector3(x, y, z) + FacingUtil.getFacingVector(dir));
-        }
+		public BlockPos(Vector3 vec) : this((int) Math.Floor(vec.X), (int) Math.Floor(vec.Y), (int) Math.Floor(vec.Z))
+		{
+		}
 
-        public BlockPos offset(float x, float y, float z)
-        {
-            return new BlockPos(this.x + x, this.y + y, this.z + z);
-        }
+		public BlockPos Offset(FaceSides dir)
+		{
+			return this + dir;
+		}
 
-        public BlockPos offsetChunk(EnumFacing dir)
-        {
-            return new BlockPos(new Vector3(x, y, z) + FacingUtil.getFacingVector(dir) * 16);
-        }
+		public BlockPos Offset(float x, float y, float z)
+		{
+			return new BlockPos(X + x, Y + y, Z + z);
+		}
 
-        public BlockPos chunkPos()
-        {
-            return new BlockPos((int)Math.Floor(x / 16f) * 16, 0, (int)Math.Floor(z / 16f) * 16);
-        }
+		public BlockPos OffsetChunk(FaceSides dir)
+		{
+			return this + dir * Chunk.ChunkSize;
+		}
 
-        public override string ToString()
-        {
-            return $"BlockPos[{x},{y},{z}]";
-        }
-    }
+		public ChunkPos ChunkPos()
+		{
+			return new ChunkPos(this);
+		}
+
+		public override string ToString()
+		{
+			return $"BlockPos[{X},{Y},{Z}]";
+		}
+	}
 }

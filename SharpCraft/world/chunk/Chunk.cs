@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using OpenTK;
+using OpenTK.Graphics.OpenGL;
 using SharpCraft.block;
 using SharpCraft.entity;
 using SharpCraft.model;
@@ -14,17 +15,14 @@ namespace SharpCraft.world.chunk
 {
 	public class Chunk
 	{
-		public static Chunk CreateWithData(BlockPos chunkPos, World world, short[,,] blockData)
-		{
-			return new Chunk(chunkPos, world, blockData);
-		}
+		public const int ChunkSize = 16;
+		public const int ChunkHeight = 256;
 
 		private short[,,] ChunkBlocks;
 
-		public bool IsDirty { get; private set; }
-		public bool NeedsSave { get; set; }
+		private bool NeedsSave { get; set; }
 
-		public BlockPos ChunkPos { get; }
+		public ChunkPos Pos { get; }
 
 		public AxisAlignedBB BoundingBox { get; }
 
@@ -35,22 +33,21 @@ namespace SharpCraft.world.chunk
 		private bool ModelGenerating;
 
 		public bool HasData => ChunkBlocks != null;
+		public bool IsGenerating { get; private set; }
 
-		public Chunk(BlockPos chunkPos, World world)
+		public Chunk(ChunkPos pos, World world)
 		{
-			ChunkPos = chunkPos;
+			Pos = pos;
 			World = world;
-
-			BoundingBox = new AxisAlignedBB(Vector3.Zero, Vector3.One * 16 + Vector3.UnitY * 240).offset(chunkPos.toVec());
-			
-			ChunkBlocks = new short[16, 256, 16];
+			BoundingBox = new AxisAlignedBB(Vector3.Zero, Vector3.One * ChunkSize + Vector3.UnitY * 240).offset(Pos.ToVec());
+			IsGenerating = true;
 		}
 
-		private Chunk(BlockPos chunkPos, World world, short[,,] blockData)
+		public Chunk(ChunkPos pos, World world, short[,,] blockData)
 		{
-			ChunkPos = chunkPos;
+			Pos = pos;
 			World = world;
-			BoundingBox = new AxisAlignedBB(Vector3.Zero, Vector3.One * 16 + Vector3.UnitY * 240).offset(chunkPos.toVec());
+			BoundingBox = new AxisAlignedBB(Vector3.Zero, Vector3.One * ChunkSize + Vector3.UnitY * 240).offset(Pos.ToVec());
 
 			ChunkBlocks = blockData;
 		}
@@ -60,73 +57,94 @@ namespace SharpCraft.world.chunk
 			//update entitys here
 		}
 
-		public void SetBlock(BlockPos pos, EnumBlock blockType, int meta)
+		private void CheckPos(BlockPos localPos)
 		{
+			if (localPos.Y < 0) throw new IndexOutOfRangeException($"Block pos y({localPos.Y}) is less than 0");
+			if (localPos.Y >= ChunkHeight) throw new IndexOutOfRangeException($"Block pos y({localPos.Y}) is bigger or equal to ChunkHeight");
+			CheckPosXZ(localPos);
+		}
+
+		private void CheckPosXZ(BlockPos localPos)
+		{
+			if (localPos.X < 0) throw new IndexOutOfRangeException($"Block pos x({localPos.X}) is less than 0");
+			if (localPos.Z < 0) throw new IndexOutOfRangeException($"Block pos z({localPos.Z}) is less than 0");
+			if (localPos.X >= ChunkSize) throw new IndexOutOfRangeException($"Block pos x({localPos.X}) is bigger or equal to ChunkSize");
+			if (localPos.Z >= ChunkSize) throw new IndexOutOfRangeException($"Block pos z({localPos.Z}) is bigger or equal to ChunkSize");
+		}
+		private bool EdgeCase(BlockPos localPos)
+		{
+			return localPos.X == 0 || localPos.Y == 0 || localPos.X == ChunkSize - 1 || localPos.Y == ChunkSize - 1;
+		}
+
+		public void SetBlock(BlockPos localPos, EnumBlock blockType, int meta)
+		{
+			CheckPos(localPos);
 			short id = (short) ((short) blockType << 4 | meta);
 
-			if (IsPosInChunk(pos))
+			ChunkBlocks[localPos.X, localPos.Y, localPos.Z] = id;
+			NeedsSave = true;
+		}
+
+		public EnumBlock GetBlock(BlockPos localPos)
+		{
+			if (localPos.Y <= 0 || localPos.Y >= ChunkHeight) return EnumBlock.AIR;
+			CheckPosXZ(localPos);
+
+			return (EnumBlock) (ChunkBlocks[localPos.X, localPos.Y, localPos.Z] >> 4);
+		}
+
+		public int GetMetadata(BlockPos localPos)
+		{
+			CheckPos(localPos);
+			return ChunkBlocks[localPos.X, localPos.Y, localPos.Z] & 15;
+		}
+
+		public void SetMetadata(BlockPos localPos, int meta)
+		{
+			CheckPos(localPos);
+			var id = (short) (ChunkBlocks[localPos.X, localPos.Y, localPos.Z] & 4095 | meta);
+
+			if (id != ChunkBlocks[localPos.X, localPos.Y, localPos.Z])
 			{
-				ChunkBlocks[pos.x, pos.y, pos.z] = id;
-				NeedsSave = true;
+				ChunkBlocks[localPos.X, localPos.Y, localPos.Z] = id;
+				MarkDirty();
+				if (EdgeCase(localPos))
+				{
+
+				}
 			}
 		}
 
-		public EnumBlock GetBlock(BlockPos pos)
-		{
-			if (pos.y >= 0 && pos.y < 256)
-			{
-				if (IsPosInChunk(pos))
-					return (EnumBlock) (ChunkBlocks[pos.x, pos.y, pos.z] >> 4);
-
-				var block = World.GetBlock(pos + ChunkPos);
-
-				return block;
-			}
-
-			return EnumBlock.AIR;
-		}
-
-		public int GetMetadata(BlockPos pos)
-		{
-			if (IsPosInChunk(pos))
-				return ChunkBlocks[pos.x, pos.y, pos.z] & 15;
-
-			return World.GetMetadata(pos + ChunkPos);
-		}
-
-		public void SetMetadata(BlockPos pos, int meta, bool redraw)
-		{
-			if (IsPosInChunk(pos))
-			{
-				var id = ChunkBlocks[pos.x, pos.y, pos.z];
-
-				ChunkBlocks[pos.x, pos.y, pos.z] = (short) (id & 4095 | meta);
-			}
-
-			World.SetMetadata(pos + ChunkPos, meta, redraw);
-		}
-
-		private bool IsPosInChunk(BlockPos pos)
-		{
-			return
-				pos.x >= 0 && pos.x < 16 &&
-				pos.y >= 0 && pos.y < 256 &&
-				pos.z >= 0 && pos.z < 16;
-		}
-
-		public void render()
+		public void Render(Matrix4 viewMatrix)
 		{
 			if (_model == null)
 			{
 				BuildChunkModel();
 				return;
 			}
+
+			foreach (var shader in _model.fragmentPerShader.Keys)
+			{
+				var chunkFragmentModel = _model.getFragmentModelWithShader(shader);
+				if (chunkFragmentModel == null) continue;
+
+				chunkFragmentModel.bind();
+
+				shader.loadVec3(Vector3.One, "lightColor");
+				shader.loadViewMatrix(viewMatrix);
+
+				shader.loadTransformationMatrix(MatrixHelper.createTransformationMatrix(Pos));
+
+				chunkFragmentModel.rawModel.Render(shader.renderType);
+
+				chunkFragmentModel.unbind();
+			}
 		}
 
 		private void BuildChunkModel()
 		{
-			if (!ChunkGenerated || ModelGenerating)
-				return;
+			if (!HasData || ModelGenerating) return;
+			if(World.AreNeighbourChunksGenerated(Pos))return;
 
 			ModelGenerating = true;
 
@@ -139,11 +157,11 @@ namespace SharpCraft.world.chunk
 				var sw = Stopwatch.StartNew();
 
 				//generate the model / fill MODEL_RAW
-				for (int z = 0; z < 16; z++)
+				for (int z = 0; z < ChunkSize; z++)
 				{
 					for (int y = 0; y < 256; y++)
 					{
-						for (int x = 0; x < 16; x++)
+						for (int x = 0; x < ChunkSize; x++)
 						{
 							var pos = new BlockPos(x, y, z);
 
@@ -157,10 +175,10 @@ namespace SharpCraft.world.chunk
 							if (!modelRaw.TryGetValue(blockModel.shader, out quads))
 								modelRaw.Add(blockModel.shader, quads = new List<RawQuad>());
 
-							for (int i = 0; i < FacingUtil.SIDES.Length; i++)
+							for (int i = 0; i < FaceSides.AllSides.Count; i++)
 							{
-								var dir = FacingUtil.SIDES[i];
-								var blockO = GetBlock(pos.offset(dir));
+								var dir = FaceSides.AllSides[i];
+								var blockO = GetBlock(pos.Offset(dir));
 
 								if (blockO == EnumBlock.AIR || blockO == EnumBlock.GLASS && block != EnumBlock.GLASS)
 								{
@@ -178,14 +196,17 @@ namespace SharpCraft.world.chunk
 				//Console.WriteLine($"DEBUG: built chunk model [{sw.Elapsed.TotalMilliseconds:F}ms]");
 
 				//var newShaders = MODEL_RAW.Keys.ToArray();
-
-				foreach (var oldShader in _model.fragmentPerShader.Keys)
+				if (_model != null)
 				{
-					if (!modelRaw.Keys.Contains(oldShader))
+					foreach (var oldShader in _model.fragmentPerShader.Keys)
 					{
-						Game.Instance.RunGlContext(() => _model.destroyFragmentModelWithShader(oldShader));
+						if (!modelRaw.Keys.Contains(oldShader))
+						{
+							Game.Instance.RunGlContext(() => _model.destroyFragmentModelWithShader(oldShader));
+						}
 					}
 				}
+				else _model = new ModelChunk();
 
 				foreach (var value in modelRaw)
 				{
@@ -206,15 +227,49 @@ namespace SharpCraft.world.chunk
 					}
 				}
 
-				IsDirty = false;
-
 				ModelGenerating = false;
 			});
 		}
 
 		public void MarkDirty()
 		{
-			IsDirty = true;
+			DestroyModel();
+		}
+
+		public void DestroyModel()
+		{
+			while (ModelGenerating)Thread.Sleep(2);
+			if (_model == null) return;
+			_model.destroy();
+			_model = null;
+		}
+
+		public bool ShouldRender(int renderDistance)
+		{
+			return Pos.DistanceTo(Game.Instance.Camera.pos.Xz) < renderDistance * ChunkSize;
+		}
+
+		public void Save()
+		{
+			lock (this)
+			{
+				if (!NeedsSave) return;
+				NeedsSave = false;
+
+				//Console.WriteLine($"Saving chunk @ {chunk.Chunk.ChunkPos.x / 16} x {chunk.Chunk.ChunkPos.z / 16}");
+
+				ChunkDataManager chunkManager = World.ChunkManager;
+				var data = new byte[chunkManager.Info.ChunkByteSize];
+				Buffer.BlockCopy(ChunkBlocks, 0, data, 0, data.Length);
+				chunkManager.WriteChunkData(new[] {Pos.x, Pos.z}, data);
+			}
+		}
+
+		public void GeneratedData(short[,,] chunkData)
+		{
+			ChunkBlocks = chunkData;
+			IsGenerating = false;
+			NeedsSave = true;
 		}
 	}
 }

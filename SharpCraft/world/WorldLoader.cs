@@ -78,7 +78,7 @@ namespace SharpCraft.world
                 }
 
                 world.AddEntity(player);
-                world.LoadChunk(new BlockPos(player.pos));
+                world.LoadChunk(new BlockPos(player.pos).ChunkPos());
                 Game.Instance.Player = player;
             }
             catch (Exception e)

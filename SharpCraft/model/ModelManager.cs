@@ -9,7 +9,7 @@ namespace SharpCraft.model
         private static List<int> VAOs = new List<int>();
         private static List<int> VBOs = new List<int>();
 
-        public static ModelBlockRaw loadBlockModelToVAO(Dictionary<EnumFacing, RawQuad> quads)
+        public static ModelBlockRaw loadBlockModelToVAO(Dictionary<FaceSides, RawQuad> quads)
         {
             int vaoID = createVAO();
 
