@@ -35,11 +35,6 @@ namespace SharpCraft.world
 
 		private void calcCord(int[] coordinate,out int[] regionCoord,out int[] regionLocalCoord)
 		{
-			//  .| . . . . . . . .| . . . . . . . .| . .
-			// -9 -8-7-6-5-4-3-2-1  0 1 2 3 4 5 6 7  8 9 global pos
-			// -2        -1               0           1  region pos
-			//  7  0 1 2 3 4 5 6 7  0 1 2 3 4 5 6 7  0 1 part pos
-
 			regionCoord = new int[coordinate.Length];
 			regionLocalCoord = new int[coordinate.Length];
 

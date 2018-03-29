@@ -52,6 +52,11 @@ namespace SharpCraft.util
 		    return val < min ? min : val;
 	    }
 
+	    //  .| . . . . . . . .| . . . . . . . .| . .
+	    // -9 -8-7-6-5-4-3-2-1  0 1 2 3 4 5 6 7  8 9 global pos
+	    // -2        -1               0           1  region pos
+	    //  7  0 1 2 3 4 5 6 7  0 1 2 3 4 5 6 7  0 1 part pos
+
 	    public static void ToLocal(int pos,int partSize, out int localPos, out int partPos)
 	    {
 		    if (pos >= 0)
@@ -61,7 +66,7 @@ namespace SharpCraft.util
 			    return;
 		    }
 
-		    partPos = (pos + 1) / pos - 1;
+		    partPos = (pos + 1) / partSize - 1;
 		    localPos = pos - partPos * partSize;
 	    }
 
@@ -69,7 +74,7 @@ namespace SharpCraft.util
 	    {
 		    if (pos >= 0) return pos % partSize;
 
-		    var partPos = (pos + 1) / pos - 1;
+		    var partPos = (pos + 1) / partSize - 1;
 		    return pos - partPos * partSize;
 	    }
     }
