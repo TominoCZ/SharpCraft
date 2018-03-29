@@ -66,7 +66,7 @@ namespace SharpCraft.util
 			    return;
 		    }
 
-		    partPos = (pos + 1) / partSize - 1;
+	        partPos = (pos + 1) / partSize - 1;
 		    localPos = pos - partPos * partSize;
 	    }
 
@@ -74,7 +74,7 @@ namespace SharpCraft.util
 	    {
 		    if (pos >= 0) return pos % partSize;
 
-		    var partPos = (pos + 1) / partSize - 1;
+	        var partPos = (pos + 1) / partSize - 1;
 		    return pos - partPos * partSize;
 	    }
     }

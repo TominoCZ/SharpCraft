@@ -149,8 +149,7 @@ namespace SharpCraft
 
                 var r = new Random();
 
-                var playerPos = new BlockPos(-100 + (float)r.NextDouble() * 200, 0,
-                    -100 + (float)r.NextDouble() * 200);
+                var playerPos = new BlockPos(0, 10, 0); //TODO DEBUG //-100 + (float)r.NextDouble() * 200, 0, -100 + (float)r.NextDouble() * 200);
 
                 World = new World("MyWorld", "Tomlow's Fuckaround", SettingsManager.GetValue("worldseed").GetHashCode());
 
@@ -401,7 +400,10 @@ namespace SharpCraft
 
             _toCheck.Clear();
 
-            Console.WriteLine(Player.pos.X + ", " + Player.pos.Z);
+            var chunk = World.GetChunk(new ChunkPos((int)Player.pos.X / 16, (int)Player.pos.Z / 16));
+
+            if (chunk != null)
+                Console.WriteLine(Player.pos.X.ToString("F") + ", " + Player.pos.Z.ToString("F") + ", " + chunk.Pos);
 
             for (var z = -WorldRenderer.RenderDistance; z <= WorldRenderer.RenderDistance; z++)
             {
