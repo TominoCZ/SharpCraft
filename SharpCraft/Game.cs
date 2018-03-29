@@ -49,8 +49,8 @@ namespace SharpCraft
         private Stopwatch _timer = Stopwatch.StartNew();
 
         private bool _wasSpaceDown;
+        private int _fpsCounter;
         private float _sensitivity = 1;
-        private double _lastRenderTime;
 
         private string _glVersion;
 
@@ -61,13 +61,13 @@ namespace SharpCraft
         {
             Instance = this;
 
-            VSync = VSyncMode.Adaptive;
+            VSync = VSyncMode.Off;
             MakeCurrent();
 
             _glVersion = GL.GetString(StringName.ShadingLanguageVersion);
             Title = _title = $"SharpCraft Alpha 0.0.2 [GLSL {_glVersion}]";
 
-            TargetRenderFrequency = 30000;
+            //TargetRenderFrequency = 30000;
 
             WorldRenderer = new WorldRenderer();
             EntityRenderer = new EntityRenderer();
@@ -354,8 +354,6 @@ namespace SharpCraft
 
         protected override void OnRenderFrame(FrameEventArgs e)
         {
-            _lastRenderTime = e.Time;
-
             while (_glContextQueue.Count > 0)
             {
                 if (_glContextQueue.TryDequeue(out var func))
@@ -369,6 +367,8 @@ namespace SharpCraft
             }
 
             RenderScreen(GetRenderPartialTicks());
+
+            _fpsCounter++;
 
             SwapBuffers();
             ProcessEvents(false);
@@ -548,7 +548,6 @@ namespace SharpCraft
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
             Prepare();
 
-
             if (World != null)
             {
                 var viewMatrix = Camera.View;
@@ -627,11 +626,12 @@ namespace SharpCraft
                             else if ((!KeysDown.Contains(Key.Space) || Player.onGround) && _wasSpaceDown)
                                 _wasSpaceDown = false;
 
-                            if (_frameTimer.ElapsedMilliseconds >= 80)
+                            if (_frameTimer.ElapsedMilliseconds >= 1000)
                             {
                                 _frameTimer.Restart();
 
-                                Title = $"{_title} - FPS: {1f / _lastRenderTime:0}";
+                                Title = $"{_title} - FPS: {_fpsCounter}";
+                                _fpsCounter = 0;
                             }
                         }
 

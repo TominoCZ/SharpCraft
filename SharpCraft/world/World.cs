@@ -295,8 +295,6 @@ namespace SharpCraft.world
 
 		private void CheckChunks(EntityPlayerSP player, int renderDistance)
 		{
-			_toCheck.Clear();
-
 			for (var z = -renderDistance; z <= renderDistance; z++)
 			{
 				for (var x = -renderDistance; x <= renderDistance; x++)

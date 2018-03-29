@@ -171,7 +171,6 @@ namespace SharpCraft.world.chunk
 				ModelGenerating = true;
 				BuildChunkModelUnsafe();
 			}
-
 		}
 
 		private bool checkCanBuild()
