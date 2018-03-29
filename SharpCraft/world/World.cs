@@ -12,275 +12,271 @@ using SharpCraft.world.chunk;
 
 namespace SharpCraft.world
 {
-	public class World
-	{
-		public ConcurrentDictionary<ChunkPos, Chunk> Chunks { get; }
+    public class World
+    {
+        public ConcurrentDictionary<ChunkPos, Chunk> Chunks { get; }
 
-		public List<Entity> Entities;
+        public List<Entity> Entities;
 
-		public readonly int    Seed;
-		public readonly string LevelName;
+        public readonly int Seed;
+        public readonly string LevelName;
 
-		private           NoiseUtil        _noiseUtil;
-		private           int              _dimension = 0;
-		internal readonly ChunkDataManager ChunkManager;
-		public readonly   String           SaveRoot;
+        private NoiseUtil _noiseUtil;
+        private int _dimension = 0;
+        internal readonly ChunkDataManager ChunkManager;
+        public readonly String SaveRoot;
 
-		public World(string saveName, string levelName, int seed)
-		{
-			Chunks = new ConcurrentDictionary<ChunkPos, Chunk>();
-			Entities = new List<Entity>();
+        public World(string saveName, string levelName, int seed)
+        {
+            Chunks = new ConcurrentDictionary<ChunkPos, Chunk>();
+            Entities = new List<Entity>();
 
-			_noiseUtil = new NoiseUtil(seed);
-			_noiseUtil.SetFractalType(NoiseUtil.FractalType.FBM);
+            _noiseUtil = new NoiseUtil(seed);
+            _noiseUtil.SetFractalType(NoiseUtil.FractalType.FBM);
 
-			Seed = seed;
-			LevelName = levelName;
-			SaveRoot = $"SharpCraft_Data/saves/{saveName}/";
-			ChunkManager = new ChunkDataManager($"{SaveRoot}{_dimension}/chunks",
-				new RegionInfo(new[] {12, 12}, 2 * Chunk.ChunkSize * Chunk.ChunkHeight * Chunk.ChunkSize));
-		}
+            Seed = seed;
+            LevelName = levelName;
+            SaveRoot = $"SharpCraft_Data/saves/{saveName}/";
+            ChunkManager = new ChunkDataManager($"{SaveRoot}{_dimension}/chunks",
+                new RegionInfo(new[] { 12, 12 }, 2 * Chunk.ChunkSize * Chunk.ChunkHeight * Chunk.ChunkSize));
+        }
 
-		public void AddEntity(Entity e)
-		{
-			if (!Entities.Contains(e))
-				Entities.Add(e);
-		}
+        public void AddEntity(Entity e)
+        {
+            if (!Entities.Contains(e))
+                Entities.Add(e);
+        }
 
-		public void UpdateEntities()
-		{
-			for (var i = 0; i < Entities.Count; i++)
-			{
-				Entities[i].Update();
-			}
-		}
+        public void UpdateEntities()
+        {
+            for (var i = 0; i < Entities.Count; i++)
+            {
+                Entities[i].Update();
+            }
+        }
 
-		public List<AxisAlignedBB> GetIntersectingEntitiesBBs(AxisAlignedBB with)
-		{
-			var bbs = new List<AxisAlignedBB>();
+        public List<AxisAlignedBB> GetIntersectingEntitiesBBs(AxisAlignedBB with)
+        {
+            var bbs = new List<AxisAlignedBB>();
 
-			for (var i = 0; i < Entities.Count; i++)
-			{
-				var bb = Entities[i].getEntityBoundingBox();
+            for (var i = 0; i < Entities.Count; i++)
+            {
+                var bb = Entities[i].getEntityBoundingBox();
 
-				if (bb.intersectsWith(with))
-					bbs.Add(bb);
-			}
+                if (bb.intersectsWith(with))
+                    bbs.Add(bb);
+            }
 
-			return bbs;
-		}
+            return bbs;
+        }
 
-		public List<AxisAlignedBB> GetBlockCollisionBoxes(AxisAlignedBB box)
-		{
-			var blocks = new List<AxisAlignedBB>();
+        public List<AxisAlignedBB> GetBlockCollisionBoxes(AxisAlignedBB box)
+        {
+            var blocks = new List<AxisAlignedBB>();
 
-			var bb = box.union(box);
+            var bb = box.union(box);
 
-			for (int x = (int) bb.min.X, maxX = (int) bb.max.X; x < maxX; x++)
-			{
-				for (int y = (int) bb.min.Y, maxY = (int) bb.max.Y; y < maxY; y++)
-				{
-					for (int z = (int) bb.min.Z, maxZ = (int) bb.max.Z; z < maxZ; z++)
-					{
-						var pos = new BlockPos(x, y, z);
-						var block = Game.Instance.World.GetBlock(pos);
-						if (block == EnumBlock.AIR)
-							continue;
+            for (int x = (int)bb.min.X, maxX = (int)bb.max.X; x < maxX; x++)
+            {
+                for (int y = (int)bb.min.Y, maxY = (int)bb.max.Y; y < maxY; y++)
+                {
+                    for (int z = (int)bb.min.Z, maxZ = (int)bb.max.Z; z < maxZ; z++)
+                    {
+                        var pos = new BlockPos(x, y, z);
+                        var block = Game.Instance.World.GetBlock(pos);
+                        if (block == EnumBlock.AIR)
+                            continue;
 
-						blocks.Add(
-							ModelRegistry.getModelForBlock(block, GetMetadata(pos)).boundingBox.offset(pos.ToVec()));
-					}
-				}
-			}
+                        blocks.Add(
+                            ModelRegistry.getModelForBlock(block, GetMetadata(pos)).boundingBox.offset(pos.ToVec()));
+                    }
+                }
+            }
 
-			return blocks;
-		}
+            return blocks;
+        }
 
-		public Chunk GetChunk(ChunkPos pos)
-		{
-			return !Chunks.TryGetValue(pos, out var chunkData) ? null : chunkData;
-		}
+        public Chunk GetChunk(ChunkPos pos)
+        {
+            return !Chunks.TryGetValue(pos, out var chunkData) ? null : chunkData;
+        }
 
-		public EnumBlock GetBlock(BlockPos pos)
-		{
-			var chunk = GetChunk(new ChunkPos(pos));
-			if (chunk == null)
-				return EnumBlock.AIR;
+        public EnumBlock GetBlock(BlockPos pos)
+        {
+            var chunk = GetChunk(new ChunkPos(pos));
+            if (chunk == null || !chunk.HasData)
+                return EnumBlock.AIR;
 
-			return chunk.GetBlock(ChunkPos.ToChunkLocal(pos));
-		}
+            return chunk.GetBlock(ChunkPos.ToChunkLocal(pos));
+        }
 
-		public void SetBlock(BlockPos pos, EnumBlock blockType, int meta)
-		{
-			var chunk = GetChunk(new ChunkPos(pos));
-			if (chunk == null)
-				return;
+        public void SetBlock(BlockPos pos, EnumBlock blockType, int meta)
+        {
+            var chunk = GetChunk(new ChunkPos(pos));
+            if (chunk == null || !chunk.HasData)
+                return;
 
-			chunk.SetBlock(ChunkPos.ToChunkLocal(pos), blockType, meta);
-		}
+            chunk.SetBlock(ChunkPos.ToChunkLocal(pos), blockType, meta);
+        }
 
-		public void UnloadChunk(ChunkPos pos)
-		{
-			if (Chunks.TryRemove(pos, out var chunk)) // && data.model.isGenerated)
-			{
-				chunk.DestroyModel();
-				chunk.Save();
-			}
-		}
+        public void UnloadChunk(ChunkPos pos)
+        {
+            if (Chunks.TryRemove(pos, out var chunk)) // && data.model.isGenerated)
+            {
+                chunk.DestroyModel();
+                chunk.Save();
+            }
+        }
 
-		public bool LoadChunk(ChunkPos chunkPos)
-		{
-			var data = ChunkManager.GetChunkData(new[] {chunkPos.x / 16, chunkPos.z / 16});
-			if (data == null) return false;
+        public bool LoadChunk(ChunkPos chunkPos)
+        {
+            var data = ChunkManager.GetChunkData(new[] { chunkPos.x / 16, chunkPos.z / 16 });
+            if (data == null) return false;
 
 
-			var blockData = new short[16, 256, 16];
-			Buffer.BlockCopy(data, 0, blockData, 0, data.Length);
+            var blockData = new short[16, 256, 16];
+            Buffer.BlockCopy(data, 0, blockData, 0, data.Length);
 
-			var chunk = new Chunk(chunkPos, this, blockData);
-			if (!Chunks.TryAdd(chunkPos, chunk)) throw new Exception("Chunk already exists at " + chunkPos);
+            var chunk = new Chunk(chunkPos, this, blockData);
+            if (!Chunks.TryAdd(chunkPos, chunk)) throw new Exception("Chunk already exists at " + chunkPos);
 
-			return true;
-		}
+            return true;
+        }
 
-		public void SaveAllChunks()
-		{
-			foreach (var data in Chunks.Values)
-			{
-				data.Save();
-			}
-		}
+        public void SaveAllChunks()
+        {
+            foreach (var data in Chunks.Values)
+            {
+                data.Save();
+            }
+        }
 
-		public void DestroyChunkModels()
-		{
-			foreach (var data in Chunks.Values)
-			{
-				data.DestroyModel();
-			}
-		}
+        public void DestroyChunkModels()
+        {
+            foreach (var data in Chunks.Values)
+            {
+                data.DestroyModel();
+            }
+        }
 
-		public int GetMetadata(BlockPos pos)
-		{
-			return GetChunk(new ChunkPos(pos))?.GetMetadata(ChunkPos.ToChunkLocal(pos)) ?? -1;
-		}
+        public int GetMetadata(BlockPos pos)
+        {
+            var chunk = GetChunk(new ChunkPos(pos));
+            if (chunk == null || !chunk.HasData)
+                return -1;
 
-		public void SetMetadata(BlockPos pos, int meta)
-		{
-			GetChunk(new ChunkPos(pos))?.SetMetadata(ChunkPos.ToChunkLocal(pos), meta);
-		}
+            return chunk.GetMetadata(ChunkPos.ToChunkLocal(pos));
+        }
 
-		public int GetHeightAtPos(float x, float z)
-		{
-			//TODO this code only for 2D
+        public void SetMetadata(BlockPos pos, int meta)
+        {
+            var chunk = GetChunk(new ChunkPos(pos));
+            if (chunk == null || !chunk.HasData)
+                return;
 
-			var pos = new BlockPos(x, 256, z);
+            chunk.SetMetadata(ChunkPos.ToChunkLocal(pos), meta);
+        }
 
-			var chunk = GetChunk(new ChunkPos(pos.X, pos.Z));
+        public int GetHeightAtPos(float x, float z)
+        {
+            var pos = new BlockPos(x, 0, z);
 
-			if (chunk == null)
-				return 0; //ThreadPool.ScheduleTask(false, () => generateChunk(pos));
+            var chunk = GetChunk(pos.ChunkPos());
+            if (chunk == null || !chunk.HasData)
+                return 0;
 
-			var lastPos = pos;
+            return chunk.GetHeightAtPos(MathUtil.ToLocal(pos.X, Chunk.ChunkSize), MathUtil.ToLocal(pos.Z, Chunk.ChunkSize));
+        }
 
-			for (var y = Chunk.ChunkHeight - 1; y >= 0; y--)
-			{
-				var block = GetBlock(lastPos = lastPos.Offset(FaceSides.Down));
+        public IEnumerable<Chunk> GetNeighbourChunks(ChunkPos pos)
+        {
+            return FaceSides.YPlane.Select(dir => GetChunk(pos + dir));
+        }
 
-				if (block != EnumBlock.AIR)
-					return y + 1;
-			}
+        public void GenerateChunk(ChunkPos chunkPos, bool updateContainingEntities)
+        {
+            Chunk chunk;
+            lock (Chunks)
+            {
+                if (Chunks.ContainsKey(chunkPos))
+                    return;
 
-			return 0;
-		}
+                chunk = new Chunk(chunkPos, this);
+                if (!Chunks.TryAdd(chunkPos, chunk)) throw new Exception("Chunk already exists at " + chunkPos);
+            }
 
-		public IEnumerable<Chunk> GetNeighbourChunks(ChunkPos pos)
-		{
-			return FaceSides.YPlane.Select(dir => GetChunk(pos + dir));
-		}
+            ThreadPool.QueueUserWorkItem(e =>
+            {
+                short[,,] chunkData = new short[Chunk.ChunkSize, Chunk.ChunkHeight, Chunk.ChunkSize];
 
-		public void GenerateChunk(ChunkPos chunkPos, bool updateContainingEntities)
-		{
-			Chunk chunk;
-			lock (Chunks)
-			{
-				if (Chunks.ContainsKey(chunkPos))
-					return;
+                void SetBlock(int x, int y, int z, EnumBlock b)
+                {
+                    short id = (short)((short)b << 4);
+                    chunkData[x, y, z] = id;
+                }
 
-				chunk = new Chunk(chunkPos, this);
-				if (!Chunks.TryAdd(chunkPos, chunk))throw new Exception("Chunk already exists at " + chunkPos);
-			}
+                for (var z = 0; z < Chunk.ChunkSize; z++)
+                {
+                    for (var x = 0; x < Chunk.ChunkSize; x++)
+                    {
+                        //the chunkPos here is causing problems when it gets to negative numbers (the chunks most likely have the wrong ChunkPos assigned to them)
+                        var wsX = chunk.Pos.WorldSpaceX();
+                        var wsZ = chunk.Pos.WorldSpaceZ();
 
-			ThreadPool.QueueUserWorkItem(e =>
-			{
-				short[,,] chunkData = new short[Chunk.ChunkSize, Chunk.ChunkHeight, Chunk.ChunkSize];
+                        var xCh = (x + wsX);
+                        var zCh = (z + wsZ);
 
-				void SetBlock(BlockPos p, EnumBlock i)
-				{
-					short id = (short) ((short) i << 4);
-					chunkData[p.X, p.Y, p.Z] = id;
-				}
+                        var peakY = 32 + (int)Math.Abs(MathHelper.Clamp(0.35f + _noiseUtil.GetPerlinFractal(xCh, zCh), 0, 1) * 30);
 
-				for (var z = 0; z < 16; z++)
-				{
-					for (var x = 0; x < 16; x++)
-					{
-						var xCh = (x + chunkPos.x) / 1.25f;
-						var yCh = (z + chunkPos.z) / 1.25f;
+                        for (var y = peakY; y >= 0; y--)
+                        {
+                            if (y == peakY) SetBlock(x, y, z, EnumBlock.GRASS);
+                            else if (y > 0 && peakY - y > 0 && peakY - y < 3) SetBlock(x, y, z, EnumBlock.DIRT);
+                            else if (y == 0) SetBlock(x, y, z, EnumBlock.BEDROCK);
+                            else
+                            {
+                                var f = _noiseUtil.GetNoise(xCh * 32 - y * 16, zCh * 32 + x * 16);
 
-						var peakY = 32 + (int) Math.Abs(
-							            MathHelper.Clamp(0.35f + _noiseUtil.GetPerlinFractal(xCh, yCh), 0, 1) * 30);
+                                SetBlock(x, y, z, f >= 0.75f ? EnumBlock.RARE : EnumBlock.STONE);
+                            }
+                        }
 
-						for (var y = peakY; y >= 0; y--)
-						{
-							var p = new BlockPos(x, y, z);
+                        var treeSeed = Math.Abs(MathHelper.Clamp(_noiseUtil.GetWhiteNoise(xCh, zCh), 0, 1));
+                        var treeSeed2 = Math.Abs(MathHelper.Clamp(0.35f + _noiseUtil.GetPerlinFractal(zCh, xCh), 0, 1));
 
-							if (y == peakY) SetBlock(p, EnumBlock.GRASS);
-							else if (y > 0 && peakY - y > 0 && peakY - y < 3) SetBlock(p, EnumBlock.DIRT);
-							else if (y == 0) SetBlock(p, EnumBlock.BEDROCK);
-							else
-							{
-								var f = _noiseUtil.GetNoise(xCh * 32 - y * 16, yCh * 32 + x * 16);
+                        if (treeSeed >= 0.995f && treeSeed2 >= 0.233f)
+                        {
+                            for (var treeY = 0; treeY < 5; treeY++)
+                            {
+                                SetBlock(x, peakY + 1 + treeY, z, EnumBlock.LOG);
+                            }
+                        }
+                    }
+                }
 
-								SetBlock(p, f >= 0.75f ? EnumBlock.RARE : EnumBlock.STONE);
-							}
-						}
+                chunk.GeneratedData(chunkData);
 
-						var treeSeed = Math.Abs(MathHelper.Clamp(_noiseUtil.GetWhiteNoise(xCh, yCh), 0, 1));
-						var treeSeed2 = Math.Abs(MathHelper.Clamp(0.35f + _noiseUtil.GetPerlinFractal(yCh, xCh), 0, 1));
+                if (updateContainingEntities)
+                {
+                    foreach (var entity in Entities)
+                    {
+                        var pos = new BlockPos(entity.pos);
 
-						if (treeSeed >= 0.995f && treeSeed2 >= 0.233f)
-						{
-							for (var treeY = 0; treeY < 5; treeY++)
-							{
-								SetBlock(new BlockPos(x, peakY + 1 + treeY, z), EnumBlock.LOG);
-							}
-						}
-					}
-				}
+                        if (chunk.Pos == pos.ChunkPos())
+                        {
+                            var height = chunk.GetHeightAtPos(MathUtil.ToLocal(pos.X, Chunk.ChunkSize), MathUtil.ToLocal(pos.Z, Chunk.ChunkSize));
 
-				chunk.GeneratedData(chunkData);
+                            if (entity.pos.Y < height)
+                                entity.teleportTo(new Vector3(entity.pos.X, entity.lastPos.Y = height, entity.pos.Z));
+                        }
+                    }
+                }
+            });
+        }
 
-				if (updateContainingEntities)
-				{
-					foreach (var entity in Entities)
-					{
-						var pos2 = new BlockPos(entity.pos).ChunkPos();
-
-						if (chunkPos.x == pos2.x && chunkPos.z == pos2.z)
-						{
-							var height = GetHeightAtPos(entity.pos.X, entity.pos.Z);
-
-							if (entity.pos.Y < height)
-								entity.teleportTo(new Vector3(entity.pos.X, entity.lastPos.Y = height, entity.pos.Z));
-						}
-					}
-				}
-			});
-		}
-
-		public bool AreNeighbourChunksGenerated(ChunkPos pos)
-		{
-			return GetNeighbourChunks(pos).All(chunk => chunk == null || !chunk.HasData);
-		}
-	}
+        public bool AreNeighbourChunksGenerated(ChunkPos pos)
+        {
+            return GetNeighbourChunks(pos).All(chunk => chunk != null && chunk.HasData);
+        }
+    }
 }

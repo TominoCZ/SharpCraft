@@ -69,9 +69,36 @@ namespace SharpCraft.render
 		{
 			foreach (var chunk in world.Chunks.Values)
 			{
-				if(chunk.ShouldRender(RenderDistance))chunk.Render(viewMatrix);
+				if(chunk.ShouldRender(RenderDistance))
+				{
+                    RenderChunkOutline(chunk.Pos, viewMatrix);
+				    chunk.Render(viewMatrix);
+				}
 			}
 		}
+
+	    private void RenderChunkOutline(ChunkPos pos, Matrix4 viewMatrix)
+	    {
+	        var shader = (ShaderBlockOutline)_selectionOutline.shader;
+
+	        var size = new Vector3(Chunk.ChunkSize, Chunk.ChunkHeight, Chunk.ChunkSize);
+
+	        _selectionOutline.bind();
+
+	        shader.loadVec4(Vector4.One, "colorIn");
+	        shader.loadViewMatrix(viewMatrix);
+	        shader.loadTransformationMatrix(MatrixHelper.createTransformationMatrix(pos.ToVec(), size));
+
+	        GL.Disable(EnableCap.CullFace);
+	        GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
+
+	        _selectionOutline.rawModel.Render(shader.renderType);
+
+	        GL.Enable(EnableCap.CullFace);
+	        GL.PolygonMode(MaterialFace.Front, PolygonMode.Fill);
+
+	        _selectionOutline.unbind();
+        }
 
 		private void RenderBlockSelectionOutline(World world, Matrix4 viewMatrix, EnumBlock block, BlockPos pos)
 		{
