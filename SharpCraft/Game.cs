@@ -391,48 +391,6 @@ namespace SharpCraft
             ShaderManager.updateProjectionMatrix();
         }
 
-        private List<ChunkPos> _toCheck = new List<ChunkPos>();
-
-        private void CheckChunks()
-        {
-            if (World == null || Player == null)
-                return;
-
-            _toCheck.Clear();
-
-            for (var z = -WorldRenderer.RenderDistance; z <= WorldRenderer.RenderDistance; z++)
-            {
-                for (var x = -WorldRenderer.RenderDistance; x <= WorldRenderer.RenderDistance; x++)
-                {
-                    _toCheck.Add(ChunkPos.FromWorldSpace(Player.pos)+new ChunkPos(x,z));
-                }
-            }
-            _toCheck
-                .Where(c => c.DistanceTo(Camera.pos.Xz) < WorldRenderer.RenderDistance * 16)
-                .AsParallel()
-	            .OrderBy(c => c.DistanceTo(Camera.pos.Xz))
-                .ForAll(CheckChunk);
-
-            _toCheck.Clear();
-        }
-
-        private void CheckChunk(ChunkPos pos)
-        {
-            var chunk = World.GetChunk(pos);
-
-            if (chunk == null) // || !world.isChunkGenerated(pos)))
-            {
-                if (World.LoadChunk(pos)) Console.WriteLine($"chunk loaded    @ {pos.x} x {pos.z}");
-                else
-                {
-                    //chunk does not exist, generate it
-                    World.GenerateChunk(pos, true);
-                    Console.WriteLine($"chunk generated @ {pos.x} x {pos.z}");
-
-                }
-            }
-        }
-
         private void GameLoop()
         {
             if (GuiScreen == null && !Focused)
@@ -630,17 +588,8 @@ namespace SharpCraft
                     {
                         if (!IsDisposed && Visible)
                         {
-                            CheckChunks();
-
-                            GetMouseOverObject();
-
-                            foreach (var chunk in World.Chunks.Values)
-                            {
-                                chunk.Tick();
-
-                                if (chunk.Pos.DistanceTo(Camera.pos.Xz) > WorldRenderer.RenderDistance * Chunk.ChunkSize + 50)
-                                    _glContextQueue.Enqueue(() => World.UnloadChunk(chunk.Pos));
-                            }
+	                        GetMouseOverObject();
+	                        World?.update(Player,WorldRenderer.RenderDistance);
                         }
 
                         Thread.Sleep(50);

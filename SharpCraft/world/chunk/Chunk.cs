@@ -263,8 +263,8 @@ namespace SharpCraft.world.chunk
         {
             while (ModelGenerating) Thread.Sleep(2);
             if (_model == null) return;
-            _model.destroy();
-            _model = null;
+	        Game.Instance.RunGlContext(_model.destroy);
+	        _model = null;
         }
 
         public bool ShouldRender(int renderDistance)

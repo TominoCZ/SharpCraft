@@ -5,7 +5,7 @@ using SharpCraft.block;
 
 namespace SharpCraft.entity
 {
-    internal class EntityPlayerSP : Entity
+	public class EntityPlayerSP : Entity
     {
         public float maxMoveSpeed = 0.25f;
         public float moveSpeed;
@@ -112,7 +112,7 @@ namespace SharpCraft.entity
     }
 
     [Serializable]
-    internal abstract class Item
+    public abstract class Item
     {
         public static bool operator ==(Item i1, Item i2)
         {
@@ -149,7 +149,7 @@ namespace SharpCraft.entity
     }
 
     [Serializable]
-    internal class ItemStack
+    public class ItemStack
     {
         public Item Item;
 
