@@ -295,7 +295,7 @@ namespace SharpCraft
                         }
 
                         //place/interact
-                        if (e.Button == MouseButton.Right)
+                        if (e.Button == MouseButton.Right) //TODO move this code to the player class
                         {
                             var block = World.GetBlock(pos);
                             var model = ModelRegistry.getModelForBlock(block, World.GetMetadata(pos));
