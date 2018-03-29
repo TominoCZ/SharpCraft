@@ -196,7 +196,7 @@ namespace SharpCraft.world
 		{
 			lock (Chunks)
 			{
-				Chunk chunk = data == null ? new Chunk(pos, this) : new Chunk(pos, this, data);
+				var chunk = data == null ? new Chunk(pos, this) : new Chunk(pos, this, data);
 				if (!Chunks.TryAdd(chunk.Pos, chunk)) throw new Exception("Chunk already exists at " + chunk.Pos);
 				return chunk;
 			}
@@ -279,15 +279,15 @@ namespace SharpCraft.world
 
 		public void update(EntityPlayerSP player, int renderDistance)
 		{
-			if (player == null)return;
+			if (player == null) return;
 
-			CheckChunks(player,renderDistance);
+			CheckChunks(player, renderDistance);
 
 			foreach (var chunk in Chunks.Values)
 			{
 				chunk.Tick();
 
-				if (chunk.Pos.DistanceTo(player.pos.Xz) > renderDistance * Chunk.ChunkSize + 50)UnloadChunk(chunk.Pos);
+				if (chunk.Pos.DistanceTo(player.pos.Xz) > renderDistance * Chunk.ChunkSize + 50) UnloadChunk(chunk.Pos);
 			}
 		}
 
@@ -295,38 +295,39 @@ namespace SharpCraft.world
 
 		private void CheckChunks(EntityPlayerSP player, int renderDistance)
 		{
+			var playerChunkPos = ChunkPos.FromWorldSpace(Game.Instance.Player.pos);
+
 			for (var z = -renderDistance; z <= renderDistance; z++)
 			{
 				for (var x = -renderDistance; x <= renderDistance; x++)
 				{
-					_toCheck.Add(ChunkPos.FromWorldSpace(Game.Instance.Player.pos)+new ChunkPos(x,z));
+					var pos = playerChunkPos + new ChunkPos(x, z);
+					if (pos.DistanceTo(player.pos.Xz) < renderDistance * Chunk.ChunkSize)
+					{
+						if (GetChunk(pos) == null) _toCheck.Add(pos);
+					}
 				}
 			}
 
-			_toCheck
-				.Where(c => c.DistanceTo(player.pos.Xz) < renderDistance * 16)
-				.AsParallel()
-				.OrderBy(c => c.DistanceTo(player.pos.Xz))
-				.ForAll(CheckChunk);
-
-			_toCheck.Clear();
-		}
-
-		private void CheckChunk(ChunkPos pos)
-		{
-			var chunk = GetChunk(pos);
-
-			if (chunk == null) // || !world.isChunkGenerated(pos)))
+			if (_toCheck.Count > 0)
 			{
-				if (LoadChunk(pos)) Console.WriteLine($"chunk loaded    @ {pos.x} x {pos.z}");
-				else
-				{
-					//chunk does not exist, generate it
-					GenerateChunk(pos, true);
-					Console.WriteLine($"chunk generated @ {pos.x} x {pos.z}");
+				_toCheck.OrderBy(c => c.DistanceTo(player.pos.Xz))
+				        .AsParallel()
+				        .ForAll(pos =>
+				        {
+					        if (LoadChunk(pos)) Console.WriteLine($"chunk loaded    @ {pos.x} x {pos.z}");
+					        else
+					        {
+						        //chunk does not exist, generate it
+						        GenerateChunk(pos, true);
+						        Console.WriteLine($"chunk generated @ {pos.x} x {pos.z}");
+					        }
+				        });
 
-				}
+				_toCheck.Clear();
 			}
+
+			Chunk.buildChunks();
 		}
 	}
 }

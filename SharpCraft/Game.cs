@@ -740,8 +740,8 @@ namespace SharpCraft
         [STAThread]
         private static void Main(string[] args)
         {
-	        ThreadPool.SetMinThreads(1, 0);
-	        ThreadPool.SetMinThreads(Math.Max(1,Environment.ProcessorCount-1), 0);
+	        ThreadPool.SetMinThreads(0, 0);
+	        ThreadPool.SetMinThreads(Math.Max(1,Environment.ProcessorCount), 0);
 
             using (var game = new Game())
             {

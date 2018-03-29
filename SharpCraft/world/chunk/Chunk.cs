@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using OpenTK;
 using OpenTK.Graphics.OpenGL;
 using SharpCraft.block;
@@ -15,6 +17,18 @@ namespace SharpCraft.world.chunk
 {
 	public class Chunk
 	{
+		private static readonly List<Chunk> ChunkBuildQueue=new List<Chunk>();
+
+		public static void buildChunks()
+		{
+			if (ChunkBuildQueue.Capacity == 0) return;
+			lock (ChunkBuildQueue)
+			{
+				ChunkBuildQueue.ForEach(c=>c.BuildChunkModelUnsafe());
+				ChunkBuildQueue.Clear();
+			}
+		}
+
 		public const int ChunkSize   = 16;
 		public const int ChunkHeight = 256;
 
@@ -48,7 +62,7 @@ namespace SharpCraft.world.chunk
 			BoundingBox = new AxisAlignedBB(Vector3.Zero, Vector3.One * ChunkSize + Vector3.UnitY * 240).offset(Pos.ToVec());
 
 			ChunkBlocks = blockData;
-			BuildChunkModelNow();
+			BuildChunkModel();
 		}
 
 		public void Tick()
@@ -160,16 +174,11 @@ namespace SharpCraft.world.chunk
 			if (checkCanBuild())
 			{
 				ModelGenerating = true;
-				ThreadPool.QueueUserWorkItem(e => BuildChunkModelUnsafe());
-			}
-		}
 
-		private void BuildChunkModelNow()
-		{
-			if (checkCanBuild())
-			{
-				ModelGenerating = true;
-				BuildChunkModelUnsafe();
+				lock (ChunkBuildQueue)
+				{
+					ChunkBuildQueue.Add(this);
+				}
 			}
 		}
 
@@ -184,19 +193,17 @@ namespace SharpCraft.world.chunk
 
 		private void BuildChunkModelUnsafe()
 		{
-
 			var modelRaw = new Dictionary<ShaderProgram, List<RawQuad>>();
 
 			List<RawQuad> quads;
 
 			var sw = Stopwatch.StartNew();
-
 			//generate the model / fill MODEL_RAW
-			for (int z = 0; z < ChunkSize; z++)
+			Enumerable.Range(0,ChunkSize).AsParallel().ForAll(x =>
 			{
-				for (int y = 0; y < 256; y++)
+				for (int z = 0; z < ChunkSize; z++)
 				{
-					for (int x = 0; x < ChunkSize; x++)
+					for (int y = 0; y < 256; y++)
 					{
 						var localPos = new BlockPos(x, y, z);
 						var worldPos = new BlockPos(x + Pos.WorldSpaceX(), y, z + Pos.WorldSpaceZ());
@@ -208,8 +215,11 @@ namespace SharpCraft.world.chunk
 
 						var blockModel = ModelRegistry.getModelForBlock(block, World.GetMetadata(worldPos));
 
-						if (!modelRaw.TryGetValue(blockModel.shader, out quads))
-							modelRaw.Add(blockModel.shader, quads = new List<RawQuad>());
+						lock (modelRaw)
+						{
+							if (!modelRaw.TryGetValue(blockModel.shader, out quads))
+								modelRaw.Add(blockModel.shader, quads = new List<RawQuad>());
+						}
 
 						for (int i = 0; i < FaceSides.AllSides.Count; i++)
 						{
@@ -221,12 +231,17 @@ namespace SharpCraft.world.chunk
 								var quad = ((ModelBlockRaw) blockModel.rawModel)?.getQuadForSide(dir)?.offset(localPos);
 
 								if (quad != null)
-									quads.Add(quad);
+								{
+									lock (quads)
+									{
+										quads.Add(quad);
+									}
+								}
 							}
 						}
 					}
 				}
-			}
+			});
 
 			sw.Stop();
 			Console.WriteLine($"DEBUG: built chunk model [{sw.Elapsed.TotalMilliseconds:F}ms]");
@@ -254,14 +269,12 @@ namespace SharpCraft.world.chunk
 					{
 						var newFragment = new ModelChunkFragment(newShader, newData);
 						_model.setFragmentModelWithShader(newShader, newFragment);
-
 					}
 					else
 					{
 						_model.getFragmentModelWithShader(newShader)?.overrideData(newData);
 					}
 				}
-
 			});
 			ModelGenerating = false;
 		}
@@ -304,7 +317,7 @@ namespace SharpCraft.world.chunk
 		{
 			ChunkBlocks = chunkData;
 			NeedsSave = true;
-			BuildChunkModelNow();
+			BuildChunkModel();
 		}
 	}
 }
