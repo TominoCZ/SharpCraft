@@ -166,7 +166,7 @@ namespace SharpCraft.world.chunk
 						{
 							var pos = new BlockPos(x, y, z);
 
-							var block = GetBlock(pos);
+							var block = World.GetBlock(pos);
 
 							if (block == EnumBlock.AIR)
 								continue;
@@ -179,7 +179,7 @@ namespace SharpCraft.world.chunk
 							for (int i = 0; i < FaceSides.AllSides.Count; i++)
 							{
 								var dir = FaceSides.AllSides[i];
-								var blockO = GetBlock(pos.Offset(dir));
+								var blockO = World.GetBlock(pos.Offset(dir));
 
 								if (blockO == EnumBlock.AIR || blockO == EnumBlock.GLASS && block != EnumBlock.GLASS)
 								{
