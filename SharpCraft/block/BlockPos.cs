@@ -55,7 +55,7 @@ namespace SharpCraft.block
 
 		public ChunkPos ChunkPos()
 		{
-			return new ChunkPos(this);
+			return world.chunk.ChunkPos.FromWorldSpace(this);
 		}
 
 		public override string ToString()

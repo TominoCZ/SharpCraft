@@ -61,7 +61,7 @@ namespace SharpCraft
         {
             Instance = this;
 
-            VSync = VSyncMode.Off;
+            VSync = VSyncMode.Adaptive;
             MakeCurrent();
 
             _glVersion = GL.GetString(StringName.ShadingLanguageVersion);
@@ -400,26 +400,17 @@ namespace SharpCraft
 
             _toCheck.Clear();
 
-            var chunk = World.GetChunk(new ChunkPos((int)Player.pos.X / 16, (int)Player.pos.Z / 16));
-
-            if (chunk != null)
-                Console.WriteLine(Player.pos.X.ToString("F") + ", " + Player.pos.Z.ToString("F") + ", " + chunk.Pos);
-
             for (var z = -WorldRenderer.RenderDistance; z <= WorldRenderer.RenderDistance; z++)
             {
                 for (var x = -WorldRenderer.RenderDistance; x <= WorldRenderer.RenderDistance; x++)
                 {
-                    var pos = new ChunkPos((int)(x + Player.pos.X / 16), (int)(z + Player.pos.Z / 16));
-
-                    if (!_toCheck.Contains(pos))
-                        _toCheck.Add(pos);
+                    _toCheck.Add(ChunkPos.FromWorldSpace(Player.pos)+new ChunkPos(x,z));
                 }
             }
-
             _toCheck
                 .Where(c => c.DistanceTo(Camera.pos.Xz) < WorldRenderer.RenderDistance * 16)
-                .OrderBy(c => c.DistanceTo(Camera.pos.Xz))
                 .AsParallel()
+	            .OrderBy(c => c.DistanceTo(Camera.pos.Xz))
                 .ForAll(CheckChunk);
 
             _toCheck.Clear();
@@ -431,12 +422,13 @@ namespace SharpCraft
 
             if (chunk == null) // || !world.isChunkGenerated(pos)))
             {
-                if (World.LoadChunk(pos)) ; //Console.WriteLine($"loaded chunk @ {pos}");
+                if (World.LoadChunk(pos)) Console.WriteLine($"chunk loaded    @ {pos.x} x {pos.z}");
                 else
                 {
                     //chunk does not exist, generate it
                     World.GenerateChunk(pos, true);
-                    Console.WriteLine($"DEBUG: chunk generated @ {pos.x} x {pos.z}");
+                    Console.WriteLine($"chunk generated @ {pos.x} x {pos.z}");
+
                 }
             }
         }
@@ -799,15 +791,8 @@ namespace SharpCraft
         [STAThread]
         private static void Main(string[] args)
         {
-            var threads = 1;
-
-            while (ThreadPool.SetMinThreads(threads, 5) && threads++ < 4)
-            {
-            }
-
-            while (ThreadPool.SetMaxThreads(threads, 5) && threads++ < 8)
-            {
-            }
+	        ThreadPool.SetMinThreads(1, 0);
+	        ThreadPool.SetMinThreads(Math.Max(1,Environment.ProcessorCount-1), 0);
 
             using (var game = new Game())
             {

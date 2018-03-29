@@ -5,66 +5,67 @@ using SharpCraft.util;
 
 namespace SharpCraft.world.chunk
 {
-    public struct ChunkPos
-    {
-        public readonly int x, z;
+	public struct ChunkPos
+	{
+		public readonly int x, z;
 
-        public static bool operator ==(ChunkPos p1, ChunkPos p2) => p1.x == p2.x && p1.z == p2.z;
-        public static bool operator !=(ChunkPos p1, ChunkPos p2) => !(p1 == p2);
+		public static bool operator ==(ChunkPos    p1, ChunkPos p2) => p1.x == p2.x && p1.z == p2.z;
+		public static bool operator !=(ChunkPos    p1, ChunkPos p2) => !(p1 == p2);
+		public static ChunkPos operator +(ChunkPos p1, ChunkPos p2) => new ChunkPos(p1.x+p2.x,p1.z+p2.z);
 
-        public ChunkPos(BlockPos pos) : this(pos.X / 16, pos.Z / 16)
-        {
-        }
+		public static ChunkPos FromWorldSpace(Vector3  pos)                  => FromWorldSpace((int) pos.X, (int) pos.Z);
+		public static ChunkPos FromWorldSpace(BlockPos pos)                  => FromWorldSpace(pos.X, pos.Z);
+		public static ChunkPos FromWorldSpace(float    xWorld, float zWorld) => FromWorldSpace((int) xWorld, (int) zWorld);
 
-        public ChunkPos(int x, int z)
-        {
-            this.x = x;
-            this.z = z;
-        }
+		public static ChunkPos FromWorldSpace(int xWorld, int zWorld)
+		{
+			MathUtil.ToLocal(xWorld, Chunk.ChunkSize, out var _, out var x);
+			MathUtil.ToLocal(zWorld, Chunk.ChunkSize, out var _, out var z);
+			return new ChunkPos(x, z);
+		}
 
-        public Vector3 CenterVec()
-        {
-            return new Vector3(WorldSpaceX() + Chunk.ChunkSize / 2F, 0, WorldSpaceZ() + Chunk.ChunkSize / 2F);
-        }
+		public ChunkPos(int x, int z)
+		{
+			this.x = x;
+			this.z = z;
+		}
 
-        public Vector3 ToVec()
-        {
-            return new Vector3(WorldSpaceX(), 0, WorldSpaceZ());
-        }
+		public Vector3 ToVec()
+		{
+			return new Vector3(WorldSpaceX(), 0, WorldSpaceZ());
+		}
 
-        public double DistanceTo(Vector3 vec) => DistanceTo(vec.X, vec.Z);
-        public double DistanceTo(Vector2 vec) => DistanceTo(vec.X, vec.Y);
+		public double DistanceTo(Vector3 vec) => DistanceTo(vec.X, vec.Z);
+		public double DistanceTo(Vector2 vec) => DistanceTo(vec.X, vec.Y);
 
-        public double DistanceTo(double x, double z)
-        {
-            double xD = WorldSpaceX() - x; // xDDDD
-            double zD = WorldSpaceZ() - z; // zDDDD
-            return Math.Sqrt(xD * xD + zD * zD);
-        }
+		public double DistanceTo(double x, double z)
+		{
+			double xD = WorldSpaceXCenter() - x; // xDDDD
+			double zD = WorldSpaceZCenter() - z; // zDDDD
+			return Math.Sqrt(xD * xD + zD * zD);
+		}
 
-        public float WorldSpaceX()
-        {
-            return x * Chunk.ChunkSize;
-        }
+		public float WorldSpaceX() =>x * Chunk.ChunkSize;
 
-        public float WorldSpaceZ()
-        {
-            return z * Chunk.ChunkSize;
-        }
+		public float WorldSpaceZ() =>z * Chunk.ChunkSize;
 
-        public Chunk GetChunk(World inWorld)
-        {
-            return inWorld.GetChunk(this);
-        }
+		public float WorldSpaceXCenter() =>(x+0.5F) * Chunk.ChunkSize;
 
-        public override string ToString()
-        {
-            return $"ChunkPos[{x}, {z}]";
-        }
+		public float WorldSpaceZCenter() =>(z+0.5F) * Chunk.ChunkSize;
 
-        public static BlockPos ToChunkLocal(BlockPos worldPos)
-        {
-            return new BlockPos(MathUtil.ToLocal(worldPos.X, Chunk.ChunkSize), MathUtil.MinMax(worldPos.Y, 0, 255), MathUtil.ToLocal(worldPos.Z, Chunk.ChunkSize));
-        }
-    }
+		public Chunk GetChunk(World inWorld)
+		{
+			return inWorld.GetChunk(this);
+		}
+
+		public override string ToString()
+		{
+			return $"ChunkPos[{x}, {z}]";
+		}
+
+		public static BlockPos ToChunkLocal(BlockPos worldPos)
+		{
+			return new BlockPos(MathUtil.ToLocal(worldPos.X, Chunk.ChunkSize), MathUtil.MinMax(worldPos.Y, 0, 255), MathUtil.ToLocal(worldPos.Z, Chunk.ChunkSize));
+		}
+	}
 }

@@ -15,12 +15,13 @@ namespace SharpCraft.world.chunk
 {
     public class Chunk
     {
+
         public const int ChunkSize = 16;
         public const int ChunkHeight = 256;
 
-        private short[,,] ChunkBlocks;
+	    private short[,,] ChunkBlocks;
 
-        private bool NeedsSave { get; set; }
+	    private bool NeedsSave { get; set; }
 
         public ChunkPos Pos { get; }
 
@@ -33,14 +34,12 @@ namespace SharpCraft.world.chunk
         private bool ModelGenerating;
 
         public bool HasData => ChunkBlocks != null;
-        public bool IsGenerating { get; private set; }
 
         public Chunk(ChunkPos pos, World world)
         {
             Pos = pos;
             World = world;
             BoundingBox = new AxisAlignedBB(Vector3.Zero, Vector3.One * ChunkSize + Vector3.UnitY * 240).offset(Pos.ToVec());
-            IsGenerating = true;
         }
 
         public Chunk(ChunkPos pos, World world, short[,,] blockData)
@@ -159,15 +158,22 @@ namespace SharpCraft.world.chunk
 
         private void BuildChunkModel()
         {
-            if (!HasData || ModelGenerating) return;
+	        if (!HasData || ModelGenerating) return;
 
-            if (!World.AreNeighbourChunksGenerated(Pos)) return;
+	        if (!World.AreNeighbourChunksGenerated(Pos)) return;
 
-            ModelGenerating = true;
+            ThreadPool.QueueUserWorkItem(e =>BuildChunkModelNow());
+        }
 
-            ThreadPool.QueueUserWorkItem(e =>
-            {
-                var modelRaw = new Dictionary<ShaderProgram, List<RawQuad>>();
+	    private void BuildChunkModelNow()
+	    {
+		    if (!HasData || ModelGenerating) return;
+
+		    if (!World.AreNeighbourChunksGenerated(Pos)) return;
+
+		    ModelGenerating = true;
+
+		    var modelRaw = new Dictionary<ShaderProgram, List<RawQuad>>();
 
                 List<RawQuad> quads;
 
@@ -246,8 +252,7 @@ namespace SharpCraft.world.chunk
                 }
 
                 ModelGenerating = false;
-            });
-        }
+	    }
 
         public void MarkDirty()
         {
@@ -286,7 +291,6 @@ namespace SharpCraft.world.chunk
         public void GeneratedData(short[,,] chunkData)
         {
             ChunkBlocks = chunkData;
-            IsGenerating = false;
             NeedsSave = true;
         }
     }
