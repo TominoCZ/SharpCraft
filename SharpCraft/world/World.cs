@@ -138,7 +138,7 @@ namespace SharpCraft.world
 			Buffer.BlockCopy(data, 0, blockData, 0, data.Length);
 
 			var chunk = new Chunk(chunkPos, this, blockData);
-			if (Chunks.TryAdd(chunkPos, chunk)) throw new Exception("Chunk already exists at " + chunkPos);
+			if (!Chunks.TryAdd(chunkPos, chunk)) throw new Exception("Chunk already exists at " + chunkPos);
 
 			return true;
 		}
@@ -200,11 +200,15 @@ namespace SharpCraft.world
 
 		public void GenerateChunk(ChunkPos chunkPos, bool updateContainingEntities)
 		{
-			if (Chunks.ContainsKey(chunkPos))
-				return;
+			Chunk chunk;
+			lock (Chunks)
+			{
+				if (Chunks.ContainsKey(chunkPos))
+					return;
 
-			var chunk = new Chunk(chunkPos, this);
-			if (Chunks.TryAdd(chunkPos, chunk)) throw new Exception("Chunk already exists at " + chunkPos);
+				chunk = new Chunk(chunkPos, this);
+				if (!Chunks.TryAdd(chunkPos, chunk))throw new Exception("Chunk already exists at " + chunkPos);
+			}
 
 			ThreadPool.QueueUserWorkItem(e =>
 			{

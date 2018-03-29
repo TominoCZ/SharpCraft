@@ -144,6 +144,7 @@ namespace SharpCraft.world.chunk
 		private void BuildChunkModel()
 		{
 			if (!HasData || ModelGenerating) return;
+
 			if(World.AreNeighbourChunksGenerated(Pos))return;
 
 			ModelGenerating = true;
