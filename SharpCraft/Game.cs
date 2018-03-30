@@ -152,7 +152,7 @@ namespace SharpCraft
 
                 var r = new Random();
 
-                var playerPos = new BlockPos(0, 10, 0); //TODO DEBUG //-100 + (float)r.NextDouble() * 200, 0, -100 + (float)r.NextDouble() * 200);
+                var playerPos = new BlockPos(-100 + (float)r.NextDouble() * 200, 10, -100 + (float)r.NextDouble() * 200);
 
                 World = new World("MyWorld", "Tomlow's Fuckaround", SettingsManager.GetValue("worldseed").GetHashCode());
 
@@ -214,7 +214,8 @@ namespace SharpCraft
                         ShaderManager.reload();
                         SettingsManager.Load();
 
-                        WorldRenderer.RenderDistance = SettingsManager.GetInt("renderdistance");
+                        //FarPlane = (
+                        WorldRenderer.RenderDistance = SettingsManager.GetInt("renderdistance");//) * 16;
                         _sensitivity = SettingsManager.GetFloat("sensitivity");
 
                         if (e.Shift)

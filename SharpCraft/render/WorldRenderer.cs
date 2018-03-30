@@ -51,7 +51,6 @@ namespace SharpCraft.render
 	        world.LoadManager.LoadImportantChunks();
 	        world.LoadManager.BuildImportantChunks();
 
-
             GL.ActiveTexture(TextureUnit.Texture0);
             GL.BindTexture(TextureTarget.Texture2D, TextureManager.blockTextureAtlasID);
 

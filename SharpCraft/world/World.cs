@@ -204,7 +204,12 @@ namespace SharpCraft.world
 			lock (Chunks)
 			{
 				var chunk = data == null ? new Chunk(pos, this) : new Chunk(pos, this, data);
-				if (!Chunks.TryAdd(chunk.Pos, chunk)) throw new Exception("Chunk already exists at " + chunk.Pos);
+				if (!Chunks.TryAdd(chunk.Pos, chunk))
+				{
+				    Console.Error.WriteLine("Chunk already exists at " + chunk.Pos);
+				    return null;
+				}
+			    // throw new Exception("Chunk already exists at " + chunk.Pos);
 				return chunk;
 			}
 		}
@@ -212,6 +217,8 @@ namespace SharpCraft.world
 		public void GenerateChunk(ChunkPos chunkPos, bool updateContainingEntities)
 		{
 			var chunk = CreateChunk(chunkPos, null);
+            //if (chunk == null)
+                //return;
 
 			var chunkData = new short[Chunk.ChunkSize, Chunk.ChunkHeight, Chunk.ChunkSize];
 
