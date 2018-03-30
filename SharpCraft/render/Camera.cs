@@ -52,15 +52,17 @@ namespace SharpCraft.render
                 return new Vector2(s, c).Normalized();
             }
         }
+
         public Matrix4 View
         {
             get
             {
-                    var x = Matrix4.CreateRotationX(pitch);
-                    var y = Matrix4.CreateRotationY(yaw);
+                var x = Matrix4.CreateRotationX(pitch);
+                var y = Matrix4.CreateRotationY(yaw);
 
-                    var t = Matrix4.CreateTranslation(-pos);
-                return  t * y * x;
+                var t = Matrix4.CreateTranslation(-pos);
+
+                return t * y * x;
             }
         }
     }

@@ -10,7 +10,6 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using OpenTK.Graphics;
 using SharpCraft.block;
 using SharpCraft.entity;
@@ -21,16 +20,17 @@ using SharpCraft.shader;
 using SharpCraft.texture;
 using SharpCraft.util;
 using SharpCraft.world;
-using SharpCraft.world.chunk;
 
 namespace SharpCraft
 {
     internal class Game : GameWindow
     {
+        public string GameFolderDir = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\.sharpcraft";
+
         public EntityRenderer EntityRenderer;
         public float NearPlane = 0.1f;
         public float FarPlane = 1000f;
-        public float Fov = 65;
+        public float Fov = 70;
         public GuiRenderer GuiRenderer;
         public HashSet<Key> KeysDown = new HashSet<Key>();
         public MouseOverObject MouseOverObject = new MouseOverObject();
@@ -42,59 +42,9 @@ namespace SharpCraft
         private Stopwatch _frameTimer = Stopwatch.StartNew();
         private WindowState _lastWindowState;
 
-        public Camera Camera = new Camera();
-
-        private Point _mouseLast;
-        private float _mouseWheelLast;
-        private Stopwatch _timer = Stopwatch.StartNew();
-
-        private bool _wasSpaceDown;
-        private int _fpsCounter;
-        private float _sensitivity = 1;
-
-        private string _glVersion;
-
-        private static string _title;
-	    private static Thread _renderThread;
-
-        public Game() : base(640, 480, GraphicsMode.Default, _title, GameWindowFlags.Default, DisplayDevice.Default, 3, 3,
-            GraphicsContextFlags.ForwardCompatible)
-        {
-            Instance = this;
-	        _renderThread = Thread.CurrentThread;
-
-            VSync = VSyncMode.Off;
-            MakeCurrent();
-
-            _glVersion = GL.GetString(StringName.ShadingLanguageVersion);
-            Title = _title = $"SharpCraft Alpha 0.0.2 [GLSL {_glVersion}]";
-
-            TargetRenderFrequency = 144;
-
-            WorldRenderer = new WorldRenderer();
-            EntityRenderer = new EntityRenderer();
-            GuiRenderer = new GuiRenderer();
-            SkyboxRenderer = new SkyboxRenderer();
-
-            Console.WriteLine("DEBUG: stitching textures");
-            TextureManager.stitchTextures();
-
-            Init();
-        }
-
-        public delegate void Method();
-
         public static Game Instance { get; private set; }
 
-        public GuiScreen GuiScreen { get; private set; }
-
-        public void CloseGuiScreen()
-        {
-            GuiScreen?.onClose();
-            GuiScreen = null;
-
-            CursorVisible = false;
-        }
+        public Camera Camera = new Camera();
 
         public Matrix4 CreateProjectionMatrix()
         {
@@ -114,32 +64,90 @@ namespace SharpCraft
 
             return matrix;
         }
+        public GuiScreen GuiScreen { get; private set; }
 
-        public float GetRenderPartialTicks()
+        private Point _mouseLast;
+        private float _mouseWheelLast;
+        private Stopwatch _timer = Stopwatch.StartNew();
+
+        private bool _wasSpaceDown;
+        private int _fpsCounter;
+        private float _sensitivity = 1;
+
+        private string _glVersion;
+
+        private static string _title;
+        private static Thread _renderThread;
+
+        public delegate void Method();
+
+        public Game() : base(640, 480, GraphicsMode.Default, _title, GameWindowFlags.Default, DisplayDevice.Default, 3, 3,
+            GraphicsContextFlags.ForwardCompatible)
         {
-            return (float)_timer.Elapsed.TotalMilliseconds / 50f;
+            Instance = this;
+            _renderThread = Thread.CurrentThread;
+
+            VSync = VSyncMode.Off;
+            MakeCurrent();
+
+            _glVersion = GL.GetString(StringName.ShadingLanguageVersion);
+            Title = _title = $"SharpCraft Alpha 0.0.3 [GLSL {_glVersion}]";
+
+            //TargetRenderFrequency = 60;
+
+            WorldRenderer = new WorldRenderer();
+            EntityRenderer = new EntityRenderer();
+            GuiRenderer = new GuiRenderer();
+            SkyboxRenderer = new SkyboxRenderer();
+
+            Console.WriteLine("DEBUG: stitching textures");
+            TextureManager.stitchTextures();
+
+            Init();
         }
 
-        public void OpenGuiScreen(GuiScreen guiScreen)
+        private void Init()
         {
-            if (guiScreen == null)
-            {
-                CloseGuiScreen();
-                return;
-            }
+            Console.WriteLine("DEBUG: loading models");
 
-            GuiScreen = guiScreen;
+            var shader = new ShaderBlock("block", PrimitiveType.Quads);
+            var shaderUnlit = new ShaderBlockUnlit("block_unlit", PrimitiveType.Quads);
 
-            var middle = new Point(ClientRectangle.Width / 2, ClientRectangle.Height / 2);
-            middle = PointToScreen(middle);
+            var stoneModel = new ModelBlock(EnumBlock.STONE, shader, false);
+            var grassModel = new ModelBlock(EnumBlock.GRASS, shader, false);
+            var dirtModel = new ModelBlock(EnumBlock.DIRT, shader, false);
+            var cobblestoneModel = new ModelBlock(EnumBlock.COBBLESTONE, shader, false);
+            var planksModel = new ModelBlock(EnumBlock.PLANKS, shader, false);
+            var craftingTableModel = new ModelBlock(EnumBlock.CRAFTING_TABLE, shader, true);
+            var furnaceModel = new ModelBlock(EnumBlock.FURNACE, shader, true);
+            var bedrockModel = new ModelBlock(EnumBlock.BEDROCK, shader, false);
+            var rareModel = new ModelBlock(EnumBlock.RARE, shader, false);
+            var glassModel = new ModelBlock(EnumBlock.GLASS, shader, false);
+            var logModel = new ModelBlock(EnumBlock.LOG, shader, false);//TODO ADD LEAVES
 
-            OpenTK.Input.Mouse.SetPosition(middle.X, middle.Y);
-        }
+            var xrayModel = new ModelBlock(EnumBlock.XRAY, shader, false);
 
-        public void RunGlContext(Method m)
-        {
-	        if(_renderThread.ManagedThreadId==Thread.CurrentThread.ManagedThreadId)m();
-            else _glContextQueue.Enqueue(m);
+            ModelRegistry.registerBlockModel(stoneModel, 0);
+            ModelRegistry.registerBlockModel(grassModel, 0);
+            ModelRegistry.registerBlockModel(dirtModel, 0);
+            ModelRegistry.registerBlockModel(cobblestoneModel, 0);
+            ModelRegistry.registerBlockModel(planksModel, 0);
+            ModelRegistry.registerBlockModel(craftingTableModel, 0);
+            ModelRegistry.registerBlockModel(furnaceModel, 0);
+
+            ModelRegistry.registerBlockModel(bedrockModel, 0);
+            ModelRegistry.registerBlockModel(rareModel, 0);
+            ModelRegistry.registerBlockModel(logModel, 0);
+            ModelRegistry.registerBlockModel(glassModel, 0);
+
+            ModelRegistry.registerBlockModel(xrayModel, 0);
+
+            SettingsManager.Load();
+
+            _sensitivity = SettingsManager.GetFloat("sensitivity");
+            WorldRenderer.RenderDistance = SettingsManager.GetInt("renderdistance");
+
+            OpenGuiScreen(new GuiScreenMainMenu());
         }
 
         public void StartGame()
@@ -185,91 +193,273 @@ namespace SharpCraft
             //world.setBlock(new BlockPos(player.pos), EnumBlock.RARE, 1, true); //test of block metadata, works perfectly
         }
 
+        private void GameLoop()
+        {
+            if (GuiScreen == null && !Focused)
+                OpenGuiScreen(new GuiScreenIngameMenu());
+
+            var wheelValue = Mouse.WheelPrecise;
+
+            if (Player != null && GuiScreen == null)
+            {
+                if (wheelValue < _mouseWheelLast)
+                    Player.selectNextItem();
+                else if (wheelValue > _mouseWheelLast)
+                    Player.selectPreviousItem();
+
+                if (World?.GetChunk(new BlockPos(Player.pos).ChunkPos()) == null)
+                    Player.motion = Vector3.Zero;
+            }
+
+            _mouseWheelLast = wheelValue;
+
+            World?.UpdateEntities();
+        }
+
+        private void RenderScreen(float partialTicks)
+        {
+
+            GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+            GL.Enable(EnableCap.DepthTest);
+            GL.Enable(EnableCap.DepthClamp);
+            GL.Enable(EnableCap.CullFace);
+            GL.CullFace(CullFaceMode.Back);
+
+            if (World != null)
+            {
+                var viewMatrix = Camera.View;
+
+                WorldRenderer.Render(World, viewMatrix);
+                EntityRenderer.render(partialTicks);
+
+                SkyboxRenderer.render(viewMatrix);
+            }
+
+            //render other gui
+            if (Player != null)
+            {
+                GuiRenderer.renderCrosshair();
+                GuiRenderer.renderHUD();
+            }
+
+            //render gui screen
+            if (GuiScreen != null)
+            {
+                CursorVisible = true;
+                GuiRenderer.render(GuiScreen);
+            }
+        }
+
+        private void GetMouseOverObject()
+        {
+            var radius = 5;
+
+            var final = new MouseOverObject();
+
+            var dist = float.MaxValue;
+
+            var camPos = Vector3.One * 0.5f + Camera.pos;
+
+            for (var z = -radius; z <= radius; z++)
+            {
+                for (var y = -radius; y <= radius; y++)
+                {
+                    for (var x = -radius; x <= radius; x++)
+                    {
+                        var vec = camPos;
+                        vec.X += x;
+                        vec.Y += y;
+                        vec.Z += z;
+
+                        var f = (vec - Camera.pos).LengthFast;
+
+                        if (f <= radius + 0.5f)
+                        {
+                            var pos = new BlockPos(vec);
+                            var block = World.GetBlock(pos);
+
+                            if (block != EnumBlock.AIR)
+                            {
+                                var model = ModelRegistry.getModelForBlock(block, World.GetMetadata(pos));
+                                var bb = model.boundingBox.offset(pos.ToVec());
+
+                                var hitSomething = RayHelper.rayIntersectsBB(Camera.pos,
+                                    Camera.getLookVec(), bb, out var hitPos, out var normal);
+
+                                if (hitSomething)
+                                {
+                                    var sideHit = FaceSides.Up;
+
+                                    if (normal.X < 0)
+                                        sideHit = FaceSides.West;
+                                    else if (normal.X > 0)
+                                        sideHit = FaceSides.East;
+                                    if (normal.Y < 0)
+                                        sideHit = FaceSides.Down;
+                                    else if (normal.Y > 0)
+                                        sideHit = FaceSides.Up;
+                                    if (normal.Z < 0)
+                                        sideHit = FaceSides.North;
+                                    else if (normal.Z > 0)
+                                        sideHit = FaceSides.South;
+
+                                    var p = new BlockPos(hitPos - normal * 0.5f);
+
+                                    var l = Math.Abs((Camera.pos - (p.ToVec() + Vector3.One * 0.5f)).Length);
+
+                                    if (l < dist)
+                                    {
+                                        dist = l;
+
+                                        final.hit = block;
+                                        final.hitVec = hitPos;
+                                        final.blockPos = p;
+                                        final.normal = normal;
+                                        final.sideHit = sideHit;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            MouseOverObject = final;
+        }
+
+        private void ResetMouse()
+        {
+            var middle = PointToScreen(new Point(ClientSize.Width / 2, ClientSize.Height / 2));
+            OpenTK.Input.Mouse.SetPosition(middle.X, middle.Y);
+        }
+
+        public void RunGlTasks()
+        {
+
+            while (_glContextQueue.Count > 0)
+            {
+                if (_glContextQueue.TryDequeue(out var func))
+                    func?.Invoke();
+            }
+        }
+
+        private void RunUpdateThreads()
+        {
+            new Thread(() =>
+            {
+                while (true)
+                {
+                    if (!IsDisposed && Visible)
+                    {
+                        GetMouseOverObject();
+                        World?.update(Player, WorldRenderer.RenderDistance);
+                    }
+
+                    Thread.Sleep(50);
+                }
+            })
+            { IsBackground = true }.Start();
+
+            new Thread(() =>
+            {
+                while (true)
+                {
+                    if (!IsDisposed && Visible)
+                    {
+                        var state = Mouse.GetState();
+
+                        var point = new Point(state.X, state.Y);
+
+                        if (AllowInput())
+                        {
+                            var delta = new Point(_mouseLast.X - point.X, _mouseLast.Y - point.Y);
+
+                            Camera.yaw -= delta.X / 1000f * _sensitivity;
+                            Camera.pitch -= delta.Y / 1000f * _sensitivity;
+
+                            ResetMouse();
+                        }
+
+                        _mouseLast = point;
+
+                        if (KeysDown.Contains(Key.Space) && !_wasSpaceDown && Player.onGround)
+                        {
+                            _wasSpaceDown = true;
+                            Player.motion.Y = 0.475F;
+                        }
+                        else if ((!KeysDown.Contains(Key.Space) || Player.onGround) && _wasSpaceDown)
+                            _wasSpaceDown = false;
+
+                        if (_frameTimer.ElapsedMilliseconds >= 1000)
+                        {
+                            _frameTimer.Restart();
+
+                            Title = $"{_title} - FPS: {_fpsCounter}";
+                            _fpsCounter = 0;
+                        }
+                    }
+
+                    Thread.Sleep(3);
+                }
+            })
+            { IsBackground = true }.Start();
+        }
+
+        public void OpenGuiScreen(GuiScreen guiScreen)
+        {
+            if (guiScreen == null)
+            {
+                CloseGuiScreen();
+                return;
+            }
+
+            GuiScreen = guiScreen;
+
+            var middle = new Point(ClientRectangle.Width / 2, ClientRectangle.Height / 2);
+            middle = PointToScreen(middle);
+
+            OpenTK.Input.Mouse.SetPosition(middle.X, middle.Y);
+        }
+
+        public void RunGlContext(Method m)
+        {
+            if (_renderThread.ManagedThreadId == Thread.CurrentThread.ManagedThreadId) m();
+            else _glContextQueue.Enqueue(m);
+        }
+
+        public float GetRenderPartialTicks()
+        {
+            return (float)_timer.Elapsed.TotalMilliseconds / 50f;
+        }
+
         private bool AllowInput()
         {
             return GuiScreen == null && !(CursorVisible = !Focused);
         }
 
-        protected override void OnClosing(CancelEventArgs e)
+        public void CloseGuiScreen()
         {
-            ShaderManager.cleanup();
+            GuiScreen?.onClose();
+            GuiScreen = null;
 
-            ModelManager.cleanup();
-            TextureManager.cleanUp();
-
-            if (World != null)
-                WorldLoader.SaveWorld(World);
+            CursorVisible = false;
         }
 
-        protected override void OnKeyDown(KeyboardKeyEventArgs e)
+        protected override void OnRenderFrame(FrameEventArgs e)
         {
-            if (!KeysDown.Contains(e.Key))
-                KeysDown.Add(e.Key);
-
-            switch (e.Key)
+            RunGlTasks();
+            if (_timer.Elapsed.TotalMilliseconds > 50 - e.Time * 1000)
             {
-                case Key.R:
-                    if (e.Control)
-                    {
-                        ShaderManager.reload();
-                        SettingsManager.Load();
-
-                        //FarPlane = (
-                        WorldRenderer.RenderDistance = SettingsManager.GetInt("renderdistance");//) * 16;
-                        _sensitivity = SettingsManager.GetFloat("sensitivity");
-
-                        if (e.Shift)
-                        {
-                            TextureManager.reload();
-                            World?.DestroyChunkModels();
-                        }
-                    }
-
-                    break;
-                case Key.Escape:
-                    if (GuiScreen is GuiScreenMainMenu)
-                        return;
-
-                    if (GuiScreen != null)
-                        CloseGuiScreen();
-                    else
-                    {
-                        OpenGuiScreen(new GuiScreenIngameMenu());
-                    }
-
-                    break;
-                case Key.F11:
-                    if (WindowState != WindowState.Fullscreen)
-                    {
-                        _lastWindowState = WindowState;
-                        WindowState = WindowState.Fullscreen;
-                    }
-                    else
-                        WindowState = _lastWindowState;
-
-                    break;
+                GameLoop();
+                _timer.Restart();
             }
 
-            if (GuiScreen == null)
-            {
-                for (var i = 0; i < 9; i++)
-                {
-                    if (e.Key == Key.Number1 + i)
-                    {
-                        Player?.setSelectedSlot(i);
+            RenderScreen(GetRenderPartialTicks());
 
-                        break;
-                    }
-                }
-            }
+            _fpsCounter++;
 
-            if (e.Key == (Key.LAlt | Key.F4))
-                Exit();
-        }
-
-        protected override void OnKeyUp(KeyboardKeyEventArgs e)
-        {
-            KeysDown.Remove(e.Key);
+            SwapBuffers();
+            ProcessEvents(false);
         }
 
         protected override void OnMouseDown(MouseButtonEventArgs e)
@@ -356,30 +546,78 @@ namespace SharpCraft
             }
         }
 
-	    public void RunGlTasks()
-	    {
-
-		    while (_glContextQueue.Count > 0)
-		    {
-			    if (_glContextQueue.TryDequeue(out var func))
-				    func?.Invoke();
-		    }
-	    }
-        protected override void OnRenderFrame(FrameEventArgs e)
+        protected override void OnKeyDown(KeyboardKeyEventArgs e)
         {
-	        RunGlTasks();
-            if (_timer.ElapsedMilliseconds > 50 - e.Time * 1000)
+            if (!KeysDown.Contains(e.Key))
+                KeysDown.Add(e.Key);
+
+            switch (e.Key)
             {
-                GameLoop();
-                _timer.Restart();
+                case Key.R:
+                    if (e.Control)
+                    {
+                        ShaderManager.reload();
+                        SettingsManager.Load();
+
+                        WorldRenderer.RenderDistance = SettingsManager.GetInt("renderdistance");
+                        _sensitivity = SettingsManager.GetFloat("sensitivity");
+
+                        if (e.Shift)
+                        {
+                            TextureManager.reload();
+                            World?.DestroyChunkModels();
+                        }
+                    }
+
+                    break;
+                case Key.Escape:
+                    if (GuiScreen is GuiScreenMainMenu)
+                        return;
+
+                    if (GuiScreen != null)
+                        CloseGuiScreen();
+                    else
+                    {
+                        OpenGuiScreen(new GuiScreenIngameMenu());
+                    }
+
+                    break;
+                case Key.F11:
+                    if (WindowState != WindowState.Fullscreen)
+                    {
+                        _lastWindowState = WindowState;
+                        WindowState = WindowState.Fullscreen;
+                    }
+                    else
+                        WindowState = _lastWindowState;
+
+                    break;
             }
 
-            RenderScreen(GetRenderPartialTicks());
+            if (GuiScreen == null)
+            {
+                for (var i = 0; i < 9; i++)
+                {
+                    if (e.Key == Key.Number1 + i)
+                    {
+                        Player?.setSelectedSlot(i);
 
-            _fpsCounter++;
+                        break;
+                    }
+                }
+            }
 
-            SwapBuffers();
-            ProcessEvents(false);
+            if (e.Key == (Key.LAlt | Key.F4))
+                Exit();
+
+            base.OnKeyDown(e);
+        }
+
+        protected override void OnKeyUp(KeyboardKeyEventArgs e)
+        {
+            KeysDown.Remove(e.Key);
+
+            base.OnKeyUp(e);
         }
 
         protected override void OnResize(EventArgs e)
@@ -399,256 +637,17 @@ namespace SharpCraft
             ShaderManager.updateProjectionMatrix();
         }
 
-        private void GameLoop()
+        protected override void OnClosing(CancelEventArgs e)
         {
-            if (GuiScreen == null && !Focused)
-                OpenGuiScreen(new GuiScreenIngameMenu());
+            ShaderManager.cleanup();
 
-            var wheelValue = Mouse.WheelPrecise;
-
-            if (Player != null && GuiScreen == null)
-            {
-                if (wheelValue < _mouseWheelLast)
-                    Player.selectNextItem();
-                else if (wheelValue > _mouseWheelLast)
-                    Player.selectPreviousItem();
-
-                if (World?.GetChunk(new BlockPos(Player.pos).ChunkPos()) == null)
-                    Player.motion = Vector3.Zero;
-            }
-
-            _mouseWheelLast = wheelValue;
-
-            World?.UpdateEntities();
-        }
-
-        private void GetMouseOverObject()
-        {
-            var radius = 5;
-
-            var final = new MouseOverObject();
-
-            var dist = float.MaxValue;
-
-            var camPos = Vector3.One * 0.5f + Camera.pos;
-
-            for (var z = -radius; z <= radius; z++)
-            {
-                for (var y = -radius; y <= radius; y++)
-                {
-                    for (var x = -radius; x <= radius; x++)
-                    {
-                        var vec = camPos;
-                        vec.X += x;
-                        vec.Y += y;
-                        vec.Z += z;
-
-                        var f = (vec - Camera.pos).LengthFast;
-
-                        if (f <= radius + 0.5f)
-                        {
-                            var pos = new BlockPos(vec);
-                            var block = World.GetBlock(pos);
-
-                            if (block != EnumBlock.AIR)
-                            {
-                                var model = ModelRegistry.getModelForBlock(block, World.GetMetadata(pos));
-                                var bb = model.boundingBox.offset(pos.ToVec());
-
-                                var hitSomething = RayHelper.rayIntersectsBB(Camera.pos,
-                                    Camera.getLookVec(), bb, out var hitPos, out var normal);
-
-                                if (hitSomething)
-                                {
-                                    var sideHit = FaceSides.Up;
-
-                                    if (normal.X < 0)
-                                        sideHit = FaceSides.West;
-                                    else if (normal.X > 0)
-                                        sideHit = FaceSides.East;
-                                    if (normal.Y < 0)
-                                        sideHit = FaceSides.Down;
-                                    else if (normal.Y > 0)
-                                        sideHit = FaceSides.Up;
-                                    if (normal.Z < 0)
-                                        sideHit = FaceSides.North;
-                                    else if (normal.Z > 0)
-                                        sideHit = FaceSides.South;
-
-                                    var p = new BlockPos(hitPos - normal * 0.5f);
-
-                                    var l = Math.Abs((Camera.pos - (p.ToVec() + Vector3.One * 0.5f)).Length);
-
-                                    if (l < dist)
-                                    {
-                                        dist = l;
-
-                                        final.hit = block;
-                                        final.hitVec = hitPos;
-                                        final.blockPos = p;
-                                        final.normal = normal;
-                                        final.sideHit = sideHit;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            MouseOverObject = final;
-        }
-
-        private void Init()
-        {
-            Console.WriteLine("DEBUG: loading models");
-
-            var shader = new ShaderBlock("block", PrimitiveType.Quads);
-            var shaderUnlit = new ShaderBlockUnlit("block_unlit", PrimitiveType.Quads);
-
-            var stoneModel = new ModelBlock(EnumBlock.STONE, shader, false);
-            var grassModel = new ModelBlock(EnumBlock.GRASS, shader, false);
-            var dirtModel = new ModelBlock(EnumBlock.DIRT, shader, false);
-            var cobblestoneModel = new ModelBlock(EnumBlock.COBBLESTONE, shader, false);
-            var planksModel = new ModelBlock(EnumBlock.PLANKS, shader, false);
-            var craftingTableModel = new ModelBlock(EnumBlock.CRAFTING_TABLE, shader, true);
-            var furnaceModel = new ModelBlock(EnumBlock.FURNACE, shader, true);
-            var bedrockModel = new ModelBlock(EnumBlock.BEDROCK, shader, false);
-            var rareModel = new ModelBlock(EnumBlock.RARE, shader, false);
-            var glassModel = new ModelBlock(EnumBlock.GLASS, shader, false);
-            var logModel = new ModelBlock(EnumBlock.LOG, shader, false);
-
-            var xrayModel = new ModelBlock(EnumBlock.XRAY, shader, false);
-
-            ModelRegistry.registerBlockModel(stoneModel, 0);
-            ModelRegistry.registerBlockModel(grassModel, 0);
-            ModelRegistry.registerBlockModel(dirtModel, 0);
-            ModelRegistry.registerBlockModel(cobblestoneModel, 0);
-            ModelRegistry.registerBlockModel(planksModel, 0);
-            ModelRegistry.registerBlockModel(craftingTableModel, 0);
-            ModelRegistry.registerBlockModel(furnaceModel, 0);
-
-            ModelRegistry.registerBlockModel(bedrockModel, 0);
-            ModelRegistry.registerBlockModel(rareModel, 0);
-            ModelRegistry.registerBlockModel(logModel, 0);
-            ModelRegistry.registerBlockModel(glassModel, 0);
-
-            ModelRegistry.registerBlockModel(xrayModel, 0);
-
-            SettingsManager.Load();
-
-            _sensitivity = SettingsManager.GetFloat("sensitivity");
-            WorldRenderer.RenderDistance = SettingsManager.GetInt("renderdistance");
-
-            OpenGuiScreen(new GuiScreenMainMenu());
-        }
-
-        private void Prepare()
-        {
-            GL.Enable(EnableCap.DepthTest);
-            GL.Enable(EnableCap.DepthClamp);
-            GL.Enable(EnableCap.CullFace);
-            GL.CullFace(CullFaceMode.Back);
-        }
-
-        private void RenderScreen(float partialTicks)
-        {
-
-            GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
-            Prepare();
+            ModelManager.cleanup();
+            TextureManager.cleanUp();
 
             if (World != null)
-            {
+                WorldLoader.SaveWorld(World);
 
-                var viewMatrix = Camera.View;
-
-                WorldRenderer.Render(World, viewMatrix);
-                EntityRenderer.render(partialTicks);
-
-                SkyboxRenderer.render(viewMatrix);
-            }
-
-            //render other gui
-            if (Player != null)
-            {
-                GuiRenderer.renderCrosshair();
-                GuiRenderer.renderHUD();
-            }
-
-            //render gui screen
-            if (GuiScreen != null)
-            {
-                CursorVisible = true;
-                GuiRenderer.render(GuiScreen);
-            }
-        }
-
-        private void ResetMouse()
-        {
-            var middle = PointToScreen(new Point(ClientSize.Width / 2, ClientSize.Height / 2));
-            OpenTK.Input.Mouse.SetPosition(middle.X, middle.Y);
-        }
-
-        private void RunUpdateThreads()
-        {
-            new Thread(() =>
-                {
-                    while (true)
-                    {
-                        if (!IsDisposed && Visible)
-                        {
-	                        GetMouseOverObject();
-	                        World?.update(Player,WorldRenderer.RenderDistance);
-                        }
-
-                        Thread.Sleep(50);
-                    }
-                })
-            { IsBackground = true }.Start();
-
-            new Thread(() =>
-                {
-                    while (true)
-                    {
-                        if (!IsDisposed && Visible)
-                        {
-                            var state = Mouse.GetState();
-
-                            var point = new Point(state.X, state.Y);
-
-                            if (AllowInput())
-                            {
-                                var delta = new Point(_mouseLast.X - point.X, _mouseLast.Y - point.Y);
-
-                                Camera.yaw -= delta.X / 1000f * _sensitivity;
-                                Camera.pitch -= delta.Y / 1000f * _sensitivity;
-
-                                ResetMouse();
-                            }
-
-                            _mouseLast = point;
-
-                            if (KeysDown.Contains(Key.Space) && !_wasSpaceDown && Player.onGround)
-                            {
-                                _wasSpaceDown = true;
-                                Player.motion.Y = 0.475F;
-                            }
-                            else if ((!KeysDown.Contains(Key.Space) || Player.onGround) && _wasSpaceDown)
-                                _wasSpaceDown = false;
-
-                            if (_frameTimer.ElapsedMilliseconds >= 1000)
-                            {
-                                _frameTimer.Restart();
-
-                                Title = $"{_title} - FPS: {_fpsCounter}";
-                                _fpsCounter = 0;
-                            }
-                        }
-
-                        Thread.Sleep(3);
-                    }
-                })
-            { IsBackground = true }.Start();
+            base.OnClosing(e);
         }
     }
 
@@ -666,11 +665,7 @@ namespace SharpCraft
 
         public static void Load()
         {
-            var dir = "SharpCraft_Data";
-            if (!Directory.Exists(dir))
-                Directory.CreateDirectory(dir);
-
-            var file = dir + "/settings.txt";
+            var file = Game.Instance.GameFolderDir + "/settings.txt";
 
             if (File.Exists(file))
             {
@@ -700,11 +695,7 @@ namespace SharpCraft
 
         public static void Save()
         {
-            var dir = "SharpCraft_Data";
-            if (!Directory.Exists(dir))
-                Directory.CreateDirectory(dir);
-
-            var file = dir + "/settings.txt";
+            var file = Game.Instance.GameFolderDir + "/settings.txt";
 
             var sb = new StringBuilder();
 
@@ -750,8 +741,8 @@ namespace SharpCraft
         [STAThread]
         private static void Main(string[] args)
         {
-	        ThreadPool.SetMinThreads(0, 0);
-	        ThreadPool.SetMinThreads(Environment.ProcessorCount, 0);
+            ThreadPool.SetMinThreads(0, 0);
+            ThreadPool.SetMinThreads(Environment.ProcessorCount, 0);
 
             using (var game = new Game())
             {

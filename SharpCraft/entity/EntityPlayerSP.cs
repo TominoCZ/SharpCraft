@@ -2,14 +2,17 @@
 using OpenTK;
 using OpenTK.Input;
 using SharpCraft.block;
+using SharpCraft.util;
 
 namespace SharpCraft.entity
 {
-	public class EntityPlayerSP : Entity
+    public class EntityPlayerSP : Entity
     {
-        public float maxMoveSpeed = 0.25f;
-        public float moveSpeed;
+        private float maxMoveSpeed = 0.245f;
+        private float moveSpeedMult = 1;
 
+        private Vector2 moveSpeed;
+        
         public int equippedItemHotbarIndex { get; private set; }
 
         public ItemStack[] hotbar { get; }
@@ -52,15 +55,15 @@ namespace SharpCraft.entity
 
             Vector2 dirVec = Vector2.Zero;
 
-            if (state.Contains(Key.W))
-                dirVec += Game.Instance.Camera.forward;
-            if (state.Contains(Key.S))
-                dirVec += -Game.Instance.Camera.forward;
+            var w = state.Contains(Key.W); //might use this later
+            var s = state.Contains(Key.S);
+            var a = state.Contains(Key.A);
+            var d = state.Contains(Key.D);
 
-            if (state.Contains(Key.A))
-                dirVec += Game.Instance.Camera.left;
-            if (state.Contains(Key.D))
-                dirVec += -Game.Instance.Camera.left;
+            if (w) dirVec += Game.Instance.Camera.forward;
+            if (s) dirVec += -Game.Instance.Camera.forward;
+            if (a) dirVec += Game.Instance.Camera.left;
+            if (d) dirVec += -Game.Instance.Camera.left;
 
             float mult = 1;
 
@@ -69,12 +72,18 @@ namespace SharpCraft.entity
 
             if (dirVec != Vector2.Zero)
             {
-                moveSpeed = MathHelper.Clamp(moveSpeed + 0.095f, 0, maxMoveSpeed) * mult;
+                moveSpeedMult = MathHelper.Clamp(moveSpeedMult + 0.085f, 1, 1.75f);
 
-                motion.Xz = dirVec.Normalized() * moveSpeed;
+                moveSpeed = MathUtil.Clamp(moveSpeed + dirVec.Normalized() * 0.1f * moveSpeedMult, 0, maxMoveSpeed);// * moveSpeed;
+
+                Console.WriteLine(moveSpeed.LengthFast.ToString("F"));
+                motion.Xz = moveSpeed * mult;
             }
             else
-                moveSpeed = 0;
+            {
+                moveSpeed = Vector2.Zero;
+                moveSpeedMult = 1;
+            }
         }
 
         public void setItemStackInHotbar(int index, ItemStack stack)

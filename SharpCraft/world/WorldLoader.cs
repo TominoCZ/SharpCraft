@@ -10,8 +10,6 @@ namespace SharpCraft.world
 {
     internal class WorldLoader
     {
-        private static string _savesFolder = "saves";
-
         public static void SaveWorld(World w)
         {
             if (w == null)
@@ -46,7 +44,7 @@ namespace SharpCraft.world
         {
             var bf = new BinaryFormatter();
 
-            var dir = $"{_savesFolder}/{saveName}";
+            var dir = $"{Game.Instance.GameFolderDir}/saves/{saveName}";
 
             if (!Directory.Exists(dir))
                 return null;

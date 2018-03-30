@@ -89,7 +89,7 @@ namespace SharpCraft.world.chunk
 
 		public static BlockPos ToChunkLocal(BlockPos worldPos)
 		{
-			return new BlockPos(MathUtil.ToLocal(worldPos.X, Chunk.ChunkSize), MathUtil.MinMax(worldPos.Y, 0, 255), MathUtil.ToLocal(worldPos.Z, Chunk.ChunkSize));
+			return new BlockPos(MathUtil.ToLocal(worldPos.X, Chunk.ChunkSize), MathUtil.Clamp(worldPos.Y, 0, 255), MathUtil.ToLocal(worldPos.Z, Chunk.ChunkSize));
 		}
 
 		public static ChunkPos Ctor(int[] data)
