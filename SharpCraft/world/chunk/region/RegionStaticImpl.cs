@@ -2,10 +2,8 @@
 using System.IO;
 using System.Text;
 using System.Threading;
-using SharpCraft.world.chunk;
-using SharpCraft.world.chunk.region;
 
-namespace SharpCraft.world
+namespace SharpCraft.world.chunk.region
 {
 	public class RegionStaticImpl<TCord> : IRegion where TCord : IRegionCord
 	{
@@ -43,7 +41,7 @@ namespace SharpCraft.world
 
 		private void CreateAndPopulate()
 		{
-			var chunkCount = CalcChunkCount();
+			var chunkCount = _info.ChunkCount;
 			PopulateBlank(chunkCount);
 			CacheFlags(chunkCount);
 		}

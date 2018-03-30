@@ -9,21 +9,20 @@ namespace SharpCraft.world.chunk.region
 	{
 		/*
 		 File format:
-
 		 Note: all pointers are absolute position of file from start
 
-		 : header
-		 int 32 - table size
-		 <pointer table> - table size * pointer size
+		 -- C++ view:
 
-		 : chunk
-		 int 32 - total size
-		 pointer - block (0 if chunk does not exist)
+		 class Chunk {
+		 	int size;
+		 	Block* next;
+		 }
+		 class Block{
+		 	byte[] data;
+		 	Block* next;
+		 }
 
-		 :block
-		 int 32 - block size
-		 <data> - block size * 8
-		 pointer - block (0 if end)
+		 Chunk[] file;
 
 		 */
 		private static readonly object CreateLock = new object();
@@ -35,7 +34,6 @@ namespace SharpCraft.world.chunk.region
 		private readonly string _filePath;
 		private          int[]  _pointerTable;
 		private          bool   _hasFile;
-		private          int    _dataStart;
 
 		private readonly ReaderWriterLockSlim _rwLock = new ReaderWriterLockSlim();
 
@@ -53,7 +51,6 @@ namespace SharpCraft.world.chunk.region
 
 			_filePath = $"{dataRoot}/.reg_{nam}.bin";
 
-			_dataStart = 4 + _info.ChunkCount * 4;
 			_cordinate = cordinate;
 			CheckFile();
 		}
@@ -82,23 +79,107 @@ namespace SharpCraft.world.chunk.region
 			}
 		}
 
-		private void ReadBlock(byte[] dest, int destPos, Stream stream, int pointer)
+		private void CreateFile()
 		{
+			using (var stream = File.Create(_filePath))
+			{
+				stream.WriteInt32(_info.ChunkCount);
+				for (int i = 0; i < _info.ChunkCount; i++)
+				{
+					stream.WriteInt32(0);
+					stream.WriteInt32(0);
+				}
+			}
+
+			_pointerTable = new int[_info.ChunkCount];
 		}
 
 		public void WriteChunkData(int id, byte[] data)
 		{
-			throw new System.NotImplementedException();
+			lock (CreateLock)
+			{
+				CheckFile();
+				if (!_hasFile) CreateFile();
+			}
+
+			FileStream stream;
+			using (stream = Write())
+			{
+				int nextChunk;
+
+				// update/init chunk in array
+				if (_pointerTable[id] == 0)
+				{
+					stream.Seek(ArrayPos(id), SeekOrigin.Begin);
+					stream.WriteInt32(nextChunk = ArrayPos(_info.ChunkCount + 1));
+					stream.WriteInt32(data.Length);
+				}
+				else
+				{
+					stream.Seek(ArrayPos(id) + 4, SeekOrigin.Begin);
+					nextChunk = _pointerTable[id];
+					stream.WriteInt32(data.Length);
+				}
+
+				int pos = 0;
+				while (pos != data.Length)
+				{
+					stream.Seek(nextChunk, SeekOrigin.Begin);
+					var blockSize = stream.ReadInt32();
+					stream.Write(data, pos, blockSize);
+					pos += blockSize;
+
+					int lastChunkPtr = (int) stream.Position;
+
+					nextChunk = stream.ReadInt32();
+					if (nextChunk == 0)
+					{
+						stream.Close();
+						int siz = data.Length - pos - 1;
+						int pointer = AllocateBlock(data, pos, siz);
+						stream = Write();
+						stream.Seek(lastChunkPtr, SeekOrigin.Begin);
+						stream.WriteInt32(pointer);
+						pos += siz;
+					}
+				}
+			}
+		}
+
+		private int AllocateBlock(byte[] data,int pos,int size)
+		{
+			//TODO fill gaps
+
+			int pointer=(int) new FileInfo(_filePath).Length-1;
+			using (var stream=Write())
+			{
+				stream.Seek(pointer, SeekOrigin.Begin);
+				stream.WriteInt32(size);//array size
+				stream.Write(data,pos,size);//array data
+				stream.WriteInt32(0);//next block
+			}
+
+			return pointer;
 		}
 
 		public byte[] ReadChunkData(int id)
 		{
+			lock (CreateLock)
+			{
+				CheckFile();
+				if (!_hasFile) return null;
+			}
+
+			int pointer = _pointerTable[id];
+			if (pointer == 0) return null;
 
 			using (var stream = Read())
 			{
-				int pointer = _pointerTable[id] + _dataStart;
+				stream.Seek(ArrayPos(id) + 4, SeekOrigin.Begin);
+
 				int totalSize = stream.ReadInt32();
-				byte[] dest=new byte[totalSize];
+				byte[] dest = new byte[totalSize];
+				int destPos = 0;
 
 				while (true)
 				{
@@ -108,12 +189,17 @@ namespace SharpCraft.world.chunk.region
 					stream.Read(dest, destPos, blockSize);
 
 					pointer = stream.ReadInt32();
-					if (pointer != 0)destPos += blockSize;
+					if (pointer != 0) destPos += blockSize;
 					else break;
 				}
+
 				return dest;
 			}
+		}
 
+		private int ArrayPos(int pos)
+		{
+			return 4 + pos * 2 * 4;
 		}
 
 		public void Optimize()

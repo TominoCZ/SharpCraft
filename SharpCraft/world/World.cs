@@ -10,6 +10,7 @@ using SharpCraft.model;
 using SharpCraft.render;
 using SharpCraft.util;
 using SharpCraft.world.chunk;
+using SharpCraft.world.chunk.region;
 
 namespace SharpCraft.world
 {

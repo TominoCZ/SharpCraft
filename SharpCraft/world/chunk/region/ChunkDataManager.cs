@@ -1,19 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Net.Sockets;
-using System.Runtime.InteropServices.ComTypes;
 using SharpCraft.util;
-using SharpCraft.world.chunk.region;
 
-namespace SharpCraft.world
+namespace SharpCraft.world.chunk.region
 {
 	public class ChunkDataManager<TReg, TCord> where TReg : IRegion where TCord : IRegionCord, new()
 	{
-		private readonly string DataRoot;
+		private readonly string _dataRoot;
 
-		private List<TReg>        _regions = new List<TReg>();
-		public  RegionInfo<TCord> Info { get; }
+		private readonly List<TReg>        _regions = new List<TReg>();
+		public           RegionInfo<TCord> Info { get; }
 
 		private readonly Func<RegionInfo<TCord>, TCord, string, TReg> _regionConstructor;
 		private readonly Func<int[], TCord>                           _cordinateConstructor;
@@ -22,10 +19,19 @@ namespace SharpCraft.world
 		{
 			Console.WriteLine(Path.GetFullPath(dataRoot));
 			Directory.CreateDirectory(dataRoot);
-			DataRoot = dataRoot;
+			_dataRoot = dataRoot;
 			Info = info;
 			_regionConstructor = regionConstructor;
 			_cordinateConstructor = cordinateConstructor;
+		}
+
+
+		/// <summary>
+		/// When ran, manager will unload region objects that were not used in a while as to keep the number of regions active at once exploding<br/>
+		/// May run internally
+		/// </summary>
+		public void RunGc()
+		{
 		}
 
 		public void WriteChunkData(TCord coordinate, byte[] data)
@@ -58,7 +64,7 @@ namespace SharpCraft.world
 			}
 
 			regionLocalCoord = _cordinateConstructor(_regionLocalCoordI);
-			regionCoord =  _cordinateConstructor(_regionCoordI);
+			regionCoord = _cordinateConstructor(_regionCoordI);
 		}
 
 		private TReg GetRegion(int hash, TCord regionCoord)
@@ -66,7 +72,9 @@ namespace SharpCraft.world
 			var pos = _regions.BinarySearch(default(TReg), Comparer<TReg>.Create((x, y) => x.GetHashCode().CompareTo(hash)));
 			if (pos <= -1 || _regions[pos].GetHashCode() != hash)
 			{
-				var r = _regionConstructor(Info, regionCoord, DataRoot);
+				if(_regions.Count==_regions.Capacity)RunGc();//try to prevent array grow
+
+				var r = _regionConstructor(Info, regionCoord, _dataRoot);
 				_regions.Add(r);
 				_regions.Sort((x, y) => x.GetHashCode().CompareTo(y.GetHashCode()));
 				return r;
@@ -79,10 +87,10 @@ namespace SharpCraft.world
 	public class RegionInfo<TCord> where TCord : IRegionCord
 	{
 		private readonly int[] _dimensionSizes;
-		public           int   ChunkByteSize  { get; }
-		public int ChunkCount { get; }
+		public           int   ChunkByteSize { get; }
+		public           int   ChunkCount    { get; }
 
-		public           int   DimSize(int i) => _dimensionSizes[i];
+		public int DimSize(int i) => _dimensionSizes[i];
 
 		public RegionInfo(int[] dimensionSizes, int chunkByteSize)
 		{
