@@ -26,11 +26,11 @@ namespace SharpCraft.world.chunk
 				var w = Game.Instance.World;
 				if (w.GetChunk(c) != null) return;
 
-				if (w.LoadChunk(c)) Console.WriteLine($"chunk loaded    @ {c.x} x {c.z}");
+				if (w.LoadChunk(c)) ;//Console.WriteLine($"chunk loaded    @ {c.x} x {c.z}");
 				else
 				{
 					w.GenerateChunk(c, true);
-					Console.WriteLine($"chunk generated @ {c.x} x {c.z}");
+					//Console.WriteLine($"chunk generated @ {c.x} x {c.z}");
 				}
 			},
 			(l, r) => l.DistanceTo(Game.Instance.Player.pos).CompareTo(l.DistanceTo(Game.Instance.Player.pos)));

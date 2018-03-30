@@ -1,71 +1,86 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Net.Sockets;
 using System.Runtime.InteropServices.ComTypes;
 using SharpCraft.util;
+using SharpCraft.world.chunk.region;
 
 namespace SharpCraft.world
 {
-	public class ChunkDataManager
+	public class ChunkDataManager<TReg, TCord> where TReg : IRegion where TCord : IRegionCord, new()
 	{
 		private readonly string DataRoot;
 
-		private List<Region> _regions = new List<Region>();
-		public RegionInfo Info { get; }
+		private List<TReg>        _regions = new List<TReg>();
+		public  RegionInfo<TCord> Info { get; }
 
-		public ChunkDataManager(string dataRoot, RegionInfo info)
+		private readonly Func<RegionInfo<TCord>, TCord, string, TReg> _regionConstructor;
+		private readonly Func<int[], TCord>                           _cordinateConstructor;
+
+		public ChunkDataManager(string dataRoot, RegionInfo<TCord> info, Func<RegionInfo<TCord>, TCord, string, TReg> regionConstructor, Func<int[], TCord> cordinateConstructor)
 		{
 			Console.WriteLine(Path.GetFullPath(dataRoot));
 			Directory.CreateDirectory(dataRoot);
 			DataRoot = dataRoot;
 			Info = info;
+			_regionConstructor = regionConstructor;
+			_cordinateConstructor = cordinateConstructor;
 		}
 
-		public void WriteChunkData(int[] coordinate, byte[] data)
+		public void WriteChunkData(TCord coordinate, byte[] data)
 		{
-			calcCord(coordinate,out var regionCoord,out var regionLocalCoord);
-			GetRegion(Info.CoordHash(regionCoord),regionCoord).WriteChunkData(Info.CoordHash(regionLocalCoord),data);
+			CalcCord(coordinate, out var regionCoord, out var regionLocalCoord);
+			GetRegion(Info.CoordHash(regionCoord), regionCoord).WriteChunkData(Info.CoordHash(regionLocalCoord), data);
 		}
 
-		public byte[] GetChunkData(int[] coordinate)
+		public byte[] GetChunkData(TCord coordinate)
 		{
-			calcCord(coordinate,out var regionCoord,out var regionLocalCoord);
-			return GetRegion(Info.CoordHash(regionCoord),regionCoord).ReadChunkData(Info.CoordHash(regionLocalCoord));
+			CalcCord(coordinate, out var regionCoord, out var regionLocalCoord);
+			return GetRegion(Info.CoordHash(regionCoord), regionCoord).ReadChunkData(Info.CoordHash(regionLocalCoord));
 		}
 
-		private void calcCord(int[] coordinate,out int[] regionCoord,out int[] regionLocalCoord)
-		{
-			regionCoord = new int[coordinate.Length];
-			regionLocalCoord = new int[coordinate.Length];
+		private int[] _regionLocalCoordI, _regionCoordI;
 
-			for (var i = 0; i < regionCoord.Length; i++)
+		private void CalcCord(TCord coordinate, out TCord regionCoord, out TCord regionLocalCoord)
+		{
+			if (_regionCoordI == null)
+			{
+				_regionLocalCoordI = new int[coordinate.Length];
+				_regionCoordI = new int[coordinate.Length];
+			}
+
+			for (var i = 0; i < coordinate.Length; i++)
 			{
 				MathUtil.ToLocal(coordinate[i], Info.DimSize(i), out var localPos, out var partPos);
-				regionLocalCoord[i] = localPos;
-				regionCoord[i] = partPos;
+				_regionLocalCoordI[i] = localPos;
+				_regionCoordI[i] = partPos;
 			}
+
+			regionLocalCoord = _cordinateConstructor(_regionLocalCoordI);
+			regionCoord =  _cordinateConstructor(_regionCoordI);
 		}
 
-		private Region GetRegion(int hash, int[] regionCoord)
+		private TReg GetRegion(int hash, TCord regionCoord)
 		{
-			var pos = _regions.BinarySearch(null, Comparer<Region>.Create((x, y) => x.GetHashCode().CompareTo(hash)));
-			if (pos <= -1||_regions[pos].GetHashCode()!=hash)
+			var pos = _regions.BinarySearch(default(TReg), Comparer<TReg>.Create((x, y) => x.GetHashCode().CompareTo(hash)));
+			if (pos <= -1 || _regions[pos].GetHashCode() != hash)
 			{
-				var r = new Region(Info, (int[]) regionCoord.Clone(), DataRoot);
+				var r = _regionConstructor(Info, regionCoord, DataRoot);
 				_regions.Add(r);
 				_regions.Sort((x, y) => x.GetHashCode().CompareTo(y.GetHashCode()));
 				return r;
 			}
-			
+
 			return _regions[pos];
 		}
 	}
 
-	public class RegionInfo
+	public class RegionInfo<TCord> where TCord : IRegionCord
 	{
 		private readonly int[] _dimensionSizes;
-		public int ChunkByteSize { get; }
-		public int DimSize(int i) => _dimensionSizes[i];
+		public           int   ChunkByteSize  { get; }
+		public           int   DimSize(int i) => _dimensionSizes[i];
 
 		public RegionInfo(int[] dimensionSizes, int chunkByteSize)
 		{
@@ -73,7 +88,7 @@ namespace SharpCraft.world
 			ChunkByteSize = chunkByteSize;
 		}
 
-		public int CoordHash(int[] coordinate)
+		public int CoordHash(TCord coordinate)
 		{
 			//dimensionSizes is size of a region (16x16 chunks for example)
 			if (_dimensionSizes.Length != coordinate.Length) throw new Exception();

@@ -2,12 +2,36 @@
 using OpenTK;
 using SharpCraft.block;
 using SharpCraft.util;
+using SharpCraft.world.chunk.region;
 
 namespace SharpCraft.world.chunk
 {
-	public struct ChunkPos
+	public struct ChunkPos:IRegionCord
 	{
+		public bool Equals(ChunkPos other)
+		{
+			return x == other.x && z == other.z;
+		}
+
+		public override bool Equals(object obj)
+		{
+			if (ReferenceEquals(null, obj)) return false;
+			return obj is ChunkPos && Equals((ChunkPos) obj);
+		}
+
+		public override int GetHashCode()
+		{
+			unchecked
+			{
+				return (x * 397) ^ z;
+			}
+		}
+
 		public readonly int x, z;
+
+		public int Length => 2;
+
+		public int this[int i] => i == 0 ? x : z;
 
 		public static bool operator ==(ChunkPos    p1, ChunkPos p2) => p1.x == p2.x && p1.z == p2.z;
 		public static bool operator !=(ChunkPos    p1, ChunkPos p2) => !(p1 == p2);
@@ -66,6 +90,11 @@ namespace SharpCraft.world.chunk
 		public static BlockPos ToChunkLocal(BlockPos worldPos)
 		{
 			return new BlockPos(MathUtil.ToLocal(worldPos.X, Chunk.ChunkSize), MathUtil.MinMax(worldPos.Y, 0, 255), MathUtil.ToLocal(worldPos.Z, Chunk.ChunkSize));
+		}
+
+		public static ChunkPos Ctor(int[] data)
+		{
+			return new ChunkPos(data[0],data[1]);
 		}
 	}
 }

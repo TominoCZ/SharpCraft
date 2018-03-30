@@ -22,10 +22,11 @@ namespace SharpCraft.world
 		public readonly int    Seed;
 		public readonly string LevelName;
 
-		private           NoiseUtil        _noiseUtil;
-		private           int              _dimension = 0;
-		internal readonly ChunkDataManager ChunkData;
-		public readonly   String           SaveRoot;
+		private         NoiseUtil _noiseUtil;
+		private         int       _dimension = 0;
+		public readonly String    SaveRoot;
+
+		internal readonly ChunkDataManager<RegionStaticSize<ChunkPos>, ChunkPos> ChunkData;
 
 		public ChunkLoadManager LoadManager { get; } = new ChunkLoadManager();
 
@@ -40,7 +41,11 @@ namespace SharpCraft.world
 			Seed = seed;
 			LevelName = levelName;
 			SaveRoot = $"saves/{saveName}/";
-			ChunkData = new ChunkDataManager($"{SaveRoot}{_dimension}/chunks", new RegionInfo(new[] {12, 12}, 2 * Chunk.ChunkSize * Chunk.ChunkHeight * Chunk.ChunkSize));
+			ChunkData = new ChunkDataManager<RegionStaticSize<ChunkPos>, ChunkPos>(
+				$"{SaveRoot}{_dimension}/chunks",
+				new RegionInfo<ChunkPos>(new[] {12, 12}, 2 * Chunk.ChunkSize * Chunk.ChunkHeight * Chunk.ChunkSize),
+				RegionStaticSize<ChunkPos>.Ctor,
+				ChunkPos.Ctor);
 		}
 
 		public void AddEntity(Entity e)
@@ -131,7 +136,7 @@ namespace SharpCraft.world
 
 		public bool LoadChunk(ChunkPos chunkPos)
 		{
-			var data = ChunkData.GetChunkData(new[] {chunkPos.x, chunkPos.z});
+			var data = ChunkData.GetChunkData(chunkPos);
 			if (data == null) return false;
 
 
@@ -278,14 +283,14 @@ namespace SharpCraft.world
 			return GetNeighbourChunks(pos).All(chunk => chunk != null && chunk.HasData);
 		}
 
-		private bool initalLoad = true;//just dirty hack needs to be removed soon
+		private bool initalLoad = true; //just dirty hack needs to be removed soon
 
 		public void update(EntityPlayerSP player, int renderDistance)
 		{
 			if (player == null) return;
 
 			LoadManager.LoadImportantChunks();
-			LoadManager.UpdateLoad(player,renderDistance,initalLoad);
+			LoadManager.UpdateLoad(player, renderDistance, initalLoad);
 			initalLoad = false;
 
 			foreach (var chunk in Chunks.Values)
