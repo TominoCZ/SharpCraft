@@ -295,7 +295,5 @@ namespace SharpCraft.world
 				if (chunk.Pos.DistanceTo(player.pos.Xz) > renderDistance * Chunk.ChunkSize + 50) UnloadChunk(chunk.Pos);
 			}
 		}
-
-		private List<ChunkPos> _toCheck = new List<ChunkPos>();
 	}
 }
