@@ -48,8 +48,8 @@ namespace SharpCraft.render
         public void Render(World world, Matrix4 viewMatrix)
         {
             if (world == null) return;
-	        world.LoadManager.LoadImportantChunks();
-	        world.LoadManager.BuildImportantChunks();
+            world.LoadManager.LoadImportantChunks();
+            world.LoadManager.BuildImportantChunks();
 
             GL.ActiveTexture(TextureUnit.Texture0);
             GL.BindTexture(TextureTarget.Texture2D, TextureManager.blockTextureAtlasID);
@@ -73,7 +73,7 @@ namespace SharpCraft.render
             {
                 if (chunk.ShouldRender(RenderDistance))
                 {
-                    if(chunk.ModelGenerating)RenderChunkOutline(chunk, viewMatrix);
+                    if (chunk.ModelGenerating) RenderChunkOutline(chunk, viewMatrix);
                     chunk.Render(viewMatrix);
                 }
             }
