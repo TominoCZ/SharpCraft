@@ -80,12 +80,20 @@ namespace SharpCraft.world
 	{
 		private readonly int[] _dimensionSizes;
 		public           int   ChunkByteSize  { get; }
+		public int ChunkCount { get; }
+
 		public           int   DimSize(int i) => _dimensionSizes[i];
 
 		public RegionInfo(int[] dimensionSizes, int chunkByteSize)
 		{
 			_dimensionSizes = dimensionSizes;
 			ChunkByteSize = chunkByteSize;
+
+			ChunkCount = 1;
+			for (var i = 0; i < dimensionSizes.Length; i++)
+			{
+				ChunkCount *= DimSize(i);
+			}
 		}
 
 		public int CoordHash(TCord coordinate)

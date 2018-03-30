@@ -1,12 +1,13 @@
 ﻿using System;
 using System.IO;
+using System.Text;
 using System.Threading;
 using SharpCraft.world.chunk;
 using SharpCraft.world.chunk.region;
 
 namespace SharpCraft.world
 {
-	public class RegionStaticSize<TCord> : IRegion where TCord : IRegionCord
+	public class RegionStaticImpl<TCord> : IRegion where TCord : IRegionCord
 	{
 		private static readonly byte   BlankChunk = 0b00000001;
 		private static readonly object CreateLock = new object();
@@ -22,26 +23,22 @@ namespace SharpCraft.world
 
 		private readonly ReaderWriterLockSlim _rwLock = new ReaderWriterLockSlim();
 
-		public RegionStaticSize(RegionInfo<TCord> info, TCord cordinate, string dataRoot)
+		public RegionStaticImpl(RegionInfo<TCord> info, TCord cordinate, string dataRoot)
 		{
 			_info = info;
 			_hash = info.CoordHash(cordinate);
 
-			_cordinate = cordinate;
-			_filePath = $"{dataRoot}/.reg_{string.Join(".", cordinate)}.bin";
-			_hasFile = File.Exists(_filePath);
-			if (_hasFile) CacheFlags(CalcChunkCount());
-		}
-
-		private int CalcChunkCount()
-		{
-			var chunkCount = 1;
-			for (var i = 0; i < _cordinate.Length; i++)
+			StringBuilder nam = new StringBuilder();
+			for (int i = 0; i < cordinate.Length;)
 			{
-				chunkCount *= _info.DimSize(i);
+				nam.Append(cordinate[i]);
+				if(++i==cordinate.Length)nam.Append('.');
 			}
+			_filePath = $"{dataRoot}/.reg_{nam}.bin";
 
-			return chunkCount;
+			_cordinate = cordinate;
+			_hasFile = File.Exists(_filePath);
+			if (_hasFile) CacheFlags(info.ChunkCount);
 		}
 
 		private void CreateAndPopulate()
@@ -130,7 +127,7 @@ namespace SharpCraft.world
 
 		public override bool Equals(object obj)
 		{
-			return obj is RegionStaticSize<TCord> other && other._cordinate.Equals(_cordinate);
+			return obj is RegionStaticImpl<TCord> other && other._cordinate.Equals(_cordinate);
 		}
 
 		public override int GetHashCode()
@@ -182,9 +179,9 @@ namespace SharpCraft.world
 
 		protected class WriteC : FileStream
 		{
-			private RegionStaticSize<TCord> r;
+			private RegionStaticImpl<TCord> r;
 
-			public WriteC(RegionStaticSize<TCord> r) : base(r._filePath, FileMode.Open, FileAccess.Write, FileShare.Write)
+			public WriteC(RegionStaticImpl<TCord> r) : base(r._filePath, FileMode.Open, FileAccess.Write, FileShare.Write)
 			{
 				this.r = r;
 			}
@@ -198,9 +195,9 @@ namespace SharpCraft.world
 
 		protected class ReadC : FileStream
 		{
-			private RegionStaticSize<TCord> r;
+			private RegionStaticImpl<TCord> r;
 
-			public ReadC(RegionStaticSize<TCord> r) : base(r._filePath, FileMode.Open, FileAccess.Read, FileShare.Read)
+			public ReadC(RegionStaticImpl<TCord> r) : base(r._filePath, FileMode.Open, FileAccess.Read, FileShare.Read)
 			{
 				this.r = r;
 			}
@@ -212,9 +209,9 @@ namespace SharpCraft.world
 			}
 		}
 
-		public static RegionStaticSize<T> Ctor<T>(RegionInfo<T> info, T cordinate, string dataRoot) where T : IRegionCord
+		public static RegionStaticImpl<T> Ctor<T>(RegionInfo<T> info, T cordinate, string dataRoot) where T : IRegionCord
 		{
-			return new RegionStaticSize<T>(info, cordinate, dataRoot);
+			return new RegionStaticImpl<T>(info, cordinate, dataRoot);
 		}
 	}
 }

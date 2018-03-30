@@ -26,7 +26,7 @@ namespace SharpCraft.world
 		private         int       _dimension = 0;
 		public readonly String    SaveRoot;
 
-		internal readonly ChunkDataManager<RegionStaticSize<ChunkPos>, ChunkPos> ChunkData;
+		internal readonly ChunkDataManager<RegionStaticImpl<ChunkPos>, ChunkPos> ChunkData;
 
 		public ChunkLoadManager LoadManager { get; } = new ChunkLoadManager();
 
@@ -41,10 +41,10 @@ namespace SharpCraft.world
 			Seed = seed;
 			LevelName = levelName;
 			SaveRoot = $"saves/{saveName}/";
-			ChunkData = new ChunkDataManager<RegionStaticSize<ChunkPos>, ChunkPos>(
+			ChunkData = new ChunkDataManager<RegionStaticImpl<ChunkPos>, ChunkPos>(
 				$"{SaveRoot}{_dimension}/chunks",
 				new RegionInfo<ChunkPos>(new[] {12, 12}, 2 * Chunk.ChunkSize * Chunk.ChunkHeight * Chunk.ChunkSize),
-				RegionStaticSize<ChunkPos>.Ctor,
+				RegionStaticImpl<ChunkPos>.Ctor,
 				ChunkPos.Ctor);
 		}
 
