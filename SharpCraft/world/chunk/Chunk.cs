@@ -215,9 +215,11 @@ namespace SharpCraft.world.chunk
 
                         foreach (var dir in FaceSides.AllSides)
                         {
-                            var blockO = World.GetBlock(worldPos.Offset(dir));
+                            var worldPosO = worldPos.Offset(dir);
+                            var blockO = World.GetBlock(worldPosO);
+                            var blockModelO = ModelRegistry.getModelForBlock(blockO, World.GetMetadata(worldPosO));
 
-                            if (blockO == EnumBlock.AIR || blockO == EnumBlock.GLASS && block != EnumBlock.GLASS)
+                            if (blockO == EnumBlock.AIR || blockModelO.hasTransparency && !blockModel.hasTransparency)
                             {
                                 var quad = ((ModelBlockRaw)blockModel.rawModel)?.getQuadForSide(dir)?.offset(localPos);
 

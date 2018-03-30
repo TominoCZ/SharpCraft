@@ -11,11 +11,14 @@ namespace SharpCraft.model
 
         public AxisAlignedBB boundingBox { get; }
 
+        public bool hasTransparency { get; }
+
         public bool canBeInteractedWith { get; }
 
-        public ModelBlock(EnumBlock block, ShaderProgram shader, bool canBeInteractedWith) : base(null, shader)
+        public ModelBlock(EnumBlock block, ShaderProgram shader, bool canBeInteractedWith = false, bool hasTransparency = false) : base(null, shader)
         {
             this.block = block;
+            this.hasTransparency = hasTransparency;
             this.canBeInteractedWith = canBeInteractedWith;
 
             var cube = ModelHelper.createTexturedCubeModel(block);
@@ -25,7 +28,7 @@ namespace SharpCraft.model
             boundingBox = AxisAlignedBB.BLOCK_FULL;
         }
 
-        public ModelBlock(EnumBlock block, ShaderProgram shader, AxisAlignedBB bb, bool canBeInteractedWith) : this(block, shader, canBeInteractedWith)
+        public ModelBlock(EnumBlock block, ShaderProgram shader, AxisAlignedBB bb, bool canBeInteractedWith = false, bool hasTransparency = false) : this(block, shader, canBeInteractedWith, hasTransparency)
         {
             boundingBox = bb;
         }

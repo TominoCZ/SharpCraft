@@ -113,19 +113,19 @@ namespace SharpCraft
             var shader = new ShaderBlock("block", PrimitiveType.Quads);
             var shaderUnlit = new ShaderBlockUnlit("block_unlit", PrimitiveType.Quads);
 
-            var stoneModel = new ModelBlock(EnumBlock.STONE, shader, false);
-            var grassModel = new ModelBlock(EnumBlock.GRASS, shader, false);
-            var dirtModel = new ModelBlock(EnumBlock.DIRT, shader, false);
-            var cobblestoneModel = new ModelBlock(EnumBlock.COBBLESTONE, shader, false);
-            var planksModel = new ModelBlock(EnumBlock.PLANKS, shader, false);
+            var stoneModel = new ModelBlock(EnumBlock.STONE, shader);
+            var grassModel = new ModelBlock(EnumBlock.GRASS, shader);
+            var dirtModel = new ModelBlock(EnumBlock.DIRT, shader);
+            var cobblestoneModel = new ModelBlock(EnumBlock.COBBLESTONE, shader);
+            var planksModel = new ModelBlock(EnumBlock.PLANKS, shader);
             var craftingTableModel = new ModelBlock(EnumBlock.CRAFTING_TABLE, shader, true);
             var furnaceModel = new ModelBlock(EnumBlock.FURNACE, shader, true);
-            var bedrockModel = new ModelBlock(EnumBlock.BEDROCK, shader, false);
-            var rareModel = new ModelBlock(EnumBlock.RARE, shader, false);
-            var glassModel = new ModelBlock(EnumBlock.GLASS, shader, false);
-            var logModel = new ModelBlock(EnumBlock.LOG, shader, false);//TODO ADD LEAVES
+            var bedrockModel = new ModelBlock(EnumBlock.BEDROCK, shader);
+            var rareModel = new ModelBlock(EnumBlock.RARE, shader);
+            var glassModel = new ModelBlock(EnumBlock.GLASS, shader, false, true);
+            var logModel = new ModelBlock(EnumBlock.LOG, shader);//TODO ADD LEAVES
 
-            var xrayModel = new ModelBlock(EnumBlock.XRAY, shader, false);
+            var xrayModel = new ModelBlock(EnumBlock.XRAY, shader);
 
             ModelRegistry.registerBlockModel(stoneModel, 0);
             ModelRegistry.registerBlockModel(grassModel, 0);
