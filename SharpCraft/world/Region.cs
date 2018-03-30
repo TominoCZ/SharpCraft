@@ -168,7 +168,7 @@ namespace SharpCraft.world
 		protected  class WriteC : FileStream
 		{
 			private Region r;
-			public WriteC(Region r):base(r._filePath, FileMode.Open, FileAccess.Write, FileShare.Write)
+			public WriteC(Region r):base(r._filePath, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite)
 			{
 				this.r = r;
 			}

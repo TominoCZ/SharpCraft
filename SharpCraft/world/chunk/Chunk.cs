@@ -18,32 +18,11 @@ namespace SharpCraft.world.chunk
 {
     public class Chunk
     {
-        private static readonly ConcurrentQueue<Chunk> ChunkBuildQueue = new ConcurrentQueue<Chunk>();
-
-        private static bool BuildingChunks;
-
-        public static void buildChunks()
-        {
-            if (ChunkBuildQueue.Count == 0 || BuildingChunks) return;
-
-            BuildingChunks = true;
-
-            ThreadPool.QueueUserWorkItem(e =>
-            {
-                while (ChunkBuildQueue.Count > 0)
-                {
-                    if (ChunkBuildQueue.TryDequeue(out var chunk))
-                        chunk.BuildChunkModelUnsafe();
-                }
-
-                BuildingChunks = false;
-            });
-        }
 
         public const int ChunkSize = 16;
         public const int ChunkHeight = 256;
 
-        private short[,,] ChunkBlocks;
+        private short[,,] _chunkBlocks;
 
         private bool NeedsSave { get; set; }
 
@@ -52,38 +31,30 @@ namespace SharpCraft.world.chunk
         public AxisAlignedBB BoundingBox { get; }
 
         public World World { get; }
+	    private readonly ChunkLoadManager _loadManager;
 
         private ModelChunk _model;
 
-        private bool ModelGenerating;
+        public bool ModelGenerating;
 
-        public bool HasData => ChunkBlocks != null;
+        public bool HasData => _chunkBlocks != null;
 
         public Chunk(ChunkPos pos, World world)
         {
             Pos = pos;
             World = world;
+	        _loadManager = World.LoadManager;
             BoundingBox = new AxisAlignedBB(Vector3.Zero, Vector3.One * ChunkSize + Vector3.UnitY * 240).offset(Pos.ToVec());
         }
 
-        public Chunk(ChunkPos pos, World world, short[,,] blockData)
+        public Chunk(ChunkPos pos, World world, short[,,] blockData):this(pos,world)
         {
-            Pos = pos;
-            World = world;
-            BoundingBox = new AxisAlignedBB(Vector3.Zero, Vector3.One * ChunkSize + Vector3.UnitY * 240).offset(Pos.ToVec());
-
-            ChunkBlocks = blockData;
+            _chunkBlocks = blockData;
             BuildChunkModel();
         }
 
-        public void Tick()
+        public void Update()
         {
-            if (NeedsSave)
-            {
-                BuildChunkModel(); //TODO test
-
-                Save();
-            }
             //update entitys here
         }
 
@@ -102,17 +73,17 @@ namespace SharpCraft.world.chunk
             if (localPos.Z >= ChunkSize) throw new IndexOutOfRangeException($"Block pos z({localPos.Z}) is bigger or equal to ChunkSize");
         }
 
-        private bool EdgeCase(BlockPos localPos)
-        {
-            return localPos.X == 0 || localPos.Y == 0 || localPos.X == ChunkSize - 1 || localPos.Y == ChunkSize - 1;
-        }
-
         public void SetBlock(BlockPos localPos, EnumBlock blockType, int meta)
         {
             CheckPos(localPos);
             short id = (short)((short)blockType << 4 | meta);
 
-            ChunkBlocks[localPos.X, localPos.Y, localPos.Z] = id;
+	        if (_chunkBlocks[localPos.X, localPos.Y, localPos.Z] != id)
+	        {
+		        _chunkBlocks[localPos.X, localPos.Y, localPos.Z] = id;
+		        NotifyModelChange(localPos);
+	        }
+
             NeedsSave = true;
         }
 
@@ -121,31 +92,37 @@ namespace SharpCraft.world.chunk
             if (localPos.Y <= 0 || localPos.Y >= ChunkHeight) return EnumBlock.AIR;
             CheckPosXZ(localPos);
 
-            return (EnumBlock)(ChunkBlocks[localPos.X, localPos.Y, localPos.Z] >> 4);
+            return (EnumBlock)(_chunkBlocks[localPos.X, localPos.Y, localPos.Z] >> 4);
         }
 
         public int GetMetadata(BlockPos localPos)
         {
             CheckPos(localPos);
-            return ChunkBlocks[localPos.X, localPos.Y, localPos.Z] & 15;
+            return _chunkBlocks[localPos.X, localPos.Y, localPos.Z] & 15;
         }
 
         public void SetMetadata(BlockPos localPos, int meta)
         {
             CheckPos(localPos);
-            var id = (short)(ChunkBlocks[localPos.X, localPos.Y, localPos.Z] & 4095 | meta);
+            var id = (short)(_chunkBlocks[localPos.X, localPos.Y, localPos.Z] & 4095 | meta);
 
-            if (id != ChunkBlocks[localPos.X, localPos.Y, localPos.Z])
+            if (id != _chunkBlocks[localPos.X, localPos.Y, localPos.Z])
             {
-                ChunkBlocks[localPos.X, localPos.Y, localPos.Z] = id;
-                MarkDirty();
-                if (EdgeCase(localPos))
-                {
-                }
+                _chunkBlocks[localPos.X, localPos.Y, localPos.Z] = id;
+	            NotifyModelChange(localPos);
             }
         }
 
-        public int GetHeightAtPos(int x, int z)
+	    private void NotifyModelChange(BlockPos localPos)
+	    {
+		    MarkDirty();
+		    if (localPos.X == 0) World.GetChunk(Pos + FaceSides.West).MarkDirty();
+		    if (localPos.X == ChunkSize - 1) World.GetChunk(Pos + FaceSides.East).MarkDirty();
+		    if (localPos.Z == 0) World.GetChunk(Pos + FaceSides.North).MarkDirty();
+		    if (localPos.Z == ChunkSize - 1) World.GetChunk(Pos + FaceSides.South).MarkDirty();
+	    }
+
+	    public int GetHeightAtPos(int x, int z)
         {
             var pos = new BlockPos(x, 256, z);
 
@@ -191,8 +168,7 @@ namespace SharpCraft.world.chunk
             if (checkCanBuild())
             {
                 ModelGenerating = true;
-
-                ChunkBuildQueue.Enqueue(this);
+	            _loadManager.NotifyBuild(this);
             }
         }
 
@@ -205,20 +181,22 @@ namespace SharpCraft.world.chunk
             return true;
         }
 
-        private void BuildChunkModelUnsafe()
+        internal void BuildChunkModelDo()
         {
+	        if (!ModelGenerating&&_model!=null) return;
+
             var modelRaw = new Dictionary<ShaderProgram, List<RawQuad>>();
 
             List<RawQuad> quads;
 
             var sw = Stopwatch.StartNew();
             //generate the model / fill MODEL_RAW
-            Enumerable.Range(0, ChunkSize).AsParallel().ForAll(x =>
+            Enumerable.Range(0, ChunkHeight).AsParallel().ForAll(y =>
              {
-                 for (int z = 0; z < ChunkSize; z++)
-                 {
-                     for (int y = 0; y < 256; y++)
-                     {
+	             for (int x = 0; x < ChunkSize; x++)
+	             {
+					 for (int z = 0; z < ChunkSize; z++)
+					 {
                          var localPos = new BlockPos(x, y, z);
                          var worldPos = new BlockPos(x + Pos.WorldSpaceX(), y, z + Pos.WorldSpaceZ());
 
@@ -289,13 +267,14 @@ namespace SharpCraft.world.chunk
                         _model.getFragmentModelWithShader(newShader)?.overrideData(newData);
                     }
                 }
+	            ModelGenerating = false;
             });
-            ModelGenerating = false;
         }
 
         public void MarkDirty()
         {
-            DestroyModel();
+	        DestroyModel();
+	        _loadManager.NotifyImportantBuild(this);
         }
 
         public void DestroyModel()
@@ -318,18 +297,18 @@ namespace SharpCraft.world.chunk
                 if (!NeedsSave) return;
                 NeedsSave = false;
 
-                //Console.WriteLine($"Saving chunk @ {chunk.Chunk.ChunkPos.x / 16} x {chunk.Chunk.ChunkPos.z / 16}");
+                Console.WriteLine($"Saving chunk @ {Pos.x} x {Pos.z}");
 
-                ChunkDataManager chunkManager = World.ChunkManager;
+                ChunkDataManager chunkManager = World.ChunkData;
                 var data = new byte[chunkManager.Info.ChunkByteSize];
-                Buffer.BlockCopy(ChunkBlocks, 0, data, 0, data.Length);
+                Buffer.BlockCopy(_chunkBlocks, 0, data, 0, data.Length);
                 chunkManager.WriteChunkData(new[] { Pos.x, Pos.z }, data);
             }
         }
 
         public void GeneratedData(short[,,] chunkData)
         {
-            ChunkBlocks = chunkData;
+            _chunkBlocks = chunkData;
             NeedsSave = true;
             BuildChunkModel();
         }

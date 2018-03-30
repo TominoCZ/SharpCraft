@@ -55,11 +55,13 @@ namespace SharpCraft
         private string _glVersion;
 
         private static string _title;
+	    private static Thread _renderThread;
 
         public Game() : base(640, 480, GraphicsMode.Default, _title, GameWindowFlags.Default, DisplayDevice.Default, 3, 3,
             GraphicsContextFlags.ForwardCompatible)
         {
             Instance = this;
+	        _renderThread = Thread.CurrentThread;
 
             VSync = VSyncMode.Off;
             MakeCurrent();
@@ -67,7 +69,7 @@ namespace SharpCraft
             _glVersion = GL.GetString(StringName.ShadingLanguageVersion);
             Title = _title = $"SharpCraft Alpha 0.0.2 [GLSL {_glVersion}]";
 
-            //TargetRenderFrequency = 30000;
+            TargetRenderFrequency = 144;
 
             WorldRenderer = new WorldRenderer();
             EntityRenderer = new EntityRenderer();
@@ -136,7 +138,8 @@ namespace SharpCraft
 
         public void RunGlContext(Method m)
         {
-            _glContextQueue.Enqueue(m);
+	        if(_renderThread.ManagedThreadId==Thread.CurrentThread.ManagedThreadId)m();
+            else _glContextQueue.Enqueue(m);
         }
 
         public void StartGame()
@@ -352,14 +355,18 @@ namespace SharpCraft
             }
         }
 
+	    public void RunGlTasks()
+	    {
+
+		    while (_glContextQueue.Count > 0)
+		    {
+			    if (_glContextQueue.TryDequeue(out var func))
+				    func?.Invoke();
+		    }
+	    }
         protected override void OnRenderFrame(FrameEventArgs e)
         {
-            while (_glContextQueue.Count > 0)
-            {
-                if (_glContextQueue.TryDequeue(out var func))
-                    func?.Invoke();
-            }
-
+	        RunGlTasks();
             if (_timer.ElapsedMilliseconds > 50 - e.Time * 1000)
             {
                 GameLoop();
@@ -545,11 +552,13 @@ namespace SharpCraft
 
         private void RenderScreen(float partialTicks)
         {
+
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
             Prepare();
 
             if (World != null)
             {
+
                 var viewMatrix = Camera.View;
 
                 WorldRenderer.Render(World, viewMatrix);
@@ -741,7 +750,7 @@ namespace SharpCraft
         private static void Main(string[] args)
         {
 	        ThreadPool.SetMinThreads(0, 0);
-	        ThreadPool.SetMinThreads(Math.Max(1,Environment.ProcessorCount), 0);
+	        ThreadPool.SetMinThreads(Environment.ProcessorCount, 0);
 
             using (var game = new Game())
             {

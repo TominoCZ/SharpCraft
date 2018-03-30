@@ -290,3 +290,4 @@ __pycache__/
 *.xsd.cs
 
 /SharpCraft/SharpCraft_Data/saves/
+/SharpCraft/saves/

@@ -24,8 +24,10 @@ namespace SharpCraft.world
 
 		private           NoiseUtil        _noiseUtil;
 		private           int              _dimension = 0;
-		internal readonly ChunkDataManager ChunkManager;
+		internal readonly ChunkDataManager ChunkData;
 		public readonly   String           SaveRoot;
+
+		public ChunkLoadManager LoadManager { get; } = new ChunkLoadManager();
 
 		public World(string saveName, string levelName, int seed)
 		{
@@ -37,9 +39,8 @@ namespace SharpCraft.world
 
 			Seed = seed;
 			LevelName = levelName;
-			SaveRoot = $"SharpCraft_Data/saves/{saveName}/";
-			ChunkManager = new ChunkDataManager($"{SaveRoot}{_dimension}/chunks",
-				new RegionInfo(new[] {12, 12}, 2 * Chunk.ChunkSize * Chunk.ChunkHeight * Chunk.ChunkSize));
+			SaveRoot = $"saves/{saveName}/";
+			ChunkData = new ChunkDataManager($"{SaveRoot}{_dimension}/chunks", new RegionInfo(new[] {12, 12}, 2 * Chunk.ChunkSize * Chunk.ChunkHeight * Chunk.ChunkSize));
 		}
 
 		public void AddEntity(Entity e)
@@ -130,7 +131,7 @@ namespace SharpCraft.world
 
 		public bool LoadChunk(ChunkPos chunkPos)
 		{
-			var data = ChunkManager.GetChunkData(new[] {chunkPos.x, chunkPos.z});
+			var data = ChunkData.GetChunkData(new[] {chunkPos.x, chunkPos.z});
 			if (data == null) return false;
 
 
@@ -277,57 +278,24 @@ namespace SharpCraft.world
 			return GetNeighbourChunks(pos).All(chunk => chunk != null && chunk.HasData);
 		}
 
+		private bool initalLoad = true;//just dirty hack needs to be removed soon
+
 		public void update(EntityPlayerSP player, int renderDistance)
 		{
 			if (player == null) return;
 
-			CheckChunks(player, renderDistance);
+			LoadManager.LoadImportantChunks();
+			LoadManager.UpdateLoad(player,renderDistance,initalLoad);
+			initalLoad = false;
 
 			foreach (var chunk in Chunks.Values)
 			{
-				chunk.Tick();
+				chunk.Update();
 
 				if (chunk.Pos.DistanceTo(player.pos.Xz) > renderDistance * Chunk.ChunkSize + 50) UnloadChunk(chunk.Pos);
 			}
 		}
 
 		private List<ChunkPos> _toCheck = new List<ChunkPos>();
-
-		private void CheckChunks(EntityPlayerSP player, int renderDistance)
-		{
-			var playerChunkPos = ChunkPos.FromWorldSpace(Game.Instance.Player.pos);
-
-			for (var z = -renderDistance; z <= renderDistance; z++)
-			{
-				for (var x = -renderDistance; x <= renderDistance; x++)
-				{
-					var pos = playerChunkPos + new ChunkPos(x, z);
-					if (pos.DistanceTo(player.pos.Xz) < renderDistance * Chunk.ChunkSize)
-					{
-						if (GetChunk(pos) == null) _toCheck.Add(pos);
-					}
-				}
-			}
-
-			if (_toCheck.Count > 0)
-			{
-				_toCheck.OrderBy(c => c.DistanceTo(player.pos.Xz))
-				        .AsParallel()
-				        .ForAll(pos =>
-				        {
-					        if (LoadChunk(pos)) Console.WriteLine($"chunk loaded    @ {pos.x} x {pos.z}");
-					        else
-					        {
-						        //chunk does not exist, generate it
-						        GenerateChunk(pos, true);
-						        Console.WriteLine($"chunk generated @ {pos.x} x {pos.z}");
-					        }
-				        });
-
-				_toCheck.Clear();
-			}
-
-			Chunk.buildChunks();
-		}
 	}
 }

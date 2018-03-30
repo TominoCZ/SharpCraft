@@ -1,14 +1,16 @@
 ﻿using System;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
+using OpenTK;
 using SharpCraft.block;
 using SharpCraft.entity;
+using SharpCraft.world.chunk;
 
 namespace SharpCraft.world
 {
     internal class WorldLoader
     {
-        private static string _savesFolder = "SharpCraft_Data/saves";
+        private static string _savesFolder = "saves";
 
         public static void SaveWorld(World w)
         {
