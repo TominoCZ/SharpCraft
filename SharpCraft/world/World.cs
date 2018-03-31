@@ -233,6 +233,11 @@ namespace SharpCraft.world
                 chunkData[x, y, z] = id;
             }
 
+            bool IsAir(int x, int y, int z)
+            {
+                return chunkData[x, y, z] >> 4 == (int)EnumBlock.AIR;
+            }
+
             for (var z = 0; z < Chunk.ChunkSize; z++)
             {
                 for (var x = 0; x < Chunk.ChunkSize; x++)
@@ -243,7 +248,7 @@ namespace SharpCraft.world
                     var xCh = x + wsX;
                     var zCh = z + wsZ;
 
-                    var peakY = 32 + (int)Math.Abs(MathHelper.Clamp(0.35f + _noiseUtil.GetPerlinFractal(xCh, zCh), 0, 1) * 64);
+                    var peakY = 32 + (int)Math.Abs(MathHelper.Clamp(0.35f + _noiseUtil.GetPerlinFractal(xCh, zCh), 0, 1) * 32);
 
                     for (var y = peakY; y >= 0; y--)
                     {
@@ -259,9 +264,9 @@ namespace SharpCraft.world
                     }
 
                     var treeSeed = Math.Abs(MathHelper.Clamp(_noiseUtil.GetWhiteNoise(xCh, zCh), 0, 1));
-                    var treeSeed2 = Math.Abs(MathHelper.Clamp(0.35f + _noiseUtil.GetPerlinFractal(zCh, xCh), 0, 1));
+                    //var treeSeed2 = Math.Abs(MathHelper.Clamp(0.35f + _noiseUtil.GetPerlinFractal(zCh, xCh), 0, 1));
 
-                    if (treeSeed >= 0.995f && treeSeed2 >= 0.233f && x >= 3 && z >= 3 && x <= 13 && z <= 13)
+                    if (treeSeed >= 0.85f && x >= 3 && z >= 3 && x <= 13 && z <= 13 && x % 4 == 0 && z % 4 == 0)
                     {
                         var treeTop = 0;
 
@@ -270,6 +275,7 @@ namespace SharpCraft.world
                             SetBlock(x, treeTop = peakY + 1 + treeY, z, EnumBlock.LOG);
                         }
 
+                        //leaves
                         for (int i = -3; i <= 3; i++)
                         {
                             for (int j = -3; j <= 3; j++)
@@ -279,16 +285,17 @@ namespace SharpCraft.world
                                     if (i == 0 && k == 0 && j <= 0)
                                         continue;
 
+                                    var pX = x + i;
+                                    var pY = treeTop + j;
+                                    var pZ = z + k;
+
+                                    if (!IsAir(pX, pY, pZ))
+                                        continue;
+
                                     var vec = new Vector3(i, j, k);
 
                                     if (MathUtil.Distance(vec, Vector3.Zero) <= 3)
-                                    {
-                                        var pX = x + i;
-                                        var pY = treeTop + j;
-                                        var pZ = z + k;
-
-                                        SetBlock(pX, pY, pZ, EnumBlock.GLASS);
-                                    }
+                                        SetBlock(pX, pY, pZ, EnumBlock.LEAVES);
                                 }
                             }
                         }

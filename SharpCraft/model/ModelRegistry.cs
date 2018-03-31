@@ -35,10 +35,8 @@ namespace SharpCraft.model
 
         public static ModelBlock getModelForBlock(EnumBlock blockType, int meta)
         {
-            if (blockType == EnumBlock.AIR)
-                return null;
-
-            models.TryGetValue(blockType, out var states);
+            if (blockType == EnumBlock.AIR || !models.TryGetValue(blockType, out var states))
+                return models[EnumBlock.MISSING][0].Model;
 
             for (int i = 0; i < states.Count; i++)
             {

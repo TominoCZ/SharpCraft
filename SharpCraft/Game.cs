@@ -110,9 +110,11 @@ namespace SharpCraft
         {
             Console.WriteLine("DEBUG: loading models");
 
+            //TODO - merge shaders and use strings as block IDs like sharpcraft:dirt
             var shader = new ShaderBlock("block", PrimitiveType.Quads);
             var shaderUnlit = new ShaderBlockUnlit("block_unlit", PrimitiveType.Quads);
 
+            var missingModel = new ModelBlock(EnumBlock.MISSING, shader);
             var stoneModel = new ModelBlock(EnumBlock.STONE, shader);
             var grassModel = new ModelBlock(EnumBlock.GRASS, shader);
             var dirtModel = new ModelBlock(EnumBlock.DIRT, shader);
@@ -123,9 +125,12 @@ namespace SharpCraft
             var bedrockModel = new ModelBlock(EnumBlock.BEDROCK, shader);
             var rareModel = new ModelBlock(EnumBlock.RARE, shader);
             var glassModel = new ModelBlock(EnumBlock.GLASS, shader, false, true);
-            var logModel = new ModelBlock(EnumBlock.LOG, shader);//TODO ADD LEAVES
+            var logModel = new ModelBlock(EnumBlock.LOG, shader);
+            var leavesModel = new ModelBlock(EnumBlock.LEAVES, shader, false, true);
 
             var xrayModel = new ModelBlock(EnumBlock.XRAY, shader);
+
+            ModelRegistry.registerBlockModel(missingModel, 0);
 
             ModelRegistry.registerBlockModel(stoneModel, 0);
             ModelRegistry.registerBlockModel(grassModel, 0);
@@ -137,8 +142,9 @@ namespace SharpCraft
 
             ModelRegistry.registerBlockModel(bedrockModel, 0);
             ModelRegistry.registerBlockModel(rareModel, 0);
-            ModelRegistry.registerBlockModel(logModel, 0);
             ModelRegistry.registerBlockModel(glassModel, 0);
+            ModelRegistry.registerBlockModel(logModel, 0);
+            ModelRegistry.registerBlockModel(leavesModel, 0);
 
             ModelRegistry.registerBlockModel(xrayModel, 0);
 

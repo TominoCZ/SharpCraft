@@ -8,7 +8,7 @@ namespace SharpCraft.entity
 {
     public class EntityPlayerSP : Entity
     {
-        private float maxMoveSpeed = 0.245f;
+        private float maxMoveSpeed = 0.235f;
         private float moveSpeedMult = 1;
 
         private Vector2 moveSpeed;
@@ -72,11 +72,10 @@ namespace SharpCraft.entity
 
             if (dirVec != Vector2.Zero)
             {
-                moveSpeedMult = MathHelper.Clamp(moveSpeedMult + 0.085f, 1, 1.75f);
+                moveSpeedMult = MathHelper.Clamp(moveSpeedMult + 0.085f, 1, 1.55f);
 
                 moveSpeed = MathUtil.Clamp(moveSpeed + dirVec.Normalized() * 0.1f * moveSpeedMult, 0, maxMoveSpeed);// * moveSpeed;
-
-                Console.WriteLine(moveSpeed.LengthFast.ToString("F"));
+                
                 motion.Xz = moveSpeed * mult;
             }
             else
