@@ -223,7 +223,6 @@ namespace SharpCraft
 
         private void RenderScreen(float partialTicks)
         {
-
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
             GL.Enable(EnableCap.DepthTest);
             GL.Enable(EnableCap.DepthClamp);
@@ -234,8 +233,8 @@ namespace SharpCraft
             {
                 var viewMatrix = Camera.View;
 
-                WorldRenderer.Render(World, viewMatrix);
-                EntityRenderer.render(partialTicks);
+                WorldRenderer.Render(World, viewMatrix, partialTicks);
+                EntityRenderer.render(viewMatrix, partialTicks);
 
                 SkyboxRenderer.render(viewMatrix);
             }
@@ -558,6 +557,9 @@ namespace SharpCraft
 
             switch (e.Key)
             {
+                case Key.Q:
+                    Player?.DropHeldItem();
+                    break;
                 case Key.R:
                     if (e.Control)
                     {
@@ -582,10 +584,7 @@ namespace SharpCraft
                     if (GuiScreen != null)
                         CloseGuiScreen();
                     else
-                    {
                         OpenGuiScreen(new GuiScreenIngameMenu());
-                    }
-
                     break;
                 case Key.F11:
                     if (WindowState != WindowState.Fullscreen)
@@ -595,7 +594,6 @@ namespace SharpCraft
                     }
                     else
                         WindowState = _lastWindowState;
-
                     break;
             }
 

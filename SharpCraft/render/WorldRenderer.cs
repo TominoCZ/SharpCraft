@@ -46,7 +46,7 @@ namespace SharpCraft.render
             _updateTimer = Stopwatch.StartNew();
         }
 
-        public void Render(World world, Matrix4 viewMatrix)
+        public void Render(World world, Matrix4 viewMatrix, float partialTicks)
         {
             if (world == null) return;
             world.LoadManager.LoadImportantChunks();

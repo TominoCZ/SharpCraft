@@ -36,7 +36,7 @@ namespace SharpCraft.gui
 
             for (int i = 0; i < 9; i++)
             {
-                var b = i == Game.Instance.Player.equippedItemHotbarIndex;
+                var b = i == Game.Instance.Player.HotbarIndex;
 
                 var x = startPos + i * (scaledWidth + space);
                 var y = size.Height - 20 - scaledHeight;

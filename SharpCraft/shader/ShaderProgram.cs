@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using OpenTK;
 using OpenTK.Graphics.OpenGL;
@@ -72,6 +73,12 @@ namespace SharpCraft.shader
             GL.BindAttribLocation(programID, attrib, variable);
         }
 
+        public void loadFloat(float f, string variable)
+        {
+            if (uniforms.TryGetValue(variable, out var pos))
+                GL.Uniform1(pos, f);
+        }
+
         public void loadVec3(Vector3 vec, string variable)
         {
             if (uniforms.TryGetValue(variable, out var pos))
@@ -90,6 +97,7 @@ namespace SharpCraft.shader
                 GL.UniformMatrix4(pos, false, ref mat);
         }
 
+        [Obsolete]
         public void loadProjectionMatrix(Matrix4 mat)
         {
             loadMatrix4(mat, "projectionMatrix");

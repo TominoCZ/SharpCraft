@@ -14,12 +14,12 @@ namespace SharpCraft.entity
         private float moveSpeedMult = 1;
 
         private Vector2 moveSpeed;
-        
-        public int equippedItemHotbarIndex { get; private set; }
+
+        public int HotbarIndex { get; private set; }
 
         public ItemStack[] hotbar { get; }
 
-        public bool HasFullInventory => hotbar.All(stack => stack?.Item != null && stack.Count > 0);
+        public bool HasFullInventory => hotbar.All(stack => stack != null && !stack.IsEmpty);
 
         public EntityPlayerSP(World world, Vector3 pos = new Vector3()) : base(world, pos)
         {
@@ -39,7 +39,7 @@ namespace SharpCraft.entity
             base.Update();
         }
 
-        public override void Render(float particalTicks)
+        public override void Render(Matrix4 viewMatrix, float particalTicks)
         {
             var interpolatedPos = lastPos + (pos - lastPos) * particalTicks;
 
@@ -75,7 +75,7 @@ namespace SharpCraft.entity
                 moveSpeedMult = MathHelper.Clamp(moveSpeedMult + 0.085f, 1, 1.55f);
 
                 moveSpeed = MathUtil.Clamp(moveSpeed + dirVec.Normalized() * 0.1f * moveSpeedMult, 0, maxMoveSpeed);// * moveSpeed;
-                
+
                 motion.Xz = moveSpeed * mult;
             }
             else
@@ -92,41 +92,51 @@ namespace SharpCraft.entity
 
         public void setItemStackInSelectedSlot(ItemStack stack)
         {
-            hotbar[equippedItemHotbarIndex] = stack;
+            hotbar[HotbarIndex] = stack;
         }
 
         public void OnPickup(ItemStack stack)
         {
             for (var i = 0; i < hotbar.Length; i++)
             {
-                if (!(hotbar[i] is ItemStack itemStack) || itemStack.Item == null || itemStack.Count == 0)
+                if (!(hotbar[i] is ItemStack itemStack) || itemStack.IsEmpty)
                 {
-                    hotbar[i] = stack;
+                    setItemStackInHotbar(i, stack);
+                    break;
                 }
             }
         }
 
+        public void DropHeldItem()
+        {
+            var stack = hotbar[HotbarIndex];
+
+            world?.AddEntity(new EntityItem(world, Game.Instance.Camera.pos - Vector3.UnitY * 0.35f, Game.Instance.Camera.getLookVec() * 0.75f + Vector3.UnitY * 0.2f, stack));
+
+            hotbar[HotbarIndex] = null;
+        }
+
         public ItemStack getEquippedItemStack()
         {
-            return hotbar[equippedItemHotbarIndex];
+            return hotbar[HotbarIndex];
         }
 
         public void setSelectedSlot(int index)
         {
-            equippedItemHotbarIndex = index % 9;
+            HotbarIndex = index % 9;
         }
 
         public void selectNextItem()
         {
-            equippedItemHotbarIndex = (equippedItemHotbarIndex + 1) % 9;
+            HotbarIndex = (HotbarIndex + 1) % 9;
         }
 
         public void selectPreviousItem()
         {
-            if (equippedItemHotbarIndex <= 0)
-                equippedItemHotbarIndex = 8;
+            if (HotbarIndex <= 0)
+                HotbarIndex = 8;
             else
-                equippedItemHotbarIndex = equippedItemHotbarIndex - 1;
+                HotbarIndex = HotbarIndex - 1;
         }
     }
 
@@ -174,6 +184,8 @@ namespace SharpCraft.entity
 
         public int Count = 1;
         public int Meta;
+
+        public bool IsEmpty => Count <= 0 || Item == null || Item.item == null;
 
         public ItemStack(Item item)
         {

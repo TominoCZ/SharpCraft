@@ -43,7 +43,7 @@ namespace SharpCraft.entity
 
         public AxisAlignedBB shrink(Vector3 by)
         {
-            return new AxisAlignedBB(min, max - by);
+            return new AxisAlignedBB(min + by / 2, max - by / 2);
         }
 
         public AxisAlignedBB union(AxisAlignedBB other)

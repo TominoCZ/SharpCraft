@@ -18,12 +18,13 @@ namespace SharpCraft.entity
 
         public bool onGround;
 
-        public bool isAlive;
+        public bool isAlive = true;
 
-        protected Entity(World world, Vector3 pos)
+        protected Entity(World world, Vector3 pos, Vector3 motion = new Vector3())
         {
             this.world = world;
             this.pos = pos;
+            this.motion = motion;
             
             collisionBoundingBox = AxisAlignedBB.BLOCK_FULL.offset(Vector3.One * -0.5f);
             boundingBox = collisionBoundingBox.offset(pos);
@@ -90,7 +91,7 @@ namespace SharpCraft.entity
                 motion.Y = 0;
         }
 
-        public virtual void Render(float particalTicks)
+        public virtual void Render(Matrix4 viewmatrix, float particalTicks)
         {
         }
 
@@ -103,7 +104,7 @@ namespace SharpCraft.entity
 
         public virtual void SetDead()
         {
-            isAlive = true;
+            isAlive = false;
         }
 
         public AxisAlignedBB getEntityBoundingBox()
