@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Linq;
 using OpenTK;
 using OpenTK.Input;
 using SharpCraft.block;
 using SharpCraft.util;
+using SharpCraft.world;
 
 namespace SharpCraft.entity
 {
@@ -17,7 +19,9 @@ namespace SharpCraft.entity
 
         public ItemStack[] hotbar { get; }
 
-        public EntityPlayerSP(Vector3 pos) : base(pos)
+        public bool HasFullInventory => hotbar.All(stack => stack?.Item != null && stack.Count > 0);
+
+        public EntityPlayerSP(World world, Vector3 pos = new Vector3()) : base(world, pos)
         {
             Game.Instance.Camera.pos = (pos += Vector3.UnitY);
 
@@ -25,10 +29,6 @@ namespace SharpCraft.entity
             boundingBox = collisionBoundingBox.offset(lastPos = pos);
 
             hotbar = new ItemStack[9];
-        }
-
-        public EntityPlayerSP() : this(Vector3.Zero)
-        {
         }
 
         public override void Update()
@@ -93,6 +93,17 @@ namespace SharpCraft.entity
         public void setItemStackInSelectedSlot(ItemStack stack)
         {
             hotbar[equippedItemHotbarIndex] = stack;
+        }
+
+        public void OnPickup(ItemStack stack)
+        {
+            for (var i = 0; i < hotbar.Length; i++)
+            {
+                if (!(hotbar[i] is ItemStack itemStack) || itemStack.Item == null || itemStack.Count == 0)
+                {
+                    hotbar[i] = stack;
+                }
+            }
         }
 
         public ItemStack getEquippedItemStack()

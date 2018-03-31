@@ -68,7 +68,7 @@ namespace SharpCraft.world
 
                 world = new World(saveName, wdn.levelName, wdn.seed);
 
-                var player = new EntityPlayerSP(wpn.pos);
+                var player = new EntityPlayerSP(world, wpn.pos);
                 Game.Instance.Camera.pitch = wpn.pitch;
                 Game.Instance.Camera.yaw = wpn.yaw;
 

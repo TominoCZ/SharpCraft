@@ -170,8 +170,7 @@ namespace SharpCraft
 
                 World = new World("MyWorld", "Tomlow's Fuckaround", SettingsManager.GetValue("worldseed").GetHashCode());
 
-                Player = new EntityPlayerSP(new Vector3(playerPos.X, World.GetHeightAtPos(playerPos.X, playerPos.Z),
-                    playerPos.Z));
+                Player = new EntityPlayerSP(World, new Vector3(playerPos.X, World.GetHeightAtPos(playerPos.X, playerPos.Z), playerPos.Z));
 
                 World.AddEntity(Player);
 

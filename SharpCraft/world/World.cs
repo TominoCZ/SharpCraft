@@ -64,7 +64,12 @@ namespace SharpCraft.world
                 var e = Entities[i];
 
                 if (GetChunk(new BlockPos(e.pos).ChunkPos()) is Chunk chunk && chunk.HasData)
+                {
                     e.Update();
+
+                    if (!e.isAlive)
+                        Entities.Remove(e);
+                }
             }
         }
 

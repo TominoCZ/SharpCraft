@@ -1,12 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using OpenTK;
+using SharpCraft.world;
 
 namespace SharpCraft.entity
 {
     public class Entity
     {
         protected AxisAlignedBB boundingBox, collisionBoundingBox;
+
+        public World world;
 
         public Vector3 pos;
         public Vector3 lastPos;
@@ -15,16 +18,21 @@ namespace SharpCraft.entity
 
         public bool onGround;
 
-        protected Entity(Vector3 pos)
-        {
-            this.pos = pos;
+        public bool isAlive;
 
+        protected Entity(World world, Vector3 pos)
+        {
+            this.world = world;
+            this.pos = pos;
+            
             collisionBoundingBox = AxisAlignedBB.BLOCK_FULL.offset(Vector3.One * -0.5f);
             boundingBox = collisionBoundingBox.offset(pos);
         }
 
         public virtual void Update()
         {
+            if (!isAlive) return;
+
             lastPos = pos;
 
             motion.Y -= 0.0775f;
@@ -91,6 +99,11 @@ namespace SharpCraft.entity
             this.pos = lastPos = pos;
 
             boundingBox = collisionBoundingBox.offset(pos);
+        }
+
+        public virtual void SetDead()
+        {
+            isAlive = true;
         }
 
         public AxisAlignedBB getEntityBoundingBox()
