@@ -13,13 +13,13 @@ void main(void){
 	if(pixelColor.a == 0)discard;
 
 	vec3 unitNormal = normalize(surfaceNormal);
-	vec3 vector1 = normalize(vec3(300, 700, 375));
+	vec3 vector1 = normalize(vec3(300, 600, 375));
 	vec3 vector2 = normalize(vec3(-375, -200, -300));
 	
 	float nDot1 = dot(unitNormal, vector1);
 	float nDot2 = dot(unitNormal, vector2);
 
-	float brightness = max(nDot1, 0.0) + max(nDot2, 0.0) * 0.75;
+	float brightness = max(nDot1, 0.0)*1.15 + max(nDot2, 0.0)* 0.85;
 	
 	vec3 diffuse = brightness * 1.5 * lightColor;
 	

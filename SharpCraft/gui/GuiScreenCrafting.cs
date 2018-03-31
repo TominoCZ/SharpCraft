@@ -10,7 +10,8 @@ namespace SharpCraft.gui
 
         public GuiScreenCrafting()
         {
-            gui = new GuiTexture(TextureManager.loadTexture("gui/crafting", false), Vector2.One * 0.5f);
+            gui = new GuiTexture(TextureManager.loadTexture("gui/crafting"), Vector2.One * 0.5f);
+            DoesGuiPauseGame = false;
         }
 
         public override void render(ShaderGui shader, int mouseX, int mouseY)

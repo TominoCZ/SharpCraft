@@ -25,11 +25,11 @@ namespace SharpCraft.entity
         protected Entity(World world, Vector3 pos, Vector3 motion = new Vector3())
         {
             this.world = world;
-            this.pos = pos;
+            this.pos = lastPos = pos;
             this.motion = motion;
 
             collisionBoundingBox = AxisAlignedBB.BLOCK_FULL.offset(Vector3.One * -0.5f);
-            boundingBox = collisionBoundingBox.offset(pos);
+            boundingBox = collisionBoundingBox.offset(pos + Vector3.UnitY * collisionBoundingBox.size.Y / 2);
         }
 
         public virtual void Update()
@@ -101,7 +101,7 @@ namespace SharpCraft.entity
         {
             this.pos = lastPos = pos;
 
-            boundingBox = collisionBoundingBox.offset(pos);
+            boundingBox = collisionBoundingBox.offset(pos + Vector3.UnitY * collisionBoundingBox.size.Y / 2);
         }
 
         public virtual void SetDead()

@@ -10,6 +10,7 @@ using SharpCraft.world;
 using SharpCraft.world.chunk;
 using System;
 using System.Diagnostics;
+using SharpCraft.item;
 using GL = OpenTK.Graphics.OpenGL.GL;
 using TextureTarget = OpenTK.Graphics.OpenGL.TextureTarget;
 using TextureUnit = OpenTK.Graphics.OpenGL.TextureUnit;
@@ -140,21 +141,25 @@ namespace SharpCraft.render
         {
             var stack = Game.Instance.Player.getEquippedItemStack();
 
-            if (stack?.Item is ItemBlock itemBlock)
+            if (!stack?.IsEmpty == true)
             {
-                var model = ModelRegistry.getModelForBlock(itemBlock.getBlock(), stack.Meta);
+                if (stack.Item is ItemBlock itemBlock)
+                {
+                    var model = ModelRegistry.getModelForBlock(itemBlock.getBlock(), stack.Meta);
 
-                model.bind();
-                model.shader.loadVec3(Vector3.One, "lightColor");
-                model.shader.loadViewMatrix(Matrix4.Identity);
+                    model.bind();
+                    model.shader.loadVec3(Vector3.One, "lightColor");
+                    model.shader.loadViewMatrix(Matrix4.Identity);
 
-                model.shader.loadTransformationMatrix(MatrixHelper.createTransformationMatrix(
-                    new Vector3(0.04125f, -0.065f, -0.1f) + Game.Instance.Camera.getLookVec() / 200,
-                    new Vector3(-2, -11, 0), 0.045f));
+                    model.shader.loadTransformationMatrix(MatrixHelper.createTransformationMatrix(
+                        new Vector3(0.04125f, -0.065f, -0.1f) + Game.Instance.Camera.getLookVec() / 200,
+                        new Vector3(-2, -11, 0) + Game.Instance.Camera.getLookVec(),
+                        0.045f));
 
-                model.rawModel.Render(model.shader.renderType);
+                    model.rawModel.Render(model.shader.renderType);
 
-                model.unbind();
+                    model.unbind();
+                }
             }
         }
 

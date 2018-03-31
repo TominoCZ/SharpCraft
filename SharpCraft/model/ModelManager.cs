@@ -54,6 +54,8 @@ namespace SharpCraft.model
             var buff1 = storeDataInAttribList(1, 2, UVs.ToArray());
             var buff2 = storeDataInAttribList(2, 3, normals.ToArray());
 
+            GL.Flush();
+
             unbindVAO();
 
             return new ModelRaw(vaoID, coordSize, quads, buff0, buff1, buff2);
@@ -84,6 +86,7 @@ namespace SharpCraft.model
         public static void overrideModelUVsInVAO(int bufferID, float[] UVs)
         {
             overrideDataInAttributeList(bufferID, 1, 2, UVs);
+            GL.Flush();
         }
 
         private static void overrideDataInAttributeList(int ID, int attrib, int coordSize, float[] data)

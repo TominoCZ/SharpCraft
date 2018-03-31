@@ -14,7 +14,7 @@ void main(void){
 	if(pixelColor.a == 0)discard;
 	
 	vec3 unitNormal = normalize(surfaceNormal);
-	vec3 vector1 = normalize(vec3(300, 700, 375));
+	vec3 vector1 = normalize(vec3(300, 600, 375));
 	vec3 vector2 = normalize(vec3(-375, -200, -300));
 	
 	float nDot1 = dot(unitNormal, vector1);

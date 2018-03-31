@@ -20,8 +20,8 @@ namespace SharpCraft.gui
 
         static GuiButton()
         {
-            GUI_BUTTON = new GuiTexture(TextureManager.loadTexture("gui/button", false));
-            GUI_BUTTON_HOVER = new GuiTexture(TextureManager.loadTexture("gui/button_hover", false));
+            GUI_BUTTON = new GuiTexture(TextureManager.loadTexture("gui/button"));
+            GUI_BUTTON_HOVER = new GuiTexture(TextureManager.loadTexture("gui/button_hover"));
         }
 
         public GuiButton(int ID, int x, int y)

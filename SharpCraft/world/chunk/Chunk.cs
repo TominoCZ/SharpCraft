@@ -187,6 +187,7 @@ namespace SharpCraft.world.chunk
 
             var sw = Stopwatch.StartNew();
             //generate the model / fill MODEL_RAW
+
             Enumerable.Range(0, ChunkHeight).AsParallel().ForAll(y =>
             {
                 for (int x = 0; x < ChunkSize; x++)
@@ -235,38 +236,44 @@ namespace SharpCraft.world.chunk
             sw.Stop();
             Console.WriteLine($"DEBUG: built chunk model [{sw.Elapsed.TotalMilliseconds:F}ms]");
 
-            Game.Instance.RunGlContext(() =>
+            //Game.Instance.RunGlContext(() =>
+            //{
+            if (_model != null)
             {
-                if (_model != null)
+                foreach (var oldShader in _model.fragmentPerShader.Keys)
                 {
-                    foreach (var oldShader in _model.fragmentPerShader.Keys)
+                    if (!modelRaw.Keys.Contains(oldShader))
                     {
-                        if (!modelRaw.Keys.Contains(oldShader))
-                        {
-                            Game.Instance.RunGlContext(() => _model.destroyFragmentModelWithShader(oldShader));
-                        }
+                        Game.Instance.RunGlContext(() => _model.destroyFragmentModelWithShader(oldShader));
                     }
                 }
-                else _model = new ModelChunk();
+            }
+            else _model = new ModelChunk();
 
-                foreach (var value in modelRaw)
+            foreach (var value in modelRaw)
+            {
+                var newShader = value.Key;
+                var newData = value.Value;
+
+                if (!_model.fragmentPerShader.Keys.Contains(newShader))
                 {
-                    var newShader = value.Key;
-                    var newData = value.Value;
-
-                    if (!_model.fragmentPerShader.Keys.Contains(newShader))
+                    Game.Instance.RunGlContext(() =>
                     {
                         var newFragment = new ModelChunkFragment(newShader, newData);
                         _model.setFragmentModelWithShader(newShader, newFragment);
-                    }
-                    else
+                    });
+                }
+                else
+                {
+                    Game.Instance.RunGlContext(() =>
                     {
                         _model.getFragmentModelWithShader(newShader)?.overrideData(newData);
-                    }
+                    });
                 }
+            }
 
-                ModelGenerating = false;
-            });
+            ModelGenerating = false;
+            // });
         }
 
         public void MarkDirty()

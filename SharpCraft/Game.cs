@@ -16,10 +16,17 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Drawing;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using SharpCraft.item;
+using Bitmap = System.Drawing.Bitmap;
+using Point = OpenTK.Point;
+using Rectangle = System.Drawing.Rectangle;
+using Size = OpenTK.Size;
 
 namespace SharpCraft
 {
@@ -71,6 +78,7 @@ namespace SharpCraft
         private float _mouseWheelLast;
         private Stopwatch _timer = Stopwatch.StartNew();
 
+        private bool _takeScreenshot;
         private bool _gamePaused;
         private bool _wasSpaceDown;
         private int _fpsCounter;
@@ -206,7 +214,7 @@ namespace SharpCraft
             if (GuiScreen == null && !Focused)
                 OpenGuiScreen(new GuiScreenIngameMenu());
 
-            if (!AllowInput())
+            if (_gamePaused)
                 return;
 
             var wheelValue = Mouse.WheelPrecise;
@@ -259,6 +267,7 @@ namespace SharpCraft
                 CursorVisible = true;
                 GuiRenderer.render(GuiScreen);
             }
+            GL.Flush();
         }
 
         private void GetMouseOverObject()
@@ -346,11 +355,16 @@ namespace SharpCraft
 
         public void RunGlTasks()
         {
+            if (_glContextQueue.Count == 0)
+                return;
+
             while (_glContextQueue.Count > 0)
             {
                 if (_glContextQueue.TryDequeue(out var func))
                     func?.Invoke();
             }
+
+            GL.Flush();
         }
 
         private void RunUpdateThreads()
@@ -388,12 +402,7 @@ namespace SharpCraft
                             Camera.pitch -= delta.Y / 1000f * _sensitivity;
 
                             ResetMouse();
-                        }
 
-                        _mouseLast = point;
-
-                        if (AllowInput())
-                        {
                             if (KeysDown.Contains(Key.Space) && !_wasSpaceDown && Player.onGround)
                             {
                                 _wasSpaceDown = true;
@@ -402,6 +411,8 @@ namespace SharpCraft
                             else if ((!KeysDown.Contains(Key.Space) || Player.onGround) && _wasSpaceDown)
                                 _wasSpaceDown = false;
                         }
+
+                        _mouseLast = point;
 
                         if (_frameTimer.ElapsedMilliseconds >= 1000)
                         {
@@ -418,22 +429,6 @@ namespace SharpCraft
             { IsBackground = true }.Start();
         }
 
-        public void OpenGuiScreen(GuiScreen guiScreen)
-        {
-            if (guiScreen == null)
-            {
-                CloseGuiScreen();
-                return;
-            }
-
-            GuiScreen = guiScreen;
-
-            var middle = new Point(ClientRectangle.Width / 2, ClientRectangle.Height / 2);
-            middle = PointToScreen(middle);
-
-            OpenTK.Input.Mouse.SetPosition(middle.X, middle.Y);
-        }
-
         public void RunGlContext(Method m)
         {
             if (_renderThread.ManagedThreadId == Thread.CurrentThread.ManagedThreadId) m();
@@ -447,15 +442,69 @@ namespace SharpCraft
 
         private bool AllowInput()
         {
-            return (GuiScreen == null || !GuiScreen.DoesGuiPauseGame) && !(CursorVisible = !Focused);
+            return GuiScreen == null && !(CursorVisible = !Focused);
+        }
+
+        public void OpenGuiScreen(GuiScreen guiScreen)
+        {
+            if (guiScreen == null)
+            {
+                CloseGuiScreen();
+                return;
+            }
+
+            GuiScreen = guiScreen;
+
+            if (guiScreen.DoesGuiPauseGame)
+                _gamePaused = true;
+
+            var middle = new Point(ClientRectangle.Width / 2, ClientRectangle.Height / 2);
+            middle = PointToScreen(middle);
+
+            OpenTK.Input.Mouse.SetPosition(middle.X, middle.Y);
         }
 
         public void CloseGuiScreen()
         {
-            GuiScreen?.onClose();
+            if (GuiScreen == null)
+                return;
+
+            if (GuiScreen.DoesGuiPauseGame)
+                _gamePaused = false;
+
+            GuiScreen.onClose();
             GuiScreen = null;
 
             CursorVisible = false;
+        }
+
+        private void CaptureScreen()
+        {
+            Bitmap bmp = new Bitmap(ClientSize.Width, ClientSize.Height,
+                System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+
+            using (bmp)
+            {
+                BitmapData bData = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height),
+                    ImageLockMode.ReadWrite, bmp.PixelFormat);
+
+                // read the data directly into the bitmap's buffer (bitmap is stored in BGRA)
+                GL.ReadPixels(0, 0, ClientSize.Width, ClientSize.Height, OpenTK.Graphics.OpenGL.PixelFormat.Bgra,
+                    PixelType.UnsignedByte, bData.Scan0);
+
+                bmp.UnlockBits(bData);
+                bmp.RotateFlip(RotateFlipType.RotateNoneFlipY);
+
+                var dir = $"{GameFolderDir}\\screenshots";
+
+                if (!Directory.Exists(dir))
+                    Directory.CreateDirectory(dir);
+
+                using (var fs = File.OpenWrite($"{dir}\\{DateTime.Now.ToShortDateString()}.png"))
+                {
+                    bmp.Save(fs, ImageFormat.Png);
+                }
+            }
         }
 
         protected override void OnRenderFrame(FrameEventArgs e)
@@ -470,6 +519,13 @@ namespace SharpCraft
             RenderScreen(GetRenderPartialTicks());
 
             _fpsCounter++;
+
+            if (_takeScreenshot)
+            {
+                _takeScreenshot = false;
+
+                CaptureScreen();
+            }
 
             SwapBuffers();
             ProcessEvents(false);
@@ -514,16 +570,14 @@ namespace SharpCraft
                     if (GuiScreen is GuiScreenMainMenu)
                         return;
 
-                    World?.UpdateEntities(); //a dirty work-around
-
-                    _gamePaused = GuiScreen == null;
-
-                    if (!_gamePaused)
+                    if (GuiScreen != null)
                         CloseGuiScreen();
                     else
                         OpenGuiScreen(new GuiScreenIngameMenu());
                     break;
-
+                case Key.F2:
+                    _takeScreenshot = true;
+                    break;
                 case Key.F11:
                     if (WindowState != WindowState.Fullscreen)
                     {

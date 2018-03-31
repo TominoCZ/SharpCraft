@@ -1,5 +1,6 @@
 ﻿using OpenTK;
 using SharpCraft.entity;
+using SharpCraft.item;
 using SharpCraft.shader;
 using SharpCraft.texture;
 
@@ -12,8 +13,8 @@ namespace SharpCraft.gui
 
         public GuiHUD()
         {
-            var slot_texture = TextureManager.loadTexture("gui/slot", false);
-            var slot_selected_texture = TextureManager.loadTexture("gui/slot_selected", false);
+            var slot_texture = TextureManager.loadTexture("gui/slot");
+            var slot_selected_texture = TextureManager.loadTexture("gui/slot_selected");
 
             if (slot_texture != null)
                 slot = new GuiTexture(slot_texture.textureID, slot_texture.textureSize, Vector2.Zero, Vector2.One * 2);
@@ -45,14 +46,17 @@ namespace SharpCraft.gui
 
                 var stack = Game.Instance.Player.hotbar[i];
 
-                if (stack != null && stack.Item is ItemBlock itemBlock)
+                if (!stack?.IsEmpty == true)
                 {
-                    var block = itemBlock.getBlock();
+                    if (stack.Item is ItemBlock itemBlock)
+                    {
+                        var block = itemBlock.getBlock();
 
-                    x += 14;
-                    y += 14;
+                        x += 14;
+                        y += 14;
 
-                    renderBlock(block, 2.25f, x, y);
+                        renderBlock(block, 2.25f, x, y);
+                    }
                 }
             }
         }

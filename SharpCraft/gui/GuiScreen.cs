@@ -11,11 +11,11 @@ namespace SharpCraft.gui
 
         protected List<GuiButton> buttons = new List<GuiButton>();
 
-        public bool DoesGuiPauseGame { get; protected set; }
+        public bool DoesGuiPauseGame { get; protected set; } = true;
 
         public GuiScreen()
         {
-            background = new GuiTexture(TextureManager.loadTexture("gui/bg", false), Vector2.Zero, Vector2.One * 4);
+            background = new GuiTexture(TextureManager.loadTexture("gui/bg"), Vector2.Zero, Vector2.One * 4);
         }
 
         public override void render(ShaderGui shader, int mouseX, int mouseY)

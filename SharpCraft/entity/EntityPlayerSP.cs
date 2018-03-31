@@ -5,8 +5,8 @@ using SharpCraft.gui;
 using SharpCraft.model;
 using SharpCraft.util;
 using SharpCraft.world;
-using System;
 using System.Linq;
+using SharpCraft.item;
 
 namespace SharpCraft.entity
 {
@@ -25,10 +25,10 @@ namespace SharpCraft.entity
 
         public EntityPlayerSP(World world, Vector3 pos = new Vector3()) : base(world, pos)
         {
-            Game.Instance.Camera.pos = (pos += Vector3.UnitY);
+            Game.Instance.Camera.pos = pos + Vector3.UnitY * 1.625f;
 
             collisionBoundingBox = new AxisAlignedBB(new Vector3(-0.3f, 0, -0.3f), new Vector3(0.3f, 1.65f, 0.3f));
-            boundingBox = collisionBoundingBox.offset(lastPos = pos);
+            boundingBox = collisionBoundingBox.offset(pos + Vector3.UnitY * collisionBoundingBox.size.Y / 2);
 
             hotbar = new ItemStack[9];
         }
@@ -97,16 +97,26 @@ namespace SharpCraft.entity
             hotbar[HotbarIndex] = stack;
         }
 
-        public void OnPickup(ItemStack stack)
+        public bool OnPickup(ItemStack stack)
         {
             for (var i = 0; i < hotbar.Length; i++)
             {
-                if (!(hotbar[i] is ItemStack itemStack) || itemStack.IsEmpty)
+                var itemStack = hotbar[i];
+
+                if (itemStack == null || itemStack.IsEmpty)
                 {
                     setItemStackInHotbar(i, stack);
-                    break;
+                    return true;
+                }
+
+                if (stack.Item == itemStack.Item && stack.Count < 63)
+                {
+                    itemStack.Count++;
+                    return true;
                 }
             }
+
+            return false;
         }
 
         public void OnClick(MouseButton btn)
@@ -147,13 +157,13 @@ namespace SharpCraft.entity
             var block = world.GetBlock(moo.blockPos);
             var meta = world.GetMetadata(moo.blockPos);
 
-            var motion = new Vector3(MathUtil.NextFloat(-0.5f, 0.5f), 0.1f, MathUtil.NextFloat(-0.5f, 0.5f));
+            world.SetBlock(moo.blockPos, EnumBlock.AIR, 0);
 
-            var entityDrop = new EntityItem(world, moo.blockPos.ToVec() + Vector3.One*0.5f, motion, new ItemStack(new ItemBlock(block), 1, meta));
+            var motion = new Vector3(MathUtil.NextFloat(-0.15f, 0.15f), 0.25f, MathUtil.NextFloat(-0.15f, 0.15f));
+
+            var entityDrop = new EntityItem(world, moo.blockPos.ToVec() + Vector3.One * 0.5f, motion, new ItemStack(new ItemBlock(block), 1, meta));
 
             world.AddEntity(entityDrop);
-
-            world.SetBlock(moo.blockPos, EnumBlock.AIR, 0);
         }
 
         public void PlaceBlock()
@@ -162,11 +172,12 @@ namespace SharpCraft.entity
             if (!(moo.hit is EnumBlock))
                 return;
 
-            if (!(getEquippedItemStack()?.Item is ItemBlock itemBlock))
+            var stack = getEquippedItemStack();
+
+            if (!(stack?.Item is ItemBlock itemBlock))
                 return;
 
             var pos = moo.blockPos.Offset(moo.sideHit);
-
             var blockAtPos = world.GetBlock(pos);
 
             var heldBlock = itemBlock.getBlock();
@@ -187,7 +198,9 @@ namespace SharpCraft.entity
                 heldBlock == EnumBlock.GRASS)
                 world.SetBlock(pos, EnumBlock.DIRT, 0);
             else
-                world.SetBlock(pos, heldBlock, getEquippedItemStack().Meta);
+                world.SetBlock(pos, heldBlock, stack.Meta);
+
+            stack.Count--;
         }
 
         public void PickBlock()
@@ -195,11 +208,26 @@ namespace SharpCraft.entity
             var moo = Game.Instance.MouseOverObject;
 
             var clickedBlock = world.GetBlock(moo.blockPos);
+            var clickedMeta = world.GetMetadata(moo.blockPos);
 
             if (clickedBlock != EnumBlock.AIR)
             {
-                setItemStackInSelectedSlot(new ItemStack(new ItemBlock(clickedBlock), 1,
-                    world.GetMetadata(moo.blockPos)));
+                var inHotbar = false; //this variable is here in case i need code under this if block (so that i dont have to return;)
+
+                for (int i = 0; i < hotbar.Length; i++)
+                {
+                    var stack = hotbar[i];
+
+                    if (stack?.Item?.item == clickedBlock && stack.Meta == clickedMeta)
+                    {
+                        setSelectedSlot(i);
+                        inHotbar = true;
+                        break;
+                    }
+                }
+
+                if (!inHotbar)
+                    setItemStackInSelectedSlot(new ItemStack(new ItemBlock(clickedBlock), 1, world.GetMetadata(moo.blockPos)));
             }
         }
 
@@ -233,62 +261,6 @@ namespace SharpCraft.entity
                 HotbarIndex = 8;
             else
                 HotbarIndex = HotbarIndex - 1;
-        }
-    }
-
-    [Serializable]
-    public abstract class Item
-    {
-        public static bool operator ==(Item i1, Item i2)
-        {
-            return i1?.item == i2?.item;
-        }
-
-        public static bool operator !=(Item i1, Item i2)
-        {
-            return i1?.item != i2?.item;
-        }
-
-        public object item { get; }
-
-        private string displayName { get; }
-
-        protected Item(string displayName, object item)
-        {
-            this.item = item;
-            this.displayName = displayName;
-        }
-    }
-
-    [Serializable]
-    internal class ItemBlock : Item
-    {
-        public ItemBlock(EnumBlock block) : base(block.ToString(), block)
-        {
-        }
-
-        public EnumBlock getBlock()
-        {
-            return (EnumBlock)item;
-        }
-    }
-
-    [Serializable]
-    public class ItemStack
-    {
-        public Item Item;
-
-        public int Count;
-        public int Meta;
-
-        public bool IsEmpty => Count <= 0 || Item == null || Item.item == null;
-
-        public ItemStack(Item item, int count = 1, int meta = 0)
-        {
-            Item = item;
-            Meta = meta;
-
-            Count = count;
         }
     }
 }

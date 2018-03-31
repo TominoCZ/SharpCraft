@@ -26,7 +26,7 @@ namespace SharpCraft.texture
 
         public static void stitchTextures()
         {
-            blockTextureAtlasID = loadTexture(generateTextureMap(), false);
+            blockTextureAtlasID = loadTexture(generateTextureMap());
         }
 
         private static Bitmap generateTextureMap()
@@ -282,9 +282,9 @@ namespace SharpCraft.texture
             return bmp;
         }
 
-        public static int loadTexture(Bitmap textureMap, bool smooth)
+        public static int loadTexture(Bitmap textureMap, bool smooth = false)
         {
-            GL.Hint(HintTarget.PerspectiveCorrectionHint, HintMode.Nicest);
+            //GL.Hint(HintTarget.PerspectiveCorrectionHint, HintMode.Nicest);
 
             int texID = GL.GenTexture();
             textures.Add(texID);
@@ -298,19 +298,16 @@ namespace SharpCraft.texture
                 OpenTK.Graphics.OpenGL.PixelFormat.Bgra, PixelType.UnsignedByte, data.Scan0);
             textureMap.UnlockBits(data);
 
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter,
-                (int)(smooth ? TextureMinFilter.Linear : TextureMinFilter.Nearest));
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter,
-                (int)(smooth ? TextureMagFilter.Linear : TextureMagFilter.Nearest));
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS,
-                (int)TextureWrapMode.ClampToEdge);
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT,
-                (int)TextureWrapMode.ClampToEdge);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)(smooth?TextureMinFilter.Linear : TextureMinFilter.Nearest));
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)(smooth ? TextureMinFilter.Linear : TextureMinFilter.Nearest));
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapR, (int)TextureWrapMode.ClampToEdge);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge);
 
             return texID;
         }
 
-        public static Texture loadTexture(string textureName, bool smooth)
+        public static Texture loadTexture(string textureName, bool smooth = false)
         {
             try
             {
