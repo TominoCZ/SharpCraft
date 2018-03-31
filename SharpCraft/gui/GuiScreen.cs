@@ -11,7 +11,7 @@ namespace SharpCraft.gui
 
         protected List<GuiButton> buttons = new List<GuiButton>();
 
-        public bool DoesGuiPauseGame { get; protected set; }
+        public bool DoesGuiPauseGame { get; protected set; } = true;
 
         public GuiScreen()
         {

@@ -8,6 +8,7 @@ using SharpCraft.util;
 using SharpCraft.world;
 using System;
 using System.Linq;
+using SharpCraft.item;
 
 namespace SharpCraft.entity
 {
@@ -19,8 +20,6 @@ namespace SharpCraft.entity
 
         private int entityAge;
         private int entityAgeLast;
-
-        public bool canBePickedUp;
 
         static EntityItem()
         {
@@ -34,6 +33,7 @@ namespace SharpCraft.entity
             collisionBoundingBox = AxisAlignedBB.BLOCK_FULL.offset(Vector3.One * -0.5f).shrink(Vector3.One * 0.6f);
             boundingBox = collisionBoundingBox.offset(pos);
 
+            gravity = 1.45f;
             isAlive = stack != null && !stack.IsEmpty;
         }
 
@@ -48,11 +48,16 @@ namespace SharpCraft.entity
 
             if (entityAge >= 40)
             {
-                EntityPlayerSP closestPlayer = null;
-                float smallestDistance = float.MaxValue;
+                //EntityPlayerSP closestPlayer = null;
+                //float smallestDistance = float.MaxValue;
 
                 //TODO change this for multiplayer
-                world.Entities.OfType<EntityPlayerSP>().AsParallel().ForAll(player =>
+                var players = world.Entities.OfType<EntityPlayerSP>()
+                    .AsParallel()
+                    .OrderBy(entity => MathUtil.Distance(entity.pos, pos))
+                    .Where(e => MathUtil.Distance(e.pos, pos) <= 2);
+
+                /*.AsParallel().ForAll(player =>
                 {
                     var dist = MathUtil.Distance(player.pos, pos);
 
@@ -61,12 +66,12 @@ namespace SharpCraft.entity
                         smallestDistance = dist;
                         closestPlayer = player;
                     }
-                });
+                });*/
 
-                if (closestPlayer != null)
+                foreach (var player in players)
                 {
-                    closestPlayer.OnPickup(stack);
-                    SetDead();
+                    if (player.OnPickup(stack))
+                        SetDead();
                 }
             }
         }
@@ -83,7 +88,7 @@ namespace SharpCraft.entity
                 if (model.rawModel == null)
                     return;
 
-                var time = (float)((Math.Sin(partialTime / 12) + 1) / 16);
+                var time = onGround ? 0 : (float)((Math.Sin(partialTime / 12) + 1) / 16);
 
                 shader.bind();
 

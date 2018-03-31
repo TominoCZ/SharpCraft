@@ -25,7 +25,7 @@ namespace SharpCraft.entity
         protected Entity(World world, Vector3 pos, Vector3 motion = new Vector3())
         {
             this.world = world;
-            this.pos = pos;
+            this.pos = lastPos = pos;
             this.motion = motion;
 
             collisionBoundingBox = AxisAlignedBB.BLOCK_FULL.offset(Vector3.One * -0.5f);

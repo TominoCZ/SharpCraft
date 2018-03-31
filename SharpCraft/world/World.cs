@@ -77,7 +77,12 @@ namespace SharpCraft.world
 
             for (var i = 0; i < Entities.Count; i++)
             {
-                var bb = Entities[i].getEntityBoundingBox();
+                var entity = Entities[i];
+
+                if (entity is EntityItem)
+                    continue;
+
+                var bb = entity.getEntityBoundingBox();
 
                 if (bb.intersectsWith(with))
                     bbs.Add(bb);
