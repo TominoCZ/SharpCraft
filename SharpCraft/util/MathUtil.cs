@@ -1,10 +1,17 @@
-﻿using System;
-using OpenTK;
+﻿using OpenTK;
+using System;
 
 namespace SharpCraft.util
 {
     internal class MathUtil
     {
+        private static Random rand;
+
+        static MathUtil()
+        {
+            rand = new Random();
+        }
+
         public static Vector3 Rotate(Vector3 vec, float angleX, float angleY, float angleZ)
         {
             var sin = new Vector3((float)Math.Sin(angleX), (float)Math.Sin(angleY), (float)Math.Sin(angleZ));
@@ -15,6 +22,11 @@ namespace SharpCraft.util
             vec = new Vector3(vec.X * cos.Z - vec.Y * sin.Z, vec.X * sin.Z + vec.Y * cos.Z, vec.Z);
 
             return vec;
+        }
+
+        public static float NextFloat(float min = 0, float max = 1)
+        {
+            return min + (float)rand.NextDouble() * (max - min);
         }
 
         public static float Min(params float[] values)

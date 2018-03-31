@@ -1,6 +1,6 @@
-﻿using System.Collections.Generic;
-using OpenTK.Graphics.OpenGL;
+﻿using OpenTK.Graphics.OpenGL;
 using SharpCraft.block;
+using System.Collections.Generic;
 
 namespace SharpCraft.model
 {

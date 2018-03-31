@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using SharpCraft.shader;
+﻿using SharpCraft.shader;
+using System.Collections.Generic;
 
 namespace SharpCraft.model
 {

@@ -1,14 +1,16 @@
-﻿using System;
-using System.Linq;
-using OpenTK;
+﻿using OpenTK;
 using OpenTK.Input;
 using SharpCraft.block;
+using SharpCraft.gui;
+using SharpCraft.model;
 using SharpCraft.util;
 using SharpCraft.world;
+using System;
+using System.Linq;
 
 namespace SharpCraft.entity
 {
-    public class EntityPlayerSP : Entity
+    internal class EntityPlayerSP : Entity
     {
         private float maxMoveSpeed = 0.235f;
         private float moveSpeedMult = 1;
@@ -107,6 +109,100 @@ namespace SharpCraft.entity
             }
         }
 
+        public void OnClick(MouseButton btn)
+        {
+            var moo = Game.Instance.MouseOverObject;
+
+            if (moo.hit is EnumBlock)
+            {
+                if (btn == MouseButton.Right)
+                {
+                    var block = world.GetBlock(moo.blockPos);
+                    var model = ModelRegistry.getModelForBlock(block, world.GetMetadata(moo.blockPos));
+
+                    if (model != null && model.canBeInteractedWith)
+                    {
+                        switch (block)
+                        {
+                            case EnumBlock.FURNACE:
+                            case EnumBlock.CRAFTING_TABLE:
+                                Game.Instance.OpenGuiScreen(new GuiScreenCrafting());
+                                break;
+                        }
+                    }
+                    else
+                        PlaceBlock();
+                }
+                else if (btn == MouseButton.Left)
+                    BreakBlock();
+            }
+        }
+
+        public void BreakBlock()
+        {
+            var moo = Game.Instance.MouseOverObject;
+            if (!(moo.hit is EnumBlock))
+                return;
+
+            var block = world.GetBlock(moo.blockPos);
+            var meta = world.GetMetadata(moo.blockPos);
+
+            var motion = new Vector3(MathUtil.NextFloat(-0.5f, 0.5f), 0.1f, MathUtil.NextFloat(-0.5f, 0.5f));
+
+            var entityDrop = new EntityItem(world, moo.blockPos.ToVec() + Vector3.One*0.5f, motion, new ItemStack(new ItemBlock(block), 1, meta));
+
+            world.AddEntity(entityDrop);
+
+            world.SetBlock(moo.blockPos, EnumBlock.AIR, 0);
+        }
+
+        public void PlaceBlock()
+        {
+            var moo = Game.Instance.MouseOverObject;
+            if (!(moo.hit is EnumBlock))
+                return;
+
+            if (!(getEquippedItemStack()?.Item is ItemBlock itemBlock))
+                return;
+
+            var pos = moo.blockPos.Offset(moo.sideHit);
+
+            var blockAtPos = world.GetBlock(pos);
+
+            var heldBlock = itemBlock.getBlock();
+            var blockBb = ModelRegistry.getModelForBlock(heldBlock, world.GetMetadata(pos))
+                .boundingBox.offset(pos.ToVec());
+
+            if (blockAtPos != EnumBlock.AIR || world.GetIntersectingEntitiesBBs(blockBb).Count > 0)
+                return;
+
+            var posUnder = pos.Offset(FaceSides.Down);
+
+            var blockUnder = world.GetBlock(posUnder);
+            var blockAbove = world.GetBlock(pos.Offset(FaceSides.Up));
+
+            if (blockUnder == EnumBlock.GRASS && heldBlock != EnumBlock.GLASS)
+                world.SetBlock(posUnder, EnumBlock.DIRT, 0);
+            if (blockAbove != EnumBlock.AIR && blockAbove != EnumBlock.GLASS &&
+                heldBlock == EnumBlock.GRASS)
+                world.SetBlock(pos, EnumBlock.DIRT, 0);
+            else
+                world.SetBlock(pos, heldBlock, getEquippedItemStack().Meta);
+        }
+
+        public void PickBlock()
+        {
+            var moo = Game.Instance.MouseOverObject;
+
+            var clickedBlock = world.GetBlock(moo.blockPos);
+
+            if (clickedBlock != EnumBlock.AIR)
+            {
+                setItemStackInSelectedSlot(new ItemStack(new ItemBlock(clickedBlock), 1,
+                    world.GetMetadata(moo.blockPos)));
+            }
+        }
+
         public void DropHeldItem()
         {
             var stack = hotbar[HotbarIndex];
@@ -182,24 +278,17 @@ namespace SharpCraft.entity
     {
         public Item Item;
 
-        public int Count = 1;
+        public int Count;
         public int Meta;
 
         public bool IsEmpty => Count <= 0 || Item == null || Item.item == null;
 
-        public ItemStack(Item item)
+        public ItemStack(Item item, int count = 1, int meta = 0)
         {
             Item = item;
-        }
-
-        public ItemStack(Item item, int count) : this(item)
-        {
-            Count = count;
-        }
-
-        public ItemStack(Item item, int count, int meta) : this(item, count)
-        {
             Meta = meta;
+
+            Count = count;
         }
     }
 }

@@ -1,10 +1,10 @@
-﻿using System.Collections.Generic;
-using OpenTK;
+﻿using OpenTK;
 using OpenTK.Graphics.OpenGL;
 using SharpCraft.gui;
 using SharpCraft.model;
 using SharpCraft.shader;
 using SharpCraft.texture;
+using System.Collections.Generic;
 
 namespace SharpCraft.render
 {

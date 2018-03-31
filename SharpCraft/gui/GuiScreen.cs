@@ -1,7 +1,7 @@
-﻿using System.Collections.Generic;
-using OpenTK;
+﻿using OpenTK;
 using SharpCraft.shader;
 using SharpCraft.texture;
+using System.Collections.Generic;
 
 namespace SharpCraft.gui
 {
@@ -10,6 +10,8 @@ namespace SharpCraft.gui
         private GuiTexture background;
 
         protected List<GuiButton> buttons = new List<GuiButton>();
+
+        public bool DoesGuiPauseGame { get; protected set; }
 
         public GuiScreen()
         {

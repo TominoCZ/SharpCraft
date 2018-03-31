@@ -1,20 +1,18 @@
-﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using OpenTK;
+﻿using OpenTK;
 using SharpCraft.block;
 using SharpCraft.entity;
 using SharpCraft.model;
-using SharpCraft.render;
 using SharpCraft.util;
 using SharpCraft.world.chunk;
 using SharpCraft.world.chunk.region;
+using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace SharpCraft.world
 {
-    public class World
+    internal class World
     {
         public ConcurrentDictionary<ChunkPos, Chunk> Chunks { get; }
 
@@ -150,10 +148,8 @@ namespace SharpCraft.world
             var data = ChunkData.GetChunkData(chunkPos);
             if (data == null) return false;
 
-
             var blockData = new short[Chunk.ChunkSize, Chunk.ChunkHeight, Chunk.ChunkSize];
             Buffer.BlockCopy(data, 0, blockData, 0, data.Length);
-
 
             CreateChunk(chunkPos, blockData);
             return true;

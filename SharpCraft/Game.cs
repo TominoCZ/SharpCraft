@@ -1,16 +1,7 @@
 ﻿using OpenTK;
+using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Input;
-using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using OpenTK.Graphics;
 using SharpCraft.block;
 using SharpCraft.entity;
 using SharpCraft.gui;
@@ -20,6 +11,15 @@ using SharpCraft.shader;
 using SharpCraft.texture;
 using SharpCraft.util;
 using SharpCraft.world;
+using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Threading;
 
 namespace SharpCraft
 {
@@ -64,15 +64,18 @@ namespace SharpCraft
 
             return matrix;
         }
+
         public GuiScreen GuiScreen { get; private set; }
 
         private Point _mouseLast;
         private float _mouseWheelLast;
         private Stopwatch _timer = Stopwatch.StartNew();
 
+        private bool _gamePaused;
         private bool _wasSpaceDown;
         private int _fpsCounter;
         private float _sensitivity = 1;
+        private float _lastPartialTicks;
 
         private string _glVersion;
 
@@ -203,6 +206,9 @@ namespace SharpCraft
             if (GuiScreen == null && !Focused)
                 OpenGuiScreen(new GuiScreenIngameMenu());
 
+            if (!AllowInput())
+                return;
+
             var wheelValue = Mouse.WheelPrecise;
 
             if (Player != null && GuiScreen == null)
@@ -233,9 +239,10 @@ namespace SharpCraft
             {
                 var viewMatrix = Camera.View;
 
-                WorldRenderer.Render(World, viewMatrix, partialTicks);
-                EntityRenderer.render(viewMatrix, partialTicks);
+                var partialTick = _gamePaused ? _lastPartialTicks : _lastPartialTicks = partialTicks;
 
+                WorldRenderer.Render(World, viewMatrix, partialTick);
+                EntityRenderer.render(viewMatrix, partialTick);
                 SkyboxRenderer.render(viewMatrix);
             }
 
@@ -256,7 +263,7 @@ namespace SharpCraft
 
         private void GetMouseOverObject()
         {
-            var radius = 5;
+            var radius = 5.5f;
 
             var final = new MouseOverObject();
 
@@ -339,7 +346,6 @@ namespace SharpCraft
 
         public void RunGlTasks()
         {
-
             while (_glContextQueue.Count > 0)
             {
                 if (_glContextQueue.TryDequeue(out var func))
@@ -386,13 +392,16 @@ namespace SharpCraft
 
                         _mouseLast = point;
 
-                        if (KeysDown.Contains(Key.Space) && !_wasSpaceDown && Player.onGround)
+                        if (AllowInput())
                         {
-                            _wasSpaceDown = true;
-                            Player.motion.Y = 0.475F;
+                            if (KeysDown.Contains(Key.Space) && !_wasSpaceDown && Player.onGround)
+                            {
+                                _wasSpaceDown = true;
+                                Player.motion.Y = 0.475F;
+                            }
+                            else if ((!KeysDown.Contains(Key.Space) || Player.onGround) && _wasSpaceDown)
+                                _wasSpaceDown = false;
                         }
-                        else if ((!KeysDown.Contains(Key.Space) || Player.onGround) && _wasSpaceDown)
-                            _wasSpaceDown = false;
 
                         if (_frameTimer.ElapsedMilliseconds >= 1000)
                         {
@@ -438,7 +447,7 @@ namespace SharpCraft
 
         private bool AllowInput()
         {
-            return GuiScreen == null && !(CursorVisible = !Focused);
+            return (GuiScreen == null || !GuiScreen.DoesGuiPauseGame) && !(CursorVisible = !Focused);
         }
 
         public void CloseGuiScreen()
@@ -476,69 +485,13 @@ namespace SharpCraft
                 {
                     GetMouseOverObject();
 
-                    if (MouseOverObject.hit is EnumBlock)
-                    {
-                        var pos = MouseOverObject.blockPos;
+                    //pickBlock
+                    if (e.Button == MouseButton.Middle)
+                        Player?.PickBlock();
 
-                        //pickBlock
-                        if (e.Button == MouseButton.Middle)
-                        {
-                            var clickedBlock = World.GetBlock(pos);
-
-                            if (clickedBlock != EnumBlock.AIR)
-                            {
-                                Player.setItemStackInSelectedSlot(new ItemStack(new ItemBlock(clickedBlock), 1,
-                                    World.GetMetadata(pos)));
-                            }
-                        }
-
-                        //place/interact
-                        if (e.Button == MouseButton.Right) //TODO move this code to the player class
-                        {
-                            var block = World.GetBlock(pos);
-                            var model = ModelRegistry.getModelForBlock(block, World.GetMetadata(pos));
-
-                            if (model != null && model.canBeInteractedWith)
-                            {
-                                switch (block)
-                                {
-                                    case EnumBlock.FURNACE:
-                                    case EnumBlock.CRAFTING_TABLE:
-                                        OpenGuiScreen(new GuiScreenCrafting());
-                                        break;
-                                }
-                            }
-                            else if (Player.getEquippedItemStack()?.Item is ItemBlock itemBlock)
-                            {
-                                pos = pos.Offset(MouseOverObject.sideHit);
-
-                                var blockAtPos = World.GetBlock(pos);
-
-                                var heldBlock = itemBlock.getBlock();
-                                var blockBb = ModelRegistry.getModelForBlock(heldBlock, World.GetMetadata(pos))
-                                    .boundingBox.offset(pos.ToVec());
-
-                                if (blockAtPos == EnumBlock.AIR && World.GetIntersectingEntitiesBBs(blockBb).Count == 0)
-                                {
-                                    var posUnder = pos.Offset(FaceSides.Down);
-
-                                    var blockUnder = World.GetBlock(posUnder);
-                                    var blockAbove = World.GetBlock(pos.Offset(FaceSides.Up));
-
-                                    if (blockUnder == EnumBlock.GRASS && heldBlock != EnumBlock.GLASS)
-                                        World.SetBlock(posUnder, EnumBlock.DIRT, 0);
-                                    if (blockAbove != EnumBlock.AIR && blockAbove != EnumBlock.GLASS && heldBlock == EnumBlock.GRASS)
-                                        World.SetBlock(pos, EnumBlock.DIRT, 0);
-                                    else
-                                        World.SetBlock(pos, heldBlock, Player.getEquippedItemStack().Meta);
-                                }
-                            }
-                        }
-
-                        //break
-                        if (e.Button == MouseButton.Left)
-                            World.SetBlock(pos, EnumBlock.AIR, 0);
-                    }
+                    //place/interact
+                    if (e.Button == MouseButton.Right || e.Button == MouseButton.Left)
+                        Player?.OnClick(e.Button);
                 }
                 else
                 {
@@ -557,35 +510,20 @@ namespace SharpCraft
 
             switch (e.Key)
             {
-                case Key.Q:
-                    Player?.DropHeldItem();
-                    break;
-                case Key.R:
-                    if (e.Control)
-                    {
-                        ShaderManager.reload();
-                        SettingsManager.Load();
-
-                        WorldRenderer.RenderDistance = SettingsManager.GetInt("renderdistance");
-                        _sensitivity = SettingsManager.GetFloat("sensitivity");
-
-                        if (e.Shift)
-                        {
-                            TextureManager.reload();
-                            World?.DestroyChunkModels();
-                        }
-                    }
-
-                    break;
                 case Key.Escape:
                     if (GuiScreen is GuiScreenMainMenu)
                         return;
 
-                    if (GuiScreen != null)
+                    World?.UpdateEntities(); //a dirty work-around
+
+                    _gamePaused = GuiScreen == null;
+
+                    if (!_gamePaused)
                         CloseGuiScreen();
                     else
                         OpenGuiScreen(new GuiScreenIngameMenu());
                     break;
+
                 case Key.F11:
                     if (WindowState != WindowState.Fullscreen)
                     {
@@ -594,24 +532,53 @@ namespace SharpCraft
                     }
                     else
                         WindowState = _lastWindowState;
+
                     break;
             }
 
-            if (GuiScreen == null)
+            if (AllowInput())
             {
-                for (var i = 0; i < 9; i++)
+                switch (e.Key)
                 {
-                    if (e.Key == Key.Number1 + i)
-                    {
-                        Player?.setSelectedSlot(i);
+                    case Key.Q:
+                        Player?.DropHeldItem();
+                        break;
+
+                    case Key.R:
+                        if (e.Control)
+                        {
+                            ShaderManager.reload();
+                            SettingsManager.Load();
+
+                            WorldRenderer.RenderDistance = SettingsManager.GetInt("renderdistance");
+                            _sensitivity = SettingsManager.GetFloat("sensitivity");
+
+                            if (e.Shift)
+                            {
+                                TextureManager.reload();
+                                World?.DestroyChunkModels();
+                            }
+                        }
 
                         break;
+                }
+
+                if (GuiScreen == null)
+                {
+                    for (var i = 0; i < 9; i++)
+                    {
+                        if (e.Key == Key.Number1 + i)
+                        {
+                            Player?.setSelectedSlot(i);
+
+                            break;
+                        }
                     }
                 }
-            }
 
-            if (e.Key == (Key.LAlt | Key.F4))
-                Exit();
+                if (e.Key == (Key.LAlt | Key.F4))
+                    Exit();
+            }
 
             base.OnKeyDown(e);
         }

@@ -6,6 +6,7 @@ using System;
 using FN_DECIMAL = System.Single;
 
 #endif
+
 using System.Runtime.CompilerServices;
 
 namespace SharpCraft.util

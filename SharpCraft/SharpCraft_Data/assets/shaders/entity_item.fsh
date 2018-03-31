@@ -10,8 +10,9 @@ uniform vec3 lightColor;
 
 void main(void){
 	vec4 pixelColor = texture(textureSampler, pass_textureCoords);
+	
 	if(pixelColor.a == 0)discard;
-
+	
 	vec3 unitNormal = normalize(surfaceNormal);
 	vec3 vector1 = normalize(vec3(300, 700, 375));
 	vec3 vector2 = normalize(vec3(-375, -200, -300));

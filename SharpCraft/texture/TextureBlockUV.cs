@@ -1,7 +1,6 @@
-﻿using System.Collections.Generic;
-using OpenTK;
+﻿using OpenTK;
 using SharpCraft.block;
-using SharpCraft.util;
+using System.Collections.Generic;
 
 namespace SharpCraft.texture
 {

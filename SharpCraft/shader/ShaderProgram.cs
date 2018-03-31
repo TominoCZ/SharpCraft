@@ -1,9 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using OpenTK;
+﻿using OpenTK;
 using OpenTK.Graphics.OpenGL;
 using SharpCraft.model;
+using System;
+using System.Collections.Generic;
+using System.IO;
 
 namespace SharpCraft.shader
 {

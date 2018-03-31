@@ -1,6 +1,6 @@
-﻿using System;
-using OpenTK;
+﻿using OpenTK;
 using SharpCraft.util;
+using System;
 
 namespace SharpCraft.render
 {

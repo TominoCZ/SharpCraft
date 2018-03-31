@@ -1,9 +1,9 @@
-﻿using System.Collections.Concurrent;
-using SharpCraft.shader;
+﻿using SharpCraft.shader;
+using System.Collections.Concurrent;
 
 namespace SharpCraft.model
 {
-    public class ModelChunk
+    internal class ModelChunk
     {
         public ConcurrentDictionary<ShaderProgram, ModelChunkFragment> fragmentPerShader { get; }
 
@@ -40,8 +40,8 @@ namespace SharpCraft.model
 
         //public List<ShaderProgram> getShadersPresent()
         //{
-            //return _shaders;
-       //}
+        //return _shaders;
+        //}
 
         public void destroy()
         {

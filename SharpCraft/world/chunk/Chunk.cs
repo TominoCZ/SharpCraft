@@ -1,22 +1,18 @@
-﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Diagnostics;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using OpenTK;
-using OpenTK.Graphics.OpenGL;
+﻿using OpenTK;
 using SharpCraft.block;
 using SharpCraft.entity;
 using SharpCraft.model;
 using SharpCraft.shader;
 using SharpCraft.util;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Threading;
 
 namespace SharpCraft.world.chunk
 {
-    public class Chunk
+    internal class Chunk
     {
         public const int ChunkSize = 16;
         public const int ChunkHeight = 256;

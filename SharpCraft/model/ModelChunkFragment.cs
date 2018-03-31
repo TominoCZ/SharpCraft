@@ -1,9 +1,9 @@
-﻿using System.Collections.Generic;
-using SharpCraft.shader;
+﻿using SharpCraft.shader;
+using System.Collections.Generic;
 
 namespace SharpCraft.model
 {
-    public class ModelChunkFragment : ModelBaked
+    internal class ModelChunkFragment : ModelBaked
     {
         public ModelChunkFragment(ShaderProgram shader, List<RawQuad> quads) : base(null, shader)
         {

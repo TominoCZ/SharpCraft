@@ -7,8 +7,9 @@ namespace SharpCraft.model
         int vaoID { get; }
         int vertexCount { get; }
         int[] bufferIDs { get; }
-        
+
         bool hasLocalData();
-	    void Render(PrimitiveType shaderRenderType);
+
+        void Render(PrimitiveType shaderRenderType);
     }
 }

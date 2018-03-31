@@ -1,11 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using OpenTK;
+﻿using OpenTK;
 using SharpCraft.world;
+using System;
+using System.Collections.Generic;
 
 namespace SharpCraft.entity
 {
-    public class Entity
+    internal class Entity
     {
         protected AxisAlignedBB boundingBox, collisionBoundingBox;
 
@@ -20,12 +20,14 @@ namespace SharpCraft.entity
 
         public bool isAlive = true;
 
+        public float gravity = 1.875f;
+
         protected Entity(World world, Vector3 pos, Vector3 motion = new Vector3())
         {
             this.world = world;
             this.pos = pos;
             this.motion = motion;
-            
+
             collisionBoundingBox = AxisAlignedBB.BLOCK_FULL.offset(Vector3.One * -0.5f);
             boundingBox = collisionBoundingBox.offset(pos);
         }
@@ -36,7 +38,7 @@ namespace SharpCraft.entity
 
             lastPos = pos;
 
-            motion.Y -= 0.0775f;
+            motion.Y -= 0.04f * gravity;
 
             Move();
 

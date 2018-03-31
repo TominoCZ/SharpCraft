@@ -7,6 +7,7 @@ namespace SharpCraft.world
     {
         public int seed { get; }
         public string levelName { get; }
+
         public WorldDataNode(World w)
         {
             levelName = w.LevelName;

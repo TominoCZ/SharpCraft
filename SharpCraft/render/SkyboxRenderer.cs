@@ -1,9 +1,9 @@
-﻿using System.Collections.Generic;
-using OpenTK;
+﻿using OpenTK;
 using OpenTK.Graphics.OpenGL;
 using SharpCraft.model;
 using SharpCraft.shader;
 using SharpCraft.texture;
+using System.Collections.Generic;
 
 namespace SharpCraft.render
 {
@@ -88,7 +88,7 @@ namespace SharpCraft.render
 
             GL.ActiveTexture(TextureUnit.Texture0);
             GL.BindTexture(TextureTarget.TextureCubeMap, texture);
-	        cube.rawModel.Render(cube.shader.renderType);
+            cube.rawModel.Render(cube.shader.renderType);
 
             cube.unbind();
         }

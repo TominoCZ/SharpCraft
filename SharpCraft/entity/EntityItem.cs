@@ -1,6 +1,4 @@
-﻿using System;
-using System.Linq;
-using OpenTK;
+﻿using OpenTK;
 using OpenTK.Graphics.OpenGL;
 using SharpCraft.block;
 using SharpCraft.model;
@@ -8,6 +6,8 @@ using SharpCraft.shader;
 using SharpCraft.texture;
 using SharpCraft.util;
 using SharpCraft.world;
+using System;
+using System.Linq;
 
 namespace SharpCraft.entity
 {
@@ -18,6 +18,7 @@ namespace SharpCraft.entity
         private ItemStack stack;
 
         private int entityAge;
+        private int entityAgeLast;
 
         public bool canBePickedUp;
 
@@ -39,6 +40,8 @@ namespace SharpCraft.entity
         public override void Update()
         {
             base.Update();
+
+            entityAgeLast = entityAge;
 
             if (onGround && ++entityAge >= (20 * 50 * 60) + 40) //stay on ground for a minute, 20 ticks as a pick up delay
                 SetDead();
@@ -71,6 +74,7 @@ namespace SharpCraft.entity
         public override void Render(Matrix4 viewMatrix, float particalTicks)
         {
             var partialPos = lastPos + (pos - lastPos) * particalTicks;
+            var partialTime = entityAgeLast + (entityAge - entityAgeLast) * particalTicks;
 
             if (stack?.Item?.item is EnumBlock block)
             {
@@ -78,6 +82,8 @@ namespace SharpCraft.entity
 
                 if (model.rawModel == null)
                     return;
+
+                var time = (float)((Math.Sin(partialTime / 12) + 1) / 16);
 
                 shader.bind();
 
@@ -89,7 +95,7 @@ namespace SharpCraft.entity
 
                 shader.loadVec3(Vector3.One, "lightColor");
                 shader.loadViewMatrix(viewMatrix);
-                shader.loadTransformationMatrix(MatrixHelper.createTransformationMatrix(partialPos - Vector3.One * 0.2f + Vector3.UnitY * 0.2f, Vector3.One * 0.4f));
+                shader.loadTransformationMatrix(MatrixHelper.createTransformationMatrix(partialPos - Vector3.One * 0.2f + Vector3.UnitY * 0.4f + Vector3.UnitY * time, Vector3.UnitY * partialTime * 2, 0.4f));
 
                 GL.ActiveTexture(TextureUnit.Texture0);
                 GL.BindTexture(TextureTarget.Texture2D, TextureManager.blockTextureAtlasID);

@@ -16,5 +16,5 @@ void main(void) {
 	gl_Position = projectionMatrix * viewMatrix * worldPos;
 
 	pass_textureCoords = textureCoords;
-	surfaceNormal = (transformationMatrix * vec4(normal, 0.0)).xyz;
+	surfaceNormal = normal;
 }

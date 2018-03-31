@@ -1,8 +1,8 @@
-﻿using System.Collections.Generic;
-using OpenTK;
+﻿using OpenTK;
 using SharpCraft.block;
 using SharpCraft.model;
 using SharpCraft.texture;
+using System.Collections.Generic;
 
 namespace SharpCraft.util
 {

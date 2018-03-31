@@ -1,10 +1,8 @@
-﻿using System;
+﻿using SharpCraft.block;
+using SharpCraft.entity;
+using System;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
-using OpenTK;
-using SharpCraft.block;
-using SharpCraft.entity;
-using SharpCraft.world.chunk;
 
 namespace SharpCraft.world
 {
