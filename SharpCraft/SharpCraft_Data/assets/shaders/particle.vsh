@@ -4,7 +4,7 @@ in vec3 position;
 in vec2 textureCoords;
 in vec3 normal;
 
-out vec2 pass_textureCoords;
+out vec2 pass_uv;
 out float brightness;
 
 uniform mat4 transformationMatrix;
@@ -20,16 +20,16 @@ void main(void) {
 	int i = gl_VertexID % 4;
 	
 	if (i == 0){
-		pass_textureCoords = UVmin;
+		pass_uv = UVmin;
 	}
 	else if (i == 1){
-		pass_textureCoords = vec2(UVmin.x, UVmax.y);
+		pass_uv = vec2(UVmin.x, UVmax.y);
 	}
 	else if (i == 2){
-		pass_textureCoords = UVmax;
+		pass_uv = UVmax;
 	}
 	else if (i == 3){
-		pass_textureCoords = vec2(UVmax.x, UVmin.y);
+		pass_uv = vec2(UVmax.x, UVmin.y);
 	}
 	
 	vec3 vector1 = vec3(300, 650, 350);

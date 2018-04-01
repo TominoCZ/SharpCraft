@@ -13,13 +13,18 @@ namespace SharpCraft.render
 {
     class ParticleRenderer
     {
-        private List<Particle> _particles = new List<Particle>();
+        private List<Particle> _particles;
 
         public static ModelBaked<Particle> ParticleModel;
 
         static ParticleRenderer()
         {
             ParticleModel = new ModelParticle(new ShaderParticle());
+        }
+
+        public ParticleRenderer()
+        {
+            _particles = new List<Particle>();
         }
 
         public void AddParticle(Particle particle)

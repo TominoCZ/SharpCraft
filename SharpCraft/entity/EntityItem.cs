@@ -9,11 +9,10 @@ using System;
 using System.Linq;
 using SharpCraft.item;
 using SharpCraft.render.shader;
-using SharpCraft.render.shader.shaders;
 
 namespace SharpCraft.entity
 {
-	internal class EntityItem : Entity
+	public class EntityItem : Entity
 	{
 		private static Shader<EntityItem> shader;
 

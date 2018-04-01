@@ -13,10 +13,12 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="OpenTK.NETCore" Version="1.1.2749.6433" />
-    <PackageReference Include="System.Drawing.Common" Version="4.5.0-preview1-26216-02" />
+    <Compile Remove="render\shader\uniforms\**" />
+    <EmbeddedResource Remove="render\shader\uniforms\**" />
+    <None Remove="render\shader\uniforms\**" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="render\shader\uniforms" />
+    <PackageReference Include="OpenTK.NETCore" Version="1.1.2749.6433" />
+    <PackageReference Include="System.Drawing.Common" Version="4.5.0-preview1-26216-02" />
   </ItemGroup>
 </Project>

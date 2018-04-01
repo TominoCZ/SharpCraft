@@ -81,18 +81,19 @@ namespace SharpCraft.render
             texture = TextureManager.loadCubeMap();
         }
 
-        public void render(Matrix4 viewMatrix)
+        public void Render()
         {
-	        viewMatrix.M41 = viewMatrix.M42 = viewMatrix.M43 = 0;
+            var mat = SharpCraft.Instance.Camera.View;
+            mat.Column3 *= Vector4.UnitW;//viewMatrix.M41 = viewMatrix.M42 = viewMatrix.M43 = 0;
 
             cube.bind();
 	        cube.shader.UpdateGlobalUniforms();
 	        cube.shader.UpdateModelUniforms(cube.rawModel);
-	        cube.shader.UpdateInstanceUniforms(viewMatrix,null);
+	        cube.shader.UpdateInstanceUniforms(mat,null);
 
             GL.ActiveTexture(TextureUnit.Texture0);
             GL.BindTexture(TextureTarget.TextureCubeMap, texture);
-            cube.rawModel.Render(PrimitiveType.Quads);
+            cube.rawModel.Render(PrimitiveType.Triangles);
 
             cube.unbind();
         }

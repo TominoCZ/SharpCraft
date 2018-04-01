@@ -14,7 +14,6 @@ namespace SharpCraft.render.shader.shaders
 		{
 		}
 
-
 		protected override void registerUniforms()
 		{
 			base.registerUniforms();

@@ -4,7 +4,7 @@ in vec3 position;
 in vec2 textureCoords;
 in vec3 normal;
 
-out vec2 pass_textureCoords;
+out vec2 pass_uv;
 out float brightness;
 
 uniform mat4 transformationMatrix;
@@ -15,7 +15,7 @@ void main(void) {
 	vec4 worldPos = transformationMatrix * vec4(position, 1.0);
 	gl_Position = projectionMatrix * viewMatrix * worldPos;
 
-	pass_textureCoords = textureCoords;
+	pass_uv = textureCoords;
 	
 	vec3 vector = vec3(300, 650, 375);
 	

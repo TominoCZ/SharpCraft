@@ -96,5 +96,16 @@ namespace SharpCraft.util
             var partPos = (pos + 1) / partSize - 1;
             return pos - partPos * partSize;
         }
+
+        public static Vector4 Hue(int angle)
+        {
+            var rad = MathHelper.DegreesToRadians(angle);
+
+            var r = (float)(Math.Sin(rad) * 0.5 + 0.5);
+            var g = (float)(Math.Sin(rad + MathHelper.PiOver3 * 2) * 0.5 + 0.5);
+            var b = (float)(Math.Sin(rad + MathHelper.PiOver3 * 4) * 0.5 + 0.5);
+
+            return new Vector4(r, g, b, 1);
+        }
     }
 }

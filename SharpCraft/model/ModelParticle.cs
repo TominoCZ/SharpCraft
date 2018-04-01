@@ -1,6 +1,5 @@
 ﻿using SharpCraft.block;
 using SharpCraft.particle;
-using SharpCraft.render.shader;
 using SharpCraft.render.shader.shaders;
 using SharpCraft.util;
 
@@ -10,7 +9,7 @@ namespace SharpCraft.model
     {
         public ModelParticle(ShaderParticle shader) : base(null, shader)
         {
-            var cube = ModelHelper.createTexturedCubeModel(EnumBlock.RARE);
+            var cube = ModelHelper.createTexturedCubeModel(EnumBlock.MISSING);
 
             rawModel = ModelManager.loadBlockModelToVAO(cube);
         }

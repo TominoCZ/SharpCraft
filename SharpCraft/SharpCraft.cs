@@ -232,6 +232,7 @@ namespace SharpCraft
 
             _mouseWheelLast = wheelValue;
 
+            WorldRenderer?.Update();
             World?.UpdateEntities();
             ParticleRenderer?.TickParticles();
         }
@@ -251,7 +252,7 @@ namespace SharpCraft
                 WorldRenderer.Render(World, partialTick);
                 EntityRenderer.Render(partialTick);
                 ParticleRenderer.Render(partialTick);
-                //SkyboxRenderer.render(viewMatrix);
+                SkyboxRenderer.Render();
             }
 
             //render other gui
