@@ -1,7 +1,8 @@
 ﻿using OpenTK;
-using SharpCraft.shader;
 using SharpCraft.texture;
 using System.Collections.Generic;
+using SharpCraft.render.shader;
+using SharpCraft.render.shader.shaders;
 
 namespace SharpCraft.gui
 {
@@ -18,16 +19,16 @@ namespace SharpCraft.gui
             background = new GuiTexture(TextureManager.loadTexture("gui/bg"), Vector2.Zero, Vector2.One * 4);
         }
 
-        public override void render(ShaderGui shader, int mouseX, int mouseY)
+        public override void Render(Shader<Gui> shader, int mouseX, int mouseY)
         {
             for (int i = 0; i < buttons.Count; i++)
             {
-                buttons[i].render(shader, mouseX, mouseY);
+                buttons[i].Render(shader, mouseX, mouseY);
             }
             //render stuff
         }
 
-        protected virtual void drawBackground(ShaderGui shader, GuiTexture tex)
+        protected virtual void drawBackground(Shader<Gui> shader, GuiTexture tex)
         {
             var sizeX = tex.textureSize.Width * tex.scale.X;
             var sizeY = tex.textureSize.Height * tex.scale.Y;

@@ -10,7 +10,7 @@ using SharpCraft.item;
 
 namespace SharpCraft.entity
 {
-    internal class EntityPlayerSP : Entity
+	public class EntityPlayerSP : Entity
     {
         private float maxMoveSpeed = 0.235f;
         private float moveSpeedMult = 1;
@@ -27,7 +27,7 @@ namespace SharpCraft.entity
         {
             SharpCraft.Instance.Camera.pos = pos + Vector3.UnitY * 1.625f;
 
-            collisionBoundingBox = new AxisAlignedBB(new Vector3(-0.3f, 0, -0.3f), new Vector3(0.3f, 1.65f, 0.3f));
+            collisionBoundingBox = new AxisAlignedBb(new Vector3(-0.3f, 0, -0.3f), new Vector3(0.3f, 1.65f, 0.3f));
             boundingBox = collisionBoundingBox.offset(pos + Vector3.UnitY * collisionBoundingBox.size.Y / 2);
 
             hotbar = new ItemStack[9];

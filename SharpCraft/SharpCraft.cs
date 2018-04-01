@@ -7,7 +7,6 @@ using SharpCraft.entity;
 using SharpCraft.gui;
 using SharpCraft.model;
 using SharpCraft.render;
-using SharpCraft.shader;
 using SharpCraft.texture;
 using SharpCraft.util;
 using SharpCraft.world;
@@ -23,6 +22,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using SharpCraft.item;
+using SharpCraft.render.shader;
 using Bitmap = System.Drawing.Bitmap;
 using Point = OpenTK.Point;
 using Rectangle = System.Drawing.Rectangle;
@@ -33,11 +33,6 @@ namespace SharpCraft
     internal class SharpCraft : GameWindow
     {
         public string GameFolderDir = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\.sharpcraft";
-
-        
-        public float NearPlane = 0.1f;
-        public float FarPlane = 1000f;
-        public float Fov = 70;
 
         public WorldRenderer WorldRenderer;
         public EntityRenderer EntityRenderer;
@@ -57,26 +52,7 @@ namespace SharpCraft
 
         public static SharpCraft Instance { get; private set; }
 
-        public Camera Camera = new Camera();
-
-        public Matrix4 CreateProjectionMatrix()
-        {
-            var matrix = Matrix4.Identity;
-
-            var aspectRatio = (float)Width / Height;
-            var yScale = (float)(1f / Math.Tan(MathHelper.DegreesToRadians(Fov / 2f)));
-            var xScale = yScale / aspectRatio;
-            var frustumLength = FarPlane - NearPlane;
-
-            matrix.M11 = xScale;
-            matrix.M22 = yScale;
-            matrix.M33 = -((FarPlane + NearPlane) / frustumLength);
-            matrix.M34 = -1;
-            matrix.M43 = -((2 * NearPlane * FarPlane) / frustumLength);
-            matrix.M44 = 0;
-
-            return matrix;
-        }
+        public Camera Camera;
 
         public GuiScreen GuiScreen { get; private set; }
 
@@ -102,6 +78,7 @@ namespace SharpCraft
             GraphicsContextFlags.ForwardCompatible)
         {
             Instance = this;
+            Camera = new Camera();
             _renderThread = Thread.CurrentThread;
 
             VSync = VSyncMode.Off;
@@ -123,8 +100,8 @@ namespace SharpCraft
             Console.WriteLine("DEBUG: loading models");
 
             //TODO - merge shaders and use strings as block IDs like sharpcraft:dirt
-            var shader = new ShaderBlock("block", PrimitiveType.Quads);
-            var shaderUnlit = new ShaderBlockUnlit("block_unlit", PrimitiveType.Quads);
+            var shader = new Shader<ModelBlock>("block");
+            var shaderUnlit = new Shader<ModelBlock>("block_unlit");
 
             var missingModel = new ModelBlock(EnumBlock.MISSING, shader);
             var stoneModel = new ModelBlock(EnumBlock.STONE, shader);
@@ -211,8 +188,6 @@ namespace SharpCraft
 
             RunUpdateThreads();
 
-            ShaderManager.updateProjectionMatrix();
-
             //world.setBlock(new BlockPos(player.pos), EnumBlock.RARE, 1, true); //test of block metadata, works perfectly
         }
 
@@ -258,9 +233,9 @@ namespace SharpCraft
                 var partialTick = _gamePaused ? _lastPartialTicks : _lastPartialTicks = partialTicks;
 
                 WorldRenderer.Render(World, viewMatrix, partialTick);
-                EntityRenderer.render(viewMatrix, partialTick);
+                EntityRenderer.Render(viewMatrix, partialTick);
                 ParticleRenderer.Render(viewMatrix, partialTick);
-                SkyboxRenderer.render(viewMatrix);
+                //SkyboxRenderer.render(viewMatrix);
             }
 
             //render other gui
@@ -528,6 +503,8 @@ namespace SharpCraft
                 _timer.Restart();
             }
 
+            Camera.UpdateViewMatrix();
+
             RenderScreen(GetRenderPartialTicks());
 
             _fpsCounter++;
@@ -613,7 +590,7 @@ namespace SharpCraft
                     case Key.R:
                         if (e.Control)
                         {
-                            ShaderManager.reload();
+                            //ShaderManager.reload();
                             SettingsManager.Load();
 
                             WorldRenderer.RenderDistance = SettingsManager.GetInt("renderdistance");
@@ -663,19 +640,16 @@ namespace SharpCraft
             if (ClientSize.Height < 480)
                 ClientSize = new Size(ClientSize.Width, 480);
 
-            base.OnResize(e);
-
             GL.Viewport(ClientRectangle);
             GL.MatrixMode(MatrixMode.Projection);
             GL.LoadIdentity();
-            GL.Ortho(0, ClientRectangle.Width, ClientRectangle.Height, 0, NearPlane, FarPlane);
+            GL.Ortho(0, ClientRectangle.Width, ClientRectangle.Height, 0, Camera.NearPlane, Camera.FarPlane);
 
-            ShaderManager.updateProjectionMatrix();
+            Camera.UpdateProjectionMatrix();
         }
 
         protected override void OnClosing(CancelEventArgs e)
         {
-            ShaderManager.cleanup();
 
             ModelManager.cleanup();
             TextureManager.cleanUp();

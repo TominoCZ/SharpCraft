@@ -1,4 +1,5 @@
-﻿using SharpCraft.shader;
+﻿using SharpCraft.render.shader;
+using SharpCraft.render.shader.shaders;
 
 namespace SharpCraft.gui
 {
@@ -11,7 +12,7 @@ namespace SharpCraft.gui
             this.crosshairTexture = crosshairTexture;
         }
 
-        public override void render(ShaderGui shader, int mouseX, int mouseY)
+        public override void Render(Shader<Gui> shader, int mouseX, int mouseY)
         {
             renderTexture(shader, crosshairTexture);
         }

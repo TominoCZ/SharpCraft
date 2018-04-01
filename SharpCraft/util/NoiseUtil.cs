@@ -239,10 +239,10 @@ namespace SharpCraft.util
     };
 
         [MethodImpl(FN_INLINE)]
-        private static int FastFloor(FN_DECIMAL f) { return (f >= 0 ? (int)f : (int)f - 1); }
+        private static int FastFloor(FN_DECIMAL f) { return f >= 0 ? (int)f : (int)f - 1; }
 
         [MethodImpl(FN_INLINE)]
-        private static int FastRound(FN_DECIMAL f) { return (f >= 0) ? (int)(f + (FN_DECIMAL)0.5) : (int)(f - (FN_DECIMAL)0.5); }
+        private static int FastRound(FN_DECIMAL f) { return f >= 0 ? (int)(f + (FN_DECIMAL)0.5) : (int)(f - (FN_DECIMAL)0.5); }
 
         [MethodImpl(FN_INLINE)]
         private static FN_DECIMAL Lerp(FN_DECIMAL a, FN_DECIMAL b, FN_DECIMAL t) { return a + t * (b - a); }
@@ -256,8 +256,8 @@ namespace SharpCraft.util
         [MethodImpl(FN_INLINE)]
         private static FN_DECIMAL CubicLerp(FN_DECIMAL a, FN_DECIMAL b, FN_DECIMAL c, FN_DECIMAL d, FN_DECIMAL t)
         {
-            var p = (d - c) - (a - b);
-            return t * t * t * p + t * t * ((a - b) - p) + t * (c - a) + b;
+            var p = d - c - (a - b);
+            return t * t * t * p + t * t * (a - b - p) + t * (c - a) + b;
         }
 
         private void CalculateFractalBounding()
@@ -328,7 +328,7 @@ namespace SharpCraft.util
             n ^= X_PRIME * x;
             n ^= Y_PRIME * y;
 
-            return (n * n * n * 60493) / (FN_DECIMAL)2147483648.0;
+            return n * n * n * 60493 / (FN_DECIMAL)2147483648.0;
         }
 
         [MethodImpl(FN_INLINE)]
@@ -339,7 +339,7 @@ namespace SharpCraft.util
             n ^= Y_PRIME * y;
             n ^= Z_PRIME * z;
 
-            return (n * n * n * 60493) / (FN_DECIMAL)2147483648.0;
+            return n * n * n * 60493 / (FN_DECIMAL)2147483648.0;
         }
 
         [MethodImpl(FN_INLINE)]
@@ -351,7 +351,7 @@ namespace SharpCraft.util
             n ^= Z_PRIME * z;
             n ^= W_PRIME * w;
 
-            return (n * n * n * 60493) / (FN_DECIMAL)2147483648.0;
+            return n * n * n * 60493 / (FN_DECIMAL)2147483648.0;
         }
 
         [MethodImpl(FN_INLINE)]
@@ -1509,12 +1509,12 @@ namespace SharpCraft.util
             var z0 = z - Z0;
             var w0 = w - W0;
 
-            var c = (x0 > y0) ? 32 : 0;
-            c += (x0 > z0) ? 16 : 0;
-            c += (y0 > z0) ? 8 : 0;
-            c += (x0 > w0) ? 4 : 0;
-            c += (y0 > w0) ? 2 : 0;
-            c += (z0 > w0) ? 1 : 0;
+            var c = x0 > y0 ? 32 : 0;
+            c += x0 > z0 ? 16 : 0;
+            c += y0 > z0 ? 8 : 0;
+            c += x0 > w0 ? 4 : 0;
+            c += y0 > w0 ? 2 : 0;
+            c += z0 > w0 ? 1 : 0;
             c <<= 2;
 
             var i1 = SIMPLEX_4D[c] >= 3 ? 1 : 0;
@@ -1936,7 +1936,7 @@ namespace SharpCraft.util
                                 var vecY = yi - y + vec.y * m_cellularJitter;
                                 var vecZ = zi - z + vec.z * m_cellularJitter;
 
-                                var newDistance = (Math.Abs(vecX) + Math.Abs(vecY) + Math.Abs(vecZ)) + (vecX * vecX + vecY * vecY + vecZ * vecZ);
+                                var newDistance = Math.Abs(vecX) + Math.Abs(vecY) + Math.Abs(vecZ) + (vecX * vecX + vecY * vecY + vecZ * vecZ);
 
                                 if (newDistance < distance)
                                 {
@@ -2037,7 +2037,7 @@ namespace SharpCraft.util
                                 var vecY = yi - y + vec.y * m_cellularJitter;
                                 var vecZ = zi - z + vec.z * m_cellularJitter;
 
-                                var newDistance = (Math.Abs(vecX) + Math.Abs(vecY) + Math.Abs(vecZ)) + (vecX * vecX + vecY * vecY + vecZ * vecZ);
+                                var newDistance = Math.Abs(vecX) + Math.Abs(vecY) + Math.Abs(vecZ) + (vecX * vecX + vecY * vecY + vecZ * vecZ);
 
                                 for (var i = m_cellularDistanceIndex1; i > 0; i--)
                                     distance[i] = Math.Max(Math.Min(distance[i], newDistance), distance[i - 1]);
@@ -2133,7 +2133,7 @@ namespace SharpCraft.util
                             var vecX = xi - x + vec.x * m_cellularJitter;
                             var vecY = yi - y + vec.y * m_cellularJitter;
 
-                            var newDistance = (Math.Abs(vecX) + Math.Abs(vecY));
+                            var newDistance = Math.Abs(vecX) + Math.Abs(vecY);
 
                             if (newDistance < distance)
                             {
@@ -2155,7 +2155,7 @@ namespace SharpCraft.util
                             var vecX = xi - x + vec.x * m_cellularJitter;
                             var vecY = yi - y + vec.y * m_cellularJitter;
 
-                            var newDistance = (Math.Abs(vecX) + Math.Abs(vecY)) + (vecX * vecX + vecY * vecY);
+                            var newDistance = Math.Abs(vecX) + Math.Abs(vecY) + (vecX * vecX + vecY * vecY);
 
                             if (newDistance < distance)
                             {
@@ -2243,7 +2243,7 @@ namespace SharpCraft.util
                             var vecX = xi - x + vec.x * m_cellularJitter;
                             var vecY = yi - y + vec.y * m_cellularJitter;
 
-                            var newDistance = (Math.Abs(vecX) + Math.Abs(vecY)) + (vecX * vecX + vecY * vecY);
+                            var newDistance = Math.Abs(vecX) + Math.Abs(vecY) + (vecX * vecX + vecY * vecY);
 
                             for (var i = m_cellularDistanceIndex1; i > 0; i--)
                                 distance[i] = Math.Max(Math.Min(distance[i], newDistance), distance[i - 1]);

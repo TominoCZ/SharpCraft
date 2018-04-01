@@ -16,4 +16,7 @@
     <PackageReference Include="OpenTK.NETCore" Version="1.1.2749.6433" />
     <PackageReference Include="System.Drawing.Common" Version="4.5.0-preview1-26216-02" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="render\shader\uniforms" />
+  </ItemGroup>
 </Project>

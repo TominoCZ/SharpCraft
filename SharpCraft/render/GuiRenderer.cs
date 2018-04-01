@@ -2,9 +2,10 @@
 using OpenTK.Graphics.OpenGL;
 using SharpCraft.gui;
 using SharpCraft.model;
-using SharpCraft.shader;
 using SharpCraft.texture;
 using System.Collections.Generic;
+using SharpCraft.render.shader;
+using SharpCraft.render.shader.shaders;
 
 namespace SharpCraft.render
 {
@@ -12,7 +13,7 @@ namespace SharpCraft.render
     {
         public static ModelRaw GUIquad;
 
-        private ShaderGui shader;
+        private Shader<Gui> shader;
 
         private GuiCrosshair crosshairGui;
         private GuiHUD hudGui;
@@ -30,7 +31,7 @@ namespace SharpCraft.render
 
         public GuiRenderer()
         {
-            shader = new ShaderGui("gui");
+            shader = new Shader<Gui>("gui");
 
             var texture = TextureManager.loadTexture("gui/cross", true);
 
@@ -61,8 +62,8 @@ namespace SharpCraft.render
 
             var state = OpenTK.Input.Mouse.GetCursorState();
             var mouse = SharpCraft.Instance.PointToClient(new Point(state.X, state.Y));
-
-            gui.render(shader, mouse.X, mouse.Y);
+            
+            gui.Render(shader, mouse.X, mouse.Y);
 
             GL.DisableVertexAttribArray(0);
             GL.DisableVertexAttribArray(1);

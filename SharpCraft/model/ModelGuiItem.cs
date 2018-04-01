@@ -1,11 +1,11 @@
-﻿using SharpCraft.shader;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using SharpCraft.render.shader;
 
 namespace SharpCraft.model
 {
-    internal class ModelGuiItem : ModelBaked
+    internal class ModelGuiItem : ModelBaked<object>
     {
-        public ModelGuiItem(ShaderProgram shader) : base(null, shader)
+        public ModelGuiItem(Shader<object> shader) : base(null, shader)
         {
             var rawQuad = new RawQuad(new float[] {
                 -1,  1,

@@ -1,11 +1,11 @@
-﻿using SharpCraft.shader;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using SharpCraft.render.shader;
 
 namespace SharpCraft.model
 {
-    internal class ModelChunkFragment : ModelBaked
+    internal class ModelChunkFragment : ModelBaked<ModelBlock>
     {
-        public ModelChunkFragment(ShaderProgram shader, List<RawQuad> quads) : base(null, shader)
+        public ModelChunkFragment(Shader<ModelBlock> shader, List<RawQuad> quads) : base(null, shader)
         {
             rawModel = ModelManager.loadModelToVAO(quads, 3);
         }

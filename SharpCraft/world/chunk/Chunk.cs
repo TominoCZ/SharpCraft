@@ -2,17 +2,18 @@
 using SharpCraft.block;
 using SharpCraft.entity;
 using SharpCraft.model;
-using SharpCraft.shader;
 using SharpCraft.util;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
+using OpenTK.Graphics.OpenGL;
+using SharpCraft.render.shader;
 
 namespace SharpCraft.world.chunk
 {
-    internal class Chunk
+	public class Chunk
     {
         public const int ChunkSize = 16;
         public const int ChunkHeight = 256;
@@ -23,7 +24,7 @@ namespace SharpCraft.world.chunk
 
         public ChunkPos Pos { get; }
 
-        public AxisAlignedBB BoundingBox { get; }
+        public AxisAlignedBb BoundingBox { get; }
 
         public World World { get; }
         private readonly ChunkLoadManager _loadManager;
@@ -39,7 +40,7 @@ namespace SharpCraft.world.chunk
             Pos = pos;
             World = world;
             _loadManager = World.LoadManager;
-            BoundingBox = new AxisAlignedBB(Vector3.Zero, Vector3.One * ChunkSize + Vector3.UnitY * 240).offset(Pos.ToVec());
+            BoundingBox = new AxisAlignedBb(Vector3.Zero, Vector3.One * ChunkSize + Vector3.UnitY * 240).offset(Pos.ToVec());
         }
 
         public Chunk(ChunkPos pos, World world, short[,,] blockData) : this(pos, world)
@@ -147,13 +148,11 @@ namespace SharpCraft.world.chunk
                 if (chunkFragmentModel == null) continue;
 
                 chunkFragmentModel.bind();
+	            shader.UpdateGlobalUniforms();
+	            shader.UpdateModelUniforms(null);
+	            shader.UpdateInstanceUniforms(MatrixHelper.createTransformationMatrix(Pos),null);
 
-                shader.loadVec3(Vector3.One, "lightColor");
-                shader.loadViewMatrix(viewMatrix);
-
-                shader.loadTransformationMatrix(MatrixHelper.createTransformationMatrix(Pos));
-
-                chunkFragmentModel.rawModel.Render(shader.renderType);
+                chunkFragmentModel.rawModel.Render(PrimitiveType.Quads);
 
                 chunkFragmentModel.unbind();
             }
@@ -181,7 +180,7 @@ namespace SharpCraft.world.chunk
         {
             if (!ModelGenerating && _model != null) return;
 
-            var modelRaw = new Dictionary<ShaderProgram, List<RawQuad>>();
+            var modelRaw = new Dictionary<Shader<ModelBlock>, List<RawQuad>>();
 
             List<RawQuad> quads;
 
@@ -242,7 +241,7 @@ namespace SharpCraft.world.chunk
                 {
                     foreach (var oldShader in _model.fragmentPerShader.Keys)
                     {
-                        if (!modelRaw.Keys.Contains(oldShader))
+                        if (!modelRaw.Keys.Contains<object>(oldShader))
                         {
                             _model.destroyFragmentModelWithShader(oldShader);
                         }
@@ -255,7 +254,7 @@ namespace SharpCraft.world.chunk
                     var newShader = value.Key;
                     var newData = value.Value;
 
-                    if (!_model.fragmentPerShader.Keys.Contains(newShader))
+                    if (!_model.fragmentPerShader.Keys.Contains<object>(newShader))
                     {
                         var newFragment = new ModelChunkFragment(newShader, newData);
                         _model.setFragmentModelWithShader(newShader, newFragment);

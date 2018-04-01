@@ -1,21 +1,21 @@
-﻿using SharpCraft.shader;
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
+using SharpCraft.render.shader;
 
 namespace SharpCraft.model
 {
     internal class ModelChunk
     {
-        public ConcurrentDictionary<ShaderProgram, ModelChunkFragment> fragmentPerShader { get; }
+        public ConcurrentDictionary<Shader<ModelBlock>, ModelChunkFragment> fragmentPerShader { get; }
 
         public bool isGenerated => fragmentPerShader.Keys.Count > 0;
 
         public ModelChunk()
         {
-            fragmentPerShader = new ConcurrentDictionary<ShaderProgram, ModelChunkFragment>();
-            //_shaders = new List<ShaderProgram>();
+            fragmentPerShader = new ConcurrentDictionary<Shader<ModelBlock>, ModelChunkFragment>();
+            //_shaders = new List<Shader>();
         }
 
-        public void setFragmentModelWithShader(ShaderProgram shader, ModelChunkFragment model)
+        public void setFragmentModelWithShader(Shader<ModelBlock> shader, ModelChunkFragment model)
         {
             fragmentPerShader.TryRemove(shader, out var removed);
 
@@ -24,12 +24,12 @@ namespace SharpCraft.model
             fragmentPerShader.TryAdd(shader, model);
         }
 
-        public ModelChunkFragment getFragmentModelWithShader(ShaderProgram shader)
+        public ModelChunkFragment getFragmentModelWithShader(Shader<ModelBlock> shader)
         {
             return fragmentPerShader.TryGetValue(shader, out var model) ? model : null;
         }
 
-        public void destroyFragmentModelWithShader(ShaderProgram shader)
+        public void destroyFragmentModelWithShader(Shader<ModelBlock> shader)
         {
             if (fragmentPerShader.TryRemove(shader, out var removed))
             {
@@ -38,7 +38,7 @@ namespace SharpCraft.model
             }
         }
 
-        //public List<ShaderProgram> getShadersPresent()
+        //public List<Shader> getShadersPresent()
         //{
         //return _shaders;
         //}

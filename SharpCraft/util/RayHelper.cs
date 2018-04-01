@@ -6,7 +6,7 @@ namespace SharpCraft.util
 {
     internal class RayHelper
     {
-        public static bool rayIntersectsBB(Vector3 /*ray*/origin, Vector3 /*ray*/direction, AxisAlignedBB bb, out Vector3 hitPosition, out Vector3 hitNormal)
+        public static bool rayIntersectsBB(Vector3 /*ray*/origin, Vector3 /*ray*/direction, AxisAlignedBb bb, out Vector3 hitPosition, out Vector3 hitNormal)
         {
             direction = direction.Normalized();
             hitNormal = Vector3.One.Normalized();
@@ -40,7 +40,7 @@ namespace SharpCraft.util
                 tymax = (bb.min.Y - origin.Y) * invrd.Y;
             }
 
-            if ((tmin > tymax) || (tymin > tmax))
+            if (tmin > tymax || tymin > tmax)
             {
                 return false;
             }
@@ -58,7 +58,7 @@ namespace SharpCraft.util
                 tzmax = (bb.min.Z - origin.Z) * invrd.Z;
             }
 
-            if ((tmin > tzmax) || (tzmin > tmax))
+            if (tmin > tzmax || tzmin > tmax)
             {
                 return false;
             }

@@ -1,11 +1,11 @@
-﻿using SharpCraft.shader;
+﻿using SharpCraft.render.shader;
 
 namespace SharpCraft.model
 {
-    internal interface IModelBaked
+    internal interface IModelBaked<T>
     {
         IModelRaw rawModel { get; }
-        ShaderProgram shader { get; }
+	    Shader<T> shader { get; }
 
         void bind();
 

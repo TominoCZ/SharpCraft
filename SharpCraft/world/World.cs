@@ -12,7 +12,7 @@ using System.Linq;
 
 namespace SharpCraft.world
 {
-    internal class World
+	public class World
     {
         public ConcurrentDictionary<ChunkPos, Chunk> Chunks { get; }
 
@@ -71,9 +71,9 @@ namespace SharpCraft.world
             }
         }
 
-        public List<AxisAlignedBB> GetIntersectingEntitiesBBs(AxisAlignedBB with)
+        public List<AxisAlignedBb> GetIntersectingEntitiesBBs(AxisAlignedBb with)
         {
-            var bbs = new List<AxisAlignedBB>();
+            var bbs = new List<AxisAlignedBb>();
 
             for (var i = 0; i < Entities.Count; i++)
             {
@@ -84,18 +84,18 @@ namespace SharpCraft.world
 
                 var bb = entity.getEntityBoundingBox();
 
-                if (bb.intersectsWith(with))
+                if (bb.IntersectsWith(with))
                     bbs.Add(bb);
             }
 
             return bbs;
         }
 
-        public List<AxisAlignedBB> GetBlockCollisionBoxes(AxisAlignedBB box)
+        public List<AxisAlignedBb> GetBlockCollisionBoxes(AxisAlignedBb box)
         {
-            var blocks = new List<AxisAlignedBB>();
+            var blocks = new List<AxisAlignedBb>();
 
-            var bb = box.union(box);
+            var bb = box.Union(box);
 
             for (int x = (int)bb.min.X, maxX = (int)bb.max.X; x < maxX; x++)
             {

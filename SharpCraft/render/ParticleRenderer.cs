@@ -4,7 +4,8 @@ using OpenTK;
 using SharpCraft.block;
 using SharpCraft.model;
 using SharpCraft.particle;
-using SharpCraft.shader;
+using SharpCraft.render.shader;
+using SharpCraft.render.shader.shaders;
 using SharpCraft.util;
 using SharpCraft.world;
 
@@ -14,7 +15,7 @@ namespace SharpCraft.render
     {
         private List<Particle> _particles = new List<Particle>();
 
-        public static ModelBaked ParticleModel;
+        public static ModelBaked<Particle> ParticleModel;
 
         static ParticleRenderer()
         {
@@ -30,7 +31,6 @@ namespace SharpCraft.render
         public void Render(Matrix4 viewMatrix, float partialTicks)
         {
             ParticleModel.bind();
-            ParticleModel.shader.loadViewMatrix(viewMatrix);
 
             for (int i = 0; i < _particles.Count; i++)
                 _particles[i].Render(viewMatrix, partialTicks);

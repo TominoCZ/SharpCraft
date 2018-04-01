@@ -10,10 +10,10 @@ uniform vec3 lightColor;
 
 void main(void){
 	vec4 pixelColor = texture(textureSampler, pass_textureCoords);
-	
+
 	if(pixelColor.a == 0)discard;
-	
-	vec3 diffuse = brightness * lightColor;
+
+	vec3 diffuse = brightness * lightColor+1;
 	
 	out_Color = vec4(diffuse, 1.0) * pixelColor;
 }
