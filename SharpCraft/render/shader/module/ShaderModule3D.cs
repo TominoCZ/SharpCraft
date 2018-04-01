@@ -40,7 +40,7 @@ namespace SharpCraft.render.shader.module
 
 		public override void UpdateGlobalUniforms()
 		{
-			Projection?.Update(SharpCraft.Instance.CreateProjectionMatrix());
+			Projection?.Update(SharpCraft.Instance.Camera.Projection);
 			View?.Update(SharpCraft.Instance.Camera.View);
 		}
 

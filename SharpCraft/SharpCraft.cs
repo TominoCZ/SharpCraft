@@ -34,11 +34,6 @@ namespace SharpCraft
     {
         public string GameFolderDir = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\.sharpcraft";
 
-        
-        public float NearPlane = 0.1f;
-        public float FarPlane = 1000f;
-        public float Fov = 70;
-
         public WorldRenderer WorldRenderer;
         public EntityRenderer EntityRenderer;
         public ParticleRenderer ParticleRenderer;
@@ -57,26 +52,7 @@ namespace SharpCraft
 
         public static SharpCraft Instance { get; private set; }
 
-        public Camera Camera = new Camera();
-
-        public Matrix4 CreateProjectionMatrix()
-        {
-            var matrix = Matrix4.Identity;
-
-            var aspectRatio = (float)Width / Height;
-            var yScale = (float)(1f / Math.Tan(MathHelper.DegreesToRadians(Fov / 2f)));
-            var xScale = yScale / aspectRatio;
-            var frustumLength = FarPlane - NearPlane;
-
-            matrix.M11 = xScale;
-            matrix.M22 = yScale;
-            matrix.M33 = -((FarPlane + NearPlane) / frustumLength);
-            matrix.M34 = -1;
-            matrix.M43 = -(2 * NearPlane * FarPlane / frustumLength);
-            matrix.M44 = 0;
-
-            return matrix;
-        }
+        public Camera Camera;
 
         public GuiScreen GuiScreen { get; private set; }
 
@@ -102,6 +78,7 @@ namespace SharpCraft
             GraphicsContextFlags.ForwardCompatible)
         {
             Instance = this;
+            Camera = new Camera();
             _renderThread = Thread.CurrentThread;
 
             VSync = VSyncMode.Off;
@@ -526,6 +503,8 @@ namespace SharpCraft
                 _timer.Restart();
             }
 
+            Camera.UpdateViewMatrix();
+
             RenderScreen(GetRenderPartialTicks());
 
             _fpsCounter++;
@@ -661,13 +640,12 @@ namespace SharpCraft
             if (ClientSize.Height < 480)
                 ClientSize = new Size(ClientSize.Width, 480);
 
-            base.OnResize(e);
-
             GL.Viewport(ClientRectangle);
             GL.MatrixMode(MatrixMode.Projection);
             GL.LoadIdentity();
-            GL.Ortho(0, ClientRectangle.Width, ClientRectangle.Height, 0, NearPlane, FarPlane);
+            GL.Ortho(0, ClientRectangle.Width, ClientRectangle.Height, 0, Camera.NearPlane, Camera.FarPlane);
 
+            Camera.UpdateProjectionMatrix();
         }
 
         protected override void OnClosing(CancelEventArgs e)
