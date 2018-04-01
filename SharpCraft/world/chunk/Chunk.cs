@@ -236,44 +236,38 @@ namespace SharpCraft.world.chunk
             sw.Stop();
             Console.WriteLine($"DEBUG: built chunk model [{sw.Elapsed.TotalMilliseconds:F}ms]");
 
-            //Game.Instance.RunGlContext(() =>
-            //{
-            if (_model != null)
+            SharpCraft.Instance.RunGlContext(() =>
             {
-                foreach (var oldShader in _model.fragmentPerShader.Keys)
+                if (_model != null)
                 {
-                    if (!modelRaw.Keys.Contains(oldShader))
+                    foreach (var oldShader in _model.fragmentPerShader.Keys)
                     {
-                        SharpCraft.Instance.RunGlContext(() => _model.destroyFragmentModelWithShader(oldShader));
+                        if (!modelRaw.Keys.Contains(oldShader))
+                        {
+                            _model.destroyFragmentModelWithShader(oldShader);
+                        }
                     }
                 }
-            }
-            else _model = new ModelChunk();
+                else _model = new ModelChunk();
 
-            foreach (var value in modelRaw)
-            {
-                var newShader = value.Key;
-                var newData = value.Value;
-
-                if (!_model.fragmentPerShader.Keys.Contains(newShader))
+                foreach (var value in modelRaw)
                 {
-                    SharpCraft.Instance.RunGlContext(() =>
+                    var newShader = value.Key;
+                    var newData = value.Value;
+
+                    if (!_model.fragmentPerShader.Keys.Contains(newShader))
                     {
                         var newFragment = new ModelChunkFragment(newShader, newData);
                         _model.setFragmentModelWithShader(newShader, newFragment);
-                    });
-                }
-                else
-                {
-                    SharpCraft.Instance.RunGlContext(() =>
+                    }
+                    else
                     {
                         _model.getFragmentModelWithShader(newShader)?.overrideData(newData);
-                    });
+                    }
                 }
-            }
 
-            ModelGenerating = false;
-            // });
+                ModelGenerating = false;
+            });
         }
 
         public void MarkDirty()

@@ -520,9 +520,11 @@ namespace SharpCraft
         protected override void OnRenderFrame(FrameEventArgs e)
         {
             RunGlTasks();
+
             if (_timer.Elapsed.TotalMilliseconds > 50 - e.Time * 1000)
             {
                 GameLoop();
+
                 _timer.Restart();
             }
 

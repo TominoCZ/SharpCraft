@@ -5,9 +5,7 @@ in vec2 textureCoords;
 in vec3 normal;
 
 out vec2 pass_textureCoords;
-out vec3 unitNormal;
-out vec3 light1;
-out vec3 light2;
+out float brightness;
 
 uniform mat4 transformationMatrix;
 uniform mat4 projectionMatrix;
@@ -19,12 +17,16 @@ void main(void) {
 
 	pass_textureCoords = textureCoords;
 	
-	vec3 vector1 = vec3(300, 650, 375);
+	vec3 vector = vec3(300, 650, 375);
 	
 	vec4 pos_view = viewMatrix * vec4(position, 1.0);
 	
-	light1 = normalize(vector1 - pos_view.xyz);
-	light2 = -light1;
+	vec3 light = normalize(vector - pos_view.xyz);
 	
-	unitNormal = normalize((transformationMatrix * vec4(normal, 0.0)).xyz);
+	vec3 unitNormal = normalize((transformationMatrix * vec4(normal, 0.0)).xyz);
+	
+	float diffuse_value1 = max(dot(unitNormal, light), 0.35);
+	float diffuse_value2 = max(dot(unitNormal, -light), 0.45);
+
+	brightness = diffuse_value1 * 0.65 + diffuse_value2 * 0.35;
 }

@@ -5,7 +5,7 @@ in vec2 textureCoords;
 in vec3 normal;
 
 out vec2 pass_textureCoords;
-out vec3 surfaceNormal;
+out float brightness;
 
 uniform mat4 transformationMatrix;
 uniform mat4 projectionMatrix;
@@ -16,5 +16,17 @@ void main(void) {
 	gl_Position = projectionMatrix * viewMatrix * worldPos;
 
 	pass_textureCoords = textureCoords;
-	surfaceNormal = (transformationMatrix * vec4(normal, 0.0)).xyz;
+	
+	vec3 vector1 = vec3(1, 1.5, 1.2);
+	vec3 vector2 = vec3(-vector1.x - 0.5, -0.85, -vector1.z);
+	
+	vec3 light1 = normalize(vector1) * 1.5;
+	vec3 light2 = normalize(vector2) * 1.2;
+	
+	vec3 unitNormal = normalize((transformationMatrix * vec4(normal, 0.0)).xyz);
+	
+	float diffuse_value1 = max(dot(unitNormal, light1), 0.55);
+	float diffuse_value2 = max(dot(unitNormal, light2), 0.45);
+
+	brightness = (diffuse_value1 + diffuse_value2) / 1.2;
 }

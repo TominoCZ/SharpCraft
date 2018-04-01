@@ -152,8 +152,8 @@ namespace SharpCraft.render
                     model.shader.loadViewMatrix(Matrix4.Identity);
 
                     model.shader.loadTransformationMatrix(MatrixHelper.createTransformationMatrix(
-                        new Vector3(0.04125f, -0.065f, -0.1f) + SharpCraft.Instance.Camera.getLookVec() / 200,
-                        new Vector3(-2, -11, 0) + SharpCraft.Instance.Camera.getLookVec(),
+                        new Vector3(0.04125f, -0.08f, -0.1f) + SharpCraft.Instance.Camera.getLookVec() / 250,
+                        new Vector3(0, 45, 0),
                         0.045f));
 
                     model.rawModel.Render(model.shader.renderType);
