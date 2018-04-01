@@ -41,7 +41,7 @@ namespace SharpCraft.world
 
             Seed = seed;
             LevelName = levelName;
-            SaveRoot = $"{Game.Instance.GameFolderDir}/saves/{saveName}/";
+            SaveRoot = $"{SharpCraft.Instance.GameFolderDir}/saves/{saveName}/";
             ChunkData = new ChunkDataManager<RegionStaticImpl<ChunkPos>, ChunkPos>(
                 $"{SaveRoot}{_dimension}/region",
                 new RegionInfo<ChunkPos>(new[] { 12, 12 }, 2 * Chunk.ChunkSize * Chunk.ChunkHeight * Chunk.ChunkSize),
@@ -104,7 +104,7 @@ namespace SharpCraft.world
                     for (int z = (int)bb.min.Z, maxZ = (int)bb.max.Z; z < maxZ; z++)
                     {
                         var pos = new BlockPos(x, y, z);
-                        var block = Game.Instance.World.GetBlock(pos);
+                        var block = SharpCraft.Instance.World.GetBlock(pos);
                         if (block == EnumBlock.AIR)
                             continue;
 

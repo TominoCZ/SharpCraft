@@ -30,26 +30,32 @@ using Size = OpenTK.Size;
 
 namespace SharpCraft
 {
-    internal class Game : GameWindow
+    internal class SharpCraft : GameWindow
     {
         public string GameFolderDir = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\.sharpcraft";
 
-        public EntityRenderer EntityRenderer;
+        
         public float NearPlane = 0.1f;
         public float FarPlane = 1000f;
         public float Fov = 70;
+
+        public WorldRenderer WorldRenderer;
+        public EntityRenderer EntityRenderer;
+        public ParticleRenderer ParticleRenderer;
+        public SkyboxRenderer SkyboxRenderer;
         public GuiRenderer GuiRenderer;
+
         public HashSet<Key> KeysDown = new HashSet<Key>();
         public MouseOverObject MouseOverObject = new MouseOverObject();
         public EntityPlayerSP Player;
-        public SkyboxRenderer SkyboxRenderer;
+        
         public World World;
-        public WorldRenderer WorldRenderer;
+        
         private ConcurrentQueue<Method> _glContextQueue = new ConcurrentQueue<Method>();
         private Stopwatch _frameTimer = Stopwatch.StartNew();
         private WindowState _lastWindowState;
 
-        public static Game Instance { get; private set; }
+        public static SharpCraft Instance { get; private set; }
 
         public Camera Camera = new Camera();
 
@@ -92,7 +98,7 @@ namespace SharpCraft
 
         public delegate void Method();
 
-        public Game() : base(640, 480, GraphicsMode.Default, _title, GameWindowFlags.Default, DisplayDevice.Default, 3, 3,
+        public SharpCraft() : base(640, 480, GraphicsMode.Default, _title, GameWindowFlags.Default, DisplayDevice.Default, 3, 3,
             GraphicsContextFlags.ForwardCompatible)
         {
             Instance = this;
@@ -105,11 +111,6 @@ namespace SharpCraft
             Title = _title = $"SharpCraft Alpha 0.0.3 [GLSL {_glVersion}]";
 
             //TargetRenderFrequency = 60;
-
-            WorldRenderer = new WorldRenderer();
-            EntityRenderer = new EntityRenderer();
-            GuiRenderer = new GuiRenderer();
-            SkyboxRenderer = new SkyboxRenderer();
 
             Console.WriteLine("DEBUG: stitching textures");
             TextureManager.stitchTextures();
@@ -160,6 +161,12 @@ namespace SharpCraft
             ModelRegistry.registerBlockModel(xrayModel, 0);
 
             SettingsManager.Load();
+
+            WorldRenderer = new WorldRenderer();
+            EntityRenderer = new EntityRenderer();
+            ParticleRenderer = new ParticleRenderer();
+            SkyboxRenderer = new SkyboxRenderer();
+            GuiRenderer = new GuiRenderer();
 
             _sensitivity = SettingsManager.GetFloat("sensitivity");
             WorldRenderer.RenderDistance = SettingsManager.GetInt("renderdistance");
@@ -233,6 +240,7 @@ namespace SharpCraft
             _mouseWheelLast = wheelValue;
 
             World?.UpdateEntities();
+            ParticleRenderer?.TickParticles();
         }
 
         private void RenderScreen(float partialTicks)
@@ -251,6 +259,7 @@ namespace SharpCraft
 
                 WorldRenderer.Render(World, viewMatrix, partialTick);
                 EntityRenderer.render(viewMatrix, partialTick);
+                ParticleRenderer.Render(viewMatrix, partialTick);
                 SkyboxRenderer.render(viewMatrix);
             }
 
@@ -488,6 +497,7 @@ namespace SharpCraft
                 BitmapData bData = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height),
                     ImageLockMode.ReadWrite, bmp.PixelFormat);
 
+                GL.ReadBuffer(ReadBufferMode.Back);
                 // read the data directly into the bitmap's buffer (bitmap is stored in BGRA)
                 GL.ReadPixels(0, 0, ClientSize.Width, ClientSize.Height, OpenTK.Graphics.OpenGL.PixelFormat.Bgra,
                     PixelType.UnsignedByte, bData.Scan0);
@@ -689,7 +699,7 @@ namespace SharpCraft
 
         public static void Load()
         {
-            var file = Game.Instance.GameFolderDir + "/settings.txt";
+            var file = SharpCraft.Instance.GameFolderDir + "/settings.txt";
 
             if (File.Exists(file))
             {
@@ -719,7 +729,7 @@ namespace SharpCraft
 
         public static void Save()
         {
-            var file = Game.Instance.GameFolderDir + "/settings.txt";
+            var file = SharpCraft.Instance.GameFolderDir + "/settings.txt";
 
             var sb = new StringBuilder();
 
@@ -768,7 +778,7 @@ namespace SharpCraft
             ThreadPool.SetMinThreads(0, 0);
             ThreadPool.SetMinThreads(Environment.ProcessorCount, 0);
 
-            using (var game = new Game())
+            using (var game = new SharpCraft())
             {
                 game.Run(30.0);
             }

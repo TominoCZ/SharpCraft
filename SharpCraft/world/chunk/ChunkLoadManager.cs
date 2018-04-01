@@ -17,12 +17,12 @@ namespace SharpCraft.world.chunk
 
         private SwapList<Chunk> _chunkBuilds = new SwapList<Chunk>(
             c => c.BuildChunkModelDo(),
-            (l, r) => l.Pos.DistanceTo(Game.Instance.Player.pos).CompareTo(l.Pos.DistanceTo(Game.Instance.Player.pos)));
+            (l, r) => l.Pos.DistanceTo(SharpCraft.Instance.Player.pos).CompareTo(l.Pos.DistanceTo(SharpCraft.Instance.Player.pos)));
 
         private SwapList<ChunkPos> _chunkLoads = new SwapList<ChunkPos>(
             c =>
             {
-                var w = Game.Instance.World;
+                var w = SharpCraft.Instance.World;
                 if (w.GetChunk(c) != null) return;
 
                 if (w.LoadChunk(c)) ;//Console.WriteLine($"chunk loaded    @ {c.x} x {c.z}");
@@ -32,7 +32,7 @@ namespace SharpCraft.world.chunk
                     //Console.WriteLine($"chunk generated @ {c.x} x {c.z}");
                 }
             },
-            (l, r) => l.DistanceTo(Game.Instance.Player.pos).CompareTo(l.DistanceTo(Game.Instance.Player.pos)));
+            (l, r) => l.DistanceTo(SharpCraft.Instance.Player.pos).CompareTo(l.DistanceTo(SharpCraft.Instance.Player.pos)));
 
         public void BuildChunks()
         {
@@ -57,7 +57,7 @@ namespace SharpCraft.world.chunk
             {
                 if (_importantChunkBuilds.TryDequeue(out var chunk)) chunk.BuildChunkModelDo();
             }
-            Game.Instance.RunGlTasks();
+            SharpCraft.Instance.RunGlTasks();
         }
 
         public void NotifyImportantBuild(Chunk chunk)
@@ -94,13 +94,13 @@ namespace SharpCraft.world.chunk
         {
             while (!_importantChunkLoads.IsEmpty)
             {
-                if (_importantChunkLoads.TryDequeue(out var pos) && Game.Instance.World.GetChunk(pos) == null)
+                if (_importantChunkLoads.TryDequeue(out var pos) && SharpCraft.Instance.World.GetChunk(pos) == null)
                 {
                     lock (_chunkLoads)
                     {
                         _chunkLoads.remove(pos);
                     }
-                    Game.Instance.World.LoadChunk(pos);
+                    SharpCraft.Instance.World.LoadChunk(pos);
                 }
             }
         }
@@ -120,9 +120,9 @@ namespace SharpCraft.world.chunk
 
         public void UpdateLoad(EntityPlayerSP player, int renderDistance, bool important)
         {
-            var world = Game.Instance.World;
+            var world = SharpCraft.Instance.World;
 
-            var playerChunkPos = ChunkPos.FromWorldSpace(Game.Instance.Player.pos);
+            var playerChunkPos = ChunkPos.FromWorldSpace(SharpCraft.Instance.Player.pos);
 
             for (var z = -renderDistance; z <= renderDistance; z++)
             {

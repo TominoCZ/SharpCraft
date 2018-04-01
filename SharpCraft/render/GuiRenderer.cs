@@ -60,7 +60,7 @@ namespace SharpCraft.render
             GL.EnableVertexAttribArray(2);
 
             var state = OpenTK.Input.Mouse.GetCursorState();
-            var mouse = Game.Instance.PointToClient(new Point(state.X, state.Y));
+            var mouse = SharpCraft.Instance.PointToClient(new Point(state.X, state.Y));
 
             gui.render(shader, mouse.X, mouse.Y);
 

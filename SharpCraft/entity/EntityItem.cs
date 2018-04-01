@@ -30,7 +30,7 @@ namespace SharpCraft.entity
         {
             this.stack = stack;
 
-            collisionBoundingBox = AxisAlignedBB.BLOCK_FULL.offset(Vector3.One * -0.5f).shrink(Vector3.One * 0.6f);
+            collisionBoundingBox = AxisAlignedBB.BLOCK_FULL.offset(Vector3.One * -0.5f).grow(Vector3.One * -0.6f);
             boundingBox = collisionBoundingBox.offset(pos + Vector3.UnitY * collisionBoundingBox.size.Y / 2);
 
             gravity = 1.45f;

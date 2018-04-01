@@ -1,5 +1,6 @@
 ﻿using OpenTK.Graphics.OpenGL;
 using System.Collections.Generic;
+using SharpCraft.block;
 
 namespace SharpCraft.model
 {

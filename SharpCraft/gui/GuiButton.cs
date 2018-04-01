@@ -46,7 +46,7 @@ namespace SharpCraft.gui
 
             if (centered)
             {
-                posX = (int)(Game.Instance.ClientSize.Width / 2f - tex.textureSize.Width * scale.X / 2f);
+                posX = (int)(SharpCraft.Instance.ClientSize.Width / 2f - tex.textureSize.Width * scale.X / 2f);
                 renderTexture(shader, tex, scale, posX, posY);
             }
             else

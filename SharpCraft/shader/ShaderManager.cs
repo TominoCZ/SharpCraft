@@ -23,7 +23,7 @@ namespace SharpCraft.shader
 
         public static void updateProjectionMatrix()
         {
-            projectionMatrix = Game.Instance.CreateProjectionMatrix();
+            projectionMatrix = SharpCraft.Instance.CreateProjectionMatrix();
 
             for (int i = 0; i < shaders.Count; i++)
             {

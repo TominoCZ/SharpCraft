@@ -244,7 +244,7 @@ namespace SharpCraft.world.chunk
                 {
                     if (!modelRaw.Keys.Contains(oldShader))
                     {
-                        Game.Instance.RunGlContext(() => _model.destroyFragmentModelWithShader(oldShader));
+                        SharpCraft.Instance.RunGlContext(() => _model.destroyFragmentModelWithShader(oldShader));
                     }
                 }
             }
@@ -257,7 +257,7 @@ namespace SharpCraft.world.chunk
 
                 if (!_model.fragmentPerShader.Keys.Contains(newShader))
                 {
-                    Game.Instance.RunGlContext(() =>
+                    SharpCraft.Instance.RunGlContext(() =>
                     {
                         var newFragment = new ModelChunkFragment(newShader, newData);
                         _model.setFragmentModelWithShader(newShader, newFragment);
@@ -265,7 +265,7 @@ namespace SharpCraft.world.chunk
                 }
                 else
                 {
-                    Game.Instance.RunGlContext(() =>
+                    SharpCraft.Instance.RunGlContext(() =>
                     {
                         _model.getFragmentModelWithShader(newShader)?.overrideData(newData);
                     });
@@ -286,13 +286,13 @@ namespace SharpCraft.world.chunk
         {
             while (ModelGenerating) Thread.Sleep(2);
             if (_model == null) return;
-            Game.Instance.RunGlContext(_model.destroy);
+            SharpCraft.Instance.RunGlContext(_model.destroy);
             _model = null;
         }
 
         public bool ShouldRender(int renderDistance)
         {
-            return Pos.DistanceTo(Game.Instance.Camera.pos.Xz) < renderDistance * ChunkSize;
+            return Pos.DistanceTo(SharpCraft.Instance.Camera.pos.Xz) < renderDistance * ChunkSize;
         }
 
         public void Save()

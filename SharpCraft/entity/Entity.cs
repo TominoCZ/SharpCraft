@@ -54,7 +54,7 @@ namespace SharpCraft.entity
         {
             var bb_o = boundingBox.union(boundingBox.offset(motion));
 
-            List<AxisAlignedBB> list = Game.Instance.World.GetBlockCollisionBoxes(bb_o);
+            List<AxisAlignedBB> list = SharpCraft.Instance.World.GetBlockCollisionBoxes(bb_o);
 
             var m_orig = motion;
 

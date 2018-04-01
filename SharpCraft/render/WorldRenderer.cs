@@ -53,14 +53,14 @@ namespace SharpCraft.render
             GL.ActiveTexture(TextureUnit.Texture0);
             GL.BindTexture(TextureTarget.Texture2D, TextureManager.blockTextureAtlasID);
 
-            var hit = Game.Instance.MouseOverObject;
+            var hit = SharpCraft.Instance.MouseOverObject;
 
             if (hit.hit != null && hit.hit is EnumBlock block && block != EnumBlock.AIR)
                 RenderBlockSelectionOutline(world, viewMatrix, block, hit.blockPos);
 
             RenderChunks(world, viewMatrix);
 
-            if (Game.Instance.Player != null)
+            if (SharpCraft.Instance.Player != null)
             {
                 RenderSelectedItemBlock();
             }
@@ -139,7 +139,7 @@ namespace SharpCraft.render
 
         private void RenderSelectedItemBlock()
         {
-            var stack = Game.Instance.Player.getEquippedItemStack();
+            var stack = SharpCraft.Instance.Player.getEquippedItemStack();
 
             if (!stack?.IsEmpty == true)
             {
@@ -152,8 +152,8 @@ namespace SharpCraft.render
                     model.shader.loadViewMatrix(Matrix4.Identity);
 
                     model.shader.loadTransformationMatrix(MatrixHelper.createTransformationMatrix(
-                        new Vector3(0.04125f, -0.065f, -0.1f) + Game.Instance.Camera.getLookVec() / 200,
-                        new Vector3(-2, -11, 0) + Game.Instance.Camera.getLookVec(),
+                        new Vector3(0.04125f, -0.065f, -0.1f) + SharpCraft.Instance.Camera.getLookVec() / 200,
+                        new Vector3(-2, -11, 0) + SharpCraft.Instance.Camera.getLookVec(),
                         0.045f));
 
                     model.rawModel.Render(model.shader.renderType);

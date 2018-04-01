@@ -79,6 +79,12 @@ namespace SharpCraft.shader
                 GL.Uniform1(pos, f);
         }
 
+        public void loadVec2(Vector2 vec, string variable)
+        {
+            if (uniforms.TryGetValue(variable, out var pos))
+                GL.Uniform2(pos, vec);
+        }
+
         public void loadVec3(Vector3 vec, string variable)
         {
             if (uniforms.TryGetValue(variable, out var pos))

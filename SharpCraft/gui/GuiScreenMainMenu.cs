@@ -26,8 +26,8 @@ namespace SharpCraft.gui
             switch (btn.ID)
             {
                 case 0:
-                    Game.Instance.CloseGuiScreen();
-                    Game.Instance.StartGame();
+                    SharpCraft.Instance.CloseGuiScreen();
+                    SharpCraft.Instance.StartGame();
                     break;
             }
         }

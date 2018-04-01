@@ -25,7 +25,7 @@ namespace SharpCraft.entity
 
         public EntityPlayerSP(World world, Vector3 pos = new Vector3()) : base(world, pos)
         {
-            Game.Instance.Camera.pos = pos + Vector3.UnitY * 1.625f;
+            SharpCraft.Instance.Camera.pos = pos + Vector3.UnitY * 1.625f;
 
             collisionBoundingBox = new AxisAlignedBB(new Vector3(-0.3f, 0, -0.3f), new Vector3(0.3f, 1.65f, 0.3f));
             boundingBox = collisionBoundingBox.offset(pos + Vector3.UnitY * collisionBoundingBox.size.Y / 2);
@@ -35,7 +35,7 @@ namespace SharpCraft.entity
 
         public override void Update()
         {
-            if (Game.Instance.Focused)
+            if (SharpCraft.Instance.Focused)
                 UpdateCameraMovement();
 
             base.Update();
@@ -45,15 +45,15 @@ namespace SharpCraft.entity
         {
             var interpolatedPos = lastPos + (pos - lastPos) * particalTicks;
 
-            Game.Instance.Camera.pos = interpolatedPos + Vector3.UnitY * 1.625f;
+            SharpCraft.Instance.Camera.pos = interpolatedPos + Vector3.UnitY * 1.625f;
         }
 
         private void UpdateCameraMovement()
         {
-            if (Game.Instance.GuiScreen != null)
+            if (SharpCraft.Instance.GuiScreen != null)
                 return;
 
-            var state = Game.Instance.KeysDown;
+            var state = SharpCraft.Instance.KeysDown;
 
             Vector2 dirVec = Vector2.Zero;
 
@@ -62,10 +62,10 @@ namespace SharpCraft.entity
             var a = state.Contains(Key.A);
             var d = state.Contains(Key.D);
 
-            if (w) dirVec += Game.Instance.Camera.forward;
-            if (s) dirVec += -Game.Instance.Camera.forward;
-            if (a) dirVec += Game.Instance.Camera.left;
-            if (d) dirVec += -Game.Instance.Camera.left;
+            if (w) dirVec += SharpCraft.Instance.Camera.forward;
+            if (s) dirVec += -SharpCraft.Instance.Camera.forward;
+            if (a) dirVec += SharpCraft.Instance.Camera.left;
+            if (d) dirVec += -SharpCraft.Instance.Camera.left;
 
             float mult = 1;
 
@@ -121,7 +121,7 @@ namespace SharpCraft.entity
 
         public void OnClick(MouseButton btn)
         {
-            var moo = Game.Instance.MouseOverObject;
+            var moo = SharpCraft.Instance.MouseOverObject;
 
             if (moo.hit is EnumBlock)
             {
@@ -136,7 +136,7 @@ namespace SharpCraft.entity
                         {
                             case EnumBlock.FURNACE:
                             case EnumBlock.CRAFTING_TABLE:
-                                Game.Instance.OpenGuiScreen(new GuiScreenCrafting());
+                                SharpCraft.Instance.OpenGuiScreen(new GuiScreenCrafting());
                                 break;
                         }
                     }
@@ -150,7 +150,7 @@ namespace SharpCraft.entity
 
         public void BreakBlock()
         {
-            var moo = Game.Instance.MouseOverObject;
+            var moo = SharpCraft.Instance.MouseOverObject;
             if (!(moo.hit is EnumBlock))
                 return;
 
@@ -163,12 +163,14 @@ namespace SharpCraft.entity
 
             var entityDrop = new EntityItem(world, moo.blockPos.ToVec() + Vector3.One * 0.5f, motion, new ItemStack(new ItemBlock(block), 1, meta));
 
+            SharpCraft.Instance.ParticleRenderer.SpawnDestroyParticles(moo.blockPos, block, meta);
+
             world.AddEntity(entityDrop);
         }
 
         public void PlaceBlock()
         {
-            var moo = Game.Instance.MouseOverObject;
+            var moo = SharpCraft.Instance.MouseOverObject;
             if (!(moo.hit is EnumBlock))
                 return;
 
@@ -205,7 +207,7 @@ namespace SharpCraft.entity
 
         public void PickBlock()
         {
-            var moo = Game.Instance.MouseOverObject;
+            var moo = SharpCraft.Instance.MouseOverObject;
 
             var clickedBlock = world.GetBlock(moo.blockPos);
             var clickedMeta = world.GetMetadata(moo.blockPos);
@@ -235,7 +237,7 @@ namespace SharpCraft.entity
         {
             var stack = hotbar[HotbarIndex];
 
-            world?.AddEntity(new EntityItem(world, Game.Instance.Camera.pos - Vector3.UnitY * 0.35f, Game.Instance.Camera.getLookVec() * 0.75f + Vector3.UnitY * 0.2f, stack));
+            world?.AddEntity(new EntityItem(world, SharpCraft.Instance.Camera.pos - Vector3.UnitY * 0.35f, SharpCraft.Instance.Camera.getLookVec() * 0.75f + Vector3.UnitY * 0.2f, stack));
 
             hotbar[HotbarIndex] = null;
         }

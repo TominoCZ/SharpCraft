@@ -19,7 +19,7 @@ namespace SharpCraft.world
 
             try
             {
-                var wpn = new WorldPlayerNode(Game.Instance.Player);
+                var wpn = new WorldPlayerNode(SharpCraft.Instance.Player);
                 var wdn = new WorldDataNode(w);
 
                 using (var fs = File.OpenWrite(w.SaveRoot + "/player.dat"))
@@ -42,7 +42,7 @@ namespace SharpCraft.world
         {
             var bf = new BinaryFormatter();
 
-            var dir = $"{Game.Instance.GameFolderDir}/saves/{saveName}";
+            var dir = $"{SharpCraft.Instance.GameFolderDir}/saves/{saveName}";
 
             if (!Directory.Exists(dir))
                 return null;
@@ -67,8 +67,8 @@ namespace SharpCraft.world
                 world = new World(saveName, wdn.levelName, wdn.seed);
 
                 var player = new EntityPlayerSP(world, wpn.pos);
-                Game.Instance.Camera.pitch = wpn.pitch;
-                Game.Instance.Camera.yaw = wpn.yaw;
+                SharpCraft.Instance.Camera.pitch = wpn.pitch;
+                SharpCraft.Instance.Camera.yaw = wpn.yaw;
 
                 for (int i = 0; i < wpn.hotbar.Length; i++)
                 {
@@ -77,7 +77,7 @@ namespace SharpCraft.world
 
                 world.AddEntity(player);
                 world.LoadChunk(new BlockPos(player.pos).ChunkPos());
-                Game.Instance.Player = player;
+                SharpCraft.Instance.Player = player;
             }
             catch (Exception e)
             {

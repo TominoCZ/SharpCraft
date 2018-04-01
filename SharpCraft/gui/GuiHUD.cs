@@ -24,7 +24,7 @@ namespace SharpCraft.gui
 
         public override void render(ShaderGui shader, int mouseX, int mouseY)
         {
-            var size = Game.Instance.ClientSize;
+            var size = SharpCraft.Instance.ClientSize;
 
             int space = 5;
 
@@ -37,14 +37,14 @@ namespace SharpCraft.gui
 
             for (int i = 0; i < 9; i++)
             {
-                var b = i == Game.Instance.Player.HotbarIndex;
+                var b = i == SharpCraft.Instance.Player.HotbarIndex;
 
                 var x = startPos + i * (scaledWidth + space);
                 var y = size.Height - 20 - scaledHeight;
 
                 renderTexture(shader, b ? slot_selected : slot, x, y);
 
-                var stack = Game.Instance.Player.hotbar[i];
+                var stack = SharpCraft.Instance.Player.hotbar[i];
 
                 if (!stack?.IsEmpty == true)
                 {
