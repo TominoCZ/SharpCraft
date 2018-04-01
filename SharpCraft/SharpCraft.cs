@@ -7,7 +7,6 @@ using SharpCraft.entity;
 using SharpCraft.gui;
 using SharpCraft.model;
 using SharpCraft.render;
-using SharpCraft.shader;
 using SharpCraft.texture;
 using SharpCraft.util;
 using SharpCraft.world;
@@ -23,6 +22,8 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using SharpCraft.item;
+using SharpCraft.render.shader;
+using SharpCraft.render.shader.shaders;
 using Bitmap = System.Drawing.Bitmap;
 using Point = OpenTK.Point;
 using Rectangle = System.Drawing.Rectangle;
@@ -72,7 +73,7 @@ namespace SharpCraft
             matrix.M22 = yScale;
             matrix.M33 = -((FarPlane + NearPlane) / frustumLength);
             matrix.M34 = -1;
-            matrix.M43 = -((2 * NearPlane * FarPlane) / frustumLength);
+            matrix.M43 = -(2 * NearPlane * FarPlane / frustumLength);
             matrix.M44 = 0;
 
             return matrix;
@@ -123,8 +124,8 @@ namespace SharpCraft
             Console.WriteLine("DEBUG: loading models");
 
             //TODO - merge shaders and use strings as block IDs like sharpcraft:dirt
-            var shader = new ShaderBlock("block", PrimitiveType.Quads);
-            var shaderUnlit = new ShaderBlockUnlit("block_unlit", PrimitiveType.Quads);
+            var shader = new Shader<ModelBlock>("block");
+            var shaderUnlit = new Shader<ModelBlock>("block_unlit");
 
             var missingModel = new ModelBlock(EnumBlock.MISSING, shader);
             var stoneModel = new ModelBlock(EnumBlock.STONE, shader);
@@ -211,8 +212,6 @@ namespace SharpCraft
 
             RunUpdateThreads();
 
-            ShaderManager.updateProjectionMatrix();
-
             //world.setBlock(new BlockPos(player.pos), EnumBlock.RARE, 1, true); //test of block metadata, works perfectly
         }
 
@@ -260,7 +259,7 @@ namespace SharpCraft
                 WorldRenderer.Render(World, viewMatrix, partialTick);
                 EntityRenderer.render(viewMatrix, partialTick);
                 ParticleRenderer.Render(viewMatrix, partialTick);
-                SkyboxRenderer.render(viewMatrix);
+                //SkyboxRenderer.render(viewMatrix);
             }
 
             //render other gui
@@ -613,7 +612,7 @@ namespace SharpCraft
                     case Key.R:
                         if (e.Control)
                         {
-                            ShaderManager.reload();
+                            //ShaderManager.reload();
                             SettingsManager.Load();
 
                             WorldRenderer.RenderDistance = SettingsManager.GetInt("renderdistance");
@@ -670,12 +669,10 @@ namespace SharpCraft
             GL.LoadIdentity();
             GL.Ortho(0, ClientRectangle.Width, ClientRectangle.Height, 0, NearPlane, FarPlane);
 
-            ShaderManager.updateProjectionMatrix();
         }
 
         protected override void OnClosing(CancelEventArgs e)
         {
-            ShaderManager.cleanup();
 
             ModelManager.cleanup();
             TextureManager.cleanUp();

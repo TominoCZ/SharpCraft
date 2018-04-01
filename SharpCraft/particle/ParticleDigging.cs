@@ -92,16 +92,13 @@ namespace SharpCraft.particle
             var partialAlpha = lastParticleAlpha + (particleAlpha - lastParticleAlpha) * particalTicks;
 
             var model = ParticleRenderer.ParticleModel;
-
-            model.shader.loadTransformationMatrix(MatrixHelper.createTransformationMatrix(partialPos - Vector3.One * partialScale / 2, partialRot, partialScale));
-            model.shader.loadVec3(Vector3.One, "lightColor");//TODO - later for when there are multi-color lgihts
-            model.shader.loadVec2(UVmin, "UVmin");
-            model.shader.loadVec2(UVmax, "UVmax");
-            model.shader.loadFloat(partialAlpha, "alpha");
+	        model.shader.UpdateGlobalUniforms();
+	        model.shader.UpdateModelUniforms(null);
+	        model.shader.UpdateInstanceUniforms(MatrixHelper.createTransformationMatrix(partialPos - Vector3.One * partialScale / 2, partialRot, partialScale),this);
 
             GL.ActiveTexture(TextureUnit.Texture0);
             GL.BindTexture(TextureTarget.Texture2D, textureID);
-            model.rawModel.Render(model.shader.renderType);
+            model.rawModel.Render(PrimitiveType.Quads);
         }
     }
 }

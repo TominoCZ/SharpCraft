@@ -1,21 +1,21 @@
 ﻿using SharpCraft.block;
 using SharpCraft.entity;
-using SharpCraft.shader;
+using SharpCraft.render.shader;
 using SharpCraft.util;
 
 namespace SharpCraft.model
 {
-    internal class ModelBlock : ModelBaked
+    internal class ModelBlock : ModelBaked<ModelBlock>
     {
         public EnumBlock block { get; }
 
-        public AxisAlignedBB boundingBox { get; }
+        public AxisAlignedBb boundingBox { get; }
 
         public bool hasTransparency { get; }
 
         public bool canBeInteractedWith { get; }
 
-        public ModelBlock(EnumBlock block, ShaderProgram shader, bool canBeInteractedWith = false, bool hasTransparency = false) : base(null, shader)
+        public ModelBlock(EnumBlock block, Shader<ModelBlock> shader, bool canBeInteractedWith = false, bool hasTransparency = false) : base(null, shader)
         {
             this.block = block;
             this.hasTransparency = hasTransparency;
@@ -25,10 +25,10 @@ namespace SharpCraft.model
 
             rawModel = ModelManager.loadBlockModelToVAO(cube);
 
-            boundingBox = AxisAlignedBB.BLOCK_FULL;
+            boundingBox = AxisAlignedBb.BLOCK_FULL;
         }
 
-        public ModelBlock(EnumBlock block, ShaderProgram shader, AxisAlignedBB bb, bool canBeInteractedWith = false, bool hasTransparency = false) : this(block, shader, canBeInteractedWith, hasTransparency)
+        public ModelBlock(EnumBlock block, Shader<ModelBlock> shader, AxisAlignedBb bb, bool canBeInteractedWith = false, bool hasTransparency = false) : this(block, shader, canBeInteractedWith, hasTransparency)
         {
             boundingBox = bb;
         }

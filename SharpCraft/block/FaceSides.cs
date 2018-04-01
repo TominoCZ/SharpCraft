@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace SharpCraft.block
 {
-    internal struct FaceSides
+	public struct FaceSides
     {
         public static readonly FaceSides East = new FaceSides("East", 2, 1, 0, 0);
         public static readonly FaceSides West = new FaceSides("West", 3, -1, 0, 0);

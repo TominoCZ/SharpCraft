@@ -3,7 +3,6 @@ using OpenTK.Graphics.OpenGL;
 using SharpCraft.block;
 using SharpCraft.entity;
 using SharpCraft.model;
-using SharpCraft.shader;
 using SharpCraft.texture;
 using SharpCraft.util;
 using SharpCraft.world;
@@ -11,6 +10,8 @@ using SharpCraft.world.chunk;
 using System;
 using System.Diagnostics;
 using SharpCraft.item;
+using SharpCraft.render.shader;
+using SharpCraft.render.shader.shaders;
 using GL = OpenTK.Graphics.OpenGL.GL;
 using TextureTarget = OpenTK.Graphics.OpenGL.TextureTarget;
 using TextureUnit = OpenTK.Graphics.OpenGL.TextureUnit;
@@ -20,10 +21,6 @@ namespace SharpCraft.render
     internal class WorldRenderer
     {
         private ModelCubeOutline _selectionOutline;
-
-        private Vector4 _selectionOutlineColor;
-
-        private Stopwatch _updateTimer;
 
         private int _hue;
 
@@ -37,11 +34,10 @@ namespace SharpCraft.render
 
         public WorldRenderer()
         {
-            _selectionOutline = new ModelCubeOutline(new ShaderBlockOutline());
+            _selectionOutline = new ModelCubeOutline();
 
             RenderDistance = 8;
 
-            _updateTimer = Stopwatch.StartNew();
         }
 
         public void Render(World world, Matrix4 viewMatrix, float partialTicks)
@@ -80,20 +76,19 @@ namespace SharpCraft.render
 
         private void RenderChunkOutline(Chunk ch, Matrix4 viewMatrix)
         {
-            var shader = (ShaderBlockOutline)_selectionOutline.shader;
+            var shader = _selectionOutline.shader;
 
             var size = new Vector3(Chunk.ChunkSize, Chunk.ChunkHeight, Chunk.ChunkSize);
 
             _selectionOutline.bind();
 
-            shader.loadVec4(ch.HasData ? Vector4.One : Vector4.UnitX, "colorIn");
-            shader.loadViewMatrix(viewMatrix);
-            shader.loadTransformationMatrix(MatrixHelper.createTransformationMatrix(ch.Pos.ToVec(), size));
-
+	        shader.UpdateGlobalUniforms();
+	        shader.UpdateModelUniforms(_selectionOutline.rawModel);
+			shader.UpdateInstanceUniforms(MatrixHelper.createTransformationMatrix(ch.Pos, size),_selectionOutline);
             GL.Disable(EnableCap.CullFace);
             GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
 
-            _selectionOutline.rawModel.Render(shader.renderType);
+            _selectionOutline.rawModel.Render(PrimitiveType.Quads);
 
             GL.Enable(EnableCap.CullFace);
             GL.PolygonMode(MaterialFace.Front, PolygonMode.Fill);
@@ -103,16 +98,8 @@ namespace SharpCraft.render
 
         private void RenderBlockSelectionOutline(World world, Matrix4 viewMatrix, EnumBlock block, BlockPos pos)
         {
-            if (_updateTimer.ElapsedMilliseconds >= 50)
-            {
-                _hue = (_hue + 5) % 365;
 
-                _selectionOutlineColor = GetHue(_hue);
-
-                _updateTimer.Restart();
-            }
-
-            var shader = (ShaderBlockOutline)_selectionOutline.shader;
+            var shader = _selectionOutline.shader;
             var bb = ModelRegistry.getModelForBlock(block, world.GetMetadata(pos))?.boundingBox;
 
             if (bb == null)
@@ -122,14 +109,15 @@ namespace SharpCraft.render
 
             _selectionOutline.bind();
 
-            shader.loadVec4(_selectionOutlineColor, "colorIn");
-            shader.loadViewMatrix(viewMatrix);
-            shader.loadTransformationMatrix(MatrixHelper.createTransformationMatrix(pos.ToVec() - Vector3.One * 0.00175f, size));
+
+	        shader.UpdateGlobalUniforms();
+	        shader.UpdateModelUniforms(_selectionOutline.rawModel);
+	        shader.UpdateInstanceUniforms(MatrixHelper.createTransformationMatrix(pos.ToVec() - Vector3.One * 0.00175f, size),_selectionOutline);
 
             GL.Disable(EnableCap.CullFace);
             GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
 
-            _selectionOutline.rawModel.Render(shader.renderType);
+            _selectionOutline.rawModel.Render(PrimitiveType.Quads);
 
             GL.Enable(EnableCap.CullFace);
             GL.PolygonMode(MaterialFace.Front, PolygonMode.Fill);
@@ -148,30 +136,18 @@ namespace SharpCraft.render
                     var model = ModelRegistry.getModelForBlock(itemBlock.getBlock(), stack.Meta);
 
                     model.bind();
-                    model.shader.loadVec3(Vector3.One, "lightColor");
-                    model.shader.loadViewMatrix(Matrix4.Identity);
+	                model.shader.UpdateGlobalUniforms();
+	                model.shader.UpdateModelUniforms(_selectionOutline.rawModel);
+	                model.shader.UpdateInstanceUniforms(MatrixHelper.createTransformationMatrix(
+		                new Vector3(0.04125f, -0.08f, -0.1f) + SharpCraft.Instance.Camera.getLookVec() / 250,
+		                new Vector3(0, 45, 0),
+		                0.045f),model);
 
-                    model.shader.loadTransformationMatrix(MatrixHelper.createTransformationMatrix(
-                        new Vector3(0.04125f, -0.08f, -0.1f) + SharpCraft.Instance.Camera.getLookVec() / 250,
-                        new Vector3(0, 45, 0),
-                        0.045f));
-
-                    model.rawModel.Render(model.shader.renderType);
+                    model.rawModel.Render(PrimitiveType.Quads);
 
                     model.unbind();
                 }
             }
-        }
-
-        private Vector4 GetHue(int hue)
-        {
-            var rads = MathHelper.DegreesToRadians(hue);
-
-            var r = (float)(Math.Sin(rads) * 0.5 + 0.5);
-            var g = (float)(Math.Sin(rads + MathHelper.PiOver3 * 2) * 0.5 + 0.5);
-            var b = (float)(Math.Sin(rads + MathHelper.PiOver3 * 4) * 0.5 + 0.5);
-
-            return Vector4.UnitX * r + Vector4.UnitY * g + Vector4.UnitZ * b + Vector4.UnitW;
         }
     }
 }

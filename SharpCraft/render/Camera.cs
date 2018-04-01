@@ -36,7 +36,7 @@ namespace SharpCraft.render
             get
             {
                 var s = (float)Math.Sin(-(_yaw + MathHelper.PiOver2));
-                var c = (float)Math.Cos((_yaw + MathHelper.PiOver2));
+                var c = (float)Math.Cos(_yaw + MathHelper.PiOver2);
 
                 return new Vector2(s, c).Normalized();
             }

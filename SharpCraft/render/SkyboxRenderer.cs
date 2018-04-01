@@ -1,9 +1,11 @@
-﻿using OpenTK;
+﻿using System;
+using OpenTK;
 using OpenTK.Graphics.OpenGL;
 using SharpCraft.model;
-using SharpCraft.shader;
 using SharpCraft.texture;
 using System.Collections.Generic;
+using SharpCraft.render.shader;
+using SharpCraft.render.shader.shaders;
 
 namespace SharpCraft.render
 {
@@ -55,7 +57,7 @@ namespace SharpCraft.render
             SIZE, -SIZE,  SIZE
         };
 
-        private ModelBaked cube;
+        private ModelBaked<object> cube;
 
         private int texture;
 
@@ -75,20 +77,22 @@ namespace SharpCraft.render
                 quads.Add(new RawQuad(vertices, 3));
             }
 
-            var shader = new SkyboxShader();
-
-            cube = new ModelBaked(ModelManager.loadModelToVAO(quads, 3), shader);
+            cube = new ModelBaked<object>(ModelManager.loadModelToVAO(quads, 3), new Shader<object>("skybox"));
             texture = TextureManager.loadCubeMap();
         }
 
         public void render(Matrix4 viewMatrix)
         {
+	        viewMatrix.M41 = viewMatrix.M42 = viewMatrix.M43 = 0;
+
             cube.bind();
-            cube.shader.loadViewMatrix(viewMatrix);
+	        cube.shader.UpdateGlobalUniforms();
+	        cube.shader.UpdateModelUniforms(cube.rawModel);
+	        cube.shader.UpdateInstanceUniforms(viewMatrix,null);
 
             GL.ActiveTexture(TextureUnit.Texture0);
             GL.BindTexture(TextureTarget.TextureCubeMap, texture);
-            cube.rawModel.Render(cube.shader.renderType);
+            cube.rawModel.Render(PrimitiveType.Quads);
 
             cube.unbind();
         }

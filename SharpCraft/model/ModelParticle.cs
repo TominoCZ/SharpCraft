@@ -1,12 +1,14 @@
 ﻿using SharpCraft.block;
-using SharpCraft.shader;
+using SharpCraft.particle;
+using SharpCraft.render.shader;
+using SharpCraft.render.shader.shaders;
 using SharpCraft.util;
 
 namespace SharpCraft.model
 {
-    class ModelParticle : ModelBaked
+    class ModelParticle : ModelBaked<Particle>
     {
-        public ModelParticle(ShaderProgram shader) : base(null, shader)
+        public ModelParticle(ShaderParticle shader) : base(null, shader)
         {
             var cube = ModelHelper.createTexturedCubeModel(EnumBlock.RARE);
 

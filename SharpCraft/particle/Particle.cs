@@ -13,7 +13,7 @@ using SharpCraft.world;
 
 namespace SharpCraft.particle
 {
-    class Particle : Entity
+	public class Particle : Entity
     {
         public float particleScale;
 
@@ -27,8 +27,8 @@ namespace SharpCraft.particle
 
         protected int textureID;
 
-        protected Vector2 UVmin;
-        protected Vector2 UVmax;
+        public Vector2 UVmin;
+	    public Vector2 UVmax;
 
         protected Particle(World world, Vector3 pos, Vector3 motion, float particleScale, int textureID) : this(world, pos, motion, particleScale, textureID, Vector2.Zero, Vector2.Zero)
         {
@@ -43,7 +43,7 @@ namespace SharpCraft.particle
             this.UVmin = UVmin;
             this.UVmax = UVmax;
 
-            collisionBoundingBox = new AxisAlignedBB(0, 0, 0, this.particleScale, this.particleScale, this.particleScale);
+            collisionBoundingBox = new AxisAlignedBb(0, 0, 0, this.particleScale, this.particleScale, this.particleScale);
             boundingBox = collisionBoundingBox.offset(pos + Vector3.UnitY * collisionBoundingBox.size.Y / 2);
 
             particleMaxAge = (int)MathUtil.NextFloat(10, 50);
@@ -75,19 +75,21 @@ namespace SharpCraft.particle
             var partialPos = lastPos + (pos - lastPos) * particalTicks;
 
             var partialScale = lastParticleScale + (particleScale - lastParticleScale) * particalTicks;
-            var partialAlpha = lastParticleAlpha + (particleAlpha - lastParticleAlpha) * particalTicks;
 
             var model = ParticleRenderer.ParticleModel;
 
-            model.shader.loadTransformationMatrix(MatrixHelper.createTransformationMatrix(partialPos - Vector3.One * partialScale / 2, Vector3.Zero, partialScale));
-            model.shader.loadVec3(Vector3.One, "lightColor");//TODO - later for when there are multi-color lgihts
-            model.shader.loadVec2(UVmin, "UVmin");
-            model.shader.loadVec2(UVmax, "UVmax");
-            model.shader.loadFloat(partialAlpha, "alpha");
+	        model.shader.UpdateGlobalUniforms();
+	        model.shader.UpdateModelUniforms(null);
+	        model.shader.UpdateInstanceUniforms(MatrixHelper.createTransformationMatrix(partialPos - Vector3.One * partialScale / 2, Vector3.Zero, partialScale),this);
 
             GL.ActiveTexture(TextureUnit.Texture0);
             GL.BindTexture(TextureTarget.Texture2D, textureID);
-            model.rawModel.Render(model.shader.renderType);
+            model.rawModel.Render(PrimitiveType.Quads);
         }
+
+	    public float GetAlpha()
+	    {
+		    return lastParticleAlpha + (particleAlpha - lastParticleAlpha) * SharpCraft.Instance.GetRenderPartialTicks();
+	    }
     }
 }

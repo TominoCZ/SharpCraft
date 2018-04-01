@@ -5,7 +5,7 @@ using System;
 namespace SharpCraft.block
 {
     [Serializable]
-    internal struct BlockPos
+    public struct BlockPos
     {
         public int X { get; }
         public int Y { get; }

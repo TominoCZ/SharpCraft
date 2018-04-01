@@ -1,5 +1,6 @@
 ﻿using OpenTK;
-using SharpCraft.shader;
+using SharpCraft.render.shader;
+using SharpCraft.render.shader.shaders;
 using SharpCraft.texture;
 
 namespace SharpCraft.gui
@@ -14,7 +15,7 @@ namespace SharpCraft.gui
             DoesGuiPauseGame = false;
         }
 
-        public override void render(ShaderGui shader, int mouseX, int mouseY)
+        public override void render(Shader<Gui> shader, int mouseX, int mouseY)
         {
             renderTexture(shader, gui, 0, 0);
         }
