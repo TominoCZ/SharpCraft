@@ -7,7 +7,7 @@ namespace SharpCraft.entity
 {
 	public class Entity
     {
-        protected AxisAlignedBb boundingBox, collisionBoundingBox;
+        protected AxisAlignedBB boundingBox, collisionBoundingBox;
 
         public World world;
 
@@ -28,8 +28,8 @@ namespace SharpCraft.entity
             this.pos = lastPos = pos;
             this.motion = motion;
 
-            collisionBoundingBox = AxisAlignedBb.BLOCK_FULL.offset(Vector3.One * -0.5f);
-            boundingBox = collisionBoundingBox.offset(pos + Vector3.UnitY * collisionBoundingBox.size.Y / 2);
+            collisionBoundingBox = AxisAlignedBB.BLOCK_FULL;
+            boundingBox = collisionBoundingBox.offset(pos - new Vector3(collisionBoundingBox.size.X / 2, 0, collisionBoundingBox.size.Z / 2));
         }
 
         public virtual void Update()
@@ -54,7 +54,7 @@ namespace SharpCraft.entity
         {
             var bb_o = boundingBox.Union(boundingBox.offset(motion));
 
-            List<AxisAlignedBb> list = SharpCraft.Instance.World.GetBlockCollisionBoxes(bb_o);
+            List<AxisAlignedBB> list = SharpCraft.Instance.World.GetBlockCollisionBoxes(bb_o);
 
             var m_orig = motion;
 
@@ -93,7 +93,7 @@ namespace SharpCraft.entity
                 motion.Y = 0;
         }
 
-        public virtual void Render(Matrix4 viewmatrix, float particalTicks)
+        public virtual void Render(float particalTicks)
         {
         }
 
@@ -109,12 +109,12 @@ namespace SharpCraft.entity
             isAlive = false;
         }
 
-        public AxisAlignedBb getEntityBoundingBox()
+        public AxisAlignedBB getEntityBoundingBox()
         {
             return boundingBox;
         }
 
-        public AxisAlignedBb getCollisionBoundingBox()
+        public AxisAlignedBB getCollisionBoundingBox()
         {
             return collisionBoundingBox;
         }

@@ -43,7 +43,7 @@ namespace SharpCraft.particle
             this.UVmin = UVmin;
             this.UVmax = UVmax;
 
-            collisionBoundingBox = new AxisAlignedBb(0, 0, 0, this.particleScale, this.particleScale, this.particleScale);
+            collisionBoundingBox = new AxisAlignedBB(0, 0, 0, this.particleScale, this.particleScale, this.particleScale);
             boundingBox = collisionBoundingBox.offset(pos + Vector3.UnitY * collisionBoundingBox.size.Y / 2);
 
             particleMaxAge = (int)MathUtil.NextFloat(10, 50);
@@ -70,10 +70,9 @@ namespace SharpCraft.particle
             }
         }
 
-        public override void Render(Matrix4 viewMatrix, float particalTicks)
+        public override void Render(float particalTicks)
         {
             var partialPos = lastPos + (pos - lastPos) * particalTicks;
-
             var partialScale = lastParticleScale + (particleScale - lastParticleScale) * particalTicks;
 
             var model = ParticleRenderer.ParticleModel;

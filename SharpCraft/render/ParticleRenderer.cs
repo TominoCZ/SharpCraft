@@ -28,12 +28,12 @@ namespace SharpCraft.render
                 _particles.Add(particle);
         }
 
-        public void Render(Matrix4 viewMatrix, float partialTicks)
+        public void Render(float partialTicks)
         {
             ParticleModel.bind();
 
             for (int i = 0; i < _particles.Count; i++)
-                _particles[i].Render(viewMatrix, partialTicks);
+                _particles[i].Render(partialTicks);
 
             ParticleModel.unbind();
         }

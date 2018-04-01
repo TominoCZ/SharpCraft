@@ -4,16 +4,24 @@ using System;
 
 namespace SharpCraft.entity
 {
-    public class AxisAlignedBb
+    public class AxisAlignedBB
     {
-        public static AxisAlignedBb BLOCK_FULL { get; } = new AxisAlignedBb(Vector3.Zero, Vector3.One);
-        public static AxisAlignedBb NULL { get; } = new AxisAlignedBb(Vector3.Zero, Vector3.Zero);
+        public static AxisAlignedBB BLOCK_FULL { get; } = new AxisAlignedBB(Vector3.Zero, Vector3.One);
+        public static AxisAlignedBB NULL { get; } = new AxisAlignedBB(Vector3.Zero, Vector3.Zero);
         public Vector3 min { get; }
         public Vector3 max { get; }
 
         public Vector3 size { get; }
 
-        public AxisAlignedBb(Vector3 min, Vector3 max)
+        public AxisAlignedBB(float size) : this(Vector3.One * size)
+        {
+        }
+
+        public AxisAlignedBB(Vector3 size) : this(Vector3.Zero, size)
+        {
+        }
+
+        public AxisAlignedBB(Vector3 min, Vector3 max)
         {
             this.min = min;
             this.max = max;
@@ -32,21 +40,21 @@ namespace SharpCraft.entity
             size = v2 - v1;
         }
 
-        public AxisAlignedBb(float minX, float minY, float minZ, float maxX, float maxY, float maxZ) : this(new Vector3(minX, minY, minZ), new Vector3(maxX, maxY, maxZ))
+        public AxisAlignedBB(float minX, float minY, float minZ, float maxX, float maxY, float maxZ) : this(new Vector3(minX, minY, minZ), new Vector3(maxX, maxY, maxZ))
         {
         }
 
-        public AxisAlignedBb offset(Vector3 by)
+        public AxisAlignedBB offset(Vector3 by)
         {
-            return new AxisAlignedBb(min + by, max + by);
+            return new AxisAlignedBB(min + by, max + by);
         }
 
-        public AxisAlignedBb Grow(Vector3 by)
+        public AxisAlignedBB Grow(Vector3 by)
         {
-            return new AxisAlignedBb(min + by / 2, max - by / 2);
+            return new AxisAlignedBB(min + by / 2, max - by / 2);
         }
 
-        public AxisAlignedBb Union(AxisAlignedBb other)
+        public AxisAlignedBB Union(AxisAlignedBB other)
         {
             var minX = (int)Math.Floor(MathUtil.Min(min.X, max.X, other.min.X, other.max.X));
             var minY = (int)Math.Floor(MathUtil.Min(min.Y, max.Y, other.min.Y, other.max.Y));
@@ -56,10 +64,10 @@ namespace SharpCraft.entity
             var maxY = (int)Math.Ceiling(MathUtil.Max(min.Y, max.Y, other.min.Y, other.max.Y));
             var maxZ = (int)Math.Ceiling(MathUtil.Max(min.Z, max.Z, other.min.Z, other.max.Z));
 
-            return new AxisAlignedBb(minX, minY, minZ, maxX, maxY, maxZ);
+            return new AxisAlignedBB(minX, minY, minZ, maxX, maxY, maxZ);
         }
 
-        public float CalculateYOffset(AxisAlignedBb other, float offset)
+        public float CalculateYOffset(AxisAlignedBB other, float offset)
         {
             //Y
             if (other.max.X > min.X && other.min.X < max.X && other.max.Z > min.Z && other.min.Z < max.Z)
@@ -87,7 +95,7 @@ namespace SharpCraft.entity
             return offset;
         }
 
-        public float CalculateXOffset(AxisAlignedBb other, float offset)
+        public float CalculateXOffset(AxisAlignedBB other, float offset)
         {
             //X
             if (other.max.Y > min.Y && other.min.Y < max.Y && other.max.Z > min.Z && other.min.Z < max.Z)
@@ -115,7 +123,7 @@ namespace SharpCraft.entity
             return offset;
         }
 
-        public float CalculateZOffset(AxisAlignedBb other, float offset)
+        public float CalculateZOffset(AxisAlignedBB other, float offset)
         {
             //Z
             if (other.max.X > min.X && other.min.X < max.X && other.max.Y > min.Y && other.min.Y < max.Y)
@@ -148,7 +156,7 @@ namespace SharpCraft.entity
             return (min + max) / 2;
         }
 
-        public bool IntersectsWith(AxisAlignedBb other)
+        public bool IntersectsWith(AxisAlignedBB other)
         {
             return min.X < other.max.X && max.X > other.min.X &&
                    min.Y < other.max.Y && max.Y > other.min.Y &&

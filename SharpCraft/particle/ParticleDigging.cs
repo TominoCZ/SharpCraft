@@ -83,13 +83,12 @@ namespace SharpCraft.particle
             }
         }
 
-        public override void Render(Matrix4 viewMatrix, float particalTicks)
+        public override void Render(float particalTicks)
         {
             var partialPos = lastPos + (pos - lastPos) * particalTicks;
             var partialRot = lastRot + (rot - lastRot) * particalTicks;
 
             var partialScale = lastParticleScale + (particleScale - lastParticleScale) * particalTicks;
-            var partialAlpha = lastParticleAlpha + (particleAlpha - lastParticleAlpha) * particalTicks;
 
             var model = ParticleRenderer.ParticleModel;
 	        model.shader.UpdateGlobalUniforms();

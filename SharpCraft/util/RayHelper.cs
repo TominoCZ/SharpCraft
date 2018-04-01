@@ -6,7 +6,7 @@ namespace SharpCraft.util
 {
     internal class RayHelper
     {
-        public static bool rayIntersectsBB(Vector3 /*ray*/origin, Vector3 /*ray*/direction, AxisAlignedBb bb, out Vector3 hitPosition, out Vector3 hitNormal)
+        public static bool rayIntersectsBB(Vector3 /*ray*/origin, Vector3 /*ray*/direction, AxisAlignedBB bb, out Vector3 hitPosition, out Vector3 hitNormal)
         {
             direction = direction.Normalized();
             hitNormal = Vector3.One.Normalized();

@@ -1,6 +1,7 @@
 ﻿using OpenTK;
 using SharpCraft.util;
 using System;
+using System.Drawing.Text;
 
 namespace SharpCraft.render
 {
@@ -8,7 +9,7 @@ namespace SharpCraft.render
     {
         public const float NearPlane = 0.1f;
         public const float FarPlane = 1000f;
-        public const float Fov = 70;
+        public float Fov { get; private set; }
 
         private float _pitch;
         private float _yaw = MathHelper.PiOver2;
@@ -17,6 +18,8 @@ namespace SharpCraft.render
 
         public Camera()
         {
+            Fov = 70;
+
             UpdateViewMatrix();
             UpdateProjectionMatrix();
         }
@@ -33,6 +36,13 @@ namespace SharpCraft.render
             get => _yaw;
 
             set => _yaw = value;
+        }
+
+        public void SetFOV(float fov)
+        {
+            Fov = fov;
+
+            UpdateProjectionMatrix();
         }
 
         public void UpdateViewMatrix()

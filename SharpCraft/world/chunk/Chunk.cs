@@ -24,7 +24,7 @@ namespace SharpCraft.world.chunk
 
         public ChunkPos Pos { get; }
 
-        public AxisAlignedBb BoundingBox { get; }
+        public AxisAlignedBB BoundingBox { get; }
 
         public World World { get; }
         private readonly ChunkLoadManager _loadManager;
@@ -40,7 +40,7 @@ namespace SharpCraft.world.chunk
             Pos = pos;
             World = world;
             _loadManager = World.LoadManager;
-            BoundingBox = new AxisAlignedBb(Vector3.Zero, Vector3.One * ChunkSize + Vector3.UnitY * 240).offset(Pos.ToVec());
+            BoundingBox = new AxisAlignedBB(Vector3.Zero, Vector3.One * ChunkSize + Vector3.UnitY * 240).offset(Pos.ToVec());
         }
 
         public Chunk(ChunkPos pos, World world, short[,,] blockData) : this(pos, world)
@@ -134,7 +134,7 @@ namespace SharpCraft.world.chunk
             return 0;
         }
 
-        public void Render(Matrix4 viewMatrix)
+        public void Render()
         {
             if (_model == null)
             {

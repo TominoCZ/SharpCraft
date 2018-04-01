@@ -32,5 +32,15 @@ namespace SharpCraft.item
 
             Count = count;
         }
+
+        public ItemStack Copy()
+        {
+            return new ItemStack(Item, Count, Meta);
+        }
+
+        public ItemStack CopyUnit()
+        {
+            return new ItemStack(Item, 1, Meta);
+        }
     }
 }

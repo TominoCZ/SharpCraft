@@ -32,7 +32,25 @@ namespace SharpCraft
 {
     internal class SharpCraft : GameWindow
     {
-        public string GameFolderDir = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\.sharpcraft";
+        string _dir = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\.sharpcraft";
+
+        public string GameFolderDir
+        {
+            get
+            {
+                if (!Directory.Exists(_dir))
+                    Directory.CreateDirectory(_dir);
+
+                return _dir;
+            }
+            set
+            {
+                _dir = value;
+
+                if (!Directory.Exists(_dir))
+                    Directory.CreateDirectory(_dir);
+            }
+        }
 
         public WorldRenderer WorldRenderer;
         public EntityRenderer EntityRenderer;
@@ -228,13 +246,11 @@ namespace SharpCraft
 
             if (World != null)
             {
-                var viewMatrix = Camera.View;
-
                 var partialTick = _gamePaused ? _lastPartialTicks : _lastPartialTicks = partialTicks;
 
-                WorldRenderer.Render(World, viewMatrix, partialTick);
-                EntityRenderer.Render(viewMatrix, partialTick);
-                ParticleRenderer.Render(viewMatrix, partialTick);
+                WorldRenderer.Render(World, partialTick);
+                EntityRenderer.Render(partialTick);
+                ParticleRenderer.Render(partialTick);
                 //SkyboxRenderer.render(viewMatrix);
             }
 

@@ -9,7 +9,7 @@ namespace SharpCraft.model
     {
         public EnumBlock block { get; }
 
-        public AxisAlignedBb boundingBox { get; }
+        public AxisAlignedBB boundingBox { get; }
 
         public bool hasTransparency { get; }
 
@@ -25,10 +25,10 @@ namespace SharpCraft.model
 
             rawModel = ModelManager.loadBlockModelToVAO(cube);
 
-            boundingBox = AxisAlignedBb.BLOCK_FULL;
+            boundingBox = AxisAlignedBB.BLOCK_FULL;
         }
 
-        public ModelBlock(EnumBlock block, Shader<ModelBlock> shader, AxisAlignedBb bb, bool canBeInteractedWith = false, bool hasTransparency = false) : this(block, shader, canBeInteractedWith, hasTransparency)
+        public ModelBlock(EnumBlock block, Shader<ModelBlock> shader, AxisAlignedBB bb, bool canBeInteractedWith = false, bool hasTransparency = false) : this(block, shader, canBeInteractedWith, hasTransparency)
         {
             boundingBox = bb;
         }

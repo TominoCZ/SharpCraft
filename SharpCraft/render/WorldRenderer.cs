@@ -39,7 +39,7 @@ namespace SharpCraft.render
             RenderDistance = 8;
         }
 
-        public void Render(World world, Matrix4 viewMatrix, float partialTicks)
+        public void Render(World world, float partialTicks)
         {
             if (world == null) return;
             world.LoadManager.LoadImportantChunks();
@@ -51,9 +51,9 @@ namespace SharpCraft.render
             var hit = SharpCraft.Instance.MouseOverObject;
 
             if (hit.hit != null && hit.hit is EnumBlock block && block != EnumBlock.AIR)
-                RenderBlockSelectionOutline(world, viewMatrix, block, hit.blockPos);
+                RenderBlockSelectionOutline(world, block, hit.blockPos);
 
-            RenderChunks(world, viewMatrix);
+            RenderChunks(world);
 
             if (SharpCraft.Instance.Player != null)
             {
@@ -61,19 +61,19 @@ namespace SharpCraft.render
             }
         }
 
-        private void RenderChunks(World world, Matrix4 viewMatrix)
+        private void RenderChunks(World world)
         {
             foreach (var chunk in world.Chunks.Values)
             {
                 if (chunk.ShouldRender(RenderDistance))
                 {
-                    if (chunk.ModelGenerating) RenderChunkOutline(chunk, viewMatrix);
-                    chunk.Render(viewMatrix);
+                    if (chunk.ModelGenerating) RenderChunkOutline(chunk);
+                    chunk.Render();
                 }
             }
         }
 
-        private void RenderChunkOutline(Chunk ch, Matrix4 viewMatrix)
+        private void RenderChunkOutline(Chunk ch)
         {
             var shader = _selectionOutline.shader;
 
@@ -95,7 +95,7 @@ namespace SharpCraft.render
             _selectionOutline.unbind();
         }
 
-        private void RenderBlockSelectionOutline(World world, Matrix4 viewMatrix, EnumBlock block, BlockPos pos)
+        private void RenderBlockSelectionOutline(World world, EnumBlock block, BlockPos pos)
         {
 
             var shader = _selectionOutline.shader;

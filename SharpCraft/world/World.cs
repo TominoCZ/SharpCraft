@@ -71,9 +71,9 @@ namespace SharpCraft.world
             }
         }
 
-        public List<AxisAlignedBb> GetIntersectingEntitiesBBs(AxisAlignedBb with)
+        public List<AxisAlignedBB> GetIntersectingEntitiesBBs(AxisAlignedBB with)
         {
-            var bbs = new List<AxisAlignedBb>();
+            var bbs = new List<AxisAlignedBB>();
 
             for (var i = 0; i < Entities.Count; i++)
             {
@@ -91,9 +91,9 @@ namespace SharpCraft.world
             return bbs;
         }
 
-        public List<AxisAlignedBb> GetBlockCollisionBoxes(AxisAlignedBb box)
+        public List<AxisAlignedBB> GetBlockCollisionBoxes(AxisAlignedBB box)
         {
-            var blocks = new List<AxisAlignedBb>();
+            var blocks = new List<AxisAlignedBB>();
 
             var bb = box.Union(box);
 

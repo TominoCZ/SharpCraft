@@ -31,10 +31,10 @@ namespace SharpCraft.entity
 		{
 			this.stack = stack;
 
-			collisionBoundingBox = AxisAlignedBb.BLOCK_FULL.offset(Vector3.One * -0.5f).Grow(Vector3.One * -0.6f);
-			boundingBox = collisionBoundingBox.offset(pos + Vector3.UnitY * collisionBoundingBox.size.Y / 2);
+		    collisionBoundingBox = new AxisAlignedBB(0.25f);
+		    boundingBox = collisionBoundingBox.offset(pos - Vector3.One * collisionBoundingBox.size / 2);
 
-			gravity = 1.45f;
+            gravity = 1.45f;
 			isAlive = stack != null && !stack.IsEmpty;
 		}
 
@@ -63,7 +63,7 @@ namespace SharpCraft.entity
 			}
 		}
 
-		public override void Render(Matrix4 viewMatrix, float particalTicks)
+		public override void Render(float particalTicks)
 		{
 			var partialPos = lastPos + (pos - lastPos) * particalTicks;
 			var partialTime = entityAgeLast + (entityAge - entityAgeLast) * particalTicks;

@@ -10,7 +10,7 @@ using SharpCraft.item;
 
 namespace SharpCraft.entity
 {
-	public class EntityPlayerSP : Entity
+    public class EntityPlayerSP : Entity
     {
         private float maxMoveSpeed = 0.235f;
         private float moveSpeedMult = 1;
@@ -27,8 +27,8 @@ namespace SharpCraft.entity
         {
             SharpCraft.Instance.Camera.pos = pos + Vector3.UnitY * 1.625f;
 
-            collisionBoundingBox = new AxisAlignedBb(new Vector3(-0.3f, 0, -0.3f), new Vector3(0.3f, 1.65f, 0.3f));
-            boundingBox = collisionBoundingBox.offset(pos + Vector3.UnitY * collisionBoundingBox.size.Y / 2);
+            collisionBoundingBox = new AxisAlignedBB(new Vector3(0.3f, 1.65f, 0.3f));
+            boundingBox = collisionBoundingBox.offset(pos - new Vector3(collisionBoundingBox.size.X / 2, 0, collisionBoundingBox.size.Z / 2));
 
             hotbar = new ItemStack[9];
         }
@@ -41,7 +41,7 @@ namespace SharpCraft.entity
             base.Update();
         }
 
-        public override void Render(Matrix4 viewMatrix, float particalTicks)
+        public override void Render(float particalTicks)
         {
             var interpolatedPos = lastPos + (pos - lastPos) * particalTicks;
 
@@ -235,11 +235,15 @@ namespace SharpCraft.entity
 
         public void DropHeldItem()
         {
-            var stack = hotbar[HotbarIndex];
+            var stack = getEquippedItemStack();
 
-            world?.AddEntity(new EntityItem(world, SharpCraft.Instance.Camera.pos - Vector3.UnitY * 0.35f, SharpCraft.Instance.Camera.getLookVec() * 0.75f + Vector3.UnitY * 0.2f, stack));
+            if (stack != null && !stack.IsEmpty)
+            {
+                world?.AddEntity(new EntityItem(world, SharpCraft.Instance.Camera.pos - Vector3.UnitY * 0.35f,
+                    SharpCraft.Instance.Camera.getLookVec() * 0.75f + Vector3.UnitY * 0.2f, stack.CopyUnit()));
 
-            hotbar[HotbarIndex] = null;
+                stack.Count--;
+            }
         }
 
         public ItemStack getEquippedItemStack()
