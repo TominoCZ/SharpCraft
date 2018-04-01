@@ -37,7 +37,6 @@ namespace SharpCraft.render
             _selectionOutline = new ModelCubeOutline();
 
             RenderDistance = 8;
-
         }
 
         public void Render(World world, Matrix4 viewMatrix, float partialTicks)

@@ -30,7 +30,7 @@ namespace SharpCraft.gui
 
 			GL.ActiveTexture(TextureUnit.Texture0);
 			GL.BindTexture(TextureTarget.Texture2D, tex.textureID);
-			GL.DrawArrays(PrimitiveType.Quads, 0, 4);
+			GL.DrawArrays(PrimitiveType.TriangleStrip, 0, 4);
 		}
 
 		protected virtual void renderTexture(Shader<Gui> shader, GuiTexture tex, int x, int y)
@@ -64,7 +64,7 @@ namespace SharpCraft.gui
 			GL.ActiveTexture(TextureUnit.Texture0);
 			GL.BindTexture(TextureTarget.Texture2D, tex.textureID);
 
-			GL.DrawArrays(PrimitiveType.Quads, 0, 4);
+			GL.DrawArrays(PrimitiveType.TriangleStrip, 0, 4);
 
 			GL.BindVertexArray(0);
 
