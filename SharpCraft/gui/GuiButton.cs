@@ -38,7 +38,7 @@ namespace SharpCraft.gui
             this.scale = scale;
         }
 
-        public override void render(Shader<Gui> shader, int mouseX, int mouseY)
+        public override void Render(Shader<Gui> shader, int mouseX, int mouseY)
         {
             GuiTexture tex = GUI_BUTTON;
 

@@ -23,7 +23,7 @@ namespace SharpCraft.gui
                 slot_selected = new GuiTexture(slot_selected_texture.textureID, slot_selected_texture.textureSize, Vector2.Zero, Vector2.One * 2);
         }
 
-        public override void render(Shader<Gui> shader, int mouseX, int mouseY)
+        public override void Render(Shader<Gui> shader, int mouseX, int mouseY)
         {
             var size = SharpCraft.Instance.ClientSize;
 

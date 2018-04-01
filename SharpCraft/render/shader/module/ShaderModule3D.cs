@@ -7,9 +7,8 @@ namespace SharpCraft.render.shader.module
 {
 	public class ShaderModule3D<T> : ShaderModule<T>
 	{
-		private UniformMat4 Projection;
+	    private UniformMat4 Projection;//TODO add the View matrtix 
 		private UniformMat4 Transform;
-
 
 		public ShaderModule3D(Shader<T> parent) : base(parent)
 		{
@@ -21,25 +20,26 @@ namespace SharpCraft.render.shader.module
 			{
 				Projection = new UniformMat4(Parent.GetUniformId("projectionMatrix"));
 			}
-			catch (Exception e)
+			catch
+			{}
 			{}
 			try
 			{
 				Transform = new UniformMat4(Parent.GetUniformId("transformationMatrix"));
 			}
-			catch (Exception e)
+			catch
 			{}
 		}
 
 		public override void UpdateGlobalUniforms()
 		{
-			Projection.Update(SharpCraft.Instance.CreateProjectionMatrix());
+			Projection?.Update(SharpCraft.Instance.CreateProjectionMatrix());
 		}
 
 		public override void UpdateInstanceUniforms(Matrix4 transform, T renderable)
 		{
 			UpdateGlobalUniforms();
-			Transform.Update(transform);
+			Transform?.Update(transform);
 		}
 	}
 }

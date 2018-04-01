@@ -4,7 +4,7 @@ namespace SharpCraft.render
 {
     internal class EntityRenderer
     {
-        public void render(Matrix4 viewMatrix, float partialTicks)
+        public void Render(Matrix4 viewMatrix, float partialTicks)
         {
             for (int i = 0; i < SharpCraft.Instance.World.Entities.Count; i++)
             {

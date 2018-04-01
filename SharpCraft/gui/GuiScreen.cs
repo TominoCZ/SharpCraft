@@ -19,11 +19,11 @@ namespace SharpCraft.gui
             background = new GuiTexture(TextureManager.loadTexture("gui/bg"), Vector2.Zero, Vector2.One * 4);
         }
 
-        public override void render(Shader<Gui> shader, int mouseX, int mouseY)
+        public override void Render(Shader<Gui> shader, int mouseX, int mouseY)
         {
             for (int i = 0; i < buttons.Count; i++)
             {
-                buttons[i].render(shader, mouseX, mouseY);
+                buttons[i].Render(shader, mouseX, mouseY);
             }
             //render stuff
         }

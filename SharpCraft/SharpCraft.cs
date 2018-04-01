@@ -23,7 +23,6 @@ using System.Text;
 using System.Threading;
 using SharpCraft.item;
 using SharpCraft.render.shader;
-using SharpCraft.render.shader.shaders;
 using Bitmap = System.Drawing.Bitmap;
 using Point = OpenTK.Point;
 using Rectangle = System.Drawing.Rectangle;
@@ -257,7 +256,7 @@ namespace SharpCraft
                 var partialTick = _gamePaused ? _lastPartialTicks : _lastPartialTicks = partialTicks;
 
                 WorldRenderer.Render(World, viewMatrix, partialTick);
-                EntityRenderer.render(viewMatrix, partialTick);
+                EntityRenderer.Render(viewMatrix, partialTick);
                 ParticleRenderer.Render(viewMatrix, partialTick);
                 //SkyboxRenderer.render(viewMatrix);
             }

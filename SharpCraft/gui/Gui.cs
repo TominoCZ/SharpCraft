@@ -19,10 +19,6 @@ namespace SharpCraft.gui
 			_item = new ModelGuiItem(new Shader<object>("gui_item"));
 		}
 
-		public virtual void render(Shader<Gui> shader, int mouseX, int mouseY)
-		{
-		}
-
 		protected virtual void renderTexture(Shader<Gui> shader, GuiTexture tex)
 		{
 			var ratio = new Vector2((float) tex.textureSize.Width / SharpCraft.Instance.ClientSize.Width, (float) tex.textureSize.Height / SharpCraft.Instance.ClientSize.Height);
@@ -34,7 +30,7 @@ namespace SharpCraft.gui
 
 			GL.ActiveTexture(TextureUnit.Texture0);
 			GL.BindTexture(TextureTarget.Texture2D, tex.textureID);
-			GL.DrawArrays(BeginMode.Quads, 0, 4);
+			GL.DrawArrays(PrimitiveType.Quads, 0, 4);
 		}
 
 		protected virtual void renderTexture(Shader<Gui> shader, GuiTexture tex, int x, int y)
@@ -107,7 +103,7 @@ namespace SharpCraft.gui
 			_item.unbind();
 		}
 
-		public void Render(Shader<Gui> shader, int mouseX, int mouseY)
+		public virtual void Render(Shader<Gui> shader, int mouseX, int mouseY)
 		{
 
 		}

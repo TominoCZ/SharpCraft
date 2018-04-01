@@ -15,7 +15,7 @@ namespace SharpCraft.gui
             DoesGuiPauseGame = false;
         }
 
-        public override void render(Shader<Gui> shader, int mouseX, int mouseY)
+        public override void Render(Shader<Gui> shader, int mouseX, int mouseY)
         {
             renderTexture(shader, gui, 0, 0);
         }

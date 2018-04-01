@@ -5,7 +5,6 @@ using OpenTK;
 using OpenTK.Graphics.OpenGL;
 using SharpCraft.model;
 using SharpCraft.render.shader.module;
-using SharpCraft.render.shader.uniform;
 
 namespace SharpCraft.render.shader
 {
@@ -87,7 +86,7 @@ namespace SharpCraft.render.shader
 		{
 			foreach (var m in _modules)
 			{
-				m.UpdateInstanceUniforms(transform,  renderable);
+				m.UpdateInstanceUniforms(transform, renderable);
 			}
 		}
 

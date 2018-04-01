@@ -12,7 +12,7 @@ namespace SharpCraft.gui
             this.crosshairTexture = crosshairTexture;
         }
 
-        public override void render(Shader<Gui> shader, int mouseX, int mouseY)
+        public override void Render(Shader<Gui> shader, int mouseX, int mouseY)
         {
             renderTexture(shader, crosshairTexture);
         }
