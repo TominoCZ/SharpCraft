@@ -42,7 +42,6 @@ namespace SharpCraft.render.shader.module
 		{
 			Projection?.Update(SharpCraft.Instance.CreateProjectionMatrix());
 			View?.Update(SharpCraft.Instance.Camera.View);
-
 		}
 
 		public override void UpdateInstanceUniforms(Matrix4 transform, T renderable)
