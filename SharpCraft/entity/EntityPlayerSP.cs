@@ -109,16 +109,17 @@ namespace SharpCraft.entity
                     return true;
                 }
 
-                var addedCount = dropped.Count + stack.Count;
-
-                if (dropped.Item == stack.Item && addedCount <= 64)
+                if (dropped.Item == stack.Item && stack.Count <= 64)
                 {
-                    stack.Count = addedCount;
-                    return true;
+                    var toPickUp = 64 - stack.Count;
+
+                    stack.Count += toPickUp;
+
+                    dropped.Count -= toPickUp;
                 }
             }
 
-            return false;
+            return dropped.IsEmpty;
         }
 
         public void OnClick(MouseButton btn)

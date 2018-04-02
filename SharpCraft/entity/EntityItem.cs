@@ -49,44 +49,47 @@ namespace SharpCraft.entity
                 return;
             }
 
-            if (entityAge >= 10)
+            if (entityAge < 5)
+                return;
+
+            var otherDrops = world.Entities.OfType<EntityItem>()
+                .AsParallel()
+                .OrderBy(entity => MathUtil.Distance(entity.pos, pos))
+                .Where(
+                    e => MathUtil.Distance(e.pos, pos) <= 1 &&
+                         e != this &&
+                         e.isAlive &&
+                         e.stack.Item.item == stack.Item.item &&
+                         e.stack.Meta == stack.Meta &&
+                         e.stack.Count + stack.Count <= 64).ToList();
+
+            if (otherDrops.Count > 0)
             {
-                //TODO change this for multiplayer
-                var players = world.Entities.OfType<EntityPlayerSP>()
-                                   .AsParallel()
-                                   .OrderBy(entity => MathUtil.Distance(entity.pos, pos))
-                                   .Where(e => MathUtil.Distance(e.pos, pos) <= 2);
+                var closest = otherDrops.First();
 
-                foreach (var player in players)
+                if (closest.isAlive)
                 {
-                    if (player.OnPickup(stack))
-                        SetDead();
+                    closest.stack.Count += stack.Count;
+
+                    SetDead();
+
+                    closest.TeleportTo((closest.pos + pos) / 2);
                 }
+            }
 
-                var otherDrops = world.Entities.OfType<EntityItem>()
-                    .AsParallel()
-                    .OrderBy(entity => MathUtil.Distance(entity.pos, pos))
-                    .Where(
-                        e => MathUtil.Distance(e.pos, pos) <= 1 &&
-                        e != this &&
-                        e.isAlive &&
-                        e.stack.Item.item == stack.Item.item &&
-                        e.stack.Meta == stack.Meta &&
-                        e.stack.Count + stack.Count <= 64).ToList();
+            if (entityAge < 10)
+                return;
 
-                if (otherDrops.Count > 0)
-                {
-                    var closest = otherDrops.First();
+            //TODO change this for multiplayer
+            var players = world.Entities.OfType<EntityPlayerSP>()
+                               .AsParallel()
+                               .OrderBy(entity => MathUtil.Distance(entity.pos, pos))
+                               .Where(e => MathUtil.Distance(e.pos, pos) <= 2);
 
-                    if (closest.isAlive)
-                    {
-                        closest.stack.Count += stack.Count;
-
-                        SetDead();
-
-                        closest.TeleportTo((closest.pos + pos) / 2);
-                    }
-                }
+            foreach (var player in players)
+            {
+                if (player.OnPickup(stack))
+                    SetDead();
             }
         }
 
