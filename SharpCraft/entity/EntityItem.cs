@@ -33,7 +33,7 @@ namespace SharpCraft.entity
             collisionBoundingBox = new AxisAlignedBB(0.25f);
             boundingBox = collisionBoundingBox.offset(pos - Vector3.One * collisionBoundingBox.size / 2);
 
-            gravity = 1.45f;
+            gravity = 1.425f;
             isAlive = stack != null && !stack.IsEmpty;
         }
 
@@ -43,7 +43,7 @@ namespace SharpCraft.entity
 
             entityAgeLast = entityAge;
 
-            if (onGround && ++entityAge >= 20 * 50 * 60 + 10) //stay on ground for a minute, 20 ticks as a pick up delay
+            if (++entityAge >= 20 * 50 * 60 + 10) //stay on ground for a minute, 20 ticks as a pick up delay
             {
                 SetDead();
                 return;
@@ -135,7 +135,7 @@ namespace SharpCraft.entity
                     var t2 = Matrix4.CreateTranslation(-vec);
                     var t3 = Matrix4.CreateTranslation(posO);
 
-                    var mat = t3 * t2 * (x * z * y * s) * t;
+                    var mat = t3 * t2 * (z * y * x * s) * t;
 
                     _shader.UpdateGlobalUniforms();
                     _shader.UpdateModelUniforms(model.RawModel);

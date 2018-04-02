@@ -45,7 +45,7 @@ namespace SharpCraft.particle
 
             lastParticleScale = this.particleScale *= MathUtil.NextFloat(1, 1.5f);
 
-            rotStep = new Vector3(MathUtil.NextFloat(), MathUtil.NextFloat(), MathUtil.NextFloat()).Normalized() * MathHelper.Pi * 20;
+            rotStep = new Vector3(MathUtil.NextFloat(), MathUtil.NextFloat(), MathUtil.NextFloat()).Normalized() * MathHelper.Pi * 22;
         }
 
         public override void Update()
@@ -69,7 +69,7 @@ namespace SharpCraft.particle
                     SetDead();
             }
 
-            rot += rotStep * (motion.Xz * 4).LengthFast;
+            rot += rotStep * (motion.Xz * 5).LengthFast;
 
             motion.Y -= 0.04f * gravity;
 

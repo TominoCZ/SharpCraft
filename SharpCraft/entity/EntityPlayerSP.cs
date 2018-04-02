@@ -87,12 +87,12 @@ namespace SharpCraft.entity
             }
         }
 
-        public void setItemStackInHotbar(int index, ItemStack stack)
+        public void SetItemStackInHotbar(int index, ItemStack stack)
         {
             hotbar[index % 9] = stack;
         }
 
-        public void setItemStackInSelectedSlot(ItemStack stack)
+        public void SetItemStackInSelectedSlot(ItemStack stack)
         {
             hotbar[HotbarIndex] = stack;
         }
@@ -105,7 +105,7 @@ namespace SharpCraft.entity
 
                 if (stack == null || stack.IsEmpty)
                 {
-                    setItemStackInHotbar(i, dropped.Copy());
+                    SetItemStackInHotbar(i, dropped.Copy());
                     return true;
                 }
 
@@ -177,7 +177,7 @@ namespace SharpCraft.entity
             if (!(moo.hit is EnumBlock))
                 return;
 
-            var stack = getEquippedItemStack();
+            var stack = GetEquippedItemStack();
 
             if (!(stack?.Item is ItemBlock itemBlock))
                 return;
@@ -225,46 +225,46 @@ namespace SharpCraft.entity
 
                     if (stack?.Item?.item == clickedBlock && stack.Meta == clickedMeta)
                     {
-                        setSelectedSlot(i);
+                        SetSelectedSlot(i);
                         inHotbar = true;
                         break;
                     }
                 }
 
                 if (!inHotbar)
-                    setItemStackInSelectedSlot(new ItemStack(new ItemBlock(clickedBlock), 1, world.GetMetadata(moo.blockPos)));
+                    SetItemStackInSelectedSlot(new ItemStack(new ItemBlock(clickedBlock), 1, world.GetMetadata(moo.blockPos)));
             }
         }
 
         public void DropHeldItem()
         {
-            var stack = getEquippedItemStack();
+            var stack = GetEquippedItemStack();
 
             if (stack != null && !stack.IsEmpty)
             {
                 world?.AddEntity(new EntityItem(world, SharpCraft.Instance.Camera.pos - Vector3.UnitY * 0.35f,
-                    SharpCraft.Instance.Camera.getLookVec() * 0.75f + Vector3.UnitY * 0.2f, stack.CopyUnit()));
+                    SharpCraft.Instance.Camera.GetLookVec() * 0.75f + Vector3.UnitY * 0.2f, stack.CopyUnit()));
 
                 stack.Count--;
             }
         }
 
-        public ItemStack getEquippedItemStack()
+        public ItemStack GetEquippedItemStack()
         {
             return hotbar[HotbarIndex];
         }
 
-        public void setSelectedSlot(int index)
+        public void SetSelectedSlot(int index)
         {
             HotbarIndex = index % 9;
         }
 
-        public void selectNextItem()
+        public void SelectNextItem()
         {
             HotbarIndex = (HotbarIndex + 1) % 9;
         }
 
-        public void selectPreviousItem()
+        public void SelectPreviousItem()
         {
             if (HotbarIndex <= 0)
                 HotbarIndex = 8;

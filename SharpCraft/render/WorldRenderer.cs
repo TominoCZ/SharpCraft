@@ -27,6 +27,9 @@ namespace SharpCraft.render
 
         private int _renderDistance;
 
+        private Vector3 lookVec;
+        private Vector3 lastLookVec;
+
         public int RenderDistance
         {
             get => _renderDistance;
@@ -42,6 +45,9 @@ namespace SharpCraft.render
 
         public void Update()
         {
+            lastLookVec = lookVec;
+            lookVec = SharpCraft.Instance.Camera.GetLookVec();
+
             _hue = (_hue + 5) % 360;
 
             _selectionOutlineColor = MathUtil.Hue(_hue);
@@ -65,10 +71,8 @@ namespace SharpCraft.render
 
             if (SharpCraft.Instance.Player != null)
             {
-                GL.Disable(EnableCap.CullFace);
                 GL.Enable(EnableCap.DepthClamp);
-                RenderSelectedItemBlock();
-                GL.Enable(EnableCap.CullFace);
+                RenderSelectedItemBlock(partialTicks);
                 GL.Disable(EnableCap.DepthClamp);
             }
         }
@@ -137,9 +141,9 @@ namespace SharpCraft.render
             _selectionOutline.Unbind();
         }
 
-        private void RenderSelectedItemBlock()
+        private void RenderSelectedItemBlock(float partialTicks)
         {
-            var stack = SharpCraft.Instance.Player.getEquippedItemStack();
+            var stack = SharpCraft.Instance.Player.GetEquippedItemStack();
 
             if (!stack?.IsEmpty == true)
             {
@@ -147,14 +151,25 @@ namespace SharpCraft.render
                 {
                     var model = ModelRegistry.getModelForBlock(itemBlock.getBlock(), stack.Meta);
 
+                    var partialLookVec = lastLookVec + (lookVec - lastLookVec) * partialTicks;
+                    var rotVec = new Vector2(-SharpCraft.Instance.Camera.pitch, -SharpCraft.Instance.Camera.yaw);
+
+                    var pos_o = new Vector3(1.25f, 1.25f, 1.25f);
+
+                    var r = Matrix4.CreateRotationX(rotVec.X) * Matrix4.CreateRotationY(rotVec.Y);
+
+                    var s = Matrix4.CreateScale(0.5f);
+                    var t0 = Matrix4.CreateTranslation(Vector3.One * -0.5f);
+                    var t1 = Matrix4.CreateTranslation(partialLookVec * pos_o);
+                    var t2 = Matrix4.CreateTranslation(SharpCraft.Instance.Camera.pos);
+
+                    var mat = t0 * r * s * t1 * t2;
+
                     model.Bind();
 
                     model.Shader.UpdateGlobalUniforms();
                     model.Shader.UpdateModelUniforms(model.RawModel);
-                    model.Shader.UpdateInstanceUniforms(MatrixHelper.CreateTransformationMatrix(
-                        new Vector3(0.04125f, -0.08f, -0.1f) + SharpCraft.Instance.Camera.getLookVec() / 250,
-                        new Vector3(0, 45, 0),
-                        0.045f), model);
+                    model.Shader.UpdateInstanceUniforms(mat, model);
 
                     model.RawModel.Render(PrimitiveType.Quads);
 

@@ -74,7 +74,7 @@ namespace SharpCraft.render
             Projection = matrix;
         }
 
-        public Vector3 getLookVec()
+        public Vector3 GetLookVec()
         {
             return MathUtil.Rotate(Vector3.UnitZ, _pitch, _yaw, 0).Normalized();
         }

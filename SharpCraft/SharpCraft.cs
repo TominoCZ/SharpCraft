@@ -187,12 +187,12 @@ namespace SharpCraft
 
                 World.AddEntity(Player);
 
-                Player.setItemStackInHotbar(0, new ItemStack(new ItemBlock(EnumBlock.CRAFTING_TABLE)));
-                Player.setItemStackInHotbar(1, new ItemStack(new ItemBlock(EnumBlock.FURNACE)));
-                Player.setItemStackInHotbar(2, new ItemStack(new ItemBlock(EnumBlock.COBBLESTONE)));
-                Player.setItemStackInHotbar(3, new ItemStack(new ItemBlock(EnumBlock.PLANKS)));
-                Player.setItemStackInHotbar(4, new ItemStack(new ItemBlock(EnumBlock.GLASS)));
-                Player.setItemStackInHotbar(5, new ItemStack(new ItemBlock(EnumBlock.XRAY)));
+                Player.SetItemStackInHotbar(0, new ItemStack(new ItemBlock(EnumBlock.CRAFTING_TABLE)));
+                Player.SetItemStackInHotbar(1, new ItemStack(new ItemBlock(EnumBlock.FURNACE)));
+                Player.SetItemStackInHotbar(2, new ItemStack(new ItemBlock(EnumBlock.COBBLESTONE)));
+                Player.SetItemStackInHotbar(3, new ItemStack(new ItemBlock(EnumBlock.PLANKS)));
+                Player.SetItemStackInHotbar(4, new ItemStack(new ItemBlock(EnumBlock.GLASS)));
+                Player.SetItemStackInHotbar(5, new ItemStack(new ItemBlock(EnumBlock.XRAY)));
             }
             else
             {
@@ -222,9 +222,9 @@ namespace SharpCraft
             if (Player != null && GuiScreen == null)
             {
                 if (wheelValue < _mouseWheelLast)
-                    Player.selectNextItem();
+                    Player.SelectNextItem();
                 else if (wheelValue > _mouseWheelLast)
-                    Player.selectPreviousItem();
+                    Player.SelectPreviousItem();
 
                 if (World?.GetChunk(new BlockPos(Player.pos).ChunkPos()) == null)
                     Player.motion = Vector3.Zero;
@@ -305,7 +305,7 @@ namespace SharpCraft
                                 var bb = model.boundingBox.offset(pos.ToVec());
 
                                 var hitSomething = RayHelper.rayIntersectsBB(Camera.pos,
-                                    Camera.getLookVec(), bb, out var hitPos, out var normal);
+                                    Camera.GetLookVec(), bb, out var hitPos, out var normal);
 
                                 if (hitSomething)
                                 {
@@ -628,7 +628,7 @@ namespace SharpCraft
                     {
                         if (e.Key == Key.Number1 + i)
                         {
-                            Player?.setSelectedSlot(i);
+                            Player?.SetSelectedSlot(i);
 
                             break;
                         }
