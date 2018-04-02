@@ -76,7 +76,7 @@ namespace SharpCraft.render
 
         public Vector3 GetLookVec()
         {
-            return MathUtil.Rotate(Vector3.UnitZ, _pitch, _yaw, 0).Normalized();
+            return MathUtil.Rotate(Vector3.UnitZ, pitch, _yaw, 0).Normalized();
         }
 
         public Vector2 left

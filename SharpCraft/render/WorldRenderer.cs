@@ -30,6 +30,9 @@ namespace SharpCraft.render
         private Vector3 lookVec;
         private Vector3 lastLookVec;
 
+        private Vector3 motion;
+        private Vector3 lastMotion;
+
         public int RenderDistance
         {
             get => _renderDistance;
@@ -46,6 +49,9 @@ namespace SharpCraft.render
         public void Update()
         {
             lastLookVec = lookVec;
+            lastMotion = motion;
+
+            motion = SharpCraft.Instance.Player.motion;
             lookVec = SharpCraft.Instance.Camera.GetLookVec();
 
             _hue = (_hue + 5) % 360;
@@ -71,9 +77,7 @@ namespace SharpCraft.render
 
             if (SharpCraft.Instance.Player != null)
             {
-                GL.Enable(EnableCap.DepthClamp);
                 RenderSelectedItemBlock(partialTicks);
-                GL.Disable(EnableCap.DepthClamp);
             }
         }
 
@@ -152,18 +156,21 @@ namespace SharpCraft.render
                     var model = ModelRegistry.getModelForBlock(itemBlock.getBlock(), stack.Meta);
 
                     var partialLookVec = lastLookVec + (lookVec - lastLookVec) * partialTicks;
+                    var partialMotion = lastMotion + (motion - lastMotion) * partialTicks;
+
                     var rotVec = new Vector2(-SharpCraft.Instance.Camera.pitch, -SharpCraft.Instance.Camera.yaw);
 
-                    var pos_o = new Vector3(1.25f, 1.25f, 1.25f);
+                    var offset = new Vector3(1.475f, -1.3f, 0.25f) - partialMotion * Vector3.UnitY * 0.175f;
 
-                    var r = Matrix4.CreateRotationX(rotVec.X) * Matrix4.CreateRotationY(rotVec.Y);
+                    var r1 = Matrix4.CreateRotationY(MathHelper.DegreesToRadians(45));
+                    var r2 = Matrix4.CreateRotationX(rotVec.X) * Matrix4.CreateRotationY(rotVec.Y);
 
-                    var s = Matrix4.CreateScale(0.5f);
+                    var s = Matrix4.CreateScale(0.575f);
                     var t0 = Matrix4.CreateTranslation(Vector3.One * -0.5f);
-                    var t1 = Matrix4.CreateTranslation(partialLookVec * pos_o);
-                    var t2 = Matrix4.CreateTranslation(SharpCraft.Instance.Camera.pos);
+                    var t1 = Matrix4.CreateTranslation(SharpCraft.Instance.Camera.pos + SharpCraft.Instance.Camera.GetLookVec() + partialLookVec * 0.175f);
+                    var t_final = Matrix4.CreateTranslation(offset);
 
-                    var mat = t0 * r * s * t1 * t2;
+                    var mat = t0 * r1 * t_final * r2 * s * t1;
 
                     model.Bind();
 

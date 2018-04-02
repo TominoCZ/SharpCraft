@@ -52,5 +52,5 @@ void main(void) {
 	float diffuse_value3 = max(dot(unitNormal, light3), 0.35);
 	float diffuse_value4 = max(dot(unitNormal, light4), 0.25);
 	
-	brightness = (diffuse_value1 + diffuse_value2 + diffuse_value3 + diffuse_value4) / 3;
+	brightness = (diffuse_value1 + diffuse_value2 + diffuse_value3 + diffuse_value4) / 3.25;
 }

@@ -377,57 +377,48 @@ namespace SharpCraft
                     if (!IsDisposed && Visible)
                     {
                         GetMouseOverObject();
-                        World?.update(Player, WorldRenderer.RenderDistance);
+                        World?.Update(Player, WorldRenderer.RenderDistance);
                     }
 
                     Thread.Sleep(50);
                 }
             })
             { IsBackground = true }.Start();
+        }
 
-            new Thread(() =>
+        private void HandleMouseMovement()
+        {
+            var state = Mouse.GetState();
+
+            var point = new Point(state.X, state.Y);
+
+            if (AllowInput())
             {
-                while (true)
+                var delta = new Point(_mouseLast.X - point.X, _mouseLast.Y - point.Y);
+
+                Camera.yaw -= delta.X / 1000f * _sensitivity;
+                Camera.pitch -= delta.Y / 1000f * _sensitivity;
+
+                ResetMouse();
+
+                if (KeysDown.Contains(Key.Space) && !_wasSpaceDown && Player.onGround)
                 {
-                    if (!IsDisposed && Visible)
-                    {
-                        var state = Mouse.GetState();
-
-                        var point = new Point(state.X, state.Y);
-
-                        if (AllowInput())
-                        {
-                            var delta = new Point(_mouseLast.X - point.X, _mouseLast.Y - point.Y);
-
-                            Camera.yaw -= delta.X / 1000f * _sensitivity;
-                            Camera.pitch -= delta.Y / 1000f * _sensitivity;
-
-                            ResetMouse();
-
-                            if (KeysDown.Contains(Key.Space) && !_wasSpaceDown && Player.onGround)
-                            {
-                                _wasSpaceDown = true;
-                                Player.motion.Y = 0.475F;
-                            }
-                            else if ((!KeysDown.Contains(Key.Space) || Player.onGround) && _wasSpaceDown)
-                                _wasSpaceDown = false;
-                        }
-
-                        _mouseLast = point;
-
-                        if (_frameTimer.ElapsedMilliseconds >= 1000)
-                        {
-                            _frameTimer.Restart();
-
-                            Title = $"{_title} - FPS: {_fpsCounter}";
-                            _fpsCounter = 0;
-                        }
-                    }
-
-                    Thread.Sleep(3);
+                    _wasSpaceDown = true;
+                    Player.motion.Y = 0.475F;
                 }
-            })
-            { IsBackground = true }.Start();
+                else if ((!KeysDown.Contains(Key.Space) || Player.onGround) && _wasSpaceDown)
+                    _wasSpaceDown = false;
+            }
+
+            _mouseLast = point;
+
+            if (_frameTimer.ElapsedMilliseconds >= 1000)
+            {
+                _frameTimer.Restart();
+
+                Title = $"{_title} - FPS: {_fpsCounter}";
+                _fpsCounter = 0;
+            }
         }
 
         public void RunGlContext(Method m)
@@ -519,6 +510,8 @@ namespace SharpCraft
 
                 _timer.Restart();
             }
+
+            HandleMouseMovement();
 
             Camera.UpdateViewMatrix();
 

@@ -54,9 +54,9 @@ namespace SharpCraft.entity
 
             var otherDrops = world.Entities.OfType<EntityItem>()
                 .AsParallel()
-                .OrderBy(entity => MathUtil.Distance(entity.pos, pos))
+                .OrderBy(entity => MathUtil.Distance(entity.pos + entity.motion, pos + motion))
                 .Where(
-                    e => MathUtil.Distance(e.pos, pos) <= 1 &&
+                    e => MathUtil.Distance(e.pos + e.motion, pos + motion) <= 1.5f &&
                          e != this &&
                          e.isAlive &&
                          e.stack.Item.item == stack.Item.item &&
@@ -67,13 +67,13 @@ namespace SharpCraft.entity
             {
                 var closest = otherDrops.First();
 
-                if (closest.isAlive)
+                if (closest.isAlive && entityAge <= closest.entityAge) //means that this current entity was just tghrown by a player
                 {
                     closest.stack.Count += stack.Count;
+                    closest.motion = motion;
+                    closest.TeleportTo(pos);
 
                     SetDead();
-
-                    closest.TeleportTo((closest.pos + pos) / 2);
                 }
             }
 
@@ -118,11 +118,26 @@ namespace SharpCraft.entity
                 GL.ActiveTexture(TextureUnit.Texture0);
                 GL.BindTexture(TextureTarget.Texture2D, TextureManager.blockTextureAtlasID);
 
-                for (int i = 0; i == 0 || i < stack.Count / 16; i++)
+                var itemsToRender = 1;
+
+                if (stack.Count > 16)
+                {
+                    if (stack.Count > 32)
+                    {
+                        if (stack.Count == 64)
+                            itemsToRender = 4;
+                    }
+                    else
+                        itemsToRender = 3;
+                }
+                else
+                    itemsToRender = 2;
+
+                for (int i = 0; i < itemsToRender; i++)
                 {
                     var rot = Vector3.UnitY * partialTime * 3;
                     var pos = partialPos - (Vector3.UnitX * 0.125f + Vector3.UnitZ * 0.125f) + Vector3.UnitY * time;
-                    var posO = Vector3.One * (i / 16f);
+                    var pos_o = Vector3.One * (i / 8f);
 
                     var x = Matrix4.CreateRotationX(MathHelper.DegreesToRadians(rot.X));
                     var y = Matrix4.CreateRotationY(MathHelper.DegreesToRadians(rot.Y));
@@ -133,7 +148,7 @@ namespace SharpCraft.entity
                     var s = Matrix4.CreateScale(0.25f);
                     var t = Matrix4.CreateTranslation(pos + vec * 0.25f);
                     var t2 = Matrix4.CreateTranslation(-vec);
-                    var t3 = Matrix4.CreateTranslation(posO);
+                    var t3 = Matrix4.CreateTranslation(pos_o);
 
                     var mat = t3 * t2 * (z * y * x * s) * t;
 

@@ -57,7 +57,7 @@ namespace SharpCraft.world
 
         public void UpdateEntities()
         {
-            for (var i = 0; i < Entities.Count; i++)
+            for (var i = Entities.Count - 1; i >= 0; i--)
             {
                 var e = Entities[i];
 
@@ -73,22 +73,7 @@ namespace SharpCraft.world
 
         public List<AxisAlignedBB> GetIntersectingEntitiesBBs(AxisAlignedBB with)
         {
-            var bbs = new List<AxisAlignedBB>();
-
-            for (var i = 0; i < Entities.Count; i++)
-            {
-                var entity = Entities[i];
-
-                if (entity is EntityItem)
-                    continue;
-
-                var bb = entity.getEntityBoundingBox();
-
-                if (bb.IntersectsWith(with))
-                    bbs.Add(bb);
-            }
-
-            return bbs;
+            return (from entity in Entities where !(entity is EntityItem) select entity.getEntityBoundingBox() into bb where bb.IntersectsWith(with) select bb).ToList();
         }
 
         public List<AxisAlignedBB> GetBlockCollisionBoxes(AxisAlignedBB box)
@@ -333,7 +318,7 @@ namespace SharpCraft.world
             return GetNeighbourChunks(pos).All(chunk => chunk != null && chunk.HasData);
         }
 
-        public void update(EntityPlayerSP player, int renderDistance)
+        public void Update(EntityPlayerSP player, int renderDistance)
         {
             if (player == null) return;
 
