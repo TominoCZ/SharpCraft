@@ -11,7 +11,7 @@ namespace SharpCraft.model
         {
             var cube = ModelHelper.createTexturedCubeModel(EnumBlock.MISSING);
 
-            rawModel = ModelManager.loadBlockModelToVAO(cube);
+            RawModel = ModelManager.loadBlockModelToVAO(cube);
         }
     }
 }

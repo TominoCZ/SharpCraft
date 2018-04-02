@@ -97,11 +97,11 @@ namespace SharpCraft.entity
         {
         }
 
-        public void teleportTo(Vector3 pos)
+        public void TeleportTo(Vector3 pos)
         {
             this.pos = lastPos = pos;
 
-            boundingBox = collisionBoundingBox.offset(pos + Vector3.UnitY * collisionBoundingBox.size.Y / 2);
+            boundingBox = collisionBoundingBox.offset(pos - Vector3.UnitX * collisionBoundingBox.size.X / 2 - Vector3.UnitZ * collisionBoundingBox.size.Z / 2);
         }
 
         public virtual void SetDead()

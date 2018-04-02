@@ -33,7 +33,7 @@ namespace SharpCraft.model
         {
             if (fragmentPerShader.TryRemove(shader, out var removed))
             {
-                removed.destroy();
+                removed.Destroy();
                 //_shaders.Remove(shader);
             }
         }

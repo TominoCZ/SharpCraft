@@ -592,7 +592,6 @@ namespace SharpCraft
                     }
                     else
                         WindowState = _lastWindowState;
-
                     break;
             }
 
@@ -607,7 +606,7 @@ namespace SharpCraft
                     case Key.R:
                         if (e.Control)
                         {
-                            //ShaderManager.reload();
+                            Shader.ReloadAll();
                             SettingsManager.Load();
 
                             WorldRenderer.RenderDistance = SettingsManager.GetInt("renderdistance");
@@ -667,7 +666,7 @@ namespace SharpCraft
 
         protected override void OnClosing(CancelEventArgs e)
         {
-
+            Shader.DestroyAll();
             ModelManager.cleanup();
             TextureManager.cleanUp();
 

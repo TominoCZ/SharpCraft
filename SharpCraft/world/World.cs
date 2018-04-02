@@ -322,7 +322,7 @@ namespace SharpCraft.world
                         var height = chunk.GetHeightAtPos(MathUtil.ToLocal(pos.X, Chunk.ChunkSize), MathUtil.ToLocal(pos.Z, Chunk.ChunkSize));
 
                         if (entity.pos.Y < height)
-                            entity.teleportTo(new Vector3(entity.pos.X, entity.lastPos.Y = height, entity.pos.Z));
+                            entity.TeleportTo(new Vector3(entity.pos.X, entity.lastPos.Y = height, entity.pos.Z));
                     }
                 }
             }

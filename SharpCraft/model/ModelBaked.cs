@@ -8,32 +8,32 @@ namespace SharpCraft.model
 {
 	public class ModelBaked<T> : IModelBaked<T>
 	{
-		public IModelRaw rawModel { get; protected set; }
-		public Shader<T> shader   { get; }
+		public IModelRaw RawModel { get; protected set; }
+		public Shader<T> Shader   { get; }
 
 		public ModelBaked(IModelRaw rawModel, Shader<T> shader)
 		{
-			this.rawModel = rawModel;
-			this.shader = shader;
+			RawModel = rawModel;
+			Shader = shader;
 		}
 
-		public void bind()
+		public void Bind()
 		{
-			if (rawModel == null)
+			if (RawModel == null)
 				return;
 
-			shader.bind();
+			Shader.Bind();
 
-			GL.BindVertexArray(rawModel.vaoID);
+			GL.BindVertexArray(RawModel.vaoID);
 
 			GL.EnableVertexAttribArray(0);
 			GL.EnableVertexAttribArray(1);
 			GL.EnableVertexAttribArray(2);
 		}
 
-		public void unbind()
+		public void Unbind()
 		{
-			if (rawModel == null)
+			if (RawModel == null)
 				return;
 
 			GL.BindVertexArray(0);
@@ -42,16 +42,16 @@ namespace SharpCraft.model
 			GL.EnableVertexAttribArray(1);
 			GL.EnableVertexAttribArray(2);
 
-			shader.unbind();
+			Shader.Unbind();
 		}
 
-		public void destroy()
+		public void Destroy()
 		{
-			shader.unbind();
+			Shader.Unbind();
 
-			for (var index = 0; index < rawModel.bufferIDs.Length; index++)
+			for (var index = 0; index < RawModel.bufferIDs.Length; index++)
 			{
-				var bufferId = rawModel.bufferIDs[index];
+				var bufferId = RawModel.bufferIDs[index];
 
 				GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
 				GL.DisableVertexAttribArray(index);
@@ -60,7 +60,7 @@ namespace SharpCraft.model
 			}
 
 			GL.BindVertexArray(0);
-			GL.DeleteVertexArray(rawModel.vaoID);
+			GL.DeleteVertexArray(RawModel.vaoID);
 		}
 	}
 }

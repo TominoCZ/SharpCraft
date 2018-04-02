@@ -31,7 +31,7 @@ namespace SharpCraft.particle
 
             var model = ModelRegistry.getModelForBlock(block, meta);
 
-            if (model.rawModel is ModelBlockRaw mbr)
+            if (model.RawModel is ModelBlockRaw mbr)
             {
                 var uvs = mbr.GetUVs(side);
 
@@ -91,13 +91,13 @@ namespace SharpCraft.particle
             var partialScale = lastParticleScale + (particleScale - lastParticleScale) * particalTicks;
 
             var model = ParticleRenderer.ParticleModel;
-	        model.shader.UpdateGlobalUniforms();
-	        model.shader.UpdateModelUniforms(null);
-	        model.shader.UpdateInstanceUniforms(MatrixHelper.createTransformationMatrix(partialPos - Vector3.One * partialScale / 2, partialRot, partialScale),this);
+	        model.Shader.UpdateGlobalUniforms();
+	        model.Shader.UpdateModelUniforms(null);
+	        model.Shader.UpdateInstanceUniforms(MatrixHelper.CreateTransformationMatrix(partialPos - Vector3.One * partialScale / 2, partialRot, partialScale),this);
 
             GL.ActiveTexture(TextureUnit.Texture0);
             GL.BindTexture(TextureTarget.Texture2D, textureID);
-            model.rawModel.Render(PrimitiveType.Quads);
+            model.RawModel.Render(PrimitiveType.Quads);
         }
     }
 }

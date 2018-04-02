@@ -14,9 +14,9 @@ namespace SharpCraft.render.shader.shaders
 		{
 		}
 
-		protected override void registerUniforms()
+		protected override void RegisterUniforms()
 		{
-			base.registerUniforms();
+			base.RegisterUniforms();
 			UVmin = new UniformVec2(GetUniformId("UVmin"));
 			UVmax = new UniformVec2(GetUniformId("UVmax"));
 			alpha = new UniformFloat(GetUniformId("alpha"));

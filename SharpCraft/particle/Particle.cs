@@ -77,13 +77,13 @@ namespace SharpCraft.particle
 
             var model = ParticleRenderer.ParticleModel;
 
-	        model.shader.UpdateGlobalUniforms();
-	        model.shader.UpdateModelUniforms(null);
-	        model.shader.UpdateInstanceUniforms(MatrixHelper.createTransformationMatrix(partialPos - Vector3.One * partialScale / 2, Vector3.Zero, partialScale),this);
+	        model.Shader.UpdateGlobalUniforms();
+	        model.Shader.UpdateModelUniforms(null);
+	        model.Shader.UpdateInstanceUniforms(MatrixHelper.CreateTransformationMatrix(partialPos - Vector3.One * partialScale / 2, Vector3.Zero, partialScale),this);
 
             GL.ActiveTexture(TextureUnit.Texture0);
             GL.BindTexture(TextureTarget.Texture2D, textureID);
-            model.rawModel.Render(PrimitiveType.Quads);
+            model.RawModel.Render(PrimitiveType.Quads);
         }
 
 	    public float GetAlpha()

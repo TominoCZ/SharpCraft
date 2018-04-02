@@ -97,21 +97,23 @@ namespace SharpCraft.entity
             hotbar[HotbarIndex] = stack;
         }
 
-        public bool OnPickup(ItemStack stack)
+        public bool OnPickup(ItemStack dropped)
         {
             for (var i = 0; i < hotbar.Length; i++)
             {
-                var itemStack = hotbar[i];
+                var stack = hotbar[i];
 
-                if (itemStack == null || itemStack.IsEmpty)
+                if (stack == null || stack.IsEmpty)
                 {
-                    setItemStackInHotbar(i, stack);
+                    setItemStackInHotbar(i, dropped.Copy());
                     return true;
                 }
 
-                if (stack.Item == itemStack.Item && stack.Count < 63)
+                var addedCount = dropped.Count + stack.Count;
+
+                if (dropped.Item == stack.Item && addedCount <= 64)
                 {
-                    itemStack.Count++;
+                    stack.Count = addedCount;
                     return true;
                 }
             }

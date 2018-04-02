@@ -19,9 +19,9 @@ namespace SharpCraft.render.shader.shaders
 			_updateTimer = Stopwatch.StartNew();
 		}
 
-		protected override void registerUniforms()
+		protected override void RegisterUniforms()
 		{
-			base.registerUniforms();
+			base.RegisterUniforms();
 			colorIn=new UniformVec4(GetUniformId("colorIn"));
 		}
 

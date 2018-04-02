@@ -147,14 +147,14 @@ namespace SharpCraft.world.chunk
                 var chunkFragmentModel = _model.getFragmentModelWithShader(shader);
                 if (chunkFragmentModel == null) continue;
 
-                chunkFragmentModel.bind();
+                chunkFragmentModel.Bind();
 	            shader.UpdateGlobalUniforms();
 	            shader.UpdateModelUniforms(null);
-	            shader.UpdateInstanceUniforms(MatrixHelper.createTransformationMatrix(Pos),null);
+	            shader.UpdateInstanceUniforms(MatrixHelper.CreateTransformationMatrix(Pos),null);
 
-                chunkFragmentModel.rawModel.Render(PrimitiveType.Quads);
+                chunkFragmentModel.RawModel.Render(PrimitiveType.Quads);
 
-                chunkFragmentModel.unbind();
+                chunkFragmentModel.Unbind();
             }
         }
 
@@ -205,8 +205,8 @@ namespace SharpCraft.world.chunk
 
                         lock (modelRaw)
                         {
-                            if (!modelRaw.TryGetValue(blockModel.shader, out quads))
-                                modelRaw.Add(blockModel.shader, quads = new List<RawQuad>());
+                            if (!modelRaw.TryGetValue(blockModel.Shader, out quads))
+                                modelRaw.Add(blockModel.Shader, quads = new List<RawQuad>());
                         }
 
                         foreach (var dir in FaceSides.AllSides)
@@ -217,7 +217,7 @@ namespace SharpCraft.world.chunk
 
                             if (blockO == EnumBlock.AIR || blockModelO.hasTransparency && !blockModel.hasTransparency)
                             {
-                                var quad = ((ModelBlockRaw)blockModel.rawModel)?.getQuadForSide(dir)?.offset(localPos);
+                                var quad = ((ModelBlockRaw)blockModel.RawModel)?.getQuadForSide(dir)?.offset(localPos);
 
                                 if (quad != null)
                                 {

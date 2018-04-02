@@ -23,7 +23,7 @@ namespace SharpCraft.model
 
             var cube = ModelHelper.createTexturedCubeModel(block);
 
-            rawModel = ModelManager.loadBlockModelToVAO(cube);
+            RawModel = ModelManager.loadBlockModelToVAO(cube);
 
             boundingBox = AxisAlignedBB.BLOCK_FULL;
         }

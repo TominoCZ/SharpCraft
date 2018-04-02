@@ -7,12 +7,12 @@ namespace SharpCraft.model
     {
         public ModelChunkFragment(Shader<ModelBlock> shader, List<RawQuad> quads) : base(null, shader)
         {
-            rawModel = ModelManager.loadModelToVAO(quads, 3);
+            RawModel = ModelManager.loadModelToVAO(quads, 3);
         }
 
         public void overrideData(List<RawQuad> quads)
         {
-            rawModel = ModelManager.overrideModelInVAO(rawModel.vaoID, rawModel.bufferIDs, quads, 3);
+            RawModel = ModelManager.overrideModelInVAO(RawModel.vaoID, RawModel.bufferIDs, quads, 3);
         }
     }
 }

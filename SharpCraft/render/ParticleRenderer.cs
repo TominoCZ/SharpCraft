@@ -35,12 +35,12 @@ namespace SharpCraft.render
 
         public void Render(float partialTicks)
         {
-            ParticleModel.bind();
+            ParticleModel.Bind();
 
             for (int i = 0; i < _particles.Count; i++)
                 _particles[i].Render(partialTicks);
 
-            ParticleModel.unbind();
+            ParticleModel.Unbind();
         }
 
         public void TickParticles()

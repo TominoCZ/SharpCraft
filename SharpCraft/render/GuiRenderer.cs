@@ -13,7 +13,7 @@ namespace SharpCraft.render
     {
         public static ModelRaw GUIquad;
 
-        private Shader<Gui> shader;
+        private Shader<Gui> _shader;
 
         private GuiCrosshair crosshairGui;
         private GuiHUD hudGui;
@@ -31,7 +31,7 @@ namespace SharpCraft.render
 
         public GuiRenderer()
         {
-            shader = new Shader<Gui>("gui");
+            _shader = new Shader<Gui>("gui");
 
             var texture = TextureManager.loadTexture("gui/cross", true);
 
@@ -49,7 +49,7 @@ namespace SharpCraft.render
             if (gui == null)
                 return;
 
-            shader.bind();
+            _shader.Bind();
 
             GL.Enable(EnableCap.Blend);
             GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
@@ -63,7 +63,7 @@ namespace SharpCraft.render
             var state = OpenTK.Input.Mouse.GetCursorState();
             var mouse = SharpCraft.Instance.PointToClient(new Point(state.X, state.Y));
             
-            gui.Render(shader, mouse.X, mouse.Y);
+            gui.Render(_shader, mouse.X, mouse.Y);
 
             GL.DisableVertexAttribArray(0);
             GL.DisableVertexAttribArray(1);
@@ -72,7 +72,7 @@ namespace SharpCraft.render
 
             GL.Enable(EnableCap.DepthTest);
 
-            shader.unbind();
+            _shader.Unbind();
         }
 
         public void renderCrosshair()
@@ -83,11 +83,6 @@ namespace SharpCraft.render
         public void renderHUD()
         {
             render(hudGui);
-        }
-
-        public void cleanUp()
-        {
-            shader.destroy();
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Dynamic;
 using System.IO;
 using OpenTK;
 using OpenTK.Graphics.OpenGL;
@@ -8,148 +9,174 @@ using SharpCraft.render.shader.module;
 
 namespace SharpCraft.render.shader
 {
-	public class Shader<TRenderable>
-	{
-		public static List<Shader<TRenderable>> list=new List<Shader<TRenderable>>();
+    public class Shader
+    {
+        private static List<dynamic> _shaders = new List<dynamic>();
 
-		private List<ShaderModule<TRenderable>> _modules = new List<ShaderModule<TRenderable>>();
+        public static void Register(dynamic shader)
+        {
+            _shaders.Add(shader);
+        }
 
-		private int program;
+        public static void ReloadAll()
+        {
+            for (var index = 0; index < _shaders.Count; index++)
+            {
+                var shader = _shaders[index];
 
-		private int vshID;
-		private int fshID;
+                shader.Reload(); //TODO WARNING: keep this name of the function the same
+            }
+        }
 
-		private string shaderName;
+        public static void DestroyAll()
+        {
+            for (var index = 0; index < _shaders.Count; index++)
+            {
+                var shader = _shaders[index];
 
-		public Shader(string shaderName)
-		{
-			this.shaderName = shaderName;
+                shader.Destroy(); //TODO WARNING: keep this name of the function the same
+            }
+        }
+    }
 
-			_modules.Add(new ShaderModule3D<TRenderable>(this));//todo auto detect
+    public class Shader<TRenderable>
+    {
+        private List<ShaderModule<TRenderable>> _modules = new List<ShaderModule<TRenderable>>();
 
-			init();
-			list.Add(this);
-		}
+        private int program;
 
-		private void init()
-		{
-			loadShader(shaderName);
+        private int vshID;
+        private int fshID;
 
-			//creates and ID for this program
-			program = GL.CreateProgram();
+        private string shaderName;
 
-			//attaches shaders to this program
-			GL.AttachShader(program, vshID);
-			GL.AttachShader(program, fshID);
+        public Shader(string shaderName)
+        {
+            this.shaderName = shaderName;
 
-			bindAttributes();
+            _modules.Add(new ShaderModule3D<TRenderable>(this));//todo auto detect
 
-			GL.LinkProgram(program);
-			GL.ValidateProgram(program);
+            Init();
+            Shader.Register(this);
+        }
 
-			registerUniforms();
-		}
+        private void Init()
+        {
+            LoadShader(shaderName);
 
+            //creates and ID for this program
+            program = GL.CreateProgram();
 
-		protected void bindAttributes()
-		{
-			bindAttribute(0, "position");
-			bindAttribute(1, "textureCoords");
-			bindAttribute(2, "normal");
-		}
+            //attaches shaders to this program
+            GL.AttachShader(program, vshID);
+            GL.AttachShader(program, fshID);
 
-		protected virtual void registerUniforms()
-		{
-			foreach (var m in _modules)
-			{
-				m.InitUniforms();
-			}
-		}
+            BindAttributes();
 
-		public virtual void UpdateGlobalUniforms()
-		{
-			foreach (var m in _modules)
-			{
-				m.UpdateGlobalUniforms();
-			}
-		}
+            GL.LinkProgram(program);
+            GL.ValidateProgram(program);
 
-		public virtual void UpdateModelUniforms(IModelRaw model)
-		{
-			foreach (var m in _modules)
-			{
-				m.UpdateModelUniforms(model);
-			}
-		}
+            RegisterUniforms();
+        }
 
-		public virtual void UpdateInstanceUniforms(Matrix4 transform, TRenderable renderable)
-		{
-			foreach (var m in _modules)
-			{
-				m.UpdateInstanceUniforms(transform, renderable);
-			}
-		}
+        protected void BindAttributes()
+        {
+            BindAttribute(0, "position");
+            BindAttribute(1, "textureCoords");
+            BindAttribute(2, "normal");
+        }
 
-		protected void bindAttribute(int attrib, string variable)
-		{
-			GL.BindAttribLocation(program, attrib, variable);
-		}
+        protected virtual void RegisterUniforms()
+        {
+            foreach (var m in _modules)
+            {
+                m.InitUniforms();
+            }
+        }
 
-		private void loadShader(string shaderName)
-		{
-			//vertex and fragment shader code
-			string vshCode = File.ReadAllText($"SharpCraft_Data/assets/shaders/{shaderName}.vsh");
-			string fshCode = File.ReadAllText($"SharpCraft_Data/assets/shaders/{shaderName}.fsh");
+        public virtual void UpdateGlobalUniforms()
+        {
+            foreach (var m in _modules)
+            {
+                m.UpdateGlobalUniforms();
+            }
+        }
 
-			//create IDs for shaders
-			vshID = GL.CreateShader(ShaderType.VertexShader);
-			fshID = GL.CreateShader(ShaderType.FragmentShader);
+        public virtual void UpdateModelUniforms(IModelRaw model)
+        {
+            foreach (var m in _modules)
+            {
+                m.UpdateModelUniforms(model);
+            }
+        }
 
-			//load shader codes into memory
-			GL.ShaderSource(vshID, vshCode);
-			GL.ShaderSource(fshID, fshCode);
+        public virtual void UpdateInstanceUniforms(Matrix4 transform, TRenderable renderable)
+        {
+            foreach (var m in _modules)
+            {
+                m.UpdateInstanceUniforms(transform, renderable);
+            }
+        }
 
-			//compile shaders
-			GL.CompileShader(vshID);
-			GL.CompileShader(fshID);
-		}
+        protected void BindAttribute(int attrib, string variable)
+        {
+            GL.BindAttribLocation(program, attrib, variable);
+        }
 
+        private void LoadShader(string shaderName)
+        {
+            //vertex and fragment shader code
+            string vshCode = File.ReadAllText($"SharpCraft_Data/assets/shaders/{shaderName}.vsh");
+            string fshCode = File.ReadAllText($"SharpCraft_Data/assets/shaders/{shaderName}.fsh");
 
-		public void reload()
-		{
-			destroy();
+            //create IDs for shaders
+            vshID = GL.CreateShader(ShaderType.VertexShader);
+            fshID = GL.CreateShader(ShaderType.FragmentShader);
 
-			init();
-		}
+            //load shader codes into memory
+            GL.ShaderSource(vshID, vshCode);
+            GL.ShaderSource(fshID, fshCode);
 
-		public void bind()
-		{
-			GL.UseProgram(program);
-		}
+            //compile shaders
+            GL.CompileShader(vshID);
+            GL.CompileShader(fshID);
+        }
 
-		public void unbind()
-		{
-			GL.UseProgram(0);
-		}
+        public void Bind()
+        {
+            GL.UseProgram(program);
+        }
 
-		public void destroy()
-		{
-			unbind();
+        public void Unbind()
+        {
+            GL.UseProgram(0);
+        }
 
-			GL.DetachShader(program, vshID);
-			GL.DetachShader(program, fshID);
+        public void Reload()
+        {
+            Destroy();
 
-			GL.DeleteShader(vshID);
-			GL.DeleteShader(fshID);
+            Init();
+        }
 
-			GL.DeleteProgram(program);
-		}
+        public void Destroy()
+        {
+            Unbind();
 
-		public int GetUniformId(string name)
-		{
-			int id = GL.GetUniformLocation(program, name);
-			if (id == -1) throw new ArgumentException($"Uniform {name} does not exist!");
-			return id;
-		}
-	}
+            GL.DetachShader(program, vshID);
+            GL.DetachShader(program, fshID);
+
+            GL.DeleteShader(vshID);
+            GL.DeleteShader(fshID);
+
+            GL.DeleteProgram(program);
+        }
+
+        public int GetUniformId(string name)
+        {
+            int id = GL.GetUniformLocation(program, name);
+            if (id == -1) throw new ArgumentException($"Uniform {name} does not exist!");
+            return id;
+        }
+    }
 }

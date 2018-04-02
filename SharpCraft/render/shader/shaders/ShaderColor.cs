@@ -13,9 +13,9 @@ namespace SharpCraft.render.shader.shaders
 		{
 		}
 
-		protected override void registerUniforms()
+		protected override void RegisterUniforms()
 		{
-			base.registerUniforms();
+			base.RegisterUniforms();
 
 		    color = new UniformVec4(GetUniformId("colorIn"));
 		}

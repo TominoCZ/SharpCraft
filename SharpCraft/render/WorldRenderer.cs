@@ -65,7 +65,11 @@ namespace SharpCraft.render
 
             if (SharpCraft.Instance.Player != null)
             {
+                GL.Disable(EnableCap.CullFace);
+                GL.Enable(EnableCap.DepthClamp);
                 RenderSelectedItemBlock();
+                GL.Enable(EnableCap.CullFace);
+                GL.Disable(EnableCap.DepthClamp);
             }
         }
 
@@ -83,31 +87,31 @@ namespace SharpCraft.render
 
         private void RenderChunkOutline(Chunk ch)
         {
-            var shader = _selectionOutline.shader;
+            var shader = _selectionOutline.Shader;
 
             var size = new Vector3(Chunk.ChunkSize, Chunk.ChunkHeight, Chunk.ChunkSize);
 
-            _selectionOutline.bind();
+            _selectionOutline.Bind();
             _selectionOutline.SetColor(Vector4.One);
 
             shader.UpdateGlobalUniforms();
-            shader.UpdateModelUniforms(_selectionOutline.rawModel);
-            shader.UpdateInstanceUniforms(MatrixHelper.createTransformationMatrix(ch.Pos, size), _selectionOutline);
+            shader.UpdateModelUniforms(_selectionOutline.RawModel);
+            shader.UpdateInstanceUniforms(MatrixHelper.CreateTransformationMatrix(ch.Pos, size), _selectionOutline);
 
             GL.Disable(EnableCap.CullFace);
             GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
 
-            _selectionOutline.rawModel.Render(PrimitiveType.Quads);
+            _selectionOutline.RawModel.Render(PrimitiveType.Quads);
 
             GL.Enable(EnableCap.CullFace);
             GL.PolygonMode(MaterialFace.Front, PolygonMode.Fill);
 
-            _selectionOutline.unbind();
+            _selectionOutline.Unbind();
         }
 
         private void RenderBlockSelectionOutline(World world, EnumBlock block, BlockPos pos)
         {
-            var shader = _selectionOutline.shader;
+            var shader = _selectionOutline.Shader;
             var bb = ModelRegistry.getModelForBlock(block, world.GetMetadata(pos))?.boundingBox;
 
             if (bb == null)
@@ -115,22 +119,22 @@ namespace SharpCraft.render
 
             var size = bb.size + Vector3.One * 0.0025f;
 
-            _selectionOutline.bind();
+            _selectionOutline.Bind();
             _selectionOutline.SetColor(_selectionOutlineColor);
 
             shader.UpdateGlobalUniforms();
-            shader.UpdateModelUniforms(_selectionOutline.rawModel);
-            shader.UpdateInstanceUniforms(MatrixHelper.createTransformationMatrix(pos.ToVec() - Vector3.One * 0.00175f, size), _selectionOutline);
+            shader.UpdateModelUniforms(_selectionOutline.RawModel);
+            shader.UpdateInstanceUniforms(MatrixHelper.CreateTransformationMatrix(pos.ToVec() - Vector3.One * 0.00175f, size), _selectionOutline);
 
             GL.Disable(EnableCap.CullFace);
             GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
 
-            _selectionOutline.rawModel.Render(PrimitiveType.Quads);
+            _selectionOutline.RawModel.Render(PrimitiveType.Quads);
 
             GL.Enable(EnableCap.CullFace);
             GL.PolygonMode(MaterialFace.Front, PolygonMode.Fill);
 
-            _selectionOutline.unbind();
+            _selectionOutline.Unbind();
         }
 
         private void RenderSelectedItemBlock()
@@ -143,17 +147,18 @@ namespace SharpCraft.render
                 {
                     var model = ModelRegistry.getModelForBlock(itemBlock.getBlock(), stack.Meta);
 
-                    model.bind();
-                    model.shader.UpdateGlobalUniforms();
-                    model.shader.UpdateModelUniforms(_selectionOutline.rawModel);
-                    model.shader.UpdateInstanceUniforms(MatrixHelper.createTransformationMatrix(
+                    model.Bind();
+
+                    model.Shader.UpdateGlobalUniforms();
+                    model.Shader.UpdateModelUniforms(model.RawModel);
+                    model.Shader.UpdateInstanceUniforms(MatrixHelper.CreateTransformationMatrix(
                         new Vector3(0.04125f, -0.08f, -0.1f) + SharpCraft.Instance.Camera.getLookVec() / 250,
                         new Vector3(0, 45, 0),
                         0.045f), model);
 
-                    model.rawModel.Render(PrimitiveType.Quads);
+                    model.RawModel.Render(PrimitiveType.Quads);
 
-                    model.unbind();
+                    model.Unbind();
                 }
             }
         }

@@ -23,7 +23,7 @@ namespace SharpCraft.gui
 		{
 			var ratio = new Vector2((float) tex.textureSize.Width / SharpCraft.Instance.ClientSize.Width, (float) tex.textureSize.Height / SharpCraft.Instance.ClientSize.Height);
 
-			var mat = MatrixHelper.createTransformationMatrix(tex.pos * 2, tex.scale * ratio);
+			var mat = MatrixHelper.CreateTransformationMatrix(tex.pos * 2, tex.scale * ratio);
 			shader.UpdateGlobalUniforms();
 			shader.UpdateModelUniforms(null);
 			shader.UpdateInstanceUniforms(mat, this);
@@ -40,7 +40,7 @@ namespace SharpCraft.gui
 
 		protected virtual void renderTexture(Shader<Gui> shader, GuiTexture tex, Vector2 scale, int x, int y)
 		{
-			shader.bind();
+			shader.Bind();
 			GL.BindVertexArray(GuiRenderer.GUIquad.vaoID);
 
 			var unit = new Vector2(1f / SharpCraft.Instance.ClientSize.Width, 1f / SharpCraft.Instance.ClientSize.Height);
@@ -56,7 +56,7 @@ namespace SharpCraft.gui
 
 			var pos = new Vector2(posX, posY) * unit;
 
-			var mat = MatrixHelper.createTransformationMatrix(pos * 2 - Vector2.UnitX + Vector2.UnitY, scale * new Vector2(width, height) * unit);
+			var mat = MatrixHelper.CreateTransformationMatrix(pos * 2 - Vector2.UnitX + Vector2.UnitY, scale * new Vector2(width, height) * unit);
 			shader.UpdateGlobalUniforms();
 			shader.UpdateModelUniforms(null);
 			shader.UpdateInstanceUniforms(mat,this);
@@ -68,13 +68,13 @@ namespace SharpCraft.gui
 
 			GL.BindVertexArray(0);
 
-			shader.unbind();
+			shader.Unbind();
 		}
 
 		protected virtual void renderBlock(EnumBlock block, float scale, int x, int y)
 		{
 			var UVs = TextureManager.getUVsFromBlock(block);
-			ModelManager.overrideModelUVsInVAO(_item.rawModel.bufferIDs[1], UVs.getUVForSide(FaceSides.South).ToArray());
+			ModelManager.overrideModelUVsInVAO(_item.RawModel.bufferIDs[1], UVs.getUVForSide(FaceSides.South).ToArray());
 
 			var unit = new Vector2(1f / SharpCraft.Instance.ClientSize.Width, 1f / SharpCraft.Instance.ClientSize.Height);
 
@@ -89,18 +89,18 @@ namespace SharpCraft.gui
 
 			var pos = new Vector2(posX, posY) * unit;
 
-			var mat = MatrixHelper.createTransformationMatrix(pos * 2 - Vector2.UnitX + Vector2.UnitY, scale * new Vector2(width, height) * unit);
+			var mat = MatrixHelper.CreateTransformationMatrix(pos * 2 - Vector2.UnitX + Vector2.UnitY, scale * new Vector2(width, height) * unit);
 
-			_item.bind();
-			_item.shader.UpdateGlobalUniforms();
-			_item.shader.UpdateModelUniforms(null);
-			_item.shader.UpdateInstanceUniforms(mat,null);
+			_item.Bind();
+			_item.Shader.UpdateGlobalUniforms();
+			_item.Shader.UpdateModelUniforms(null);
+			_item.Shader.UpdateInstanceUniforms(mat,null);
 
 			GL.ActiveTexture(TextureUnit.Texture0);
 			GL.BindTexture(TextureTarget.Texture2D, TextureManager.blockTextureAtlasID);
 			GL.DrawArrays(PrimitiveType.Quads, 0, 4);
 
-			_item.unbind();
+			_item.Unbind();
 		}
 
 		public virtual void Render(Shader<Gui> shader, int mouseX, int mouseY)
