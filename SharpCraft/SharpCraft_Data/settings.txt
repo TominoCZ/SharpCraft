@@ -1,4 +1,0 @@
-sensitivity=1
-renderdistance=16
-worldseed=yeet
-altrendermethod=false

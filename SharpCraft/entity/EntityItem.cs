@@ -120,18 +120,12 @@ namespace SharpCraft.entity
 
                 var itemsToRender = 1;
 
-                if (stack.Count > 16)
-                {
-                    if (stack.Count > 32)
-                    {
-                        if (stack.Count == 64)
-                            itemsToRender = 4;
-                    }
-                    else
-                        itemsToRender = 3;
-                }
-                else
+                if (stack.Count > 1)
                     itemsToRender = 2;
+                if (stack.Count >= 32)
+                    itemsToRender = 3;
+                if (stack.Count == 64)
+                    itemsToRender = 4;
 
                 for (int i = 0; i < itemsToRender; i++)
                 {

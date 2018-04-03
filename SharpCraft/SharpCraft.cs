@@ -761,7 +761,7 @@ namespace SharpCraft
         private static void Main(string[] args)
         {
             ThreadPool.SetMinThreads(0, 0);
-            ThreadPool.SetMinThreads(Environment.ProcessorCount, 0);
+            ThreadPool.SetMaxThreads(Environment.ProcessorCount, Environment.ProcessorCount);
 
             using (var game = new SharpCraft())
             {

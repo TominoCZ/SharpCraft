@@ -27,7 +27,7 @@ namespace SharpCraft.entity
         {
             SharpCraft.Instance.Camera.pos = pos + Vector3.UnitY * 1.625f;
 
-            collisionBoundingBox = new AxisAlignedBB(new Vector3(0.3f, 1.65f, 0.3f));
+            collisionBoundingBox = new AxisAlignedBB(new Vector3(0.6f, 1.65f, 0.6f));
             boundingBox = collisionBoundingBox.offset(pos - new Vector3(collisionBoundingBox.size.X / 2, 0, collisionBoundingBox.size.Z / 2));
 
             hotbar = new ItemStack[9];
