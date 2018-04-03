@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using OpenTK;
 using OpenTK.Graphics.OpenGL;
 using SharpCraft.model;
@@ -63,7 +64,7 @@ namespace SharpCraft.render
 
         public SkyboxRenderer()
         {
-            List<RawQuad> quads = new List<RawQuad>();
+            var quads = new List<RawQuad>();
 
             for (int i = 0; i < VERTICES.Length; i += 18)
             {
