@@ -97,10 +97,7 @@ namespace SharpCraft.util
 
 		public static long NanoTime()
 		{
-			long nano = 10000L * Stopwatch.GetTimestamp();
-			nano /= TimeSpan.TicksPerMillisecond;
-			nano *= 100L;
-			return nano;
+			return (long) (Stopwatch.GetTimestamp() / (Stopwatch.Frequency / 1000000000.0));
 		}
 
 		public float GetPartialTicks()
