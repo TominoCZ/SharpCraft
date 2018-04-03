@@ -219,16 +219,6 @@ namespace SharpCraft
 				GameLoop();
 			};
 
-			new Thread(() =>
-				{
-					while (true)
-					{
-						timer.CheckUpdate();
-						Thread.Sleep(2);
-					}
-				})
-				{IsBackground = true}.Start();
-
 			//world.setBlock(new BlockPos(player.pos), EnumBlock.RARE, 1, true); //test of block metadata, works perfectly
 		}
 

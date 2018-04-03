@@ -31,10 +31,10 @@ namespace SharpCraft.util
 		{
 			long tim = NanoTime();
 			_partialTicks = (float) ((tim - lastUpdate) / (double) nanosPerUpdate);
-			if (_partialTicks >= 1)
+			if (_partialTicks >= 1 || _partialTicks < 0)
 			{
 				CheckUpdate();
-				_partialTicks = 0;
+				CalcPartialTicks();
 			}
 		}
 
@@ -45,7 +45,6 @@ namespace SharpCraft.util
 				CalcPartialTicks();
 				renderHook();
 			}
-
 		}
 
 		private void Update()
@@ -69,19 +68,19 @@ namespace SharpCraft.util
 
 		public void CheckUpdate()
 		{
-			long count;
+			double count;
 
 			lock (this)
 			{
 				long time = NanoTime();
-				count = (time - lastUpdate) / nanosPerUpdate;
+				count = (time - lastUpdate) / (double) nanosPerUpdate;
 				if (count > ups * 2)
 				{
 					count = 1;
 					Console.WriteLine("Game lagging really fucking badly man. Get yo shit together");
 				}
 
-				if (count == 0)
+				if (count < 1)
 				{
 					return;
 				}
@@ -89,7 +88,8 @@ namespace SharpCraft.util
 				lastUpdate = time;
 			}
 
-			while (count-- > 0)
+			if (count > 2) Console.WriteLine(count);
+			while (count-- > 1)
 			{
 				Update();
 			}
