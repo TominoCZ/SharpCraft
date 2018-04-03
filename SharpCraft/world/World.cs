@@ -12,7 +12,7 @@ using System.Linq;
 
 namespace SharpCraft.world
 {
-	public class World
+    public class World
     {
         public ConcurrentDictionary<ChunkPos, Chunk> Chunks { get; }
 
@@ -63,9 +63,9 @@ namespace SharpCraft.world
 
                 if (GetChunk(new BlockPos(e.pos).ChunkPos()) is Chunk chunk && chunk.HasData)
                 {
-                    e.Update();
-
-                    if (!e.isAlive)
+                    if (e.isAlive)
+                        e.Update();
+                    else
                         Entities.Remove(e);
                 }
             }

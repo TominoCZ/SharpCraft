@@ -19,7 +19,9 @@ namespace SharpCraft.entity
         private ItemStack stack;
 
         private int entityAge;
-        private int entityAgeLast;
+
+        private long tick;
+        private long lastTick;
 
         static EntityItem()
         {
@@ -41,7 +43,7 @@ namespace SharpCraft.entity
         {
             base.Update();
 
-            entityAgeLast = entityAge;
+            lastTick = tick++;
 
             if (++entityAge >= 20 * 50 * 60 + 10) //stay on ground for a minute, 20 ticks as a pick up delay
             {
@@ -52,37 +54,49 @@ namespace SharpCraft.entity
             if (entityAge < 5)
                 return;
 
-            var otherDrops = world.Entities.OfType<EntityItem>()
-                .AsParallel()
-                .OrderBy(entity => MathUtil.Distance(entity.pos + entity.motion, pos + motion))
+            var inAttractionArea = world.Entities.OfType<EntityItem>()
+                .OrderBy(entity => MathUtil.Distance(entity.pos, pos + motion) - entity.stack.Count)
                 .Where(
-                    e => MathUtil.Distance(e.pos + e.motion, pos + motion) <= 1.5f &&
+                    e => MathUtil.Distance(e.pos, pos + motion) <= 1.85f &&
                          e != this &&
                          e.isAlive &&
-                         e.stack.Item.item == stack.Item.item &&
-                         e.stack.Meta == stack.Meta &&
-                         e.stack.Count + stack.Count <= 64).ToList();
+                         e.stack.Count <= stack.Count &&
+                         e.stack?.Item?.item == stack?.Item?.item &&
+                         e.stack?.Meta == stack?.Meta).ToList();
 
-            if (otherDrops.Count > 0)
+            foreach (var entity in inAttractionArea)
             {
-                var closest = otherDrops.First();
+                if (!entity.isAlive)
+                    continue;
 
-                if (closest.isAlive && entityAge <= closest.entityAge) //means that this current entity was just tghrown by a player
+                var ammountToTake = Math.Min(64 - stack.Count, entity.stack.Count);
+
+                if (ammountToTake > 0 && stack.Count + ammountToTake <= 64)
                 {
-                    closest.stack.Count += stack.Count;
-                    closest.motion = motion;
-                    closest.TeleportTo(pos);
+                    entity.motion -= (entity.pos - pos).Normalized() * 0.15f;
 
-                    SetDead();
+                    if (MathUtil.Distance(entity.pos, pos) <= 0.25f)
+                    {
+                        entity.stack.Count -= ammountToTake;
+                        stack.Count += ammountToTake;
+
+                        motion = entity.motion * 0.25f;
+                        entity.motion *= 0.35f;
+
+                        entityAge = 3;
+                        entity.entityAge = 1;
+
+                        if (entity.stack.IsEmpty)
+                            entity.SetDead();
+                    }
                 }
             }
 
-            if (entityAge < 10)
+            if (entityAge < 15 || !isAlive)
                 return;
 
             //TODO change this for multiplayer
             var players = world.Entities.OfType<EntityPlayerSP>()
-                               .AsParallel()
                                .OrderBy(entity => MathUtil.Distance(entity.pos, pos))
                                .Where(e => MathUtil.Distance(e.pos, pos) <= 2);
 
@@ -96,7 +110,7 @@ namespace SharpCraft.entity
         public override void Render(float particalTicks)
         {
             var partialPos = lastPos + (pos - lastPos) * particalTicks;
-            var partialTime = entityAgeLast + (entityAge - entityAgeLast) * particalTicks;
+            var partialTime = lastTick + (tick - lastTick) * particalTicks;
 
             if (stack?.Item?.item is EnumBlock block)
             {

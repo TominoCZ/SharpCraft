@@ -160,14 +160,14 @@ namespace SharpCraft.render
 
                     var rotVec = new Vector2(-SharpCraft.Instance.Camera.pitch, -SharpCraft.Instance.Camera.yaw);
 
-                    var offset = new Vector3(1.475f, -1.3f, 0.25f) - partialMotion * Vector3.UnitY * 0.175f;
+                    var offset = new Vector3(1.475f, -1.3f, 0.25f) - partialMotion * Vector3.UnitY * 0.15f;
 
                     var r1 = Matrix4.CreateRotationY(MathHelper.DegreesToRadians(45));
                     var r2 = Matrix4.CreateRotationX(rotVec.X) * Matrix4.CreateRotationY(rotVec.Y);
 
                     var s = Matrix4.CreateScale(0.575f);
                     var t0 = Matrix4.CreateTranslation(Vector3.One * -0.5f);
-                    var t1 = Matrix4.CreateTranslation(SharpCraft.Instance.Camera.pos + SharpCraft.Instance.Camera.GetLookVec() + partialLookVec * 0.175f);
+                    var t1 = Matrix4.CreateTranslation(SharpCraft.Instance.Camera.pos + SharpCraft.Instance.Camera.GetLookVec() + partialLookVec * 0.15f);
                     var t_final = Matrix4.CreateTranslation(offset);
 
                     var mat = t0 * r1 * t_final * r2 * s * t1;

@@ -34,8 +34,6 @@ namespace SharpCraft.entity
 
         public virtual void Update()
         {
-            if (!isAlive) return;
-
             lastPos = pos;
 
             motion.Y -= 0.04f * gravity;

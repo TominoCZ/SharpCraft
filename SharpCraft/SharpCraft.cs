@@ -222,14 +222,8 @@ namespace SharpCraft
 			//world.setBlock(new BlockPos(player.pos), EnumBlock.RARE, 1, true); //test of block metadata, works perfectly
 		}
 
-		private long lastNano;
-
 		private void GameLoop()
 		{
-			long tim = GameTimer.NanoTime();
-			Console.WriteLine((tim-lastNano)/1000);
-			lastNano = tim;
-
 			if (GuiScreen == null && !Focused)
 				OpenGuiScreen(new GuiScreenIngameMenu());
 
