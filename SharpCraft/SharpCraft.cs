@@ -92,7 +92,7 @@ namespace SharpCraft
 
 		public delegate void Method();
 
-		private GameTimer timer = new GameTimer(60, 40);
+		private GameTimer timer = new GameTimer(60, 20);
 
 		public SharpCraft() : base(640, 480, GraphicsMode.Default, _title, GameWindowFlags.Default, DisplayDevice.Default, 3, 3,
 			GraphicsContextFlags.ForwardCompatible)
@@ -222,8 +222,14 @@ namespace SharpCraft
 			//world.setBlock(new BlockPos(player.pos), EnumBlock.RARE, 1, true); //test of block metadata, works perfectly
 		}
 
+		private long lastNano;
+
 		private void GameLoop()
 		{
+			long tim = GameTimer.NanoTime();
+			Console.WriteLine((tim-lastNano)/1000);
+			lastNano = tim;
+
 			if (GuiScreen == null && !Focused)
 				OpenGuiScreen(new GuiScreenIngameMenu());
 

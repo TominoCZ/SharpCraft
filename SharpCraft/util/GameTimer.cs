@@ -95,7 +95,7 @@ namespace SharpCraft.util
 			}
 		}
 
-		private static long NanoTime()
+		public static long NanoTime()
 		{
 			long nano = 10000L * Stopwatch.GetTimestamp();
 			nano /= TimeSpan.TicksPerMillisecond;
