@@ -1,5 +1,6 @@
 ﻿using OpenTK;
 using System;
+using OpenTK.Graphics.ES20;
 
 namespace SharpCraft.util
 {
@@ -57,6 +58,11 @@ namespace SharpCraft.util
         public static float Distance(Vector3 v1, Vector3 v2)
         {
             return (v1 - v2).LengthFast;
+        }
+
+        public static float Remap(float value, float from1, float to1, float from2, float to2)
+        {
+            return (value - from1) / (to1 - from1) * (to2 - from2) + from2;
         }
 
         public static Vector2 Clamp(Vector2 val, float minLength, float maxLength)

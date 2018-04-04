@@ -75,10 +75,7 @@ namespace SharpCraft.render
 
             RenderChunks(world);
 
-            if (SharpCraft.Instance.Player != null)
-            {
-                RenderSelectedItemBlock(partialTicks);
-            }
+            RenderSelectedItemBlock(partialTicks);
         }
 
         private void RenderChunks(World world)
@@ -134,12 +131,10 @@ namespace SharpCraft.render
             shader.UpdateModelUniforms(_selectionOutline.RawModel);
             shader.UpdateInstanceUniforms(MatrixHelper.CreateTransformationMatrix(pos.ToVec() - Vector3.One * 0.00175f, size), _selectionOutline);
 
-            GL.Disable(EnableCap.CullFace);
             GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
 
             _selectionOutline.RawModel.Render(PrimitiveType.Quads);
 
-            GL.Enable(EnableCap.CullFace);
             GL.PolygonMode(MaterialFace.Front, PolygonMode.Fill);
 
             _selectionOutline.Unbind();
@@ -147,41 +142,48 @@ namespace SharpCraft.render
 
         private void RenderSelectedItemBlock(float partialTicks)
         {
+            if (SharpCraft.Instance.Player == null)
+                return;
+
             var stack = SharpCraft.Instance.Player.GetEquippedItemStack();
 
-            if (!stack?.IsEmpty == true)
+            if (stack == null || stack.IsEmpty)
+                return;
+
+            if (stack.Item is ItemBlock itemBlock)
             {
-                if (stack.Item is ItemBlock itemBlock)
-                {
-                    var model = ModelRegistry.getModelForBlock(itemBlock.getBlock(), stack.Meta);
+                var model = ModelRegistry.getModelForBlock(itemBlock.getBlock(), stack.Meta);
 
-                    var partialLookVec = lastLookVec + (lookVec - lastLookVec) * partialTicks;
-                    var partialMotion = lastMotion + (motion - lastMotion) * partialTicks;
+                var partialLookVec = lastLookVec + (lookVec - lastLookVec) * partialTicks;
+                var partialMotion = lastMotion + (motion - lastMotion) * partialTicks;
 
-                    var rotVec = new Vector2(-SharpCraft.Instance.Camera.pitch, -SharpCraft.Instance.Camera.yaw);
+                var rotVec = new Vector2(-SharpCraft.Instance.Camera.pitch, -SharpCraft.Instance.Camera.yaw);
 
-                    var offset = new Vector3(1.475f, -1.3f, 0.25f) - partialMotion * Vector3.UnitY * 0.15f;
+                var offset = new Vector3(1.475f, -1.3f, 0.25f) - partialMotion * Vector3.UnitY * 0.15f;
 
-                    var r1 = Matrix4.CreateRotationY(MathHelper.DegreesToRadians(45));
-                    var r2 = Matrix4.CreateRotationX(rotVec.X) * Matrix4.CreateRotationY(rotVec.Y);
+                var r1 = Matrix4.CreateRotationY(MathHelper.DegreesToRadians(45));
+                var r2 = Matrix4.CreateRotationX(rotVec.X) * Matrix4.CreateRotationY(rotVec.Y);
 
-                    var s = Matrix4.CreateScale(0.575f);
-                    var t0 = Matrix4.CreateTranslation(Vector3.One * -0.5f);
-                    var t1 = Matrix4.CreateTranslation(SharpCraft.Instance.Camera.pos + SharpCraft.Instance.Camera.GetLookVec() + partialLookVec * 0.15f);
-                    var t_final = Matrix4.CreateTranslation(offset);
+                var s = Matrix4.CreateScale(0.575f);
+                var t0 = Matrix4.CreateTranslation(Vector3.One * -0.5f);
+                var t1 = Matrix4.CreateTranslation(SharpCraft.Instance.Camera.pos + SharpCraft.Instance.Camera.GetLookVec() + partialLookVec * 0.15f);
+                var t_final = Matrix4.CreateTranslation(offset);
 
-                    var mat = t0 * r1 * t_final * r2 * s * t1;
+                var mat = t0 * r1 * t_final * r2 * s * t1;
 
-                    model.Bind();
+                GL.DepthRange(0, 0.1f);
 
-                    model.Shader.UpdateGlobalUniforms();
-                    model.Shader.UpdateModelUniforms(model.RawModel);
-                    model.Shader.UpdateInstanceUniforms(mat, model);
+                model.Bind();
 
-                    model.RawModel.Render(PrimitiveType.Quads);
+                model.Shader.UpdateGlobalUniforms();
+                model.Shader.UpdateModelUniforms(model.RawModel);
+                model.Shader.UpdateInstanceUniforms(mat, model);
 
-                    model.Unbind();
-                }
+                model.RawModel.Render(PrimitiveType.Quads);
+
+                model.Unbind();
+
+                GL.DepthRange(0, 1);
             }
         }
     }

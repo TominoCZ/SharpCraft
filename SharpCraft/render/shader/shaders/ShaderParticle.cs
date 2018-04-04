@@ -17,9 +17,10 @@ namespace SharpCraft.render.shader.shaders
 		protected override void RegisterUniforms()
 		{
 			base.RegisterUniforms();
-			UVmin = new UniformVec2(GetUniformId("UVmin"));
-			UVmax = new UniformVec2(GetUniformId("UVmax"));
-			alpha = new UniformFloat(GetUniformId("alpha"));
+
+			UVmin = GetUniformVec2("UVmin");
+			UVmax = GetUniformVec2("UVmax");
+			alpha = GetUniformFloat("alpha");
 		}
 
 		public override void UpdateInstanceUniforms(Matrix4 transform, Particle instance)

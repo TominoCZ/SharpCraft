@@ -6,6 +6,7 @@ using OpenTK;
 using OpenTK.Graphics.OpenGL;
 using SharpCraft.model;
 using SharpCraft.render.shader.module;
+using SharpCraft.render.shader.uniform;
 
 namespace SharpCraft.render.shader
 {
@@ -172,11 +173,44 @@ namespace SharpCraft.render.shader
             GL.DeleteProgram(program);
         }
 
-        public int GetUniformId(string name)
+        private int GetUniformId(string name)
         {
-            int id = GL.GetUniformLocation(program, name);
-            if (id == -1) throw new ArgumentException($"Uniform {name} does not exist!");
-            return id;
+            return GL.GetUniformLocation(program, name);
+        }
+
+        public UniformMat4 GetUniformMat4(string name)
+        {
+            var id = GetUniformId(name);
+
+            return id != -1 ? new UniformMat4(id) : null;
+        }
+
+        public UniformVec4 GetUniformVec4(string name)
+        {
+            var id = GetUniformId(name);
+
+            return id != -1 ? new UniformVec4(id) : null;
+        }
+
+        public UniformVec3 GetUniformVec3(string name)
+        {
+            var id = GetUniformId(name);
+
+            return id != -1 ? new UniformVec3(id) : null;
+        }
+
+        public UniformVec2 GetUniformVec2(string name)
+        {
+            var id = GetUniformId(name);
+
+            return id != -1 ? new UniformVec2(id) : null;
+        }
+
+        public UniformFloat GetUniformFloat(string name)
+        {
+            var id = GetUniformId(name);
+
+            return id != -1 ? new UniformFloat(id) : null;
         }
     }
 }

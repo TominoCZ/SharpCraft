@@ -35,7 +35,6 @@ namespace SharpCraft.entity
 			collisionBoundingBox = new AxisAlignedBB(0.25f);
 			boundingBox = collisionBoundingBox.offset(pos - Vector3.One * collisionBoundingBox.size / 2);
 
-			gravity = 1.425f;
 			isAlive = stack != null && !stack.IsEmpty;
 		}
 
@@ -60,6 +59,9 @@ namespace SharpCraft.entity
 
 			foreach (var entity in inAttractionArea)
 			{
+                if (entity.stack.Count == 64)
+                    continue;
+
 				Vector3 distanceVector = entity.pos - pos;
 				var distance = distanceVector.Length;
 				if (distance >= attractionRange) continue;
@@ -69,8 +71,8 @@ namespace SharpCraft.entity
 
 				if (distance <= mergeRange)
 				{
-					motion += entity.motion * entity.stack.Count / stack.Count;
-					entity.motion += motion * stack.Count / entity.stack.Count;
+					motion += entity.motion * MathUtil.Remap(entity.stack.Count / (float)stack.Count, 1, 64, 1, 3);
+					entity.motion += motion *  MathUtil.Remap(stack.Count / (float)entity.stack.Count, 1, 64, 1, 3);
 
 					entity.stack.Count -= ammountToTake;
 					if (entity.stack.IsEmpty) entity.SetDead();

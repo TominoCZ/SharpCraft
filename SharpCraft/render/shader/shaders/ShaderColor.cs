@@ -17,7 +17,7 @@ namespace SharpCraft.render.shader.shaders
 		{
 			base.RegisterUniforms();
 
-		    color = new UniformVec4(GetUniformId("colorIn"));
+		    color = GetUniformVec4("colorIn");
 		}
 
 		public override void UpdateInstanceUniforms(Matrix4 transform, ModelCubeOutline instance)

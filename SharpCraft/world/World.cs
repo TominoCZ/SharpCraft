@@ -52,7 +52,7 @@ namespace SharpCraft.world
                 Entities.Add(e);
         }
 
-        public void UpdateEntities()
+        private void UpdateEntities()
         {
 	        Entities.RemoveAll(e =>
 	        {
@@ -332,6 +332,8 @@ namespace SharpCraft.world
 
                 if (chunk.Pos.DistanceTo(player.pos.Xz) > renderDistance * Chunk.ChunkSize + 50) UnloadChunk(chunk.Pos);
             }
+
+            UpdateEntities();
         }
     }
 }

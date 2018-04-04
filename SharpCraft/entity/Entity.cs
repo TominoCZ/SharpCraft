@@ -2,10 +2,11 @@
 using SharpCraft.world;
 using System;
 using System.Collections.Generic;
+using System.Reflection.PortableExecutable;
 
 namespace SharpCraft.entity
 {
-	public class Entity
+    public class Entity
     {
         protected AxisAlignedBB boundingBox, collisionBoundingBox;
 
@@ -40,13 +41,31 @@ namespace SharpCraft.entity
 
             Move();
 
-            motion *= 0.8664021f;
+            motion.Xz *= 0.8664021f;
+
+            var bbs = SharpCraft.Instance.World.GetBlockCollisionBoxes(boundingBox);
+
+            if (bbs.Count > 0)
+            {
+                var dir = Vector3.Zero;
+
+                foreach (var bb in bbs)
+                {
+                    dir += pos - bb.GetCenter();
+                }
+
+                dir = dir.Normalized() * 0.25f;
+                dir.Y = 0;
+
+                motion += dir;
+            }
 
             if (onGround)
             {
                 motion.Xz *= 0.6676801f;
             }
         }
+
 
         public virtual void Move()
         {
@@ -90,8 +109,6 @@ namespace SharpCraft.entity
             if (onGround && motion.Y < 0)
                 motion.Y = 0;
         }
-
-
 
         public virtual void Render(float particalTicks)
         {

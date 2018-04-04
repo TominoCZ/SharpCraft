@@ -246,8 +246,10 @@ namespace SharpCraft
 			_mouseWheelLast = wheelValue;
 
 			World?.Update(Player, WorldRenderer.RenderDistance);
+
 			WorldRenderer?.Update();
-			World?.UpdateEntities();
+            SkyboxRenderer.Update();
+
 			ParticleRenderer?.TickParticles();
 		}
 
@@ -265,9 +267,9 @@ namespace SharpCraft
 				var partialTick = _gamePaused ? _lastPartialTicks : _lastPartialTicks = partialTicks;
 
 				WorldRenderer.Render(World, partialTick);
+			    ParticleRenderer.Render(partialTick);
 				EntityRenderer.Render(partialTick);
-				ParticleRenderer.Render(partialTick);
-				SkyboxRenderer.Render();
+				SkyboxRenderer.Render(partialTick);
 			}
 
 			//render other gui
@@ -402,7 +404,7 @@ namespace SharpCraft
 				if (KeysDown.Contains(Key.Space) && !_wasSpaceDown && Player.onGround)
 				{
 					_wasSpaceDown = true;
-					Player.motion.Y = 0.6F;
+					Player.motion.Y = 0.475F;
 				}
 				else if ((!KeysDown.Contains(Key.Space) || Player.onGround) && _wasSpaceDown)
 					_wasSpaceDown = false;
@@ -599,15 +601,13 @@ namespace SharpCraft
 						{
 							Shader.ReloadAll();
 							SettingsManager.Load();
+						    TextureManager.reload();
 
 							WorldRenderer.RenderDistance = SettingsManager.GetInt("renderdistance");
 							_sensitivity = SettingsManager.GetFloat("sensitivity");
 
 							if (e.Shift)
-							{
-								TextureManager.reload();
 								World?.DestroyChunkModels();
-							}
 						}
 
 						break;
@@ -677,7 +677,6 @@ namespace SharpCraft
 			_settings.Add("sensitivity", "1");
 			_settings.Add("renderdistance", "8");
 			_settings.Add("worldseed", "yeet");
-			_settings.Add("altrendermethod", "false");
 		}
 
 		public static void Load()

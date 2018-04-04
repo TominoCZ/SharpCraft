@@ -112,7 +112,7 @@ namespace SharpCraft.entity
 
                 if (dropped.Item == stack.Item && stack.Count <= 64)
                 {
-                    var toPickUp = 64 - stack.Count;
+                    var toPickUp = Math.Min(64 - stack.Count, stack.Count);
 
                     stack.Count += toPickUp;
                     dropped.Count -= toPickUp;
@@ -243,7 +243,7 @@ namespace SharpCraft.entity
             if (stack != null && !stack.IsEmpty)
             {
                 world?.AddEntity(new EntityItem(world, SharpCraft.Instance.Camera.pos - Vector3.UnitY * 0.35f,
-                    SharpCraft.Instance.Camera.GetLookVec() * 0.75f + Vector3.UnitY * 0.2f, stack.CopyUnit()));
+                    SharpCraft.Instance.Camera.GetLookVec() * 0.75f + Vector3.UnitY * 0.1f, stack.CopyUnit()));
 
                 stack.Count--;
             }
