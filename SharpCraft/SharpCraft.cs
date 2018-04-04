@@ -402,7 +402,7 @@ namespace SharpCraft
 				if (KeysDown.Contains(Key.Space) && !_wasSpaceDown && Player.onGround)
 				{
 					_wasSpaceDown = true;
-					Player.motion.Y = 0.475F;
+					Player.motion.Y = 0.6F;
 				}
 				else if ((!KeysDown.Contains(Key.Space) || Player.onGround) && _wasSpaceDown)
 					_wasSpaceDown = false;

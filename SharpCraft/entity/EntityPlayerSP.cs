@@ -1,4 +1,5 @@
-﻿using OpenTK;
+﻿using System;
+using OpenTK;
 using OpenTK.Input;
 using SharpCraft.block;
 using SharpCraft.gui;
@@ -114,7 +115,6 @@ namespace SharpCraft.entity
                     var toPickUp = 64 - stack.Count;
 
                     stack.Count += toPickUp;
-
                     dropped.Count -= toPickUp;
                 }
             }

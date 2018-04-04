@@ -14,9 +14,9 @@ namespace SharpCraft.world
 {
     public class World
     {
-        public ConcurrentDictionary<ChunkPos, Chunk> Chunks { get; }
+        public ConcurrentDictionary<ChunkPos, Chunk> Chunks { get; } = new ConcurrentDictionary<ChunkPos, Chunk>();
 
-        public List<Entity> Entities;
+        public List<Entity> Entities = new List<Entity>();
 
         public readonly int Seed;
         public readonly string LevelName;
@@ -33,13 +33,10 @@ namespace SharpCraft.world
 
         public World(string saveName, string levelName, int seed)
         {
-            Chunks = new ConcurrentDictionary<ChunkPos, Chunk>();
-            Entities = new List<Entity>();
 
-            _noiseUtil = new NoiseUtil(seed);
+            _noiseUtil = new NoiseUtil(Seed = seed);
             _noiseUtil.SetFractalType(NoiseUtil.FractalType.FBM);
 
-            Seed = seed;
             LevelName = levelName;
             SaveRoot = $"{SharpCraft.Instance.GameFolderDir}/saves/{saveName}/";
             ChunkData = new ChunkDataManager<RegionStaticImpl<ChunkPos>, ChunkPos>(
@@ -57,19 +54,22 @@ namespace SharpCraft.world
 
         public void UpdateEntities()
         {
-            for (var i = Entities.Count - 1; i >= 0; i--)
-            {
-                var e = Entities[i];
-
-                if (GetChunk(new BlockPos(e.pos).ChunkPos()) is Chunk chunk && chunk.HasData)
-                {
-                    if (e.isAlive)
-                        e.Update();
-                    else
-                        Entities.Remove(e);
-                }
-            }
+	        Entities.RemoveAll(e =>
+	        {
+		        if (!IsChunkLoaded(ChunkPos.FromWorldSpace(e.pos))) return false;
+		        if (e.isAlive)
+		        {
+			        e.Update();
+			        return !e.isAlive;
+		        }
+		        return true;
+	        });
         }
+
+	    public bool IsChunkLoaded(ChunkPos pos)
+	    {
+		    return GetChunk(pos) is Chunk chunk && chunk.HasData;
+	    }
 
         public List<AxisAlignedBB> GetIntersectingEntitiesBBs(AxisAlignedBB with)
         {

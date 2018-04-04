@@ -17,7 +17,7 @@ namespace SharpCraft.world.chunk
 
         private SwapList<Chunk> _chunkBuilds = new SwapList<Chunk>(
             c => c.BuildChunkModelDo(),
-            (l, r) => l.Pos.DistanceTo(SharpCraft.Instance.Player.pos).CompareTo(l.Pos.DistanceTo(SharpCraft.Instance.Player.pos)));
+            (l, r) => l.Pos.DistanceTo(SharpCraft.Instance.Player.pos).CompareTo(r.Pos.DistanceTo(SharpCraft.Instance.Player.pos)));
 
         private SwapList<ChunkPos> _chunkLoads = new SwapList<ChunkPos>(
             c =>
@@ -32,7 +32,7 @@ namespace SharpCraft.world.chunk
                     //Console.WriteLine($"chunk generated @ {c.x} x {c.z}");
                 }
             },
-            (l, r) => l.DistanceTo(SharpCraft.Instance.Player.pos).CompareTo(l.DistanceTo(SharpCraft.Instance.Player.pos)));
+            (l, r) => l.DistanceTo(SharpCraft.Instance.Player.pos).CompareTo(r.DistanceTo(SharpCraft.Instance.Player.pos)));
 
         public void BuildChunks()
         {

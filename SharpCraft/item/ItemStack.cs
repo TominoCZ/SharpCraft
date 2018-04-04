@@ -2,45 +2,52 @@
 
 namespace SharpCraft.item
 {
-    [Serializable]
-    public class ItemStack
-    {
-        public Item Item;
+	[Serializable]
+	public class ItemStack
+	{
 
-        private int _count;
+		public Item Item;
 
-        public int Count
-        {
-            get => _count;
-            set
-            {
-                _count = Math.Max(value, 0);
+		private int _count;
 
-                if (_count == 0)
-                    Item = null;
-            }
-        }
+		public int Count
+		{
+			get => _count;
+			set
+			{
+				_count = Math.Max(value, 0);
 
-        public int Meta;
+				if (_count == 0)
+					Item = null;
+			}
+		}
 
-        public bool IsEmpty => Count == 0 || Item == null || Item.item == null;
+		public int Meta;
 
-        public ItemStack(Item item, int count = 1, int meta = 0)
-        {
-            Item = item;
-            Meta = meta;
+		public bool IsEmpty => Count == 0 || Item == null || Item.item == null;
 
-            Count = count;
-        }
+		public ItemStack(Item item, int count = 1, int meta = 0)
+		{
+			Item = item;
+			Meta = meta;
 
-        public ItemStack Copy()
-        {
-            return new ItemStack(Item, Count, Meta);
-        }
+			Count = count;
+		}
 
-        public ItemStack CopyUnit()
-        {
-            return new ItemStack(Item, 1, Meta);
-        }
-    }
+		public ItemStack Copy()
+		{
+			return new ItemStack(Item, Count, Meta);
+		}
+
+		public ItemStack CopyUnit()
+		{
+			return new ItemStack(Item, 1, Meta);
+		}
+		public bool ItemSame(ItemStack other)
+		{
+			if (other == null) return false;
+			return Meta == other.Meta &&
+			       Item == other.Item;
+		}
+	}
 }

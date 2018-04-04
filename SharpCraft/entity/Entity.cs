@@ -40,7 +40,7 @@ namespace SharpCraft.entity
 
             Move();
 
-            motion.Xz *= 0.8664021f;
+            motion *= 0.8664021f;
 
             if (onGround)
             {
@@ -90,6 +90,8 @@ namespace SharpCraft.entity
             if (onGround && motion.Y < 0)
                 motion.Y = 0;
         }
+
+
 
         public virtual void Render(float particalTicks)
         {
