@@ -7,6 +7,7 @@ using SharpCraft.util;
 using SharpCraft.world;
 using System;
 using System.Linq;
+using System.Threading;
 using SharpCraft.item;
 using SharpCraft.render.shader;
 
@@ -54,7 +55,7 @@ namespace SharpCraft.entity
                 return;
 
             var inAttractionArea = world.Entities.OfType<EntityItem>().Where(e => e != this && e.isAlive && e.stack.ItemSame(stack)).OrderByDescending(e => e.stack.Count).ToList();
-            var attractionRange = 1.8F;
+            var attractionRange = 1.0F;
             var mergeRange = 0.15F;
 
             foreach (var entity in inAttractionArea)
@@ -99,14 +100,24 @@ namespace SharpCraft.entity
             //TODO change this for multiplayer
             var players = world.Entities.OfType<EntityPlayerSP>()
                                .OrderBy(entity => MathUtil.Distance(entity.pos, pos))
-                               .Where(e => MathUtil.Distance(e.pos, pos) <= 2);
+                               .Where(e => MathUtil.Distance(e.pos, pos) <= attractionRange);
 
             foreach (var player in players)
             {
-                if (player.OnPickup(stack))
+                var attrTarget = player.pos;
+                attrTarget.Y += player.EyeHeight - 0.35f;
+
+                Vector3 distanceVector = attrTarget - pos;
+
+                if (distanceVector.Length <= 0.35f)
                 {
-                    SetDead();
+                    if (player.OnPickup(stack))
+                    {
+                        SetDead();
+                    }
                 }
+
+                motion = distanceVector.Normalized() * 0.45f;
             }
             if (stack.IsEmpty) SetDead();
         }

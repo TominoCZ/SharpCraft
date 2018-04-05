@@ -94,6 +94,8 @@ namespace SharpCraft
 
         private GameTimer timer = new GameTimer(60, 20);
 
+        //public BThreadPool.ThreadPool ThreadPool = new BThreadPool.ThreadPool(4);
+
         public SharpCraft() : base(640, 480, GraphicsMode.Default, _title, GameWindowFlags.Default, DisplayDevice.Default, 3, 3,
             GraphicsContextFlags.ForwardCompatible)
         {
@@ -395,7 +397,7 @@ namespace SharpCraft
                 Camera.yaw -= delta.X / 1000f * _sensitivity;
                 Camera.pitch -= delta.Y / 1000f * _sensitivity;
 
-                ResetMouse();
+                //ResetMouse();
 
                 if (KeysDown.Contains(Key.Space) && !_wasSpaceDown && Player.onGround)
                 {

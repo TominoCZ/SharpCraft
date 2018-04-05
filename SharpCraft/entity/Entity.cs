@@ -98,15 +98,23 @@ namespace SharpCraft.entity
 
             setPositionToBB();
 
-            onGround = Math.Abs(m_orig.Y - motion.Y) > 0.00001f && m_orig.Y < 0.0D;
+            var stoppedX = Math.Abs(m_orig.X - motion.X) > 0.00001f;
+            var stoppedY = Math.Abs(m_orig.Y - motion.Y) > 0.00001f;
+            var stoppedZ = Math.Abs(m_orig.Z - motion.Z) > 0.00001f;
 
-            if (Math.Abs(m_orig.X - motion.X) > 0.00001f)
+            onGround = stoppedY && m_orig.Y < 0.0D;
+
+            var onCeiling = stoppedY && m_orig.Y > 0.0D;
+
+            if (stoppedX)
                 motion.X = 0;
 
-            if (Math.Abs(m_orig.Z - motion.Z) > 0.00001f)
+            if (stoppedZ)
                 motion.Z = 0;
 
-            if (onGround && motion.Y < 0)
+            if (onCeiling)
+                motion.Y *= 0.15f;
+            else if (onGround)
                 motion.Y = 0;
         }
 

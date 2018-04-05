@@ -16,6 +16,8 @@ namespace SharpCraft.entity
         private float maxMoveSpeed = 0.235f;
         private float moveSpeedMult = 1;
 
+        public float EyeHeight = 1.625f;
+
         private Vector2 moveSpeed;
 
         public int HotbarIndex { get; private set; }
@@ -46,7 +48,7 @@ namespace SharpCraft.entity
         {
             var interpolatedPos = lastPos + (pos - lastPos) * particalTicks;
 
-            SharpCraft.Instance.Camera.pos = interpolatedPos + Vector3.UnitY * 1.625f;
+            SharpCraft.Instance.Camera.pos = interpolatedPos + Vector3.UnitY * EyeHeight;
         }
 
         private void UpdateCameraMovement()

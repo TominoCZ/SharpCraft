@@ -33,7 +33,6 @@ namespace SharpCraft.world
 
         public World(string saveName, string levelName, int seed)
         {
-
             _noiseUtil = new NoiseUtil(Seed = seed);
             _noiseUtil.SetFractalType(NoiseUtil.FractalType.FBM);
 
