@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace SharpCraft.block
 {
-	public struct FaceSides
+    public struct FaceSides
     {
         public static readonly FaceSides East = new FaceSides("East", 2, 1, 0, 0);
         public static readonly FaceSides West = new FaceSides("West", 3, -1, 0, 0);
@@ -29,6 +29,11 @@ namespace SharpCraft.block
             this.x = x;
             this.y = y;
             this.z = z;
+        }
+
+        public Vector3 ToVec()
+        {
+            return new Vector3(x, y, z);
         }
 
         public override string ToString()

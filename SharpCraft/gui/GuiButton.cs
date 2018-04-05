@@ -7,23 +7,14 @@ namespace SharpCraft.gui
 {
     internal class GuiButton : Gui
     {
-        public static GuiTexture GUI_BUTTON;
-        public static GuiTexture GUI_BUTTON_HOVER;
-
         public int ID;
 
         public int posX;
         public int posY;
 
-        public Vector2 scale = Vector2.One;
+        public float scale = 1;
 
         public bool centered;
-
-        static GuiButton()
-        {
-            GUI_BUTTON = new GuiTexture(TextureManager.loadTexture("gui/button"));
-            GUI_BUTTON_HOVER = new GuiTexture(TextureManager.loadTexture("gui/button_hover"));
-        }
 
         public GuiButton(int ID, int x, int y)
         {
@@ -33,25 +24,25 @@ namespace SharpCraft.gui
             posY = y;
         }
 
-        public GuiButton(int ID, int x, int y, Vector2 scale) : this(ID, x, y)
+        public GuiButton(int ID, int x, int y, float scale) : this(ID, x, y)
         {
             this.scale = scale;
         }
 
-        public override void Render(Shader<Gui> shader, int mouseX, int mouseY)
+        public override void Render(int mouseX, int mouseY)
         {
-            GuiTexture tex = GUI_BUTTON;
+            var u = 0;
+            var v = 0;
 
             if (isMouseOver(mouseX, mouseY))
-                tex = GUI_BUTTON_HOVER;
+                v += 20;
+
+            var tex = TextureManager.TEXTURE_GUI_WIDGETS;
 
             if (centered)
-            {
-                posX = (int)(SharpCraft.Instance.ClientSize.Width / 2f - tex.textureSize.Width * scale.X / 2f);
-                renderTexture(shader, tex, scale, posX, posY);
-            }
-            else
-                renderTexture(shader, tex, scale, posX, posY);
+                posX = (int)(SharpCraft.Instance.ClientSize.Width / 2f - 200 * scale / 2);
+
+            RenderTexture(tex, posX, posY, u, v, 200, 20, scale);
         }
 
         public virtual void Dispose()
@@ -62,8 +53,8 @@ namespace SharpCraft.gui
         {
             return x >= posX &&
                    y >= posY &&
-                   x <= posX + GUI_BUTTON.textureSize.Width * scale.X &&
-                   y <= posY + GUI_BUTTON.textureSize.Height * scale.Y;
+                   x <= posX + 200 * scale &&
+                   y <= posY + 20 * scale;
         }
     }
 }

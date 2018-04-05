@@ -8,6 +8,7 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
+using SharpCraft.gui;
 using Bitmap = System.Drawing.Bitmap;
 using Image = System.Drawing.Image;
 using Rectangle = System.Drawing.Rectangle;
@@ -16,30 +17,43 @@ namespace SharpCraft.texture
 {
     internal class TextureManager
     {
-        private static Dictionary<EnumBlock, TextureBlockUV> UVs = new Dictionary<EnumBlock, TextureBlockUV>();
+        private static Dictionary<EnumBlock, TextureBlockUV> _blockUVs = new Dictionary<EnumBlock, TextureBlockUV>();
 
-        private static List<int> textures = new List<int>();
+        private static List<int> _allTextures = new List<int>();
 
-        private static Bitmap missing = createMissingBMP();
+        private static Bitmap TEXTURE_MISSING = CreateMissingTexture();
 
-        public static int blockTextureAtlasID;
+        public static Texture TEXTURE_BLOCKS;
+        public static Texture TEXTURE_GUI_WIDGETS;
 
-        public static void stitchTextures()
+        public static void LoadTextures()
         {
-            blockTextureAtlasID = loadTexture(generateTextureMap());
+            StitchTextures();
+
+            TEXTURE_GUI_WIDGETS = LoadTexture("gui/widgets");
         }
 
-        private static Bitmap generateTextureMap()
+        private static void StitchTextures()
+        {
+            var bmp = CreateTextureMap("blocks");
+            var id = LoadTexture(bmp);
+
+            TEXTURE_BLOCKS = new Texture(id, bmp.Size);
+
+            bmp.Dispose();
+        }
+
+        private static Bitmap CreateTextureMap(string folder)
         {
             Bitmap map = new Bitmap(256, 256);
 
             var blocks = Enum.GetValues(typeof(EnumBlock));
 
-            var dir = "SharpCraft_Data/assets/textures/blocks";
+            var dir = $"SharpCraft_Data/assets/textures/{folder}";
 
             var files = new string[0];
             if (Directory.Exists(dir))
-                files = Directory.GetFiles("SharpCraft_Data/assets/textures/blocks", "*.png");
+                files = Directory.GetFiles(dir, "*.png");
 
             for (int i = 0; i < files.Length; i++)
             {
@@ -65,7 +79,7 @@ namespace SharpCraft.texture
 
                         uvs.fill(pos, end);
 
-                        drawToBitmap(map, countX * 16, countY * 16, missing);
+                        DrawToBitmap(map, countX * 16, countY * 16, TEXTURE_MISSING);
 
                         countX++;
 
@@ -76,7 +90,7 @@ namespace SharpCraft.texture
                             countY++;
                         }
                     }
-                    else if (containsContaining(files, texName) > 0)
+                    else if (ContainsContaining(files, texName) > 0)
                     {
                         //found
 
@@ -88,7 +102,7 @@ namespace SharpCraft.texture
 
                             uvs.fill(pos, end);
 
-                            drawToBitmap(map, countX * 16, countY * 16, $"{dir}/{texName}.png");
+                            DrawToBitmap(map, countX * 16, countY * 16, $"{dir}/{texName}.png");
 
                             countX++;
 
@@ -111,7 +125,7 @@ namespace SharpCraft.texture
                             uvs.setUVForSide(FaceSides.South, pos, end);
                             uvs.setUVForSide(FaceSides.West, pos, end);
 
-                            drawToBitmap(map, countX * 16, countY * 16, $"{dir}/{texName}_side.png");
+                            DrawToBitmap(map, countX * 16, countY * 16, $"{dir}/{texName}_side.png");
 
                             countX++;
 
@@ -134,7 +148,7 @@ namespace SharpCraft.texture
 
                                 uvs.setUVForSide(face, pos, end);
 
-                                drawToBitmap(map, countX * 16, countY * 16, $"{dir}/{texName}_{faceName}.png");
+                                DrawToBitmap(map, countX * 16, countY * 16, $"{dir}/{texName}_{faceName}.png");
 
                                 countX++;
 
@@ -148,123 +162,28 @@ namespace SharpCraft.texture
                         }
                     }
 
-                    UVs.Add(block, uvs);
+                    _blockUVs.Add(block, uvs);
                 }
 
-                var missingUVs = getUVsFromBlock(EnumBlock.MISSING);
+                var missingUVs = GetUVsFromBlock(EnumBlock.MISSING);
 
-                foreach (var uv in UVs)
+                foreach (var uv in _blockUVs)
                 {
                     if (uv.Key != EnumBlock.AIR)
                         uv.Value.fillEmptySides(missingUVs.getUVForSide(FaceSides.Down));
                 }
 
-                #region fuj
-
-                /*
-				foreach (EnumBlock block in blocks)
-				{
-				    var name = block.ToString().ToLower();
-
-				    if (containsContaining(files, name))
-				    {
-				        var uvs = new BlockTextureUV();
-
-				        if (files.Contains(name))
-				        {
-				            if (countX * 16 >= map.Size.Width)
-				            {
-				                countX = 0;
-				                countY++;
-				            }
-
-				            var pos = new Vector2(countX * size.X, countY * size.Y);
-				            var end = pos + size;
-
-				            uvs.fill(pos, end);
-
-				            using (var bmp = Image.FromFile(dir + name + ".png"))
-				            {
-				                using (var g = Graphics.FromImage(map))
-				                {
-				                    g.DrawImage(bmp, countX * 16, countY * 16, 16, 16);
-				                }
-				            }
-
-				            countX++;
-				        }
-
-				        var textureName = "";
-
-				        if (files.Contains(textureName = name + "_side"))
-				        {
-				            if (countX * 16 >= map.Size.Width)
-				            {
-				                countX = 0;
-				                countY++;
-				            }
-
-				            var pos = new Vector2(countX * size.X, countY * size.Y);
-				            var end = pos + size;
-
-				            uvs.setUVForSide(EnumFacing.NORTH, pos, end);
-				            uvs.setUVForSide(EnumFacing.SOUTH, pos, end);
-				            uvs.setUVForSide(EnumFacing.WEST, pos, end);
-				            uvs.setUVForSide(EnumFacing.EAST, pos, end);
-
-				            using (var bmp = Image.FromFile(dir + textureName + ".png"))
-				            {
-				                using (var g = Graphics.FromImage(map))
-				                {
-				                    g.DrawImage(bmp, countX * 16, countY * 16, 16, 16);
-				                }
-				            }
-
-				            countX++;
-				        }
-
-				        foreach (EnumFacing side in sides)
-				        {
-				            var sideName = side.ToString().ToLower();
-
-				            if (files.Contains(textureName = name + "_" + sideName))
-				            {
-				                if (countX * 16 >= map.Size.Width)
-				                {
-				                    countX = 0;
-				                    countY++;
-				                }
-
-				                var pos = new Vector2(countX * size.X, countY * size.Y);
-				                var end = pos + size;
-
-				                uvs.setUVForSide(side, pos, end);
-
-				                using (var bmp = Image.FromFile(dir + textureName + ".png"))
-				                {
-				                    using (var g = Graphics.FromImage(map))
-				                    {
-				                        g.DrawImage(bmp, countX * 16, countY * 16, 16, 16);
-				                    }
-				                }
-
-				                countX++;
-				            }
-				        }
-
-				        Uv.Add(block, uvs);
-				    }
-				}*/
-
-                #endregion fuj
-
                 map.Save("terrain_debug.png");
 
-                return (Bitmap)map.Clone();
+                var clone = (Bitmap)map.Clone();
+
+                map.Dispose();
+
+                return clone;
             }
         }
 
-        private static Bitmap createMissingBMP()
+        private static Bitmap CreateMissingTexture()
         {
             var bmp = new Bitmap(16, 16);
 
@@ -282,12 +201,10 @@ namespace SharpCraft.texture
             return bmp;
         }
 
-        public static int loadTexture(Bitmap textureMap, bool smooth = false)
+        public static int LoadTexture(Bitmap textureMap, bool smooth = false)
         {
-            //GL.Hint(HintTarget.PerspectiveCorrectionHint, HintMode.Nicest);
-
             int texID = GL.GenTexture();
-            textures.Add(texID);
+            _allTextures.Add(texID);
 
             GL.BindTexture(TextureTarget.Texture2D, texID);
 
@@ -298,7 +215,7 @@ namespace SharpCraft.texture
                 OpenTK.Graphics.OpenGL.PixelFormat.Bgra, PixelType.UnsignedByte, data.Scan0);
             textureMap.UnlockBits(data);
 
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)(smooth?TextureMinFilter.Linear : TextureMinFilter.Nearest));
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)(smooth ? TextureMinFilter.Linear : TextureMinFilter.Nearest));
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)(smooth ? TextureMinFilter.Linear : TextureMinFilter.Nearest));
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapR, (int)TextureWrapMode.ClampToEdge);
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
@@ -307,13 +224,13 @@ namespace SharpCraft.texture
             return texID;
         }
 
-        public static Texture loadTexture(string textureName, bool smooth = false)
+        public static Texture LoadTexture(string textureName, bool smooth = false)
         {
             try
             {
                 var bmp = (Bitmap)Image.FromFile($"SharpCraft_Data/assets/textures/{textureName}.png");
 
-                int id = loadTexture(bmp, smooth);
+                int id = LoadTexture(bmp, smooth);
 
                 return new Texture(id, bmp.Size);
             }
@@ -322,10 +239,10 @@ namespace SharpCraft.texture
                 Console.WriteLine($"Error: the texture '{textureName}' failed to load!");
             }
 
-            return new Texture(loadTexture(missing, smooth), missing.Size);
+            return new Texture(LoadTexture(TEXTURE_MISSING, smooth), TEXTURE_MISSING.Size);
         }
 
-        private static Dictionary<FaceSides, Bitmap> loadCubeMapTextures()
+        private static Dictionary<FaceSides, Bitmap> LoadSkyboxTextures()
         {
             Dictionary<FaceSides, Bitmap> bitmaps = new Dictionary<FaceSides, Bitmap>();
 
@@ -353,23 +270,23 @@ namespace SharpCraft.texture
                 }
                 else
                 {
-                    bitmaps.Add(side, missing);
+                    bitmaps.Add(side, TEXTURE_MISSING);
                 }
             }
 
             return bitmaps;
         }
 
-        public static int loadCubeMap()
+        public static int LoadCubeMap()
         {
             int texID = GL.GenTexture();
 
-            textures.Add(texID);
+            _allTextures.Add(texID);
 
             GL.ActiveTexture(TextureUnit.Texture0);
             GL.BindTexture(TextureTarget.TextureCubeMap, texID);
 
-            var cubeMapTextures = loadCubeMapTextures();
+            var cubeMapTextures = LoadSkyboxTextures();
 
             foreach (var dictValues in cubeMapTextures)
             {
@@ -403,27 +320,27 @@ namespace SharpCraft.texture
             return texID;
         }
 
-        public static TextureBlockUV getUVsFromBlock(EnumBlock block)
+        public static TextureBlockUV GetUVsFromBlock(EnumBlock block)
         {
             TextureBlockUV uv;
 
-            UVs.TryGetValue(block, out uv);
+            _blockUVs.TryGetValue(block, out uv);
 
             if (uv == null)
-                UVs.TryGetValue(EnumBlock.MISSING, out uv);
+                _blockUVs.TryGetValue(EnumBlock.MISSING, out uv);
 
             return uv;
         }
 
-        private static void drawToBitmap(Bitmap to, int x, int y, string file)
+        private static void DrawToBitmap(Bitmap to, int x, int y, string file)
         {
             using (var bmp = (Bitmap)Image.FromFile(file))
             {
-                drawToBitmap(to, x, y, bmp);
+                DrawToBitmap(to, x, y, bmp);
             }
         }
 
-        private static void drawToBitmap(Bitmap to, int x, int y, Bitmap bmp)
+        private static void DrawToBitmap(Bitmap to, int x, int y, Bitmap bmp)
         {
             using (var g = Graphics.FromImage(to))
             {
@@ -431,7 +348,7 @@ namespace SharpCraft.texture
             }
         }
 
-        private static int containsContaining(Array a, string s)
+        private static int ContainsContaining(Array a, string s)
         {
             int res = 0;
 
@@ -444,27 +361,27 @@ namespace SharpCraft.texture
             return res;
         }
 
-        public static void destroyTexture(int ID)
+        public static void DestroyTexture(int id)
         {
-            GL.DeleteTexture(ID);
+            GL.DeleteTexture(id);
         }
 
-        public static void reload()
+        public static void Reload()
         {
-            destroyTexture(blockTextureAtlasID);
+            DestroyTexture(TEXTURE_BLOCKS.textureID);
 
-            UVs.Clear();
+            _blockUVs.Clear();
 
-            stitchTextures();
+            LoadTextures();
         }
 
-        public static void cleanUp()
+        public static void Destroy()
         {
-            destroyTexture(blockTextureAtlasID);
+            DestroyTexture(TEXTURE_BLOCKS.textureID);
 
-            for (int i = 0; i < textures.Count; i++)
+            for (int i = 0; i < _allTextures.Count; i++)
             {
-                destroyTexture(textures[i]);
+                DestroyTexture(_allTextures[i]);
             }
         }
     }

@@ -149,7 +149,7 @@ namespace SharpCraft.world.chunk
 
                 chunkFragmentModel.Bind();
                 shader.UpdateGlobalUniforms();
-                shader.UpdateModelUniforms(null);
+                shader.UpdateModelUniforms();
                 shader.UpdateInstanceUniforms(MatrixHelper.CreateTransformationMatrix(Pos), null);
 
                 chunkFragmentModel.RawModel.Render(PrimitiveType.Quads);

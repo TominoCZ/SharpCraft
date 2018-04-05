@@ -11,18 +11,19 @@ namespace SharpCraft.gui
 
         public GuiScreenCrafting()
         {
-            gui = new GuiTexture(TextureManager.loadTexture("gui/crafting"), Vector2.One * 0.5f);
+            //gui = new GuiTexture(TextureManager.LoadTexture("gui/crafting"), Vector2.One * 0.5f);
             DoesGuiPauseGame = false;
         }
 
-        public override void Render(Shader<Gui> shader, int mouseX, int mouseY)
+        public override void Render(int mouseX, int mouseY)
         {
-            renderTexture(shader, gui, 0, 0);
+            DrawBackground();
+            //RenderTexture(shader, gui, 0, 0);
         }
 
-        public override void onClose()
+        public override void OnClose()
         {
-            TextureManager.destroyTexture(gui.textureID);
+            //TextureManager.DestroyTexture(gui.textureID);
         }
     }
 }

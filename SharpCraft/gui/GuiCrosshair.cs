@@ -1,20 +1,24 @@
-﻿using SharpCraft.render.shader;
+﻿using OpenTK;
+using SharpCraft.render.shader;
 using SharpCraft.render.shader.shaders;
+using SharpCraft.texture;
 
 namespace SharpCraft.gui
 {
     internal class GuiCrosshair : Gui
     {
-        private GuiTexture crosshairTexture;
+        private static GuiTexture _texture;
 
-        public GuiCrosshair(GuiTexture crosshairTexture)
+        public GuiCrosshair()
         {
-            this.crosshairTexture = crosshairTexture;
+            var texture = TextureManager.LoadTexture("gui/cross");
+
+            _texture = new GuiTexture(texture, Vector2.Zero, new Vector2(texture.textureSize.Width, texture.textureSize.Height), 1.4f);
         }
 
-        public override void Render(Shader<Gui> shader, int mouseX, int mouseY)
+        public override void Render(int mouseX, int mouseY)
         {
-            renderTexture(shader, crosshairTexture);
+            RenderTexture(_texture, SharpCraft.Instance.ClientSize.Width / 2, SharpCraft.Instance.ClientSize.Height / 2, 0, 0, _texture.textureSize.Width, _texture.textureSize.Height, 1.25f, true);
         }
     }
 }

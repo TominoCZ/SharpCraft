@@ -64,16 +64,9 @@ namespace SharpCraft.world
                     wdn = (WorldDataNode)bf.Deserialize(fs);
                 }
 
-                world = new World(saveName, wdn.levelName, wdn.seed);
+                world = wdn.GetWorld(saveName);
 
-                var player = new EntityPlayerSP(world, wpn.pos);
-                SharpCraft.Instance.Camera.pitch = wpn.pitch;
-                SharpCraft.Instance.Camera.yaw = wpn.yaw;
-
-                for (int i = 0; i < wpn.hotbar.Length; i++)
-                {
-                    player.hotbar[i] = wpn.hotbar[i];
-                }
+                var player = wpn.GetPlayer(world);
 
                 world.AddEntity(player);
                 world.LoadChunk(new BlockPos(player.pos).ChunkPos());

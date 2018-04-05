@@ -25,7 +25,7 @@ namespace SharpCraft.particle
         {
         }
 
-        public ParticleDigging(World world, Vector3 pos, Vector3 motion, float particleScale, EnumBlock block, FaceSides side, int meta) : base(world, pos, motion, particleScale, TextureManager.blockTextureAtlasID)
+        public ParticleDigging(World world, Vector3 pos, Vector3 motion, float particleScale, EnumBlock block, FaceSides side, int meta) : base(world, pos, motion, particleScale, TextureManager.TEXTURE_BLOCKS.textureID)
         {
             this.block = block;
 
@@ -42,8 +42,6 @@ namespace SharpCraft.particle
                 UVmin = uvs.start + pixel * new Vector2(MathUtil.NextFloat(0, 12), MathUtil.NextFloat(0, 12));
                 UVmax = UVmin + pixel * 4;
             }
-
-            lastParticleScale = this.particleScale *= MathUtil.NextFloat(1, 1.5f);
 
             rotStep = new Vector3(MathUtil.NextFloat(), MathUtil.NextFloat(), MathUtil.NextFloat()).Normalized() * MathHelper.Pi * 22;
         }
@@ -92,7 +90,7 @@ namespace SharpCraft.particle
 
             var model = ParticleRenderer.ParticleModel;
 	        model.Shader.UpdateGlobalUniforms();
-	        model.Shader.UpdateModelUniforms(null);
+	        model.Shader.UpdateModelUniforms();
 	        model.Shader.UpdateInstanceUniforms(MatrixHelper.CreateTransformationMatrix(partialPos - Vector3.One * partialScale / 2, partialRot, partialScale),this);
 
             GL.ActiveTexture(TextureUnit.Texture0);

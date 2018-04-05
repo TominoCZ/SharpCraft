@@ -23,8 +23,9 @@ namespace SharpCraft.entity
         public int HotbarIndex { get; private set; }
 
         public ItemStack[] hotbar { get; }
+        public ItemStack[] inventory { get; }
 
-        public bool HasFullInventory => hotbar.All(stack => stack != null && !stack.IsEmpty);
+        public bool HasFullInventory => hotbar.All(stack => stack != null && !stack.IsEmpty) && inventory.All(stack => stack != null && !stack.IsEmpty);
 
         public EntityPlayerSP(World world, Vector3 pos = new Vector3()) : base(world, pos)
         {
@@ -34,6 +35,7 @@ namespace SharpCraft.entity
             boundingBox = collisionBoundingBox.offset(pos - new Vector3(collisionBoundingBox.size.X / 2, 0, collisionBoundingBox.size.Z / 2));
 
             hotbar = new ItemStack[9];
+            inventory = new ItemStack[27];
         }
 
         public override void Update()
@@ -56,14 +58,14 @@ namespace SharpCraft.entity
             if (SharpCraft.Instance.GuiScreen != null)
                 return;
 
-            var state = SharpCraft.Instance.KeysDown;
+            var state = SharpCraft.Instance.KeyboardState;
 
             Vector2 dirVec = Vector2.Zero;
 
-            var w = state.Contains(Key.W); //might use this later
-            var s = state.Contains(Key.S);
-            var a = state.Contains(Key.A);
-            var d = state.Contains(Key.D);
+            var w = state.IsKeyDown(Key.W); //might use this later
+            var s = state.IsKeyDown(Key.S);
+            var a = state.IsKeyDown(Key.A);
+            var d = state.IsKeyDown(Key.D);
 
             if (w) dirVec += SharpCraft.Instance.Camera.forward;
             if (s) dirVec += -SharpCraft.Instance.Camera.forward;
@@ -72,7 +74,7 @@ namespace SharpCraft.entity
 
             float mult = 1;
 
-            if (state.Contains(Key.LShift))
+            if (state.IsKeyDown(Key.LShift))
                 mult = 1.5f;
 
             if (dirVec != Vector2.Zero)
@@ -102,26 +104,54 @@ namespace SharpCraft.entity
 
         public bool OnPickup(ItemStack dropped)
         {
-            for (var i = 0; i < hotbar.Length; i++)
+            //TODO - add to inventory if stack of same type is present in it, otherwise put the stack into the hotbar slot if possible
+            for (var i = 0; i < hotbar.Length + inventory.Length; i++)
             {
-                var stack = hotbar[i];
-
-                if (stack == null || stack.IsEmpty)
+                if (i < hotbar.Length)
                 {
-                    SetItemStackInHotbar(i, dropped.Copy());
-                    return true;
+                    var stack = hotbar[i];
+
+                    if (stack == null || stack.IsEmpty)
+                    {
+                        SetItemStackInHotbar(i, dropped.Copy());
+                        return true;
+                    }
+
+                    if (dropped.Item == stack.Item && stack.Count <= 64)
+                    {
+                        var toPickUp = Math.Min(64 - stack.Count, stack.Count);
+
+                        stack.Count += toPickUp;
+                        dropped.Count -= toPickUp;
+                    }
                 }
-
-                if (dropped.Item == stack.Item && stack.Count <= 64)
+                else
                 {
-                    var toPickUp = Math.Min(64 - stack.Count, stack.Count);
+                    var index = i - hotbar.Length;
+                    var stack = inventory[index];
 
-                    stack.Count += toPickUp;
-                    dropped.Count -= toPickUp;
+                    if (stack == null || stack.IsEmpty)
+                    {
+                        inventory[index] = dropped.Copy();
+                        return true;
+                    }
+
+                    if (dropped.Item == stack.Item && stack.Count <= 64)
+                    {
+                        var toPickUp = Math.Min(64 - stack.Count, stack.Count);
+
+                        stack.Count += toPickUp;
+                        dropped.Count -= toPickUp;
+                    }
                 }
             }
 
             return dropped.IsEmpty;
+        }
+
+        public bool CanPickUpStack(ItemStack dropped)
+        {
+            return hotbar.Any(stack => stack == null || stack.IsEmpty || stack.ItemSame(dropped) && stack.Count + dropped.Count <= 64) || inventory.Any(stack => stack == null || (stack.IsEmpty || stack.ItemSame(dropped) && stack.Count + dropped.Count <= 64));
         }
 
         public void OnClick(MouseButton btn)
@@ -248,6 +278,19 @@ namespace SharpCraft.entity
                     SharpCraft.Instance.Camera.GetLookVec() * 0.75f + Vector3.UnitY * 0.1f, stack.CopyUnit()));
 
                 stack.Count--;
+            }
+        }
+
+        public void DropHeldStack()
+        {
+            var stack = GetEquippedItemStack();
+
+            if (stack != null && !stack.IsEmpty)
+            {
+                world?.AddEntity(new EntityItem(world, SharpCraft.Instance.Camera.pos - Vector3.UnitY * 0.35f,
+                    SharpCraft.Instance.Camera.GetLookVec() * 0.75f + Vector3.UnitY * 0.1f, stack.Copy()));
+
+                stack.Count = 0;
             }
         }
 

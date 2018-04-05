@@ -59,13 +59,15 @@ namespace SharpCraft
         public SkyboxRenderer SkyboxRenderer;
         public GuiRenderer GuiRenderer;
 
-        public HashSet<Key> KeysDown = new HashSet<Key>();
+        public KeyboardState KeyboardState = new KeyboardState();
+        //public HashSet<Key> KeysDown = new HashSet<Key>();
         public MouseOverObject MouseOverObject = new MouseOverObject();
         public EntityPlayerSP Player;
 
         public World World;
 
-        private ConcurrentQueue<Method> _glContextQueue = new ConcurrentQueue<Method>();
+        private List<MouseButton> _mouseButtonsDown = new List<MouseButton>();
+        private ConcurrentQueue<Action> _glContextQueue = new ConcurrentQueue<Action>();
         private Stopwatch _frameTimer = Stopwatch.StartNew();
         private WindowState _lastWindowState;
 
@@ -82,6 +84,7 @@ namespace SharpCraft
         private bool _gamePaused;
         private bool _wasSpaceDown;
         private int _fpsCounter;
+        private long _tickCounter;
         private float _sensitivity = 1;
         private float _lastPartialTicks;
 
@@ -90,11 +93,7 @@ namespace SharpCraft
         private static string _title;
         private static Thread _renderThread;
 
-        public delegate void Method();
-
         private GameTimer timer = new GameTimer(60, 20);
-
-        //public BThreadPool.ThreadPool ThreadPool = new BThreadPool.ThreadPool(4);
 
         public SharpCraft() : base(640, 480, GraphicsMode.Default, _title, GameWindowFlags.Default, DisplayDevice.Default, 3, 3,
             GraphicsContextFlags.ForwardCompatible)
@@ -112,7 +111,7 @@ namespace SharpCraft
             //TargetRenderFrequency = 60;
 
             Console.WriteLine("DEBUG: stitching textures");
-            TextureManager.stitchTextures();
+            TextureManager.LoadTextures();
 
             Init();
         }
@@ -241,6 +240,26 @@ namespace SharpCraft
 
                 if (World?.GetChunk(new BlockPos(Player.pos).ChunkPos()) == null)
                     Player.motion = Vector3.Zero;
+
+                var lmb = _mouseButtonsDown.Contains(MouseButton.Left);
+                var rmb = _mouseButtonsDown.Contains(MouseButton.Right);
+
+                if (lmb || rmb)
+                {
+                    _tickCounter++;
+
+                    if (_tickCounter % 4 == 0)
+                    {
+                        GetMouseOverObject();
+
+                        if (rmb)
+                            Player.PlaceBlock();
+                        if (lmb)
+                            Player.BreakBlock();
+                    }
+                }
+                else
+                    _tickCounter = 0;
             }
 
             _mouseWheelLast = wheelValue;
@@ -399,12 +418,12 @@ namespace SharpCraft
 
                 //ResetMouse();
 
-                if (KeysDown.Contains(Key.Space) && !_wasSpaceDown && Player.onGround)
+                if (KeyboardState.IsKeyDown(Key.Space) && !_wasSpaceDown && Player.onGround)
                 {
                     _wasSpaceDown = true;
                     Player.motion.Y = 0.475F;
                 }
-                else if ((!KeysDown.Contains(Key.Space) || Player.onGround) && _wasSpaceDown)
+                else if ((!KeyboardState.IsKeyDown(Key.Space) || Player.onGround) && _wasSpaceDown)
                     _wasSpaceDown = false;
             }
 
@@ -419,10 +438,10 @@ namespace SharpCraft
             }
         }
 
-        public void RunGlContext(Method m)
+        public void RunGlContext(Action a)
         {
-            if (_renderThread.ManagedThreadId == Thread.CurrentThread.ManagedThreadId) m();
-            else _glContextQueue.Enqueue(m);
+            if (_renderThread.ManagedThreadId == Thread.CurrentThread.ManagedThreadId) a();
+            else _glContextQueue.Enqueue(a);
         }
 
         public float GetRenderPartialTicks()
@@ -462,7 +481,7 @@ namespace SharpCraft
             if (GuiScreen.DoesGuiPauseGame)
                 _gamePaused = false;
 
-            GuiScreen.onClose();
+            GuiScreen.OnClose();
             GuiScreen = null;
 
             CursorVisible = false;
@@ -550,26 +569,48 @@ namespace SharpCraft
                     var state = OpenTK.Input.Mouse.GetCursorState();
                     var point = PointToClient(new Point(state.X, state.Y));
 
-                    GuiScreen.onMouseClick(point.X, point.Y);
+                    GuiScreen.OnMouseClick(point.X, point.Y);
                 }
+
+                if (!_mouseButtonsDown.Contains(e.Button))
+                    _mouseButtonsDown.Add(e.Button);
             }
+        }
+
+        protected override void OnMouseUp(MouseButtonEventArgs e)
+        {
+            base.OnMouseUp(e);
+
+            _mouseButtonsDown.Remove(e.Button);
         }
 
         protected override void OnKeyDown(KeyboardKeyEventArgs e)
         {
-            if (!KeysDown.Contains(e.Key))
-                KeysDown.Add(e.Key);
+            base.OnKeyDown(e);
 
             switch (e.Key)
             {
                 case Key.Escape:
-                    if (GuiScreen is GuiScreenMainMenu)
+                    if (GuiScreen is GuiScreenMainMenu || KeyboardState.IsKeyDown(Key.Escape))
                         return;
 
                     if (GuiScreen != null)
                         CloseGuiScreen();
                     else
                         OpenGuiScreen(new GuiScreenIngameMenu());
+                    break;
+                case Key.E:
+                    if (KeyboardState.IsKeyDown(Key.E))
+                        return;
+
+                    if (GuiScreen is GuiScreenInventory)
+                    {
+                        CloseGuiScreen();
+                        return;
+                    }
+
+                    if (GuiScreen == null)
+                        OpenGuiScreen(new GuiScreenInventory());
                     break;
                 case Key.F2:
                     _takeScreenshot = true;
@@ -582,7 +623,6 @@ namespace SharpCraft
                     }
                     else
                         WindowState = _lastWindowState;
-
                     break;
             }
 
@@ -591,22 +631,28 @@ namespace SharpCraft
                 switch (e.Key)
                 {
                     case Key.Q:
-                        Player?.DropHeldItem();
+                        if (KeyboardState.IsKeyDown(Key.Q))
+                            return;
+
+                        if (e.Control)
+                            Player.DropHeldStack();
+                        else
+                            Player?.DropHeldItem();
                         break;
 
                     case Key.R:
-                        if (e.Control)
-                        {
-                            Shader.ReloadAll();
-                            SettingsManager.Load();
-                            TextureManager.reload();
+                        if (!e.Control || KeyboardState.IsKeyDown(Key.R))
+                            return;
 
-                            WorldRenderer.RenderDistance = SettingsManager.GetInt("renderdistance");
-                            _sensitivity = SettingsManager.GetFloat("sensitivity");
+                        Shader.ReloadAll();
+                        SettingsManager.Load();
+                        TextureManager.Reload();
 
-                            if (e.Shift)
-                                World?.DestroyChunkModels();
-                        }
+                        WorldRenderer.RenderDistance = SettingsManager.GetInt("renderdistance");
+                        _sensitivity = SettingsManager.GetFloat("sensitivity");
+
+                        if (e.Shift)
+                            World?.DestroyChunkModels();
 
                         break;
                 }
@@ -628,14 +674,14 @@ namespace SharpCraft
                     Exit();
             }
 
-            base.OnKeyDown(e);
+            KeyboardState = e.Keyboard;
         }
 
         protected override void OnKeyUp(KeyboardKeyEventArgs e)
         {
-            KeysDown.Remove(e.Key);
-
             base.OnKeyUp(e);
+
+            KeyboardState = e.Keyboard;
         }
 
         protected override void OnResize(EventArgs e)
@@ -657,7 +703,7 @@ namespace SharpCraft
         {
             Shader.DestroyAll();
             ModelManager.cleanup();
-            TextureManager.cleanUp();
+            TextureManager.Destroy();
 
             if (World != null)
                 WorldLoader.SaveWorld(World);

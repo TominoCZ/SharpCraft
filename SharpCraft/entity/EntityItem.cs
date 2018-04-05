@@ -42,8 +42,35 @@ namespace SharpCraft.entity
         public override void Update()
         {
             lastTick = tick++;
+            lastPos = pos;
 
-            base.Update();
+            motion.Y -= 0.04f * gravity;
+
+            Move();
+
+            motion.Xz *= 0.8664021f;
+
+            var bbs = SharpCraft.Instance.World.GetBlockCollisionBoxes(boundingBox);
+
+            if (bbs.Count > 0)
+            {
+                var bp = new BlockPos(pos);
+
+                var lastFace = FaceSides.Up;
+                var blocksAround = FaceSides.YPlane.All(face => world.GetBlock(bp.Offset(lastFace = face)) != EnumBlock.AIR)
+                                   && world.GetBlock(bp.Offset(lastFace = FaceSides.Up)) != EnumBlock.AIR
+                                   && world.GetBlock(bp.Offset(lastFace = FaceSides.Down)) != EnumBlock.AIR; //has to be in this order
+
+                if (!blocksAround)
+                {
+                    motion += lastFace.ToVec() * 0.1f;
+                }
+            }
+
+            if (onGround)
+            {
+                motion.Xz *= 0.6676801f;
+            }
 
             if (++entityAge >= 20 * 50 * 60 + 10) //stay on ground for a minute, 20 ticks as a pick up delay
             {
@@ -55,7 +82,7 @@ namespace SharpCraft.entity
                 return;
 
             var inAttractionArea = world.Entities.OfType<EntityItem>().Where(e => e != this && e.isAlive && e.stack.ItemSame(stack)).OrderByDescending(e => e.stack.Count).ToList();
-            var attractionRange = 1.0F;
+            var attractionRange = 1.8F;
             var mergeRange = 0.15F;
 
             foreach (var entity in inAttractionArea)
@@ -88,7 +115,7 @@ namespace SharpCraft.entity
 
                 var distanceMul = (float)Math.Sqrt(1 - distance / attractionRange);
                 if (distanceMul > 0.8) distanceMul = ((1 - distanceMul) / 0.2F) * 0.6F + 0.2F;
-                var baseForce = distanceVector * 0.02f * distanceMul * MathUtil.Remap(stack.Count / (float)entity.stack.Count, 1, 64, 1, 5);
+                var baseForce = distanceVector * 0.02f * distanceMul * MathUtil.Remap(stack.Count / (float)entity.stack.Count, 1, 64, 2, 5);
 
                 motion += baseForce * entity.stack.Count / Math.Max(entity.stack.Count, stack.Count);
                 entity.motion -= baseForce * stack.Count / Math.Max(entity.stack.Count, stack.Count);
@@ -104,17 +131,20 @@ namespace SharpCraft.entity
 
             foreach (var player in players)
             {
+                if (!player.CanPickUpStack(stack))
+                    continue;
+
                 var attrTarget = player.pos;
-                attrTarget.Y += player.EyeHeight - 0.35f;
+                attrTarget.Y += player.getCollisionBoundingBox().size.Y / 2;
 
                 Vector3 distanceVector = attrTarget - pos;
 
                 if (distanceVector.Length <= 0.35f)
                 {
                     if (player.OnPickup(stack))
-                    {
                         SetDead();
-                    }
+
+                    motion *= -1f;
                 }
 
                 motion = distanceVector.Normalized() * 0.45f;
@@ -145,7 +175,7 @@ namespace SharpCraft.entity
                 GL.EnableVertexAttribArray(2);
 
                 GL.ActiveTexture(TextureUnit.Texture0);
-                GL.BindTexture(TextureTarget.Texture2D, TextureManager.blockTextureAtlasID);
+                GL.BindTexture(TextureTarget.Texture2D, TextureManager.TEXTURE_BLOCKS.textureID);
 
                 var itemsToRender = 1;
 

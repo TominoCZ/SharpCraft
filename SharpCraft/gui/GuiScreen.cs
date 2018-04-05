@@ -1,4 +1,5 @@
-﻿using OpenTK;
+﻿using System;
+using OpenTK;
 using SharpCraft.texture;
 using System.Collections.Generic;
 using SharpCraft.render.shader;
@@ -8,7 +9,8 @@ namespace SharpCraft.gui
 {
     internal class GuiScreen : Gui
     {
-        private GuiTexture background;
+        private static GuiTexture background_default;
+        private static GuiTexture background;
 
         protected List<GuiButton> buttons = new List<GuiButton>();
 
@@ -16,36 +18,54 @@ namespace SharpCraft.gui
 
         public GuiScreen()
         {
-            background = new GuiTexture(TextureManager.loadTexture("gui/bg"), Vector2.Zero, Vector2.One * 4);
+            background_default = new GuiTexture(TextureManager.LoadTexture("gui/bg"), Vector2.Zero, Vector2.One * 16, 8);
+            background = new GuiTexture(TextureManager.LoadTexture("gui/bg_transparent"), Vector2.Zero, Vector2.One * 16, 8);
         }
 
-        public override void Render(Shader<Gui> shader, int mouseX, int mouseY)
+        public override void Render(int mouseX, int mouseY)
         {
             for (int i = 0; i < buttons.Count; i++)
             {
-                buttons[i].Render(shader, mouseX, mouseY);
+                buttons[i].Render(mouseX, mouseY);
             }
             //render stuff
         }
 
-        protected virtual void drawBackground(Shader<Gui> shader, GuiTexture tex)
+        protected virtual void DrawBackground()
         {
-            var sizeX = tex.textureSize.Width * tex.scale.X;
-            var sizeY = tex.textureSize.Height * tex.scale.Y;
+            var sizeX = background.textureSize.Width * background.Scale;
+            var sizeY = background.textureSize.Height * background.Scale;
 
-            var countX = SharpCraft.Instance.ClientSize.Width / sizeX;
-            var countY = SharpCraft.Instance.ClientSize.Height / sizeY;
+            var countX = Math.Ceiling(SharpCraft.Instance.ClientSize.Width / sizeX);
+            var countY = Math.Ceiling(SharpCraft.Instance.ClientSize.Height / sizeY);
+            
+            for (int x = 0; x <= countX; x++)
+            {
+                for (int y = 0; y <= countY; y++)
+                {
+                    RenderTexture(background, (int)(x * sizeX), (int)(y * sizeY));
+                }
+            }
+        }
+
+        protected virtual void DrawDefaultBackground()
+        {
+            var sizeX = background_default.textureSize.Width * background_default.Scale;
+            var sizeY = background_default.textureSize.Height * background_default.Scale;
+
+            var countX = Math.Ceiling(SharpCraft.Instance.ClientSize.Width / sizeX);
+            var countY = Math.Ceiling(SharpCraft.Instance.ClientSize.Height / sizeY);
 
             for (int x = 0; x <= countX; x++)
             {
                 for (int y = 0; y <= countY; y++)
                 {
-                    renderTexture(shader, tex, (int)(x * sizeX), (int)(y * sizeY));
+                    RenderTexture(background_default, x * sizeX, y * sizeY);
                 }
             }
         }
 
-        public virtual void onMouseClick(int x, int y)
+        public void OnMouseClick(int x, int y)
         {
             for (int i = buttons.Count - 1; i >= 0; i--)
             {
@@ -53,19 +73,19 @@ namespace SharpCraft.gui
 
                 if (btn.isMouseOver(x, y))
                 {
-                    buttonClicked(btn);
+                    ButtonClicked(btn);
                     break;
                 }
             }
         }
 
-        protected virtual void buttonClicked(GuiButton btn)
+        protected virtual void ButtonClicked(GuiButton btn)
         {
         }
 
-        public virtual void onClose()
+        public virtual void OnClose()
         {
-            TextureManager.destroyTexture(background.textureID);
+
         }
     }
 }

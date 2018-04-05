@@ -36,7 +36,7 @@ namespace SharpCraft.model
                 }
             }
 
-            return TextureManager.getUVsFromBlock(EnumBlock.MISSING).getUVForSide(FaceSides.South);
+            return TextureManager.GetUVsFromBlock(EnumBlock.MISSING).getUVForSide(FaceSides.South);
         }
     }
 }

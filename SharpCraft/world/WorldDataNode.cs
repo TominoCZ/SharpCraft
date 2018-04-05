@@ -13,5 +13,10 @@ namespace SharpCraft.world
             levelName = w.LevelName;
             seed = w.Seed;
         }
+
+        public World GetWorld(string saveName)
+        {
+            return new World(saveName, levelName, seed);
+        }
     }
 }

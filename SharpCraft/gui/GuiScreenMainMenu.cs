@@ -7,22 +7,19 @@ namespace SharpCraft.gui
 {
     internal class GuiScreenMainMenu : GuiScreen
     {
-        private GuiTexture background;
-
         public GuiScreenMainMenu()
         {
-            buttons.Add(new GuiButton(0, 0, 200, Vector2.One * 2) { centered = true });
-            background = new GuiTexture(TextureManager.loadTexture("gui/bg"), Vector2.Zero, Vector2.One * 8);
+            buttons.Add(new GuiButton(0, 0, 200, 2) { centered = true });
         }
 
-        public override void Render(Shader<Gui> shader, int mouseX, int mouseY)
+        public override void Render(int mouseX, int mouseY)
         {
-            drawBackground(shader, background);
+            DrawDefaultBackground();
 
-            base.Render(shader, mouseX, mouseY);
+            base.Render(mouseX, mouseY);
         }
 
-        protected override void buttonClicked(GuiButton btn)
+        protected override void ButtonClicked(GuiButton btn)
         {
             switch (btn.ID)
             {
@@ -31,11 +28,6 @@ namespace SharpCraft.gui
                     SharpCraft.Instance.StartGame();
                     break;
             }
-        }
-
-        public override void onClose()
-        {
-            TextureManager.destroyTexture(background.textureID);
         }
     }
 }

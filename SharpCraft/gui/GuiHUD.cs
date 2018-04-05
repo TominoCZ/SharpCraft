@@ -1,4 +1,5 @@
 ﻿using OpenTK;
+using SharpCraft.block;
 using SharpCraft.entity;
 using SharpCraft.item;
 using SharpCraft.render.shader;
@@ -9,28 +10,28 @@ namespace SharpCraft.gui
 {
     internal class GuiHUD : Gui
     {
-        private GuiTexture slot;
-        private GuiTexture slot_selected;
+        //private GuiTexture slot;
+        //private GuiTexture slot_selected;
 
         public GuiHUD()
         {
-            var slot_texture = TextureManager.loadTexture("gui/slot");
-            var slot_selected_texture = TextureManager.loadTexture("gui/slot_selected");
+            /*var slot_texture = TextureManager.LoadTexture("gui/slot");
+            var slot_selected_texture = TextureManager.LoadTexture("gui/slot_selected");
 
             if (slot_texture != null)
-                slot = new GuiTexture(slot_texture.textureID, slot_texture.textureSize, Vector2.Zero, Vector2.One * 2);
+                slot = new GuiTexture(slot_texture, Vector2.Zero, Vector2.One * 2);
             if (slot_selected_texture != null)
-                slot_selected = new GuiTexture(slot_selected_texture.textureID, slot_selected_texture.textureSize, Vector2.Zero, Vector2.One * 2);
+                slot_selected = new GuiTexture(slot_selected_texture.textureID, slot_selected_texture.textureSize, Vector2.Zero, Vector2.One * 2);*/
         }
 
-        public override void Render(Shader<Gui> shader, int mouseX, int mouseY)
+        public override void Render(int mouseX, int mouseY)
         {
             var size = SharpCraft.Instance.ClientSize;
 
             int space = 5;
 
-            int scaledWidth = (int)(slot.textureSize.Width * slot.scale.X);
-            int scaledHeight = (int)(slot.textureSize.Height * slot.scale.Y);
+            int scaledWidth = 32 * 2;
+            int scaledHeight = 32 * 2;
 
             int totalHotbarWidth = 9 * scaledWidth + 8 * space;
 
@@ -43,7 +44,13 @@ namespace SharpCraft.gui
                 var x = startPos + i * (scaledWidth + space);
                 var y = size.Height - 20 - scaledHeight;
 
-                renderTexture(shader, b ? slot_selected : slot, x, y);
+                var u = 224;
+                var v = 0;
+
+                if (b)
+                    v += 32;
+
+                RenderTexture(TextureManager.TEXTURE_GUI_WIDGETS, x, y, u, v, 32, 32, 2);
 
                 var stack = SharpCraft.Instance.Player.hotbar[i];
 
@@ -56,7 +63,7 @@ namespace SharpCraft.gui
                         x += 14;
                         y += 14;
 
-                        renderBlock(block, 2.25f, x, y);
+                        RenderBlock(block, x, y, 2.25f);
                     }
                 }
             }

@@ -2,7 +2,7 @@
 
 namespace SharpCraft.util
 {
-    internal class Texture
+    public class Texture
     {
         public int textureID { get; }
         public Size textureSize { get; }

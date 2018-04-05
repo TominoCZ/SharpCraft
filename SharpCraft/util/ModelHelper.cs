@@ -92,7 +92,7 @@ namespace SharpCraft.util
         public static Dictionary<FaceSides, RawQuad> createTexturedCubeModel(EnumBlock block)
         {
             var quads = new Dictionary<FaceSides, RawQuad>();
-            var uvs = TextureManager.getUVsFromBlock(block);
+            var uvs = TextureManager.GetUVsFromBlock(block);
 
             foreach (var face in CUBE.Keys)
             {

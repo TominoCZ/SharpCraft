@@ -81,7 +81,7 @@ namespace SharpCraft.render
             }
 
             cube = new ModelBaked<object>(ModelManager.loadModelToVAO(quads, 3), new Shader<object>("skybox"));
-            texture = TextureManager.loadCubeMap();
+            texture = TextureManager.LoadCubeMap();
         }
 
         public void Update()

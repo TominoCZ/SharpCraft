@@ -66,7 +66,7 @@ namespace SharpCraft.render
             world.LoadManager.BuildImportantChunks();
 
             GL.ActiveTexture(TextureUnit.Texture0);
-            GL.BindTexture(TextureTarget.Texture2D, TextureManager.blockTextureAtlasID);
+            GL.BindTexture(TextureTarget.Texture2D, TextureManager.TEXTURE_BLOCKS.textureID);
 
             var hit = SharpCraft.Instance.MouseOverObject;
 

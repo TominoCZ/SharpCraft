@@ -12,6 +12,7 @@ namespace SharpCraft.render.shader.shaders
         private Vector4 _selectionOutlineColor;
 
         private Stopwatch _updateTimer;
+
         int _hue;
 
         public ShaderBlockOutline(string shaderName) : base(shaderName)
@@ -37,7 +38,7 @@ namespace SharpCraft.render.shader.shaders
             }
 
             base.UpdateInstanceUniforms(transform, renderable);
-            colorIn.Update(_selectionOutlineColor);
+            colorIn?.Update(_selectionOutlineColor);
         }
 
 

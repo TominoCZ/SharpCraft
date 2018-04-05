@@ -103,7 +103,7 @@ namespace SharpCraft.render.shader
             }
         }
 
-        public virtual void UpdateModelUniforms(IModelRaw model)
+        public virtual void UpdateModelUniforms(IModelRaw model = null)
         {
             foreach (var m in _modules)
             {
