@@ -13,7 +13,7 @@ using SharpCraft.render.shader;
 
 namespace SharpCraft.world.chunk
 {
-	public class Chunk
+    public class Chunk
     {
         public const int ChunkSize = 16;
         public const int ChunkHeight = 256;
@@ -148,9 +148,9 @@ namespace SharpCraft.world.chunk
                 if (chunkFragmentModel == null) continue;
 
                 chunkFragmentModel.Bind();
-	            shader.UpdateGlobalUniforms();
-	            shader.UpdateModelUniforms(null);
-	            shader.UpdateInstanceUniforms(MatrixHelper.CreateTransformationMatrix(Pos),null);
+                shader.UpdateGlobalUniforms();
+                shader.UpdateModelUniforms(null);
+                shader.UpdateInstanceUniforms(MatrixHelper.CreateTransformationMatrix(Pos), null);
 
                 chunkFragmentModel.RawModel.Render(PrimitiveType.Quads);
 
@@ -185,8 +185,8 @@ namespace SharpCraft.world.chunk
             List<RawQuad> quads;
 
             var sw = Stopwatch.StartNew();
-            //generate the model / fill MODEL_RAW
 
+            //generate the model - fill MODEL_RAW
             Enumerable.Range(0, ChunkHeight).AsParallel().ForAll(y =>
             {
                 for (int x = 0; x < ChunkSize; x++)

@@ -39,7 +39,7 @@ namespace SharpCraft.particle
 
                 var pixel = size / 16;
 
-                UVmin = uvs.start + MathUtil.NextFloat(0, 12) * pixel;
+                UVmin = uvs.start + pixel * new Vector2(MathUtil.NextFloat(0, 12), MathUtil.NextFloat(0, 12));
                 UVmax = UVmin + pixel * 4;
             }
 

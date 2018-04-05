@@ -60,7 +60,7 @@ namespace SharpCraft.render
         {
             var posVec = pos.ToVec();
 
-            var perAxis = 4;
+            var perAxis = 3;
             var step = 1f / perAxis;
 
             for (var x = 0f; x < perAxis; x++)

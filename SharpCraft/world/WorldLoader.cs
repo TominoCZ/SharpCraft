@@ -42,7 +42,7 @@ namespace SharpCraft.world
         {
             var bf = new BinaryFormatter();
 
-            var dir = $"{SharpCraft.Instance.GameFolderDir}/saves/{saveName}";
+            var dir = $"{SharpCraft.Instance.GameFolderDir}saves/{saveName}";
 
             if (!Directory.Exists(dir))
                 return null;
