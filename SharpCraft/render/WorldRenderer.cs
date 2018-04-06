@@ -154,7 +154,7 @@ namespace SharpCraft.render
 
             if (stack.Item is ItemBlock itemBlock)
             {
-                var model = ModelRegistry.getModelForBlock(itemBlock.getBlock(), stack.Meta);
+                var model = ModelRegistry.getModelForBlock(itemBlock.GetBlock(), stack.Meta);
 
                 var partialLookVec = lastLookVec + (lookVec - lastLookVec) * partialTicks;
                 var partialMotion = lastMotion + (motion - lastMotion) * partialTicks;

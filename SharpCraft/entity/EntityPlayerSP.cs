@@ -92,9 +92,35 @@ namespace SharpCraft.entity
             }
         }
 
-        public void SetItemStackInHotbar(int index, ItemStack stack)
+        /// <summary>
+        /// Sets an item stack at a position starting from hotbar to the inventory
+        /// </summary>
+        /// <param name="index"></param>
+        /// <param name="stack"></param>
+        public void SetItemStackInInventory(int index, ItemStack stack)
         {
-            hotbar[index % 9] = stack;
+            if (index < hotbar.Length)
+                SetItemStackInHotbar(index, stack);
+            else
+                inventory[index % inventory.Length] = stack;
+        }
+
+        private void SetItemStackInHotbar(int index, ItemStack stack)
+        {
+            hotbar[index % hotbar.Length] = stack;
+        }
+
+        public ItemStack GetItemStackInInventory(int index)
+        {
+            if (index < hotbar.Length)
+                return GetItemStackInHotbar(index);
+
+            return inventory[index % inventory.Length];
+        }
+
+        private ItemStack GetItemStackInHotbar(int index)
+        {
+            return hotbar[index % hotbar.Length];
         }
 
         public void SetItemStackInSelectedSlot(ItemStack stack)
@@ -113,44 +139,21 @@ namespace SharpCraft.entity
             //TODO - add to inventory if stack of same type is present in it, otherwise put the stack into the hotbar slot if possible
             for (var i = 0; i < hotbar.Length + inventory.Length; i++)
             {
-                if (i < hotbar.Length)
+                var stack = GetItemStackInInventory(i);
+
+                if (stack == null || stack.IsEmpty)
                 {
-                    var stack = hotbar[i];
-
-                    if (stack == null || stack.IsEmpty)
-                    {
-                        SetItemStackInHotbar(i, dropped.Copy());
-                        dropped.Count = 0;
-                        continue;
-                    }
-
-                    if (dropped.Item == stack.Item && stack.Count <= 64)
-                    {
-                        var toPickUp = Math.Min(64 - stack.Count, stack.Count);
-
-                        stack.Count += toPickUp;
-                        dropped.Count -= toPickUp;
-                    }
+                    SetItemStackInInventory(i, dropped.Copy());
+                    dropped.Count = 0;
+                    continue;
                 }
-                else
+
+                if (dropped.Item == stack.Item && stack.Count <= 64)
                 {
-                    var index = i - hotbar.Length;
-                    var stack = inventory[index];
+                    var toPickUp = Math.Min(64 - stack.Count, stack.Count);
 
-                    if (stack == null || stack.IsEmpty)
-                    {
-                        inventory[index] = dropped.Copy();
-                        dropped.Count = 0;
-                        continue;
-                    }
-
-                    if (dropped.Item == stack.Item && stack.Count <= 64)
-                    {
-                        var toPickUp = Math.Min(64 - stack.Count, stack.Count);
-
-                        stack.Count += toPickUp;
-                        dropped.Count -= toPickUp;
-                    }
+                    stack.Count += toPickUp;
+                    dropped.Count -= toPickUp;
                 }
             }
 
@@ -224,7 +227,7 @@ namespace SharpCraft.entity
             var pos = moo.blockPos.Offset(moo.sideHit);
             var blockAtPos = world.GetBlock(pos);
 
-            var heldBlock = itemBlock.getBlock();
+            var heldBlock = itemBlock.GetBlock();
             var blockBb = ModelRegistry.getModelForBlock(heldBlock, world.GetMetadata(pos))
                 .boundingBox.offset(pos.ToVec());
 
@@ -277,28 +280,28 @@ namespace SharpCraft.entity
 
         public void DropHeldItem()
         {
-            var stack = GetEquippedItemStack();
-
-            if (stack != null && !stack.IsEmpty)
-            {
-                world?.AddEntity(new EntityItem(world, SharpCraft.Instance.Camera.pos - Vector3.UnitY * 0.35f,
-                    SharpCraft.Instance.Camera.GetLookVec() * 0.75f + Vector3.UnitY * 0.1f, stack.CopyUnit()));
-
-                stack.Count--;
-            }
+            ThrowStack(GetEquippedItemStack(), 1);
         }
 
         public void DropHeldStack()
         {
-            var stack = GetEquippedItemStack();
+            ThrowStack(GetEquippedItemStack());
+        }
 
-            if (stack != null && !stack.IsEmpty)
-            {
-                world?.AddEntity(new EntityItem(world, SharpCraft.Instance.Camera.pos - Vector3.UnitY * 0.35f,
-                    SharpCraft.Instance.Camera.GetLookVec() * 0.75f + Vector3.UnitY * 0.1f, stack.Copy()));
+        public void ThrowStack(ItemStack stack, int count = 64)
+        {
+            if (stack == null || stack.IsEmpty)
+                return;
 
-                stack.Count = 0;
-            }
+            var ammountToThrow = Math.Min(count, stack.Count);
+
+            var toThrow = stack.CopyUnit();
+            toThrow.Count = ammountToThrow;
+
+            world?.AddEntity(new EntityItem(world, SharpCraft.Instance.Camera.pos - Vector3.UnitY * 0.35f,
+                SharpCraft.Instance.Camera.GetLookVec() * 0.75f + Vector3.UnitY * 0.1f, toThrow));
+
+            stack.Count -= ammountToThrow;
         }
 
         public ItemStack GetEquippedItemStack()

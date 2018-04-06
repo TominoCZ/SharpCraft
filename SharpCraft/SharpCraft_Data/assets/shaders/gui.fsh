@@ -7,5 +7,8 @@ out vec4 out_Color;
 uniform sampler2D guiTexture;
 
 void main(void){
-	out_Color = texture(guiTexture, pass_uv);
+	vec4 color = texture(guiTexture, pass_uv);
+	if (color.a <= 0.1) discard;
+	
+	out_Color = color;
 }

@@ -70,66 +70,8 @@ namespace SharpCraft.gui
             GL.DisableVertexAttribArray(0);
 
             Shader.Unbind();
-
-            /*var ratio = new Vector2((float)tex.textureSize.Width / SharpCraft.Instance.ClientSize.Width, (float)tex.textureSize.Height / SharpCraft.Instance.ClientSize.Height);
-
-            var mat = MatrixHelper.CreateTransformationMatrix(new  * 2, scale * ratio);
-            Shader.UpdateGlobalUniforms();
-            Shader.UpdateModelUniforms();
-            Shader.UpdateInstanceUniforms(mat, tex);
-
-            GL.ActiveTexture(TextureUnit.Texture0);
-            GL.BindTexture(TextureTarget.Texture2D, tex.textureID);
-            GL.DrawArrays(PrimitiveType.TriangleStrip, 0, 4);*/
         }
-        /*
-        protected virtual void RenderTexture(GuiTexture tex)
-        {
-            var ratio = new Vector2((float)tex.textureSize.Width / SharpCraft.Instance.ClientSize.Width, (float)tex.textureSize.Height / SharpCraft.Instance.ClientSize.Height);
-
-            var mat = MatrixHelper.CreateTransformationMatrix(tex.pos * 2, tex.scale * ratio);
-            Shader.UpdateGlobalUniforms();
-            Shader.UpdateModelUniforms();
-            Shader.UpdateInstanceUniforms(mat, tex);
-
-            GL.ActiveTexture(TextureUnit.Texture0);
-            GL.BindTexture(TextureTarget.Texture2D, tex.textureID);
-            GL.DrawArrays(PrimitiveType.TriangleStrip, 0, 4);
-        }
-
-        protected virtual void RenderTexture(GuiTexture tex, Vector2 scale, int x, int y)
-        {
-            Shader.Bind();
-            GL.BindVertexArray(GuiRenderer.GuiQuad.vaoID);
-
-            var unit = new Vector2(1f / SharpCraft.Instance.ClientSize.Width, 1f / SharpCraft.Instance.ClientSize.Height);
-
-            float width = tex.textureSize.Width;
-            float height = tex.textureSize.Height;
-
-            float scaledWidth = width * scale.X;
-            float scaledHeight = height * scale.Y;
-
-            float posX = x + scaledWidth / 2;
-            float posY = -y - scaledHeight / 2;
-
-            var pos = new Vector2(posX, posY) * unit;
-
-            var mat = MatrixHelper.CreateTransformationMatrix(pos * 2 - Vector2.UnitX + Vector2.UnitY, scale * new Vector2(width, height) * unit);
-            Shader.UpdateGlobalUniforms();
-            Shader.UpdateModelUniforms();
-            Shader.UpdateInstanceUniforms(mat, tex);
-
-            GL.ActiveTexture(TextureUnit.Texture0);
-            GL.BindTexture(TextureTarget.Texture2D, tex.textureID);
-
-            GL.DrawArrays(PrimitiveType.TriangleStrip, 0, 4);
-
-            GL.BindVertexArray(0);
-
-            Shader.Unbind();
-        }*/
-
+        
         protected virtual void RenderBlock(EnumBlock block, float x, float y, float scale)
         {
             var UVs = TextureManager.GetUVsFromBlock(block);

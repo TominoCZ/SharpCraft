@@ -1,4 +1,5 @@
-﻿using OpenTK;
+﻿using System.Security.Cryptography.X509Certificates;
+using OpenTK;
 using SharpCraft.render.shader;
 using SharpCraft.render.shader.shaders;
 using SharpCraft.texture;
@@ -9,14 +10,16 @@ namespace SharpCraft.gui
     {
         public int ID;
 
-        public int posX;
-        public int posY;
+        public float alphaForRender = 1;
+
+        public float posX;
+        public float posY;
 
         public float scale = 1;
 
         public bool centered;
 
-        public GuiButton(int ID, int x, int y)
+        public GuiButton(int ID, float x, float y)
         {
             this.ID = ID;
 
@@ -24,32 +27,27 @@ namespace SharpCraft.gui
             posY = y;
         }
 
-        public GuiButton(int ID, int x, int y, float scale) : this(ID, x, y)
+        public GuiButton(int ID, float x, float y, float scale) : this(ID, x, y)
         {
             this.scale = scale;
         }
 
         public override void Render(int mouseX, int mouseY)
         {
-            var u = 0;
             var v = 0;
 
-            if (isMouseOver(mouseX, mouseY))
+            if (IsMouseOver(mouseX, mouseY))
                 v += 20;
 
             var tex = TextureManager.TEXTURE_GUI_WIDGETS;
 
             if (centered)
                 posX = (int)(SharpCraft.Instance.ClientSize.Width / 2f - 200 * scale / 2);
-
-            RenderTexture(tex, posX, posY, u, v, 200, 20, scale);
+            
+            RenderTexture(tex, posX, posY, 0, v, 200, 20, scale);
         }
 
-        public virtual void Dispose()
-        {
-        }
-
-        internal bool isMouseOver(int x, int y)
+        public virtual bool IsMouseOver(int x, int y)
         {
             return x >= posX &&
                    y >= posY &&

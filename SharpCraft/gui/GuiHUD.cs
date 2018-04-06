@@ -58,7 +58,7 @@ namespace SharpCraft.gui
                 {
                     if (stack.Item is ItemBlock itemBlock)
                     {
-                        var block = itemBlock.getBlock();
+                        var block = itemBlock.GetBlock();
 
                         x += 14;
                         y += 14;

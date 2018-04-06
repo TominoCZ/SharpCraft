@@ -12,7 +12,7 @@ namespace SharpCraft.render.shader.shaders
 		private UniformVec2  UVmin;
 		private UniformVec2  UVmax;
 
-		public ShaderGui() : base("gui")
+        public ShaderGui() : base("gui")
 		{
 		}
 
@@ -22,7 +22,7 @@ namespace SharpCraft.render.shader.shaders
 
 			UVmin = GetUniformVec2("UVmin");
 			UVmax = GetUniformVec2("UVmax");
-		}
+        }
 
 		public override void UpdateInstanceUniforms(Matrix4 transform, GuiTexture instance)
 		{

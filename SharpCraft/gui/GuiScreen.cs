@@ -65,13 +65,13 @@ namespace SharpCraft.gui
             }
         }
 
-        public void OnMouseClick(int x, int y)
+        public virtual void OnMouseClick(int x, int y)
         {
             for (int i = buttons.Count - 1; i >= 0; i--)
             {
                 var btn = buttons[i];
 
-                if (btn.isMouseOver(x, y))
+                if (btn.IsMouseOver(x, y))
                 {
                     ButtonClicked(btn);
                     break;

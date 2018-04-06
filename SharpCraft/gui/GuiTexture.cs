@@ -12,6 +12,16 @@ namespace SharpCraft.gui
         public Vector2 UVmin;
         public Vector2 UVmax;
 
+        public GuiTexture(Texture tex, int startX, int startY, int sizeX, int sizeY) : this(tex, new Vector2(startX, startY), new Vector2(sizeX, sizeY), 1)
+        {
+
+        }
+
+        public GuiTexture(Texture tex, int startX, int startY, int sizeX, int sizeY, float scale) : this(tex, new Vector2(startX, startY), new Vector2(sizeX, sizeY), scale)
+        {
+
+        }
+
         public GuiTexture(Texture tex, Vector2 textureStart, Vector2 size) : this(tex, textureStart, size, 1)
         {
 

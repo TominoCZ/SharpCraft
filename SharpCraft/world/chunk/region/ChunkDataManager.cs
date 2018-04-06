@@ -17,7 +17,7 @@ namespace SharpCraft.world.chunk.region
 
         public ChunkDataManager(string dataRoot, RegionInfo<TCord> info, Func<RegionInfo<TCord>, TCord, string, TReg> regionConstructor, Func<int[], TCord> cordinateConstructor)
         {
-            Console.WriteLine(Path.GetFullPath(dataRoot));
+            //Console.WriteLine(Path.GetFullPath(dataRoot));
             Directory.CreateDirectory(dataRoot);
             _dataRoot = dataRoot;
             Info = info;

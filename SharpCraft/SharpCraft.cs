@@ -191,12 +191,12 @@ namespace SharpCraft
 
                 World.AddEntity(Player);
 
-                Player.SetItemStackInHotbar(0, new ItemStack(new ItemBlock(EnumBlock.CRAFTING_TABLE)));
-                Player.SetItemStackInHotbar(1, new ItemStack(new ItemBlock(EnumBlock.FURNACE)));
-                Player.SetItemStackInHotbar(2, new ItemStack(new ItemBlock(EnumBlock.COBBLESTONE)));
-                Player.SetItemStackInHotbar(3, new ItemStack(new ItemBlock(EnumBlock.PLANKS)));
-                Player.SetItemStackInHotbar(4, new ItemStack(new ItemBlock(EnumBlock.GLASS)));
-                Player.SetItemStackInHotbar(5, new ItemStack(new ItemBlock(EnumBlock.XRAY)));
+                Player.SetItemStackInInventory(0, new ItemStack(new ItemBlock(EnumBlock.CRAFTING_TABLE)));
+                Player.SetItemStackInInventory(1, new ItemStack(new ItemBlock(EnumBlock.FURNACE)));
+                Player.SetItemStackInInventory(2, new ItemStack(new ItemBlock(EnumBlock.COBBLESTONE)));
+                Player.SetItemStackInInventory(3, new ItemStack(new ItemBlock(EnumBlock.PLANKS)));
+                Player.SetItemStackInInventory(4, new ItemStack(new ItemBlock(EnumBlock.GLASS)));
+                Player.SetItemStackInInventory(5, new ItemStack(new ItemBlock(EnumBlock.XRAY)));
             }
             else
             {
