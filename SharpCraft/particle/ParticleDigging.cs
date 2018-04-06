@@ -28,7 +28,7 @@ namespace SharpCraft.particle
         public ParticleDigging(World world, Vector3 pos, Vector3 motion, float particleScale, EnumBlock block, FaceSides side, int meta) : base(world, pos, motion, particleScale, TextureManager.TEXTURE_BLOCKS.textureID)
         {
             this.block = block;
-
+           
             var model = ModelRegistry.getModelForBlock(block, meta);
 
             if (model.RawModel is ModelBlockRaw mbr)

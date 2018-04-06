@@ -28,7 +28,7 @@ namespace SharpCraft.render
         {
             get => _pitch;
 
-            set => _pitch = MathHelper.Clamp(value, -MathHelper.PiOver2, MathHelper.PiOver2);
+            set => _pitch = MathHelper.Clamp(value, -MathHelper.PiOver2 + MathHelper.DegreesToRadians(0.1f), MathHelper.PiOver2 - MathHelper.DegreesToRadians(0.1f));
         }
 
         public float yaw

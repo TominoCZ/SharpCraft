@@ -6,12 +6,23 @@ namespace SharpCraft.block
 {
     public struct FaceSides
     {
+        public static bool operator ==(FaceSides f1, FaceSides f2)
+        {
+            return f1.id == f2.id;
+        }
+
+        public static bool operator !=(FaceSides f1, FaceSides f2)
+        {
+            return f1.id != f2.id;
+        }
+
         public static readonly FaceSides East = new FaceSides("East", 2, 1, 0, 0);
         public static readonly FaceSides West = new FaceSides("West", 3, -1, 0, 0);
         public static readonly FaceSides Up = new FaceSides("Up", 4, 0, 1, 0);
         public static readonly FaceSides Down = new FaceSides("Down", 5, 0, -1, 0);
         public static readonly FaceSides South = new FaceSides("South", 1, 0, 0, 1);
         public static readonly FaceSides North = new FaceSides("North", 0, 0, 0, -1);
+        public static readonly FaceSides Null = new FaceSides("Null", -1, 0, 0, 0);
 
         public static readonly IReadOnlyList<FaceSides> XPlane = new[] { Up, South, Down, North };
         public static readonly IReadOnlyList<FaceSides> YPlane = new[] { East, South, West, North };

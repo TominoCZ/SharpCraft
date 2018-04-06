@@ -344,7 +344,7 @@ namespace SharpCraft
 
                                 if (hitSomething)
                                 {
-                                    var sideHit = FaceSides.Up;
+                                    FaceSides sideHit = FaceSides.Null;
 
                                     if (normal.X < 0)
                                         sideHit = FaceSides.West;
@@ -359,7 +359,10 @@ namespace SharpCraft
                                     else if (normal.Z > 0)
                                         sideHit = FaceSides.South;
 
-                                    var p = new BlockPos(hitPos - normal * 0.5f);
+                                    var p = new BlockPos(hitPos - normal * 0.5f);;
+
+                                    if (sideHit == FaceSides.Null)
+                                       continue;
 
                                     var l = Math.Abs((Camera.pos - (p.ToVec() + Vector3.One * 0.5f)).Length);
 

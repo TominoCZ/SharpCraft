@@ -51,7 +51,9 @@ namespace SharpCraft.render
             lastLookVec = lookVec;
             lastMotion = motion;
 
-            motion = SharpCraft.Instance.Player.motion;
+            if (SharpCraft.Instance.Player != null)
+                motion = SharpCraft.Instance.Player.motion;
+
             lookVec = SharpCraft.Instance.Camera.GetLookVec();
 
             _hue = (_hue + 5) % 360;

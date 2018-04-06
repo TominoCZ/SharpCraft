@@ -12,6 +12,8 @@ namespace SharpCraft.gui
 
         public override void Render(int mouseX, int mouseY)
         {
+            DrawBackground();
+
             var size = SharpCraft.Instance.ClientSize;
 
             int space = 5;

@@ -11,7 +11,7 @@ namespace SharpCraft.render
 {
     internal class GuiRenderer
     {
-        public static ModelRaw GUIquad;
+        public static ModelRaw GuiQuad;
 
         private GuiCrosshair crosshairGui;
         private GuiHUD hudGui;
@@ -24,7 +24,7 @@ namespace SharpCraft.render
                 1, -1,
                 1, 1 }, 2);
 
-            GUIquad = ModelManager.loadModelToVAO(new List<RawQuad> { rawQuad }, 2);
+            GuiQuad = ModelManager.loadModelToVAO(new List<RawQuad> { rawQuad }, 2);
         }
 
         public GuiRenderer()
@@ -42,7 +42,7 @@ namespace SharpCraft.render
             GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
             GL.Disable(EnableCap.DepthTest);
 
-            GL.BindVertexArray(GUIquad.vaoID);
+            GL.BindVertexArray(GuiQuad.vaoID);
 
             var state = OpenTK.Input.Mouse.GetCursorState();
             var mouse = SharpCraft.Instance.PointToClient(new Point(state.X, state.Y));

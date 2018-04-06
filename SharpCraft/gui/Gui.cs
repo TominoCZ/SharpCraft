@@ -55,6 +55,8 @@ namespace SharpCraft.gui
 
             Shader.Bind();
 
+            GL.BindVertexArray(GuiRenderer.GuiQuad.vaoID);
+
             Shader.UpdateGlobalUniforms();
             Shader.UpdateModelUniforms();
             Shader.UpdateInstanceUniforms(mat, tex);
@@ -98,7 +100,7 @@ namespace SharpCraft.gui
         protected virtual void RenderTexture(GuiTexture tex, Vector2 scale, int x, int y)
         {
             Shader.Bind();
-            GL.BindVertexArray(GuiRenderer.GUIquad.vaoID);
+            GL.BindVertexArray(GuiRenderer.GuiQuad.vaoID);
 
             var unit = new Vector2(1f / SharpCraft.Instance.ClientSize.Width, 1f / SharpCraft.Instance.ClientSize.Height);
 
@@ -147,7 +149,7 @@ namespace SharpCraft.gui
             var pos = new Vector2(posX, posY) * unit;
 
             var mat = MatrixHelper.CreateTransformationMatrix(pos * 2 - Vector2.UnitX + Vector2.UnitY, scale * new Vector2(width, height) * unit);
-
+            
             _item.Bind();
 
             _item.Shader.UpdateGlobalUniforms();

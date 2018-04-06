@@ -86,7 +86,7 @@ namespace SharpCraft.world.chunk
 
         public EnumBlock GetBlock(BlockPos localPos)
         {
-            if (localPos.Y <= 0 || localPos.Y >= ChunkHeight) return EnumBlock.AIR;
+            if (localPos.Y < 0 || localPos.Y >= ChunkHeight) return EnumBlock.AIR;
             CheckPosXZ(localPos);
 
             return (EnumBlock)(_chunkBlocks[localPos.X, localPos.Y, localPos.Z] >> 4);
@@ -160,14 +160,14 @@ namespace SharpCraft.world.chunk
 
         private void BuildChunkModel()
         {
-            if (checkCanBuild())
+            if (CheckCanBuild())
             {
                 ModelGenerating = true;
                 _loadManager.NotifyBuild(this);
             }
         }
 
-        private bool checkCanBuild()
+        private bool CheckCanBuild()
         {
             if (!HasData || ModelGenerating) return false;
 

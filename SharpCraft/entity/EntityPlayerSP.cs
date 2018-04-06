@@ -102,6 +102,12 @@ namespace SharpCraft.entity
             hotbar[HotbarIndex] = stack;
         }
 
+        public bool CanPickUpStack(ItemStack dropped)
+        {
+            return hotbar.Any(stack => stack == null || stack.IsEmpty || stack.ItemSame(dropped) && stack.Count + dropped.Count <= 64) ||
+                   inventory.Any(stack => stack == null || stack.IsEmpty || stack.ItemSame(dropped) && stack.Count + dropped.Count <= 64);
+        }
+
         public bool OnPickup(ItemStack dropped)
         {
             //TODO - add to inventory if stack of same type is present in it, otherwise put the stack into the hotbar slot if possible
@@ -114,7 +120,8 @@ namespace SharpCraft.entity
                     if (stack == null || stack.IsEmpty)
                     {
                         SetItemStackInHotbar(i, dropped.Copy());
-                        return true;
+                        dropped.Count = 0;
+                        continue;
                     }
 
                     if (dropped.Item == stack.Item && stack.Count <= 64)
@@ -133,7 +140,8 @@ namespace SharpCraft.entity
                     if (stack == null || stack.IsEmpty)
                     {
                         inventory[index] = dropped.Copy();
-                        return true;
+                        dropped.Count = 0;
+                        continue;
                     }
 
                     if (dropped.Item == stack.Item && stack.Count <= 64)
@@ -147,11 +155,6 @@ namespace SharpCraft.entity
             }
 
             return dropped.IsEmpty;
-        }
-
-        public bool CanPickUpStack(ItemStack dropped)
-        {
-            return hotbar.Any(stack => stack == null || stack.IsEmpty || stack.ItemSame(dropped) && stack.Count + dropped.Count <= 64) || inventory.Any(stack => stack == null || (stack.IsEmpty || stack.ItemSame(dropped) && stack.Count + dropped.Count <= 64));
         }
 
         public void OnClick(MouseButton btn)
@@ -190,6 +193,10 @@ namespace SharpCraft.entity
                 return;
 
             var block = world.GetBlock(moo.blockPos);
+
+            if (block == EnumBlock.AIR)
+                return;
+
             var meta = world.GetMetadata(moo.blockPos);
 
             world.SetBlock(moo.blockPos, EnumBlock.AIR, 0);

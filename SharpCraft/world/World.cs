@@ -53,22 +53,22 @@ namespace SharpCraft.world
 
         private void UpdateEntities()
         {
-	        Entities.RemoveAll(e =>
-	        {
-		        if (!IsChunkLoaded(ChunkPos.FromWorldSpace(e.pos))) return false;
-		        if (e.isAlive)
-		        {
-			        e.Update();
-			        return !e.isAlive;
-		        }
-		        return true;
-	        });
+            Entities.RemoveAll(e =>
+            {
+                if (!IsChunkLoaded(ChunkPos.FromWorldSpace(e.pos))) return false;
+                if (e.isAlive)
+                {
+                    e.Update();
+                    return !e.isAlive;
+                }
+                return true;
+            });
         }
 
-	    public bool IsChunkLoaded(ChunkPos pos)
-	    {
-		    return GetChunk(pos) is Chunk chunk && chunk.HasData;
-	    }
+        public bool IsChunkLoaded(ChunkPos pos)
+        {
+            return GetChunk(pos) is Chunk chunk && chunk.HasData;
+        }
 
         public List<AxisAlignedBB> GetIntersectingEntitiesBBs(AxisAlignedBB with)
         {
@@ -107,6 +107,9 @@ namespace SharpCraft.world
 
         public EnumBlock GetBlock(BlockPos pos)
         {
+            if (pos.Y < 0 || pos.Y >= Chunk.ChunkHeight)
+                return EnumBlock.AIR;
+
             var chunk = GetChunk(ChunkPos.FromWorldSpace(pos));
             if (chunk == null || !chunk.HasData)
                 return EnumBlock.AIR;
@@ -244,7 +247,8 @@ namespace SharpCraft.world
                     {
                         if (y == peakY) SetBlock(x, y, z, EnumBlock.GRASS);
                         else if (y > 0 && peakY - y > 0 && peakY - y < 3) SetBlock(x, y, z, EnumBlock.DIRT);
-                        else if (y == 0) SetBlock(x, y, z, EnumBlock.BEDROCK);
+                        else if (y == 0)
+                            SetBlock(x, y, z, EnumBlock.BEDROCK);
                         else
                         {
                             var f = _noiseUtil.GetNoise(xCh * 32 - y * 16, zCh * 32 + x * 16);
