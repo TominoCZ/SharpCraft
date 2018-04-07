@@ -30,7 +30,7 @@ namespace SharpCraft.world.chunk.region
             for (int i = 0; i < cordinate.Length;)
             {
                 nam.Append(cordinate[i]);
-                if (++i == cordinate.Length) nam.Append('.');
+                if (++i != cordinate.Length) nam.Append('.');
             }
             _filePath = $"{dataRoot}/.reg_{nam}.bin";
 
