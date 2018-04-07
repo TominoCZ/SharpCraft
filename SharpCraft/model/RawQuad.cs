@@ -2,12 +2,14 @@
 
 namespace SharpCraft.model
 {
-    internal class RawQuad
+    internal struct RawQuad
     {
         public float[] vertices { get; }
         public float[] normal { get; }
         public float[] UVs { get; }
         public int valuesPerVertice { get; }
+
+        public bool Loaded { get; }
 
         public RawQuad(float[] vertices, float[] UVs, float[] normal, int valuesPerVertice)
         {
@@ -16,6 +18,7 @@ namespace SharpCraft.model
             this.UVs = UVs;
 
             this.valuesPerVertice = valuesPerVertice;
+            Loaded = true;
         }
 
         public RawQuad(float[] vertices, float[] UVs, int valuesPerVertice) : this(vertices, UVs, new float[0], valuesPerVertice)

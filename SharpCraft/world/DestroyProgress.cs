@@ -37,7 +37,8 @@ namespace SharpCraft.world
             var block = player.world.GetBlock(pos);
             var meta = player.world.GetMetadata(pos);
 
-            _blockHardness = ModelRegistry.GetBlockState(block, meta).hardness;
+            _blockHardness = 8; //TODO
+            //_blockHardness = ModelRegistry.GetBlockState(block, meta).hardness;
             Player = player;
         }
 

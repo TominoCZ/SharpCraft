@@ -160,20 +160,16 @@ namespace SharpCraft.world.chunk
 
         private void BuildChunkModel()
         {
-            if (CheckCanBuild())
-            {
-                ModelGenerating = true;
-                _loadManager.NotifyBuild(this);
-            }
+            if (!CheckCanBuild())
+                return;
+
+            ModelGenerating = true;
+            _loadManager.NotifyBuild(this);
         }
 
         private bool CheckCanBuild()
         {
-            if (!HasData || ModelGenerating) return false;
-
-            if (!World.AreNeighbourChunksGenerated(Pos)) return false;
-
-            return true;
+            return HasData && !ModelGenerating && World.AreNeighbourChunksGenerated(Pos);
         }
 
         internal void BuildChunkModelDo()
@@ -193,16 +189,16 @@ namespace SharpCraft.world.chunk
                 {
                     for (int z = 0; z < ChunkSize; z++)
                     {
-                        var localPos = new BlockPos(x, y, z);
                         var worldPos = new BlockPos(x + Pos.WorldSpaceX(), y, z + Pos.WorldSpaceZ());
 
                         var block = World.GetBlock(worldPos);
-
                         if (block == EnumBlock.AIR)
                             continue;
 
-                        var blockModel = ModelRegistry.GetModelForBlock(block, World.GetMetadata(worldPos));
+                        var localPos = new BlockPos(x, y, z);
 
+                        var blockModel = ModelRegistry.GetModelForBlock(block, World.GetMetadata(worldPos));
+                        
                         lock (modelRaw)
                         {
                             if (!modelRaw.TryGetValue(blockModel.Shader, out quads))
@@ -215,16 +211,17 @@ namespace SharpCraft.world.chunk
                             var blockO = World.GetBlock(worldPosO);
                             var blockModelO = ModelRegistry.GetModelForBlock(blockO, World.GetMetadata(worldPosO));
 
-                            if (blockO == EnumBlock.AIR || blockModelO.hasTransparency && !blockModel.hasTransparency)
-                            {
-                                var quad = ((ModelBlockRaw)blockModel.RawModel)?.getQuadForSide(dir)?.offset(localPos);
+                            if (!(blockO == EnumBlock.AIR ||
+                                  blockModelO.hasTransparency && !blockModel.hasTransparency))
+                                continue;
 
-                                if (quad != null)
+                            var quad = ((ModelBlockRaw)blockModel.RawModel).getQuadForSide(dir).offset(localPos);
+
+                            if (quad.Loaded)
+                            {
+                                lock (quads)
                                 {
-                                    lock (quads)
-                                    {
-                                        quads.Add(quad); //TODO - rescale the model by the bounding box.. or do that while creating the model..
-                                    }
+                                    quads.Add(quad); //TODO - rescale the model by the bounding box.. or do that while creating the model..
                                 }
                             }
                         }
@@ -241,10 +238,10 @@ namespace SharpCraft.world.chunk
                 {
                     foreach (var oldShader in _model.fragmentPerShader.Keys)
                     {
-                        if (!modelRaw.Keys.Contains<object>(oldShader))
-                        {
-                            _model.destroyFragmentModelWithShader(oldShader);
-                        }
+                        if (modelRaw.Keys.Contains<object>(oldShader))
+                            continue;
+
+                        _model.destroyFragmentModelWithShader(oldShader);
                     }
                 }
                 else _model = new ModelChunk();

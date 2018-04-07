@@ -96,11 +96,13 @@ namespace SharpCraft.render
         {
             foreach (var chunk in world.Chunks.Values)
             {
-                if (chunk.ShouldRender(RenderDistance))
-                {
-                    if (chunk.ModelGenerating) RenderChunkOutline(chunk);
-                    chunk.Render();
-                }
+                if (!chunk.ShouldRender(RenderDistance))
+                    continue;
+
+                if (chunk.ModelGenerating)
+                    RenderChunkOutline(chunk);
+
+                chunk.Render();
             }
         }
 
@@ -112,7 +114,7 @@ namespace SharpCraft.render
 
             GL.ActiveTexture(TextureUnit.Texture0);
             GL.BindTexture(TextureTarget.Texture2D, TextureManager.TEXTURE_DESTROY_PROGRESS.ID);
-            
+
             GL.BlendFunc(BlendingFactorSrc.DstColor, BlendingFactorDest.Zero);
 
             _shaderTexturedCube.Bind();

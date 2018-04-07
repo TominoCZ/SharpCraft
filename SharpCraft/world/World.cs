@@ -272,7 +272,7 @@ namespace SharpCraft.world
                         //leaves
                         for (int i = -3; i <= 3; i++)
                         {
-                            for (int j = -3; j <= 0; j++)
+                            for (int j = 0; j <= 3; j++)
                             {
                                 for (int k = -3; k <= 3; k++)
                                 {
