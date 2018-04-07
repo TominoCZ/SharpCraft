@@ -16,6 +16,10 @@ namespace SharpCraft.block
             return new Vector3(X, Y, Z);
         }
 
+        public static bool operator ==(BlockPos p1, BlockPos p2) => p1.X == p2.X && p1.Y == p2.Y && p1.Z ==p2.Z;
+
+        public static bool operator !=(BlockPos p1, BlockPos p2) => !(p1 == p2);
+
         public static BlockPos operator +(BlockPos p1, BlockPos p2) => new BlockPos(p1.X + p2.X, p1.Y + p2.Y, p1.Z + p2.Z);
 
         public static BlockPos operator +(BlockPos p1, Vector3 p2) => new BlockPos(p1.X + p2.X, p1.Y + p2.Y, p1.Z + p2.Z);

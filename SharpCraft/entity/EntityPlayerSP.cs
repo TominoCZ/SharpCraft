@@ -92,6 +92,21 @@ namespace SharpCraft.entity
             }
         }
 
+        public void FastMoveStack(int index)
+        {
+            //TODO - finish :D sont forget, that there is a possibility that the item in the stacks are the same, so they merge
+            int i = 0;
+
+            for (; i < inventory.Length; i++)
+            {
+                if (inventory[i] == null || inventory[i].IsEmpty)
+                    break;
+            }
+
+            if (i >= index)
+                return;
+        }
+
         /// <summary>
         /// Sets an item stack at a position starting from hotbar to the inventory
         /// </summary>
@@ -169,7 +184,7 @@ namespace SharpCraft.entity
                 if (btn == MouseButton.Right)
                 {
                     var block = world.GetBlock(moo.blockPos);
-                    var model = ModelRegistry.getModelForBlock(block, world.GetMetadata(moo.blockPos));
+                    var model = ModelRegistry.GetModelForBlock(block, world.GetMetadata(moo.blockPos));
 
                     if (model != null && model.canBeInteractedWith)
                     {
@@ -185,7 +200,9 @@ namespace SharpCraft.entity
                         PlaceBlock();
                 }
                 else if (btn == MouseButton.Left)
-                    BreakBlock();
+                {
+                    //BreakBlock(); TODO - start breaking
+                }
             }
         }
 
@@ -228,7 +245,7 @@ namespace SharpCraft.entity
             var blockAtPos = world.GetBlock(pos);
 
             var heldBlock = itemBlock.GetBlock();
-            var blockBb = ModelRegistry.getModelForBlock(heldBlock, world.GetMetadata(pos))
+            var blockBb = ModelRegistry.GetModelForBlock(heldBlock, world.GetMetadata(pos))
                 .boundingBox.offset(pos.ToVec());
 
             if (blockAtPos != EnumBlock.AIR || world.GetIntersectingEntitiesBBs(blockBb).Count > 0)

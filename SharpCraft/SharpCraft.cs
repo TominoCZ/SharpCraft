@@ -59,12 +59,16 @@ namespace SharpCraft
         public SkyboxRenderer SkyboxRenderer;
         public GuiRenderer GuiRenderer;
 
-        public KeyboardState KeyboardState = new KeyboardState();
+        public KeyboardState KeyboardState;
         //public HashSet<Key> KeysDown = new HashSet<Key>();
         public MouseOverObject MouseOverObject = new MouseOverObject();
+        private MouseOverObject _lastMouseOverObject = new MouseOverObject();
+
         public EntityPlayerSP Player;
 
         public World World;
+
+        public ConcurrentDictionary<BlockPos, DestroyProgress> DestroyProgresses = new ConcurrentDictionary<BlockPos, DestroyProgress>();
 
         private List<MouseButton> _mouseButtonsDown = new List<MouseButton>();
         private ConcurrentQueue<Action> _glContextQueue = new ConcurrentQueue<Action>();
@@ -95,7 +99,7 @@ namespace SharpCraft
 
         private GameTimer timer = new GameTimer(60, 20);
 
-        public SharpCraft() : base(640, 480, GraphicsMode.Default, _title, GameWindowFlags.Default, DisplayDevice.Default, 3, 3,
+        public SharpCraft() : base(680, 480, GraphicsMode.Default, _title, GameWindowFlags.Default, DisplayDevice.Default, 3, 3,
             GraphicsContextFlags.ForwardCompatible)
         {
             Instance = this;
@@ -126,6 +130,10 @@ namespace SharpCraft
 
             var missingModel = new ModelBlock(EnumBlock.MISSING, shader);
             var stoneModel = new ModelBlock(EnumBlock.STONE, shader);
+
+            //TEST
+            var stoneSlabModel = new ModelBlock(EnumBlock.STONE_SLAB, shader, new AxisAlignedBB(Vector3.One - Vector3.UnitY * 0.5f));
+
             var grassModel = new ModelBlock(EnumBlock.GRASS, shader);
             var dirtModel = new ModelBlock(EnumBlock.DIRT, shader);
             var cobblestoneModel = new ModelBlock(EnumBlock.COBBLESTONE, shader);
@@ -140,23 +148,26 @@ namespace SharpCraft
 
             var xrayModel = new ModelBlock(EnumBlock.XRAY, shader);
 
-            ModelRegistry.registerBlockModel(missingModel, 0);
+            ModelRegistry.RegisterBlockModel(missingModel, 0);
 
-            ModelRegistry.registerBlockModel(stoneModel, 0);
-            ModelRegistry.registerBlockModel(grassModel, 0);
-            ModelRegistry.registerBlockModel(dirtModel, 0);
-            ModelRegistry.registerBlockModel(cobblestoneModel, 0);
-            ModelRegistry.registerBlockModel(planksModel, 0);
-            ModelRegistry.registerBlockModel(craftingTableModel, 0);
-            ModelRegistry.registerBlockModel(furnaceModel, 0);
+            //TEST
+            ModelRegistry.RegisterBlockModel(stoneSlabModel, 0);
 
-            ModelRegistry.registerBlockModel(bedrockModel, 0);
-            ModelRegistry.registerBlockModel(rareModel, 0);
-            ModelRegistry.registerBlockModel(glassModel, 0);
-            ModelRegistry.registerBlockModel(logModel, 0);
-            ModelRegistry.registerBlockModel(leavesModel, 0);
+            ModelRegistry.RegisterBlockModel(stoneModel, 0);
+            ModelRegistry.RegisterBlockModel(grassModel, 0);
+            ModelRegistry.RegisterBlockModel(dirtModel, 0);
+            ModelRegistry.RegisterBlockModel(cobblestoneModel, 0);
+            ModelRegistry.RegisterBlockModel(planksModel, 0);
+            ModelRegistry.RegisterBlockModel(craftingTableModel, 0);
+            ModelRegistry.RegisterBlockModel(furnaceModel, 0);
 
-            ModelRegistry.registerBlockModel(xrayModel, 0);
+            ModelRegistry.RegisterBlockModel(bedrockModel, 0);
+            ModelRegistry.RegisterBlockModel(rareModel, 0);
+            ModelRegistry.RegisterBlockModel(glassModel, 0);
+            ModelRegistry.RegisterBlockModel(logModel, 0);
+            ModelRegistry.RegisterBlockModel(leavesModel, 0);
+
+            ModelRegistry.RegisterBlockModel(xrayModel, 0);
 
             SettingsManager.Load();
 
@@ -203,6 +214,8 @@ namespace SharpCraft
                 World = loadedWorld;
             }
 
+            Player.SetItemStackInInventory(0, new ItemStack(new ItemBlock(EnumBlock.STONE_SLAB)));
+
             ResetMouse();
 
             var state = OpenTK.Input.Mouse.GetState();
@@ -248,14 +261,48 @@ namespace SharpCraft
                 {
                     _tickCounter++;
 
+                    var lastPos = _lastMouseOverObject.blockPos;
+
+                    if (lmb && _lastMouseOverObject.hit is EnumBlock)
+                    {
+                        ParticleRenderer.SpawnDiggingParticle(_lastMouseOverObject);
+
+                        if (MouseOverObject.hit != null && _lastMouseOverObject.hit == MouseOverObject.hit &&
+                            lastPos == MouseOverObject.blockPos)
+                        {
+                            DestroyProgress progress;
+
+                            if (!DestroyProgresses.TryGetValue(lastPos, out progress))
+                            {
+                                DestroyProgresses.TryAdd(lastPos, progress = new DestroyProgress(lastPos, Player));
+                            }
+
+                            progress.Progress++;
+
+                            if (progress.Destroyed)
+                                DestroyProgresses.TryRemove(progress.Pos, out var removed);
+                        }
+                        else
+                        {
+                            foreach (var progress in DestroyProgresses.Values)
+                            {
+                                if (progress.Player == Player)
+                                    DestroyProgresses.TryRemove(progress.Pos, out var removed);
+                            }
+                        }
+                    }
+
+                    _lastMouseOverObject = MouseOverObject;
+
+
                     if (_tickCounter % 4 == 0)
                     {
                         GetMouseOverObject();
 
                         if (rmb)
                             Player.PlaceBlock();
-                        if (lmb)
-                            Player.BreakBlock();
+
+                        // Player.BreakBlock();//TODO - only in creative
                     }
                 }
                 else
@@ -336,7 +383,7 @@ namespace SharpCraft
 
                             if (block != EnumBlock.AIR)
                             {
-                                var model = ModelRegistry.getModelForBlock(block, World.GetMetadata(pos));
+                                var model = ModelRegistry.GetModelForBlock(block, World.GetMetadata(pos));
                                 var bb = model.boundingBox.offset(pos.ToVec());
 
                                 var hitSomething = RayHelper.rayIntersectsBB(Camera.pos,
@@ -359,10 +406,10 @@ namespace SharpCraft
                                     else if (normal.Z > 0)
                                         sideHit = FaceSides.South;
 
-                                    var p = new BlockPos(hitPos - normal * 0.5f);;
+                                    var p = new BlockPos(hitPos - normal * 0.5f); ;
 
                                     if (sideHit == FaceSides.Null)
-                                       continue;
+                                        continue;
 
                                     var l = Math.Abs((Camera.pos - (p.ToVec() + Vector3.One * 0.5f)).Length);
 
@@ -375,6 +422,8 @@ namespace SharpCraft
                                         final.blockPos = p;
                                         final.normal = normal;
                                         final.sideHit = sideHit;
+
+                                        final.boundingBox = bb;
                                     }
                                 }
                             }
@@ -585,6 +634,12 @@ namespace SharpCraft
             base.OnMouseUp(e);
 
             _mouseButtonsDown.Remove(e.Button);
+
+            foreach (var progress in DestroyProgresses.Values)
+            {
+                if (progress.Player == Player)
+                    DestroyProgresses.TryRemove(progress.Pos, out var removed);
+            }
         }
 
         protected override void OnKeyDown(KeyboardKeyEventArgs e)

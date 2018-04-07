@@ -27,7 +27,7 @@ namespace SharpCraft.gui
 
         }
 
-        public GuiTexture(Texture tex, Vector2 textureStart, Vector2 size, float scale) : base(tex.textureID, tex.textureSize)
+        public GuiTexture(Texture tex, Vector2 textureStart, Vector2 size, float scale) : base(tex.ID, tex.textureSize)
         {
             Size = size;
             Scale = scale;

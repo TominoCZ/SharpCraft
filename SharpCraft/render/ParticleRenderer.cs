@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using OpenTK;
 using SharpCraft.block;
+using SharpCraft.entity;
 using SharpCraft.model;
 using SharpCraft.particle;
 using SharpCraft.render.shader;
@@ -53,6 +54,39 @@ namespace SharpCraft.render
 
                 if (!particle.isAlive)
                     _particles.Remove(particle);
+            }
+        }
+
+        public void SpawnDiggingParticle(MouseOverObject moo)
+        {
+            if (moo.hit is EnumBlock block)
+            {
+                var f0 = moo.hitVec.X
+                     + MathUtil.NextFloat(-0.21f, 0.21f) * Math.Abs(moo.boundingBox.max.X - moo.boundingBox.min.X);
+                var f1 = moo.hitVec.Y
+                     + MathUtil.NextFloat(-0.21f, 0.21f) * Math.Abs(moo.boundingBox.max.Y - moo.boundingBox.min.Y);
+                var f2 = moo.hitVec.Z
+                     + MathUtil.NextFloat(-0.21f, 0.21f) * Math.Abs(moo.boundingBox.max.Z - moo.boundingBox.min.Z);
+
+                var vec = new Vector3(MathUtil.NextFloat(-0.025f, 0.025f), MathUtil.NextFloat(-0.025f, 0.025f), MathUtil.NextFloat(-0.025f, 0.025f));
+
+                var pos = vec;
+                pos.X += f0;
+                pos.Y += f1;
+                pos.Z += f2;
+
+                var motion = vec + moo.normal * 0.075f;
+
+                var ok = SharpCraft.Instance.DestroyProgresses.TryGetValue(moo.blockPos, out var progress);
+
+                AddParticle(new ParticleDigging(
+                    SharpCraft.Instance.World,
+                    pos,
+                    motion,
+                    0.4f + (ok ? progress.Percentage : 0),
+                    block,
+                    moo.sideHit,
+                    SharpCraft.Instance.World.GetMetadata(moo.blockPos)));
             }
         }
 

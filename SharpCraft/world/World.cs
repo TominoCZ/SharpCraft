@@ -92,7 +92,7 @@ namespace SharpCraft.world
                         if (block == EnumBlock.AIR)
                             continue;
 
-                        blocks.Add(ModelRegistry.getModelForBlock(block, GetMetadata(pos)).boundingBox.offset(pos.ToVec()));
+                        blocks.Add(ModelRegistry.GetModelForBlock(block, GetMetadata(pos)).boundingBox.offset(pos.ToVec()));
                     }
                 }
             }

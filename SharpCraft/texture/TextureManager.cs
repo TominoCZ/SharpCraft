@@ -23,6 +23,7 @@ namespace SharpCraft.texture
 
         private static Bitmap TEXTURE_MISSING = CreateMissingTexture();
 
+        public static Texture TEXTURE_DESTROY_PROGRESS;
         public static Texture TEXTURE_BLOCKS;
         public static Texture TEXTURE_GUI_WIDGETS;
 
@@ -31,6 +32,7 @@ namespace SharpCraft.texture
             StitchTextures();
 
             TEXTURE_GUI_WIDGETS = LoadTexture("gui/widgets");
+            TEXTURE_DESTROY_PROGRESS = LoadTexture("blocks/destroy_progress");
         }
 
         private static void StitchTextures()
@@ -368,7 +370,7 @@ namespace SharpCraft.texture
 
         public static void Reload()
         {
-            DestroyTexture(TEXTURE_BLOCKS.textureID);
+            DestroyTexture(TEXTURE_BLOCKS.ID);
 
             _blockUVs.Clear();
 
@@ -377,7 +379,7 @@ namespace SharpCraft.texture
 
         public static void Destroy()
         {
-            DestroyTexture(TEXTURE_BLOCKS.textureID);
+            DestroyTexture(TEXTURE_BLOCKS.ID);
 
             for (int i = 0; i < _allTextures.Count; i++)
             {

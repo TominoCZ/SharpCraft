@@ -13,6 +13,8 @@ namespace SharpCraft.entity
 
         public BlockPos blockPos;
 
-        public object hit;
+        public AxisAlignedBB boundingBox = AxisAlignedBB.NULL;
+
+        public dynamic hit;
     }
 }

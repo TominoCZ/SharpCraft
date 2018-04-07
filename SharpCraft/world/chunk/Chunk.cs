@@ -201,7 +201,7 @@ namespace SharpCraft.world.chunk
                         if (block == EnumBlock.AIR)
                             continue;
 
-                        var blockModel = ModelRegistry.getModelForBlock(block, World.GetMetadata(worldPos));
+                        var blockModel = ModelRegistry.GetModelForBlock(block, World.GetMetadata(worldPos));
 
                         lock (modelRaw)
                         {
@@ -213,7 +213,7 @@ namespace SharpCraft.world.chunk
                         {
                             var worldPosO = worldPos.Offset(dir);
                             var blockO = World.GetBlock(worldPosO);
-                            var blockModelO = ModelRegistry.getModelForBlock(blockO, World.GetMetadata(worldPosO));
+                            var blockModelO = ModelRegistry.GetModelForBlock(blockO, World.GetMetadata(worldPosO));
 
                             if (blockO == EnumBlock.AIR || blockModelO.hasTransparency && !blockModel.hasTransparency)
                             {
@@ -223,7 +223,7 @@ namespace SharpCraft.world.chunk
                                 {
                                     lock (quads)
                                     {
-                                        quads.Add(quad);
+                                        quads.Add(quad); //TODO - rescale the model by the bounding box.. or do that while creating the model..
                                     }
                                 }
                             }

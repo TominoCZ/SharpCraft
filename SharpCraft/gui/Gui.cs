@@ -64,7 +64,7 @@ namespace SharpCraft.gui
             GL.EnableVertexAttribArray(0);
 
             GL.ActiveTexture(TextureUnit.Texture0);
-            GL.BindTexture(TextureTarget.Texture2D, tex.textureID);
+            GL.BindTexture(TextureTarget.Texture2D, tex.ID);
             GL.DrawArrays(PrimitiveType.Quads, 0, 4);
 
             GL.DisableVertexAttribArray(0);
@@ -99,7 +99,7 @@ namespace SharpCraft.gui
             _item.Shader.UpdateInstanceUniforms(mat, null);
 
             GL.ActiveTexture(TextureUnit.Texture0);
-            GL.BindTexture(TextureTarget.Texture2D, TextureManager.TEXTURE_BLOCKS.textureID);
+            GL.BindTexture(TextureTarget.Texture2D, TextureManager.TEXTURE_BLOCKS.ID);
             GL.DrawArrays(PrimitiveType.Quads, 0, 4);
 
             _item.Unbind();

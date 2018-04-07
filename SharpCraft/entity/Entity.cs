@@ -49,15 +49,15 @@ namespace SharpCraft.entity
             {
                 var dir = Vector3.Zero;
 
-                foreach (var bb in bbs)
+                foreach (var bb in bbs) //TODO - fix this with half sized blocks
                 {
-                    dir += pos - bb.GetCenter();
+                    //dir += pos - bb.GetCenter();
                 }
 
-                dir = dir.Normalized() * 0.25f;
-                dir.Y = 0;
+                //dir = dir.Normalized() * 0.25f;
+                //dir.Y = 0;
 
-                motion += dir;
+                //motion += dir;
             }
 
             if (onGround)

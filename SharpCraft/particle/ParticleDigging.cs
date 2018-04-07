@@ -25,11 +25,11 @@ namespace SharpCraft.particle
         {
         }
 
-        public ParticleDigging(World world, Vector3 pos, Vector3 motion, float particleScale, EnumBlock block, FaceSides side, int meta) : base(world, pos, motion, particleScale, TextureManager.TEXTURE_BLOCKS.textureID)
+        public ParticleDigging(World world, Vector3 pos, Vector3 motion, float particleScale, EnumBlock block, FaceSides side, int meta) : base(world, pos, motion, particleScale, TextureManager.TEXTURE_BLOCKS.ID)
         {
             this.block = block;
-           
-            var model = ModelRegistry.getModelForBlock(block, meta);
+
+            var model = ModelRegistry.GetModelForBlock(block, meta);
 
             if (model.RawModel is ModelBlockRaw mbr)
             {
@@ -89,9 +89,9 @@ namespace SharpCraft.particle
             var partialScale = lastParticleScale + (particleScale - lastParticleScale) * particalTicks;
 
             var model = ParticleRenderer.ParticleModel;
-	        model.Shader.UpdateGlobalUniforms();
-	        model.Shader.UpdateModelUniforms();
-	        model.Shader.UpdateInstanceUniforms(MatrixHelper.CreateTransformationMatrix(partialPos - Vector3.One * partialScale / 2, partialRot, partialScale),this);
+            model.Shader.UpdateGlobalUniforms();
+            model.Shader.UpdateModelUniforms();
+            model.Shader.UpdateInstanceUniforms(MatrixHelper.CreateTransformationMatrix(partialPos - Vector3.One * partialScale / 2, partialRot, partialScale), this);
 
             GL.ActiveTexture(TextureUnit.Texture0);
             GL.BindTexture(TextureTarget.Texture2D, textureID);

@@ -159,7 +159,7 @@ namespace SharpCraft.entity
 
             if (stack?.Item?.item is EnumBlock block)
             {
-                var model = ModelRegistry.getModelForBlock(block, stack.Meta);
+                var model = ModelRegistry.GetModelForBlock(block, stack.Meta);
 
                 if (model.RawModel == null)
                     return;
@@ -175,7 +175,7 @@ namespace SharpCraft.entity
                 GL.EnableVertexAttribArray(2);
 
                 GL.ActiveTexture(TextureUnit.Texture0);
-                GL.BindTexture(TextureTarget.Texture2D, TextureManager.TEXTURE_BLOCKS.textureID);
+                GL.BindTexture(TextureTarget.Texture2D, TextureManager.TEXTURE_BLOCKS.ID);
 
                 var itemsToRender = 1;
 

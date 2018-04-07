@@ -2,7 +2,9 @@
 using System.Linq;
 using System.Security;
 using OpenTK;
+using OpenTK.Input;
 using SharpCraft.block;
+using SharpCraft.entity;
 using SharpCraft.item;
 using SharpCraft.texture;
 
@@ -129,7 +131,11 @@ namespace SharpCraft.gui
         {
             if (btn is GuiItemSlot slot)
             {
-                if ((draggedStack == null || draggedStack.IsEmpty) && slot.stack != null && !slot.stack.IsEmpty)
+                if (SharpCraft.Instance.KeyboardState.IsKeyDown(Key.LShift))
+                {
+                    SharpCraft.Instance.Player.FastMoveStack(slot.ID);
+                }
+                else if ((draggedStack == null || draggedStack.IsEmpty) && slot.stack != null && !slot.stack.IsEmpty)
                 {
                     draggedStack = slot.stack.Copy();
                     slot.stack.Count = 0;
