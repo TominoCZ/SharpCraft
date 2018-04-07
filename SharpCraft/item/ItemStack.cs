@@ -1,11 +1,11 @@
 ﻿using System;
+using System.Reflection.Metadata.Ecma335;
 
 namespace SharpCraft.item
 {
 	[Serializable]
 	public class ItemStack
 	{
-
 		public Item Item;
 
 		private int _count;
@@ -15,7 +15,13 @@ namespace SharpCraft.item
 			get => _count;
 			set
 			{
-				_count = Math.Max(value, 0);
+			    if (Item == null)
+			    {
+			        _count = 0;
+			        return;
+			    }
+
+				_count = Math.Clamp(value, 0, Item.MaxStackSize());
 
 				if (_count == 0)
 					Item = null;
@@ -43,6 +49,7 @@ namespace SharpCraft.item
 		{
 			return new ItemStack(Item, 1, Meta);
 		}
+
 		public bool ItemSame(ItemStack other)
 		{
 			if (other == null) return false;

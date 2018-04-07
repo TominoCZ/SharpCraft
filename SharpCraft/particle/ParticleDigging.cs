@@ -43,7 +43,13 @@ namespace SharpCraft.particle
                 UVmax = UVmin + pixel * 4;
             }
 
-            rotStep = new Vector3(MathUtil.NextFloat(), MathUtil.NextFloat(), MathUtil.NextFloat()).Normalized() * MathHelper.Pi * 22;
+            if (side == FaceSides.Up)
+                this.motion.Xz = SharpCraft.Instance.Camera.GetLookVec().Xz * 0.15f;
+
+            var vec = new Vector3(MathUtil.NextFloat(-1), MathUtil.NextFloat(-1), MathUtil.NextFloat(-1));
+            var l = vec.LengthFast / 1;
+            vec *= l;
+            rotStep = vec * MathHelper.Pi * 18;
         }
 
         public override void Update()
@@ -67,13 +73,13 @@ namespace SharpCraft.particle
                     SetDead();
             }
 
-            rot += rotStep * (motion.Xz * 5).LengthFast;
+            rot += rotStep * Math.Clamp((motion.Xz * 5).LengthFast, onGround ? 0 : 0.2f, 0.275f);
 
             motion.Y -= 0.04f * gravity;
 
             Move();
 
-            motion.Xz *= 0.8664021f;
+            motion.Xz *= 0.8864021f;
 
             if (onGround)
             {

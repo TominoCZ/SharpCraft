@@ -17,6 +17,5 @@
         GLASS = 20,
         FURNACE = 61,
         RARE = 1337,
-        STONE_SLAB = 1338,
     }
 }

@@ -174,7 +174,8 @@ namespace SharpCraft.world.chunk
 
         internal void BuildChunkModelDo()
         {
-            if (!ModelGenerating && _model != null) return;
+            if (!ModelGenerating && _model != null)
+                return;
 
             var modelRaw = new Dictionary<Shader<ModelBlock>, List<RawQuad>>();
 
@@ -198,7 +199,7 @@ namespace SharpCraft.world.chunk
                         var localPos = new BlockPos(x, y, z);
 
                         var blockModel = ModelRegistry.GetModelForBlock(block, World.GetMetadata(worldPos));
-                        
+
                         lock (modelRaw)
                         {
                             if (!modelRaw.TryGetValue(blockModel.Shader, out quads))
@@ -255,11 +256,10 @@ namespace SharpCraft.world.chunk
                     {
                         var newFragment = new ModelChunkFragment(newShader, newData);
                         _model.setFragmentModelWithShader(newShader, newFragment);
+                        continue;
                     }
-                    else
-                    {
-                        _model.getFragmentModelWithShader(newShader)?.overrideData(newData);
-                    }
+
+                    _model.getFragmentModelWithShader(newShader)?.overrideData(newData);
                 }
 
                 ModelGenerating = false;
@@ -275,6 +275,7 @@ namespace SharpCraft.world.chunk
         public void DestroyModel()
         {
             while (ModelGenerating) Thread.Sleep(2);
+
             if (_model == null) return;
             SharpCraft.Instance.RunGlContext(_model.destroy);
             _model = null;

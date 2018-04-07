@@ -135,9 +135,9 @@ namespace SharpCraft.render
 
                 var model = ModelRegistry.GetModelForBlock(block, meta);
 
-                var v = 32 * (int)(pair.Value.Percentage * 8);
+                var v = 32 * (int)(pair.Value.PartialProgress * 8);
 
-                var size_o = Vector3.One * 0.01f;
+                var size_o = Vector3.One * 0.0045f;
 
                 var mat = MatrixHelper.CreateTransformationMatrix(pair.Key.ToVec() - size_o / 2, model.boundingBox.size + size_o);
 
@@ -186,15 +186,16 @@ namespace SharpCraft.render
             if (bb == null)
                 return;
 
-            var size = bb.size + Vector3.One * 0.0025f;
+            var size = Vector3.One * 0.0045f;
 
             _selectionOutline.Bind();
-            _selectionOutline.SetColor(_selectionOutlineColor);
+            _selectionOutline.SetColor(Vector4.One);//_selectionOutlineColor);
 
             shader.UpdateGlobalUniforms();
             shader.UpdateModelUniforms(_selectionOutline.RawModel);
-            shader.UpdateInstanceUniforms(MatrixHelper.CreateTransformationMatrix(pos.ToVec() - Vector3.One * 0.00175f, size), _selectionOutline);
+            shader.UpdateInstanceUniforms(MatrixHelper.CreateTransformationMatrix(pos.ToVec() - size / 2f, bb.size + size), _selectionOutline);
 
+            GL.LineWidth(2);
             GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
 
             _selectionOutline.RawModel.Render(PrimitiveType.Quads);
@@ -223,14 +224,14 @@ namespace SharpCraft.render
 
                 var rotVec = new Vector2(-SharpCraft.Instance.Camera.pitch, -SharpCraft.Instance.Camera.yaw);
 
-                var offset = new Vector3(1.475f, -1.3f, 0.25f) - partialMotion * Vector3.UnitY * 0.15f;
+                var offset = new Vector3(1.3f, -1.25f, 0.3f) - partialMotion * Vector3.UnitY * 0.05f;
 
                 var r1 = Matrix4.CreateRotationY(MathHelper.DegreesToRadians(45));
                 var r2 = Matrix4.CreateRotationX(rotVec.X) * Matrix4.CreateRotationY(rotVec.Y);
 
-                var s = Matrix4.CreateScale(0.575f);
+                var s = Matrix4.CreateScale(0.55f);
                 var t0 = Matrix4.CreateTranslation(Vector3.One * -0.5f);
-                var t1 = Matrix4.CreateTranslation(SharpCraft.Instance.Camera.pos + SharpCraft.Instance.Camera.GetLookVec() + partialLookVec * 0.15f);
+                var t1 = Matrix4.CreateTranslation(SharpCraft.Instance.Camera.pos + SharpCraft.Instance.Camera.GetLookVec() + partialLookVec * 0.1f);
                 var t_final = Matrix4.CreateTranslation(offset);
 
                 var mat = t0 * r1 * Matrix4.CreateScale(model.boundingBox.size) * t_final * r2 * s * t1;

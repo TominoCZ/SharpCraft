@@ -150,7 +150,7 @@ namespace SharpCraft.gui
                     }
                     else if (draggedStack != null && slot.stack.ItemSame(draggedStack))
                     {
-                        var ammountToMove = Math.Min(64 - slot.stack.Count, draggedStack.Count);
+                        var ammountToMove = Math.Min(slot.stack.Item.MaxStackSize() - slot.stack.Count, draggedStack.Count);
 
                         slot.stack.Count += ammountToMove;
                         draggedStack.Count -= ammountToMove;

@@ -87,14 +87,14 @@ namespace SharpCraft.entity
 
             foreach (var entity in inAttractionArea)
             {
-                if (entity.stack.Count == 64)
+                if (stack.IsEmpty || entity.stack.IsEmpty || entity.stack.Count == entity.stack.Item.MaxStackSize())
                     continue;
 
                 Vector3 distanceVector = entity.pos - pos;
                 var distance = distanceVector.Length;
                 if (distance >= attractionRange) continue;
 
-                var ammountToTake = Math.Min(stack.Item.MaxStackSize(stack) - stack.Count, entity.stack.Count);
+                var ammountToTake = Math.Min(stack.Item.MaxStackSize() - stack.Count, entity.stack.Count);
                 if (ammountToTake == 0) continue;
 
                 if (distance <= mergeRange)
@@ -115,7 +115,7 @@ namespace SharpCraft.entity
 
                 var distanceMul = (float)Math.Sqrt(1 - distance / attractionRange);
                 if (distanceMul > 0.8) distanceMul = ((1 - distanceMul) / 0.2F) * 0.6F + 0.2F;
-                var baseForce = distanceVector * 0.02f * distanceMul * MathUtil.Remap(stack.Count / (float)entity.stack.Count, 1, 64, 2, 5);
+                var baseForce = distanceVector * 0.02f * distanceMul * MathUtil.Remap(stack.Count / (float)entity.stack.Count, 1, entity.stack.Item.MaxStackSize(), 2, 5);
 
                 motion += baseForce * entity.stack.Count / Math.Max(entity.stack.Count, stack.Count);
                 entity.motion -= baseForce * stack.Count / Math.Max(entity.stack.Count, stack.Count);
@@ -181,9 +181,9 @@ namespace SharpCraft.entity
 
                 if (stack.Count > 1)
                     itemsToRender = 2;
-                if (stack.Count >= 32)
+                if (stack.Count >= 32*4)
                     itemsToRender = 3;
-                if (stack.Count == 64)
+                if (stack.Count == 64*4)
                     itemsToRender = 4;
 
                 for (int i = 0; i < itemsToRender; i++)

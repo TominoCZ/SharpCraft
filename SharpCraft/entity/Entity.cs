@@ -30,7 +30,7 @@ namespace SharpCraft.entity
             this.motion = motion;
 
             collisionBoundingBox = AxisAlignedBB.BLOCK_FULL;
-            boundingBox = collisionBoundingBox.offset(pos - new Vector3(collisionBoundingBox.size.X / 2, 0, collisionBoundingBox.size.Z / 2));
+            boundingBox = collisionBoundingBox.offset(pos - (Vector3.UnitX * collisionBoundingBox.size.X / 2 + Vector3.UnitZ * collisionBoundingBox.size.Z / 2));
         }
 
         public virtual void Update()
@@ -65,7 +65,6 @@ namespace SharpCraft.entity
                 motion.Xz *= 0.6676801f;
             }
         }
-
 
         public virtual void Move()
         {

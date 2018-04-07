@@ -264,9 +264,12 @@ namespace SharpCraft.world
                     {
                         var treeTop = 0;
 
-                        for (var treeY = 0; treeY < 5; treeY++)
+                        var height = (int)Math.Clamp(peakY * treeSeed / 64f * 7.5f, 3, 4);
+
+                        for (var treeY = 0; treeY < height; treeY++)
                         {
-                            SetBlock(x, treeTop = peakY + 1 + treeY, z, EnumBlock.LOG);
+                            treeTop = peakY + 1 + treeY;
+                            SetBlock(x, treeTop, z, EnumBlock.LOG);
                         }
 
                         //leaves
@@ -280,7 +283,7 @@ namespace SharpCraft.world
                                         continue;
 
                                     var pX = x + i;
-                                    var pY = treeTop + j;
+                                    var pY = treeTop + j - 1;
                                     var pZ = z + k;
 
                                     if (!IsAir(pX, pY, pZ))
@@ -288,7 +291,7 @@ namespace SharpCraft.world
 
                                     var vec = new Vector3(i, j, k);
 
-                                    if (MathUtil.Distance(vec, Vector3.Zero) <= 3)
+                                    if (MathUtil.Distance(vec, Vector3.Zero) <= 2.5f)
                                         SetBlock(pX, pY, pZ, EnumBlock.LEAVES);
                                 }
                             }

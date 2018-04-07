@@ -37,12 +37,12 @@ namespace SharpCraft.particle
             this.UVmin = UVmin;
             this.UVmax = UVmax;
 
-            collisionBoundingBox = new AxisAlignedBB(0, 0, 0, this.particleScale, this.particleScale, this.particleScale);
-            boundingBox = collisionBoundingBox.offset(pos + Vector3.UnitY * collisionBoundingBox.size.Y / 2);
+            collisionBoundingBox = new AxisAlignedBB(this.particleScale);
+            boundingBox = collisionBoundingBox.offset(pos - (Vector3.UnitX * collisionBoundingBox.size.X / 2 + Vector3.UnitZ * collisionBoundingBox.size.Z / 2));
 
             particleMaxAge = (int)MathUtil.NextFloat(10, 50);
 
-            gravity = 0.9875f;
+            gravity = 0.975f;
         }
 
         public override void Update()
@@ -82,7 +82,7 @@ namespace SharpCraft.particle
 
         public float GetAlpha()
         {
-            return lastParticleAlpha + (particleAlpha - lastParticleAlpha) * SharpCraft.Instance.GetRenderPartialTicks();
+            return lastParticleAlpha + (particleAlpha - lastParticleAlpha) * SharpCraft.Instance.GetPartialTicksForRender();
         }
     }
 }

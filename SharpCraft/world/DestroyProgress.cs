@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using SharpCraft.block;
 using SharpCraft.entity;
 using SharpCraft.model;
@@ -12,7 +13,17 @@ namespace SharpCraft.world
 
         public bool Destroyed { get; private set; }
 
-        public float Percentage => (float) _progress / _blockHardness; 
+        //public float Percentage => (float) _progress / _blockHardness;
+
+        public float PartialProgress
+        {
+            get
+            {
+                var partialTicks = SharpCraft.Instance.GetPartialTicksForRender();
+
+                return Math.Clamp((_lastProgress + (Progress - _lastProgress) * partialTicks) / _blockHardness, 0, _blockHardness);
+            }
+        }
 
         public int Progress
         {
@@ -20,6 +31,7 @@ namespace SharpCraft.world
 
             set
             {
+                _lastProgress = _progress;
                 _progress = value;
 
                 ProgressChanged();
@@ -27,6 +39,7 @@ namespace SharpCraft.world
         }
 
         private int _progress;
+        private int _lastProgress;
 
         private int _blockHardness;
 
@@ -37,14 +50,14 @@ namespace SharpCraft.world
             var block = player.world.GetBlock(pos);
             var meta = player.world.GetMetadata(pos);
 
-            _blockHardness = 8; //TODO
+            _blockHardness = 12; //TODO
             //_blockHardness = ModelRegistry.GetBlockState(block, meta).hardness;
             Player = player;
         }
 
         private void ProgressChanged()
         {
-            if (_blockHardness == _progress)
+            if (!Destroyed && _progress >= _blockHardness)
             {
                 Destroyed = true;
 

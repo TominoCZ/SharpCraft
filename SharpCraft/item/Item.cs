@@ -2,6 +2,7 @@
 
 namespace SharpCraft.item
 {
+
 	[Serializable]
 	public abstract class Item
 	{
@@ -25,9 +26,9 @@ namespace SharpCraft.item
 			this.displayName = displayName;
 		}
 
-		public virtual int MaxStackSize(ItemStack stack)
+		public virtual int MaxStackSize()
 		{
-			return 64;
+			return 256;
 		}
 	}
 }

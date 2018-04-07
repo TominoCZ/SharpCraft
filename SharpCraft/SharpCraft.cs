@@ -130,10 +130,6 @@ namespace SharpCraft
 
             var missingModel = new ModelBlock(EnumBlock.MISSING, shader);
             var stoneModel = new ModelBlock(EnumBlock.STONE, shader);
-
-            //TEST
-            var stoneSlabModel = new ModelBlock(EnumBlock.STONE_SLAB, shader, new AxisAlignedBB(Vector3.One - Vector3.UnitY * 0.5f));
-
             var grassModel = new ModelBlock(EnumBlock.GRASS, shader);
             var dirtModel = new ModelBlock(EnumBlock.DIRT, shader);
             var cobblestoneModel = new ModelBlock(EnumBlock.COBBLESTONE, shader);
@@ -149,9 +145,6 @@ namespace SharpCraft
             var xrayModel = new ModelBlock(EnumBlock.XRAY, shader);
 
             ModelRegistry.RegisterBlockModel(missingModel, 0);
-
-            //TEST
-            ModelRegistry.RegisterBlockModel(stoneSlabModel, 0);
 
             ModelRegistry.RegisterBlockModel(stoneModel, 0);
             ModelRegistry.RegisterBlockModel(grassModel, 0);
@@ -202,19 +195,17 @@ namespace SharpCraft
 
                 World.AddEntity(Player);
 
-                Player.SetItemStackInInventory(0, new ItemStack(new ItemBlock(EnumBlock.CRAFTING_TABLE)));
-                Player.SetItemStackInInventory(1, new ItemStack(new ItemBlock(EnumBlock.FURNACE)));
-                Player.SetItemStackInInventory(2, new ItemStack(new ItemBlock(EnumBlock.COBBLESTONE)));
-                Player.SetItemStackInInventory(3, new ItemStack(new ItemBlock(EnumBlock.PLANKS)));
-                Player.SetItemStackInInventory(4, new ItemStack(new ItemBlock(EnumBlock.GLASS)));
-                Player.SetItemStackInInventory(5, new ItemStack(new ItemBlock(EnumBlock.XRAY)));
+                //Player.SetItemStackInInventory(0, new ItemStack(new ItemBlock(EnumBlock.CRAFTING_TABLE)));
+                //Player.SetItemStackInInventory(1, new ItemStack(new ItemBlock(EnumBlock.FURNACE)));
+                //Player.SetItemStackInInventory(2, new ItemStack(new ItemBlock(EnumBlock.COBBLESTONE)));
+                //Player.SetItemStackInInventory(3, new ItemStack(new ItemBlock(EnumBlock.PLANKS)));
+                //Player.SetItemStackInInventory(4, new ItemStack(new ItemBlock(EnumBlock.GLASS)));
+                //Player.SetItemStackInInventory(5, new ItemStack(new ItemBlock(EnumBlock.XRAY)));
             }
             else
             {
                 World = loadedWorld;
             }
-
-            Player.SetItemStackInInventory(0, new ItemStack(new ItemBlock(EnumBlock.STONE_SLAB)));
 
             ResetMouse();
 
@@ -244,69 +235,64 @@ namespace SharpCraft
 
             var wheelValue = Mouse.WheelPrecise;
 
-            if (Player != null && GuiScreen == null)
+            if (Player != null) // && GuiScreen == null)
             {
-                if (wheelValue < _mouseWheelLast)
-                    Player.SelectNextItem();
-                else if (wheelValue > _mouseWheelLast)
-                    Player.SelectPreviousItem();
-
-                if (World?.GetChunk(new BlockPos(Player.pos).ChunkPos()) == null)
-                    Player.motion = Vector3.Zero;
-
-                var lmb = _mouseButtonsDown.Contains(MouseButton.Left);
-                var rmb = _mouseButtonsDown.Contains(MouseButton.Right);
-
-                if (lmb || rmb)
+                if (AllowInput())
                 {
-                    _tickCounter++;
+                    if (wheelValue < _mouseWheelLast)
+                        Player.SelectNextItem();
+                    else if (wheelValue > _mouseWheelLast)
+                        Player.SelectPreviousItem();
 
-                    var lastPos = _lastMouseOverObject.blockPos;
+                    if (World?.GetChunk(new BlockPos(Player.pos).ChunkPos()) == null)
+                        Player.motion = Vector3.Zero;
 
-                    if (lmb && _lastMouseOverObject.hit is EnumBlock)
+                    var lmb = _mouseButtonsDown.Contains(MouseButton.Left);
+                    var rmb = _mouseButtonsDown.Contains(MouseButton.Right);
+
+                    if (lmb || rmb)
                     {
-                        ParticleRenderer.SpawnDiggingParticle(_lastMouseOverObject);
+                        _tickCounter++;
 
-                        if (MouseOverObject.hit != null && _lastMouseOverObject.hit == MouseOverObject.hit &&
-                            lastPos == MouseOverObject.blockPos)
+                        var lastPos = _lastMouseOverObject.blockPos;
+
+                        if (lmb && _lastMouseOverObject.hit is EnumBlock)
                         {
-                            DestroyProgress progress;
+                            ParticleRenderer.SpawnDiggingParticle(_lastMouseOverObject);
 
-                            if (!DestroyProgresses.TryGetValue(lastPos, out progress))
+                            if (MouseOverObject.hit != null && _lastMouseOverObject.hit == MouseOverObject.hit &&
+                                lastPos == MouseOverObject.blockPos)
                             {
-                                DestroyProgresses.TryAdd(lastPos, progress = new DestroyProgress(lastPos, Player));
-                            }
+                                if (!DestroyProgresses.TryGetValue(lastPos, out var progress))
+                                    DestroyProgresses.TryAdd(lastPos,
+                                        progress = new DestroyProgress(lastPos, Player));
+                                else
+                                    progress.Progress++;
 
-                            progress.Progress++;
-
-                            if (progress.Destroyed)
-                                DestroyProgresses.TryRemove(progress.Pos, out var removed);
-                        }
-                        else
-                        {
-                            foreach (var progress in DestroyProgresses.Values)
-                            {
-                                if (progress.Player == Player)
+                                if (progress.Destroyed)
                                     DestroyProgresses.TryRemove(progress.Pos, out var removed);
                             }
+                            else ResetDestroyProgress(Player);
+                        }
+
+                        _lastMouseOverObject = MouseOverObject;
+
+                        if (_tickCounter % 4 == 0)
+                        {
+                            GetMouseOverObject();
+
+                            if (rmb)
+                                Player.PlaceBlock();
                         }
                     }
-
-                    _lastMouseOverObject = MouseOverObject;
-
-
-                    if (_tickCounter % 4 == 0)
+                    else
                     {
-                        GetMouseOverObject();
-
-                        if (rmb)
-                            Player.PlaceBlock();
-
-                        // Player.BreakBlock();//TODO - only in creative
+                        _tickCounter = 0;
+                        ResetDestroyProgress(Player);
                     }
                 }
                 else
-                    _tickCounter = 0;
+                    ResetDestroyProgress(Player);
             }
 
             _mouseWheelLast = wheelValue;
@@ -321,7 +307,7 @@ namespace SharpCraft
 
         private void RenderScreen()
         {
-            float partialTicks = GetRenderPartialTicks();
+            float partialTicks = GetPartialTicksForRender();
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
             GL.Enable(EnableCap.DepthTest);
             GL.Enable(EnableCap.DepthClamp);
@@ -435,6 +421,15 @@ namespace SharpCraft
             MouseOverObject = final;
         }
 
+        private void ResetDestroyProgress(EntityPlayerSP player)
+        {
+            foreach (var progress in DestroyProgresses.Values)
+            {
+                if (progress.Player == player)
+                    DestroyProgresses.TryRemove(progress.Pos, out var removed);
+            }
+        }
+
         private void ResetMouse()
         {
             var middle = PointToScreen(new Point(ClientSize.Width / 2, ClientSize.Height / 2));
@@ -496,7 +491,7 @@ namespace SharpCraft
             else _glContextQueue.Enqueue(a);
         }
 
-        public float GetRenderPartialTicks()
+        public float GetPartialTicksForRender()
         {
             return _gamePaused ? _lastPartialTicks : _lastPartialTicks = timer.GetPartialTicks();
         }
@@ -557,12 +552,15 @@ namespace SharpCraft
                 bmp.UnlockBits(bData);
                 bmp.RotateFlip(RotateFlipType.RotateNoneFlipY);
 
+                var time = DateTime.UtcNow;
+
                 var dir = $"{GameFolderDir}\\screenshots";
+                var file = $"{dir}\\{time.ToShortDateString()}_{time.TimeOfDay.Hours}.{time.TimeOfDay.Minutes}.{time.TimeOfDay.Seconds}.png";
 
                 if (!Directory.Exists(dir))
                     Directory.CreateDirectory(dir);
 
-                using (var fs = File.OpenWrite($"{dir}\\{DateTime.Now.ToShortDateString()}.png"))
+                using (var fs = new FileStream(file, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite))
                 {
                     bmp.Save(fs, ImageFormat.Png);
                 }
@@ -635,11 +633,8 @@ namespace SharpCraft
 
             _mouseButtonsDown.Remove(e.Button);
 
-            foreach (var progress in DestroyProgresses.Values)
-            {
-                if (progress.Player == Player)
-                    DestroyProgresses.TryRemove(progress.Pos, out var removed);
-            }
+            if (e.Button == MouseButton.Left && AllowInput())
+                ResetDestroyProgress(Player);
         }
 
         protected override void OnKeyDown(KeyboardKeyEventArgs e)

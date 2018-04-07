@@ -32,7 +32,7 @@ namespace SharpCraft.entity
             SharpCraft.Instance.Camera.pos = pos + Vector3.UnitY * 1.625f;
 
             collisionBoundingBox = new AxisAlignedBB(new Vector3(0.6f, 1.65f, 0.6f));
-            boundingBox = collisionBoundingBox.offset(pos - new Vector3(collisionBoundingBox.size.X / 2, 0, collisionBoundingBox.size.Z / 2));
+            boundingBox = collisionBoundingBox.offset(pos - (Vector3.UnitX * collisionBoundingBox.size.X / 2 + Vector3.UnitZ * collisionBoundingBox.size.Z / 2));
 
             hotbar = new ItemStack[9];
             inventory = new ItemStack[27];
@@ -107,11 +107,6 @@ namespace SharpCraft.entity
                 return;
         }
 
-        /// <summary>
-        /// Sets an item stack at a position starting from hotbar to the inventory
-        /// </summary>
-        /// <param name="index"></param>
-        /// <param name="stack"></param>
         public void SetItemStackInInventory(int index, ItemStack stack)
         {
             if (index < hotbar.Length)
@@ -145,13 +140,12 @@ namespace SharpCraft.entity
 
         public bool CanPickUpStack(ItemStack dropped)
         {
-            return hotbar.Any(stack => stack == null || stack.IsEmpty || stack.ItemSame(dropped) && stack.Count + dropped.Count <= 64) ||
-                   inventory.Any(stack => stack == null || stack.IsEmpty || stack.ItemSame(dropped) && stack.Count + dropped.Count <= 64);
+            return hotbar.Any(stack => stack == null || stack.IsEmpty || stack.ItemSame(dropped) && stack.Count + dropped.Count <= dropped.Item.MaxStackSize()) ||
+                   inventory.Any(stack => stack == null || stack.IsEmpty || stack.ItemSame(dropped) && stack.Count + dropped.Count <= dropped.Item.MaxStackSize());
         }
 
         public bool OnPickup(ItemStack dropped)
         {
-            //TODO - add to inventory if stack of same type is present in it, otherwise put the stack into the hotbar slot if possible
             for (var i = 0; i < hotbar.Length + inventory.Length; i++)
             {
                 var stack = GetItemStackInInventory(i);
@@ -163,13 +157,16 @@ namespace SharpCraft.entity
                     continue;
                 }
 
-                if (dropped.Item == stack.Item && stack.Count <= 64)
+                if (dropped.Item == stack.Item && stack.Count <= stack.Item.MaxStackSize())
                 {
-                    var toPickUp = Math.Min(64 - stack.Count, stack.Count);
+                    var toPickUp = Math.Min(stack.Item.MaxStackSize() - stack.Count, dropped.Count);
 
                     stack.Count += toPickUp;
                     dropped.Count -= toPickUp;
                 }
+
+                if (dropped.IsEmpty)
+                    break;
             }
 
             return dropped.IsEmpty;
@@ -219,13 +216,13 @@ namespace SharpCraft.entity
 
             var meta = world.GetMetadata(moo.blockPos);
 
+            SharpCraft.Instance.ParticleRenderer.SpawnDestroyParticles(moo.blockPos, block, meta);
+
             world.SetBlock(moo.blockPos, EnumBlock.AIR, 0);
 
             var motion = new Vector3(MathUtil.NextFloat(-0.15f, 0.15f), 0.25f, MathUtil.NextFloat(-0.15f, 0.15f));
 
             var entityDrop = new EntityItem(world, moo.blockPos.ToVec() + Vector3.One * 0.5f, motion, new ItemStack(new ItemBlock(block), 1, meta));
-
-            SharpCraft.Instance.ParticleRenderer.SpawnDestroyParticles(moo.blockPos, block, meta);
 
             world.AddEntity(entityDrop);
         }
@@ -271,27 +268,26 @@ namespace SharpCraft.entity
         {
             var moo = SharpCraft.Instance.MouseOverObject;
 
-            var clickedBlock = world.GetBlock(moo.blockPos);
-            var clickedMeta = world.GetMetadata(moo.blockPos);
-
-            if (clickedBlock != EnumBlock.AIR)
+            if (moo.hit is EnumBlock clickedBlock)
             {
-                var inHotbar = false; //this variable is here in case i need code under this if block (so that i dont have to return;)
+                var clickedMeta = world.GetMetadata(moo.blockPos);
 
-                for (int i = 0; i < hotbar.Length; i++)
+                if (clickedBlock != EnumBlock.AIR)
                 {
-                    var stack = hotbar[i];
-
-                    if (stack?.Item?.item == clickedBlock && stack.Meta == clickedMeta)
+                    for (int i = 0; i < hotbar.Length; i++)
                     {
-                        SetSelectedSlot(i);
-                        inHotbar = true;
-                        break;
-                    }
-                }
+                        var stack = hotbar[i];
 
-                if (!inHotbar)
-                    SetItemStackInSelectedSlot(new ItemStack(new ItemBlock(clickedBlock), 1, world.GetMetadata(moo.blockPos)));
+                        if (stack?.Item?.item == clickedBlock && stack.Meta == clickedMeta)
+                        {
+                            SetSelectedSlot(i);
+                            return;
+                        }
+                    }
+
+                    SetItemStackInSelectedSlot(new ItemStack(new ItemBlock(clickedBlock), 1,
+                        world.GetMetadata(moo.blockPos)));
+                }
             }
         }
 
@@ -305,7 +301,15 @@ namespace SharpCraft.entity
             ThrowStack(GetEquippedItemStack());
         }
 
-        public void ThrowStack(ItemStack stack, int count = 64)
+        public void ThrowStack(ItemStack stack)
+        {
+            if (stack == null)
+                return;
+
+            ThrowStack(stack, stack.Count);
+        }
+
+        public void ThrowStack(ItemStack stack, int count)
         {
             if (stack == null || stack.IsEmpty)
                 return;
