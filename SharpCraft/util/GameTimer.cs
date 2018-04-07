@@ -40,11 +40,8 @@ namespace SharpCraft.util
 
 		private void Render()
 		{
-			lock (this)
-			{
-				CalcPartialTicks();
-				renderHook();
-			}
+			CalcPartialTicks();
+			renderHook();
 		}
 
 		private void Update()
@@ -54,41 +51,39 @@ namespace SharpCraft.util
 
 		public void CheckRender()
 		{
-			if (infiniteFps) Render();
-			else
+			if (infiniteFps)
 			{
-				long time = NanoTime();
-				if (time - lastFrame >= nanosPerFrame)
-				{
-					lastFrame = time;
-					Render();
-				}
+				Render();
+				return;
 			}
+
+			long time = NanoTime();
+			if (time - lastFrame < nanosPerFrame) return;
+
+			lastFrame = time;
+			Render();
 		}
 
 		public void CheckUpdate()
 		{
 			double count;
 
-			lock (this)
+			long time = NanoTime();
+			count = (time - lastUpdate) / (double) nanosPerUpdate;
+			if (count > ups * 2)
 			{
-				long time = NanoTime();
-				count = (time - lastUpdate) / (double) nanosPerUpdate;
-				if (count > ups * 2)
-				{
-					count = 1;
-					Console.WriteLine("Game lagging really fucking badly man. Get yo shit together");
-				}
-
-				if (count < 1)
-				{
-					return;
-				}
-
-				lastUpdate = time;
+				count = 1;
+				Console.WriteLine("Game lagging really fucking badly man. Get yo shit together");
 			}
 
-			if (count > 2) Console.WriteLine(count);
+			if (count < 1)
+			{
+				return;
+			}
+
+			lastUpdate = time;
+
+			if (count > 2) Console.WriteLine($"Warning: game is lagging behind, updating {(long) count} times ({count})");
 			while (count-- > 1)
 			{
 				Update();
