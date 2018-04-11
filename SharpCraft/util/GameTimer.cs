@@ -1,103 +1,112 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Reflection;
-using System.Threading;
 
 namespace SharpCraft.util
 {
-	public class GameTimer
-	{
-		private long  lastFrame  = NanoTime();
-		private long  lastUpdate = NanoTime();
-		private int   maxFps;
-		public  bool  infiniteFps = false;
-		private int   ups;
-		private long  nanosPerFrame;
-		private long  nanosPerUpdate;
-		private float _partialTicks;
+    public class GameTimer
+    {
+        private long lastFrame = NanoTime();
+        private long lastUpdate = NanoTime();
 
-		public Action renderHook = () => { };
-		public Action updateHook = () => { };
+        private long lastUpdateTime;
 
-		public GameTimer(int fps, int ups)
-		{
-			maxFps = fps;
-			this.ups = ups;
-			nanosPerFrame = 1_000_000_000L / fps;
-			nanosPerUpdate = 1_000_000_000L / ups;
-		}
+        private int maxFps;
+        public bool infiniteFps = false;
+        private int ups;
+        private long nanosPerFrame;
+        private long nanosPerUpdate;
+        private float _partialTicks;
 
-		private void CalcPartialTicks()
-		{
-			long tim = NanoTime();
-			_partialTicks = (float) ((tim - lastUpdate) / (double) nanosPerUpdate);
-			if (_partialTicks >= 1 || _partialTicks < 0)
-			{
-				CheckUpdate();
-				CalcPartialTicks();
-			}
-		}
+        public Action renderHook = () => { };
+        public Action updateHook = () => { };
 
-		private void Render()
-		{
-			CalcPartialTicks();
-			renderHook();
-		}
+        public GameTimer(int fps, int ups)
+        {
+            maxFps = fps;
+            this.ups = ups;
+            nanosPerFrame = 1_000_000_000L / fps;
+            nanosPerUpdate = 1_000_000_000L / ups;
+        }
 
-		private void Update()
-		{
-			updateHook();
-		}
+        private void CalcPartialTicks()
+        {
+            long time = NanoTime();
+            var timeDelta = time - lastUpdate + lastUpdateTime;
+            _partialTicks = timeDelta / (float)nanosPerUpdate;
 
-		public void CheckRender()
-		{
-			if (infiniteFps)
-			{
-				Render();
-				return;
-			}
+            if (timeDelta >= nanosPerUpdate)
+            {
+                if (!CheckUpdate())
+                    return;
 
-			long time = NanoTime();
-			if (time - lastFrame < nanosPerFrame) return;
+                time = NanoTime();
+                timeDelta = time - lastUpdate + lastUpdateTime;
+                _partialTicks = timeDelta / (float)nanosPerUpdate;
+            }
+        }
 
-			lastFrame = time;
-			Render();
-		}
+        private void Render()
+        {
+            CalcPartialTicks();
+            renderHook();
+        }
 
-		public void CheckUpdate()
-		{
-			double count;
+        private void Update()
+        {
+            updateHook();
+        }
 
-			long time = NanoTime();
-			count = (time - lastUpdate) / (double) nanosPerUpdate;
-			if (count > ups * 2)
-			{
-				count = 1;
-				Console.WriteLine("Game lagging really fucking badly man. Get yo shit together");
-			}
+        public void CheckRender()
+        {
+            if (infiniteFps)
+            {
+                Render();
+                return;
+            }
 
-			if (count < 1)
-			{
-				return;
-			}
+            long time = NanoTime();
+            if (time - lastFrame < nanosPerFrame) return;
 
-			lastUpdate = time;
+            lastFrame = time;
+            Render();
+        }
 
-			if (count > 2) Console.WriteLine($"Warning: game is lagging behind, updating {(long) count} times ({count})");
-			while (count-- > 1)
-			{
-				Update();
-			}
-		}
+        public bool CheckUpdate()
+        {
+            long time = NanoTime();
+            double count = (time - lastUpdate + lastUpdateTime) / (double)nanosPerUpdate;
+            if (count > ups * 2)
+            {
+                count = 1;
+                Console.WriteLine("Game lagging really fucking badly man. Get yo shit together");
+            }
 
-		public static long NanoTime()
-		{
-			return (long) (Stopwatch.GetTimestamp() / (Stopwatch.Frequency / 1000000000.0));
-		}
+            if (count < 1)
+            {
+                return false;
+            }
 
-		public float GetPartialTicks()
-		{
-			return _partialTicks;
-		}
-	}
+            lastUpdate = time;
+
+            if (count > 2) Console.WriteLine($"Warning: game is lagging behind, updating {(long)count} times ({count})");
+            while (count-- > 1)
+            {
+                Update();
+            }
+
+            lastUpdateTime = NanoTime() - time;
+
+            return true;
+        }
+
+        public static long NanoTime()
+        {
+            return (long)(Stopwatch.GetTimestamp() / (Stopwatch.Frequency / 1000000000.0));
+        }
+
+        public float GetPartialTicks()
+        {
+            return _partialTicks;
+        }
+    }
 }
