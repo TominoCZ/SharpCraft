@@ -71,7 +71,7 @@ namespace SharpCraft.world.chunk
             if (localPos.Z >= ChunkSize) throw new IndexOutOfRangeException($"Block pos z({localPos.Z}) is bigger or equal to ChunkSize");
         }
 
-        public void SetBlock(BlockPos localPos, EnumBlock blockType, int meta)
+        public void SetBlock(BlockPos localPos, EnumBlock blockType, int meta = 0)
         {
             CheckPos(localPos);
             short id = (short)((short)blockType << 4 | meta);
@@ -79,10 +79,13 @@ namespace SharpCraft.world.chunk
             if (_chunkBlocks[localPos.X, localPos.Y, localPos.Z] != id)
             {
                 _chunkBlocks[localPos.X, localPos.Y, localPos.Z] = id;
-                NotifyModelChange(localPos);
-            }
 
-            NeedsSave = true;
+                if (ModelBuilding || !QueuedForModelBuild) //this is so that we prevent double chunk build calls and invisible placed blocks(if the model is already generating, there is a chance that the block on this position was already processed, so the rebuild is queued again)
+                {
+                    NotifyModelChange(localPos);
+                    NeedsSave = true;
+                }
+            }
         }
 
         public EnumBlock GetBlock(BlockPos localPos)
@@ -107,7 +110,12 @@ namespace SharpCraft.world.chunk
             if (id != _chunkBlocks[localPos.X, localPos.Y, localPos.Z])
             {
                 _chunkBlocks[localPos.X, localPos.Y, localPos.Z] = id;
-                NotifyModelChange(localPos);
+
+                if (ModelBuilding || !QueuedForModelBuild) //see SetBlock() for why (ModelBuilding || ...) is here
+                {
+                    NotifyModelChange(localPos);
+                    NeedsSave = true;
+                }
             }
         }
 
@@ -176,7 +184,7 @@ namespace SharpCraft.world.chunk
         public void BuildChunkModelNow()
         {
             //if (!CheckCanBuild()) TODO might not be necessary
-                //return;
+            //return;
 
             var modelRaw = new Dictionary<Shader<ModelBlock>, List<RawQuad>>();
 
