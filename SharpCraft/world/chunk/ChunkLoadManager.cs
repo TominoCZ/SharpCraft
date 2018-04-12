@@ -16,7 +16,7 @@ namespace SharpCraft.world.chunk
         private readonly object _loadLock = new object();
 
         private SwapList<Chunk> _chunkBuilds = new SwapList<Chunk>(
-            c => c.BuildChunkModelDo(),
+            c => c.BuildChunkModelNow(),
             (l, r) => l.Pos.DistanceTo(SharpCraft.Instance.Player.pos).CompareTo(r.Pos.DistanceTo(SharpCraft.Instance.Player.pos)));
 
         private SwapList<ChunkPos> _chunkLoads = new SwapList<ChunkPos>(
@@ -55,7 +55,7 @@ namespace SharpCraft.world.chunk
         {
             while (!_importantChunkBuilds.IsEmpty)
             {
-                if (_importantChunkBuilds.TryDequeue(out var chunk)) chunk.BuildChunkModelDo();
+                if (_importantChunkBuilds.TryDequeue(out var chunk)) chunk.BuildChunkModelNow();
             }
             SharpCraft.Instance.RunGlTasks();
         }

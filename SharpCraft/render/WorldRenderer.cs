@@ -1,16 +1,12 @@
 ﻿using OpenTK;
 using OpenTK.Graphics.OpenGL;
 using SharpCraft.block;
-using SharpCraft.entity;
 using SharpCraft.model;
 using SharpCraft.texture;
 using SharpCraft.util;
 using SharpCraft.world;
 using SharpCraft.world.chunk;
-using System;
-using System.Diagnostics;
 using SharpCraft.item;
-using SharpCraft.render.shader;
 using SharpCraft.render.shader.shaders;
 using GL = OpenTK.Graphics.OpenGL.GL;
 using TextureTarget = OpenTK.Graphics.OpenGL.TextureTarget;
@@ -99,7 +95,7 @@ namespace SharpCraft.render
                 if (!chunk.ShouldRender(RenderDistance))
                     continue;
 
-                if (chunk.ModelGenerating)
+                if (chunk.ModelBuilding)
                     RenderChunkOutline(chunk);
 
                 chunk.Render();

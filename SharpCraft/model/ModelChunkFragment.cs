@@ -11,7 +11,7 @@ namespace SharpCraft.model
             RawModel = ModelManager.loadModelToVAO(quads, 3);
         }
 
-        public void overrideData(List<RawQuad> quads)
+        public void OverrideData(List<RawQuad> quads)
         {
             RawModel = ModelManager.overrideModelInVAO(RawModel.vaoID, RawModel.bufferIDs, quads, 3);
         }

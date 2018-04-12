@@ -31,7 +31,8 @@ namespace SharpCraft.world.chunk
 
         private ModelChunk _model;
 
-        public bool ModelGenerating;
+        public bool ModelBuilding;
+        public bool QueuedForModelBuild;
 
         public bool HasData => _chunkBlocks != null;
 
@@ -163,19 +164,19 @@ namespace SharpCraft.world.chunk
             if (!CheckCanBuild())
                 return;
 
-            ModelGenerating = true;
+            QueuedForModelBuild = true;
             _loadManager.NotifyBuild(this);
         }
 
         private bool CheckCanBuild()
         {
-            return HasData && !ModelGenerating && World.AreNeighbourChunksGenerated(Pos);
+            return HasData && !QueuedForModelBuild && !ModelBuilding && World.AreNeighbourChunksGenerated(Pos);
         }
 
-        internal void BuildChunkModelDo()
+        public void BuildChunkModelNow()
         {
-            if (!ModelGenerating && _model != null)
-                return;
+            //if (!CheckCanBuild()) TODO might not be necessary
+                //return;
 
             var modelRaw = new Dictionary<Shader<ModelBlock>, List<RawQuad>>();
 
@@ -259,23 +260,22 @@ namespace SharpCraft.world.chunk
                         continue;
                     }
 
-                    _model.getFragmentModelWithShader(newShader)?.overrideData(newData);
+                    _model.getFragmentModelWithShader(newShader)?.OverrideData(newData);
                 }
 
-                ModelGenerating = false;
+                ModelBuilding = false;
             });
+
+            QueuedForModelBuild = false;
         }
 
         public void MarkDirty()
         {
-            DestroyModel();
             _loadManager.NotifyImportantBuild(this);
         }
 
         public void DestroyModel()
         {
-            while (ModelGenerating) Thread.Sleep(2);
-
             if (_model == null) return;
             SharpCraft.Instance.RunGlContext(_model.destroy);
             _model = null;
