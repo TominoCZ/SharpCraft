@@ -84,8 +84,8 @@ namespace SharpCraft
         private Point _mouseLast;
         private float _mouseWheelLast;
 
+        public bool IsPaused { get; private set; }
         private bool _takeScreenshot;
-        private bool _gamePaused;
         private bool _wasSpaceDown;
         private int _fpsCounter;
         private long _tickCounter;
@@ -112,7 +112,7 @@ namespace SharpCraft
             _glVersion = GL.GetString(StringName.ShadingLanguageVersion);
             Title = _title = $"SharpCraft Alpha 0.0.3 [GLSL {_glVersion}]";
 
-            //TargetRenderFrequency = 60;
+            TargetRenderFrequency = 60;
 
             Console.WriteLine("DEBUG: stitching textures");
             TextureManager.LoadTextures();
@@ -175,8 +175,7 @@ namespace SharpCraft
 
             OpenGuiScreen(new GuiScreenMainMenu());
 
-            timer.infiniteFps = true;
-            timer.renderHook = Render;
+            timer.InfiniteFps = true;
         }
 
         public void StartGame()
@@ -212,7 +211,7 @@ namespace SharpCraft
             var state = OpenTK.Input.Mouse.GetState();
             _mouseLast = new Point(state.X, state.Y);
 
-            timer.updateHook = () =>
+            timer.UpdateHook = () =>
             {
                 if (!IsDisposed && Visible)
                 {
@@ -229,9 +228,6 @@ namespace SharpCraft
         {
             if (GuiScreen == null && !Focused)
                 OpenGuiScreen(new GuiScreenIngameMenu());
-
-            if (_gamePaused)
-                return;
 
             var wheelValue = Mouse.WheelPrecise;
 
@@ -305,9 +301,8 @@ namespace SharpCraft
             ParticleRenderer?.TickParticles();
         }
 
-        private void RenderScreen()
+        private void RenderScreen(float partialTicks)
         {
-            float partialTicks = GetPartialTicksForRender();
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
             GL.Enable(EnableCap.DepthTest);
             GL.Enable(EnableCap.DepthClamp);
@@ -493,7 +488,7 @@ namespace SharpCraft
 
         public float GetPartialTicksForRender()
         {
-            return _gamePaused ? _lastPartialTicks : _lastPartialTicks = timer.GetPartialTicks();
+            return IsPaused ? _lastPartialTicks : _lastPartialTicks = timer.GetPartialTicks();
         }
 
         private bool AllowInput()
@@ -512,7 +507,7 @@ namespace SharpCraft
             GuiScreen = guiScreen;
 
             if (guiScreen.DoesGuiPauseGame)
-                _gamePaused = true;
+                IsPaused = true;
 
             var middle = new Point(ClientRectangle.Width / 2, ClientRectangle.Height / 2);
             middle = PointToScreen(middle);
@@ -526,7 +521,7 @@ namespace SharpCraft
                 return;
 
             if (GuiScreen.DoesGuiPauseGame)
-                _gamePaused = false;
+                IsPaused = false;
 
             GuiScreen.OnClose();
             GuiScreen = null;
@@ -569,19 +564,34 @@ namespace SharpCraft
 
         protected override void OnRenderFrame(FrameEventArgs e)
         {
-            timer.CheckRender();
+            if (!timer.CanRender())
+                return;
+
+            timer.CalculatePartialTicks();
+
+            var partialTicks = timer.GetPartialTicks();
+
+            if (partialTicks >= 1 || IsPaused)
+            {
+                if (timer.TryUpdate())
+                {
+                    timer.CalculatePartialTicks();
+                    partialTicks = timer.GetPartialTicks();
+                }
+            }
+
+            Render(partialTicks);
         }
 
-        private void Render()
+        private void Render(float partialTicks)
         {
             RunGlTasks();
 
             HandleMouseMovement();
 
-            timer.CheckUpdate();
             Camera.UpdateViewMatrix();
 
-            RenderScreen();
+            RenderScreen(partialTicks);
 
             _fpsCounter++;
 

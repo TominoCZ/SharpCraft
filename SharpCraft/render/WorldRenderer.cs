@@ -182,10 +182,10 @@ namespace SharpCraft.render
             if (bb == null)
                 return;
 
-            var size = Vector3.One * 0.0045f;
+            var size = Vector3.One * 0.0055f;
 
             _selectionOutline.Bind();
-            _selectionOutline.SetColor(Vector4.One);//_selectionOutlineColor);
+            _selectionOutline.SetColor(_selectionOutlineColor);
 
             shader.UpdateGlobalUniforms();
             shader.UpdateModelUniforms(_selectionOutline.RawModel);

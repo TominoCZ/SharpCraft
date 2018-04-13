@@ -278,7 +278,7 @@ namespace SharpCraft.entity
                     {
                         var stack = hotbar[i];
 
-                        if (stack?.Item?.item == clickedBlock && stack.Meta == clickedMeta)
+                        if (stack?.Item?.InnerItem == clickedBlock && stack.Meta == clickedMeta)
                         {
                             SetSelectedSlot(i);
                             return;

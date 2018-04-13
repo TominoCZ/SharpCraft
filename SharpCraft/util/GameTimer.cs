@@ -5,20 +5,21 @@ namespace SharpCraft.util
 {
     public class GameTimer
     {
-        private long lastFrame = NanoTime();
-        private long lastUpdate = NanoTime();
+        private long lastFrame = GetNanoTime();
+        private long lastUpdate = GetNanoTime();
 
         private long lastUpdateTime;
 
+        public bool InfiniteFps = false;
+
         private int maxFps;
-        public bool infiniteFps = false;
         private int ups;
         private long nanosPerFrame;
         private long nanosPerUpdate;
-        private float _partialTicks;
+        private float partialTicks;
+        private float lastPartialTicks;
 
-        public Action renderHook = () => { };
-        public Action updateHook = () => { };
+        public Action UpdateHook = () => { };
 
         public GameTimer(int fps, int ups)
         {
@@ -28,52 +29,36 @@ namespace SharpCraft.util
             nanosPerUpdate = 1_000_000_000L / ups;
         }
 
-        private void CalcPartialTicks()
+        public void CalculatePartialTicks()
         {
-            long time = NanoTime();
-            var timeDelta = time - lastUpdate + lastUpdateTime;
-            _partialTicks = timeDelta / (float)nanosPerUpdate;
-
-            if (timeDelta >= nanosPerUpdate)
-            {
-                if (!CheckUpdate())
-                    return;
-
-                time = NanoTime();
-                timeDelta = time - lastUpdate + lastUpdateTime;
-                _partialTicks = timeDelta / (float)nanosPerUpdate;
-            }
+            partialTicks = (GetNanoTime() - lastUpdate + lastUpdateTime) / (float)nanosPerUpdate;
         }
 
-        private void Render()
+        public bool CanRender()
         {
-            CalcPartialTicks();
-            renderHook();
-        }
+            if (InfiniteFps)
+                return true;
 
-        private void Update()
-        {
-            updateHook();
-        }
-
-        public void CheckRender()
-        {
-            if (infiniteFps)
-            {
-                Render();
-                return;
-            }
-
-            long time = NanoTime();
-            if (time - lastFrame < nanosPerFrame) return;
+            long time = GetNanoTime();
+            if (time - lastFrame < nanosPerFrame)
+                return false;
 
             lastFrame = time;
-            Render();
+
+            return true;
         }
 
-        public bool CheckUpdate()
+        public bool TryUpdate()
         {
-            long time = NanoTime();
+            long time = GetNanoTime();
+
+            if (SharpCraft.Instance.IsPaused)
+            {
+                lastUpdate = time;
+
+                return false;
+            }
+
             double count = (time - lastUpdate + lastUpdateTime) / (double)nanosPerUpdate;
             if (count > ups * 2)
             {
@@ -91,22 +76,22 @@ namespace SharpCraft.util
             if (count > 2) Console.WriteLine($"Warning: game is lagging behind, updating {(long)count} times ({count})");
             while (count-- > 1)
             {
-                time = NanoTime();
-                Update();
-                lastUpdateTime = NanoTime() - time;
+                time = GetNanoTime();
+                UpdateHook();
+                lastUpdateTime = GetNanoTime() - time;
             }
 
             return true;
         }
 
-        public static long NanoTime()
+        public static long GetNanoTime()
         {
             return (long)(Stopwatch.GetTimestamp() / (Stopwatch.Frequency / 1000000000.0));
         }
 
         public float GetPartialTicks()
         {
-            return _partialTicks;
+            return SharpCraft.Instance.IsPaused ? lastPartialTicks : (lastPartialTicks = partialTicks);
         }
     }
 }

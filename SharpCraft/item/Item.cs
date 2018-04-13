@@ -3,32 +3,32 @@
 namespace SharpCraft.item
 {
 
-	[Serializable]
-	public abstract class Item
-	{
-		public static bool operator ==(Item i1, Item i2)
-		{
-			return i1?.item == i2?.item;
-		}
+    [Serializable]
+    public abstract class Item
+    {
+        public static bool operator ==(Item i1, Item i2)
+        {
+            return i1?.InnerItem == i2?.InnerItem;
+        }
 
-		public static bool operator !=(Item i1, Item i2)
-		{
-			return i1?.item != i2?.item;
-		}
+        public static bool operator !=(Item i1, Item i2)
+        {
+            return !(i1 == i2);
+        }
 
-		public dynamic item { get; }
+        public dynamic InnerItem { get; }
 
-		private string displayName { get; }
+        private string DisplayName { get; }
 
-		protected Item(string displayName, object item)
-		{
-			this.item = item;
-			this.displayName = displayName;
-		}
+        protected Item(string displayName, object innerItem)
+        {
+            InnerItem = innerItem;
+            DisplayName = displayName;
+        }
 
-		public virtual int MaxStackSize()
-		{
-			return 256;
-		}
-	}
+        public virtual int MaxStackSize()
+        {
+            return 256;
+        }
+    }
 }
