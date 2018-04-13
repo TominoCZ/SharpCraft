@@ -30,7 +30,7 @@ namespace SharpCraft.item
 
 		public int Meta;
 
-		public bool IsEmpty => Count == 0 || Item == null || Item.item == null;
+		public bool IsEmpty => Count == 0 || Item?.InnerItem == null;
 
 		public ItemStack(Item item, int count = 1, int meta = 0)
 		{

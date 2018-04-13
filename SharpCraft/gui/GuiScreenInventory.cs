@@ -110,7 +110,7 @@ namespace SharpCraft.gui
 
             base.Render(mouseX, mouseY);
 
-            if (draggedStack != null && !draggedStack.IsEmpty && draggedStack.Item?.item is EnumBlock block)
+            if (draggedStack != null && !draggedStack.IsEmpty && draggedStack.Item?.InnerItem is EnumBlock block)
             {
                 RenderBlock(block, mouseX - 16 * guiScale / 2, mouseY - 16 * guiScale / 2, guiScale); //TODO - make this render Items too once they're implemented
             }

@@ -157,7 +157,7 @@ namespace SharpCraft.entity
             var partialPos = lastPos + (pos - lastPos) * particalTicks;
             var partialTime = lastTick + (tick - lastTick) * particalTicks;
 
-            if (stack?.Item?.item is EnumBlock block)
+            if (stack?.Item?.InnerItem is EnumBlock block)
             {
                 var model = ModelRegistry.GetModelForBlock(block, stack.Meta);
 

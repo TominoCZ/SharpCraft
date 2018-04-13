@@ -12,7 +12,7 @@ namespace SharpCraft.item
 
         public EnumBlock GetBlock()
         {
-            return (EnumBlock)item;
+            return (EnumBlock)InnerItem;
         }
     }
 }
