@@ -30,5 +30,13 @@ namespace SharpCraft.render.shader.shaders
 			UVmin?.Update(instance.UVmin);
 			UVmax?.Update(instance.UVmax);
 		}
-	}
+
+	    public void UpdateInstanceUniforms(Matrix4 transform, Vector2 UVmin, Vector2 UVmax)
+	    {
+	        base.UpdateInstanceUniforms(transform, null);
+
+	        this.UVmin?.Update(UVmin);
+	        this.UVmax?.Update(UVmax);
+	    }
+    }
 }

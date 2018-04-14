@@ -29,7 +29,15 @@ namespace SharpCraft.util
             return s * t;
         }
 
-	    public static Matrix4 CreateTransformationMatrix(Vector3 translation, Vector3 scale)
+        public static Matrix4 CreateTransformationMatrix(float translationX, float translationY, float scale)
+        {
+            var s = Matrix4.CreateScale(scale);
+            var t = Matrix4.CreateTranslation(translationX, translationY, 0);
+
+            return s * t;
+        }
+
+        public static Matrix4 CreateTransformationMatrix(Vector3 translation, Vector3 scale)
 	    {
 		    var s = Matrix4.CreateScale(scale.X, scale.Y, scale.Z);
 		    var t = Matrix4.CreateTranslation(translation.X, translation.Y, translation.Z);

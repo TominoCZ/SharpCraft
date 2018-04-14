@@ -26,6 +26,7 @@ namespace SharpCraft.texture
         public static Texture TEXTURE_DESTROY_PROGRESS;
         public static Texture TEXTURE_BLOCKS;
         public static Texture TEXTURE_GUI_WIDGETS;
+        public static Texture TEXTURE_TEXT;
 
         public static void LoadTextures()
         {
@@ -33,6 +34,9 @@ namespace SharpCraft.texture
 
             TEXTURE_GUI_WIDGETS = LoadTexture("gui/widgets");
             TEXTURE_DESTROY_PROGRESS = LoadTexture("blocks/destroy_progress");
+            TEXTURE_TEXT = LoadTexture("font/default");
+
+            FontManager.LoadCharacters(TEXTURE_TEXT, "font/default");
         }
 
         private static void StitchTextures()
