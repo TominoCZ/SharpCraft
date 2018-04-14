@@ -7,9 +7,12 @@ namespace SharpCraft.render
 {
     public class Camera
     {
-        public const float NearPlane = 0.1f;
+        public const float NearPlane = 0.15f;
         public const float FarPlane = 1000f;
-        public float Fov { get; private set; }
+
+        public float TargetFov { get; private set; }
+
+        public float PartialFov { get; private set; }
 
         private float _pitch;
         private float _yaw = MathHelper.PiOver2;
@@ -18,7 +21,7 @@ namespace SharpCraft.render
 
         public Camera()
         {
-            Fov = 70;
+            PartialFov = TargetFov = 70;
 
             UpdateViewMatrix();
             UpdateProjectionMatrix();
@@ -40,7 +43,7 @@ namespace SharpCraft.render
 
         public void SetFOV(float fov)
         {
-            Fov = fov;
+            PartialFov = fov;
 
             UpdateProjectionMatrix();
         }
@@ -60,7 +63,7 @@ namespace SharpCraft.render
             var matrix = Matrix4.Identity;
 
             var aspectRatio = (float)SharpCraft.Instance.Width / SharpCraft.Instance.Height;
-            var yScale = (float)(1f / Math.Tan(MathHelper.DegreesToRadians(Fov / 2f)));
+            var yScale = (float)(1f / Math.Tan(MathHelper.DegreesToRadians(PartialFov / 2f)));
             var xScale = yScale / aspectRatio;
             var frustumLength = FarPlane - NearPlane;
 

@@ -2,8 +2,7 @@
 using OpenTK;
 using SharpCraft.texture;
 using System.Collections.Generic;
-using SharpCraft.render.shader;
-using SharpCraft.render.shader.shaders;
+using OpenTK.Input;
 
 namespace SharpCraft.gui
 {
@@ -26,7 +25,12 @@ namespace SharpCraft.gui
         {
             for (int i = 0; i < buttons.Count; i++)
             {
-                buttons[i].Render(mouseX, mouseY);
+                var btn = buttons[i];
+
+                btn.Render(mouseX, mouseY);
+                //hovered? HoverColor : Vector3.One
+                //if (btn is GuiItemSlot slot && !slot.stack?.IsEmpty == true && slot.stack.Count > 1)
+                    //RenderText(slot.stack.Count.ToString(), slot.PosX + 32 * slot.Scale / 2f, slot.PosY + 32 * slot.Scale / 2f + 14, 1, true);
             }
             //render stuff
         }
@@ -38,7 +42,7 @@ namespace SharpCraft.gui
 
             var countX = Math.Ceiling(SharpCraft.Instance.ClientSize.Width / sizeX);
             var countY = Math.Ceiling(SharpCraft.Instance.ClientSize.Height / sizeY);
-            
+
             for (int x = 0; x <= countX; x++)
             {
                 for (int y = 0; y <= countY; y++)
@@ -65,7 +69,7 @@ namespace SharpCraft.gui
             }
         }
 
-        public virtual void OnMouseClick(int x, int y)
+        public virtual void OnMouseClick(int x, int y, MouseButton button)
         {
             for (int i = buttons.Count - 1; i >= 0; i--)
             {
@@ -73,13 +77,13 @@ namespace SharpCraft.gui
 
                 if (btn.IsMouseOver(x, y))
                 {
-                    ButtonClicked(btn);
+                    ButtonClicked(btn, button);
                     break;
                 }
             }
         }
 
-        protected virtual void ButtonClicked(GuiButton btn)
+        protected virtual void ButtonClicked(GuiButton btn, MouseButton button)
         {
         }
 

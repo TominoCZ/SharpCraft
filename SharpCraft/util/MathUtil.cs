@@ -25,6 +25,11 @@ namespace SharpCraft.util
             return vec;
         }
 
+        public static float Floor(float f)
+        {
+            return (float) Math.Floor(f); // lol
+        }
+
         public static float NextFloat(float min = 0, float max = 1)
         {
             return min + (float)rand.NextDouble() * (max - min);

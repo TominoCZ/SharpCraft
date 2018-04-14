@@ -1,20 +1,14 @@
-﻿using OpenTK;
-using SharpCraft.render.shader;
-using SharpCraft.render.shader.shaders;
-using SharpCraft.texture;
-
-namespace SharpCraft.gui
+﻿namespace SharpCraft.gui
 {
     internal class GuiScreenIngameMenu : GuiScreen
     {
-        public GuiScreenIngameMenu()
-        {
-
-        }
-
         public override void Render(int mouseX, int mouseY)
         {
             DrawBackground();
+
+            var size = SharpCraft.Instance.ClientSize;
+
+            RenderText("PAUSED", size.Width / 2f, size.Height / 2f, 5, true, true);
 
             base.Render(mouseX, mouseY);
         }

@@ -1,18 +1,20 @@
 ﻿using OpenTK;
 using SharpCraft.gui;
-using SharpCraft.model;
-using SharpCraft.particle;
 using SharpCraft.render.shader.uniform;
-using SharpCraft.util;
+using SharpCraft.texture;
 
 namespace SharpCraft.render.shader.shaders
 {
-	public class ShaderGui : Shader<GuiTexture>
+	class ShaderGui : Shader<GuiTexture>
 	{
 		private UniformVec2  UVmin;
 		private UniformVec2  UVmax;
 
-        public ShaderGui() : base("gui")
+	    public ShaderGui() : base("gui")
+		{
+		}
+
+        protected ShaderGui(string shaderName) : base(shaderName)
 		{
 		}
 
@@ -26,10 +28,13 @@ namespace SharpCraft.render.shader.shaders
 
 		public override void UpdateInstanceUniforms(Matrix4 transform, GuiTexture instance)
 		{
-			base.UpdateInstanceUniforms(transform, instance);
-			UVmin?.Update(instance.UVmin);
-			UVmax?.Update(instance.UVmax);
+			UpdateInstanceUniforms(transform, instance.UVmin, instance.UVmax);
 		}
+
+	    public void UpdateInstanceUniforms(Matrix4 transform, TextureUVNode node)
+	    {
+	        UpdateInstanceUniforms(transform, node.start, node.end);
+	    }
 
 	    public void UpdateInstanceUniforms(Matrix4 transform, Vector2 UVmin, Vector2 UVmax)
 	    {

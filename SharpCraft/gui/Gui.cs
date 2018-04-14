@@ -23,38 +23,14 @@ namespace SharpCraft.gui
             Shader = new ShaderGui();
         }
 
-        protected void RenderTetxt(string text, int x, int y, float scale) //#TODO
+        protected void RenderText(string text, float x, float y, float scale, bool centered = false, bool dropShadow = false)
         {
-            var tex = TextureManager.TEXTURE_TEXT;
+            RenderText(text, x, y, scale, Vector3.One, centered, dropShadow);
+        }
 
-            float width = tex.textureSize.Width * scale;
-            float height = tex.textureSize.Height * scale;
-
-            var ratio = new Vector2(width / SharpCraft.Instance.ClientSize.Width, height / SharpCraft.Instance.ClientSize.Height);
-
-            var unit = new Vector2(1f / SharpCraft.Instance.ClientSize.Width, 1f / SharpCraft.Instance.ClientSize.Height);
-
-            var pos = new Vector2(x, -y);
-
-            var mat = MatrixHelper.CreateTransformationMatrix(pos * unit * 2 + Vector2.UnitY - Vector2.UnitX, ratio);
-
-            Shader.Bind();
-
-            GL.BindVertexArray(GuiRenderer.GuiQuad.vaoID);
-
-            Shader.UpdateGlobalUniforms();
-            Shader.UpdateModelUniforms();
-            Shader.UpdateInstanceUniforms(mat, tex);
-
-            GL.EnableVertexAttribArray(0);
-
-            GL.ActiveTexture(TextureUnit.Texture0);
-            GL.BindTexture(TextureTarget.Texture2D, tex.ID);
-            GL.DrawArrays(PrimitiveType.Quads, 0, 4);
-
-            GL.DisableVertexAttribArray(0);
-
-            Shader.Unbind();
+        protected void RenderText(string text, float x, float y, float scale, Vector3 color, bool centered = false, bool dropShadow = false)
+        {
+            SharpCraft.Instance.FontRenderer.RenderText(text, x, y, scale, color, centered, dropShadow);
         }
 
         protected virtual void RenderTexture(Texture tex, float x, float y, int textureX, int textureY, int sizeX, int sizeY, float scale = 1, bool centered = false)

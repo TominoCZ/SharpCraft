@@ -20,6 +20,8 @@ namespace SharpCraft.entity
 
         private Vector2 moveSpeed;
 
+        public bool isRunning { get; private set; }
+
         public int HotbarIndex { get; private set; }
 
         public ItemStack[] hotbar { get; }
@@ -74,14 +76,14 @@ namespace SharpCraft.entity
 
             float mult = 1;
 
-            if (state.IsKeyDown(Key.LShift))
+            if (isRunning = state.IsKeyDown(Key.LShift))
                 mult = 1.5f;
 
             if (dirVec != Vector2.Zero)
             {
                 moveSpeedMult = MathHelper.Clamp(moveSpeedMult + 0.085f, 1, 1.55f);
 
-                moveSpeed = MathUtil.Clamp(moveSpeed + dirVec.Normalized() * 0.1f * moveSpeedMult, 0, maxMoveSpeed);// * moveSpeed;
+                moveSpeed = MathUtil.Clamp(moveSpeed + dirVec.Normalized() * 0.1f * moveSpeedMult, 0, maxMoveSpeed);
 
                 motion.Xz = moveSpeed * mult;
             }
@@ -94,7 +96,7 @@ namespace SharpCraft.entity
 
         public void FastMoveStack(int index)
         {
-            //TODO - finish :D sont forget, that there is a possibility that the item in the stacks are the same, so they merge
+            //TODO - finish :D dont forget, that there is a possibility that the item in the stacks are the same, so they merge
             int i = 0;
 
             for (; i < inventory.Length; i++)
@@ -316,7 +318,7 @@ namespace SharpCraft.entity
 
             var ammountToThrow = Math.Min(count, stack.Count);
 
-            var toThrow = stack.CopyUnit();
+            var toThrow = stack.Copy(1);
             toThrow.Count = ammountToThrow;
 
             world?.AddEntity(new EntityItem(world, SharpCraft.Instance.Camera.pos - Vector3.UnitY * 0.35f,

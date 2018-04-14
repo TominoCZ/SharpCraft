@@ -1,7 +1,4 @@
-﻿using OpenTK;
-using SharpCraft.render.shader;
-using SharpCraft.render.shader.shaders;
-using SharpCraft.texture;
+﻿using OpenTK.Input;
 
 namespace SharpCraft.gui
 {
@@ -9,7 +6,7 @@ namespace SharpCraft.gui
     {
         public GuiScreenMainMenu()
         {
-            buttons.Add(new GuiButton(0, 0, 200, 2) { centered = true });
+            buttons.Add(new GuiButton(0, 0, 200, 2, "START") { CenteredX = true, CenteredY = true});
         }
 
         public override void Render(int mouseX, int mouseY)
@@ -19,7 +16,7 @@ namespace SharpCraft.gui
             base.Render(mouseX, mouseY);
         }
 
-        protected override void ButtonClicked(GuiButton btn)
+        protected override void ButtonClicked(GuiButton btn, MouseButton button)
         {
             switch (btn.ID)
             {

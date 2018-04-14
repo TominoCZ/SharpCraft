@@ -1,6 +1,5 @@
 ﻿using OpenTK;
-using SharpCraft.render.shader;
-using SharpCraft.render.shader.shaders;
+using OpenTK.Graphics.OpenGL;
 using SharpCraft.texture;
 
 namespace SharpCraft.gui
@@ -18,7 +17,9 @@ namespace SharpCraft.gui
 
         public override void Render(int mouseX, int mouseY)
         {
+            GL.BlendFunc(BlendingFactorSrc.OneMinusDstColor, BlendingFactorDest.OneMinusSrcColor);
             RenderTexture(_texture, SharpCraft.Instance.ClientSize.Width / 2, SharpCraft.Instance.ClientSize.Height / 2, 0, 0, _texture.textureSize.Width, _texture.textureSize.Height, 1.25f, true);
+            GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
         }
     }
 }

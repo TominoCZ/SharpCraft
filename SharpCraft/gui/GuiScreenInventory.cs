@@ -10,7 +10,7 @@ using SharpCraft.texture;
 
 namespace SharpCraft.gui
 {
-    internal class GuiScreenInventory : GuiScreen
+    class GuiScreenInventory : GuiScreen
     {
         private static float guiScale = 1.75f;
 
@@ -35,7 +35,7 @@ namespace SharpCraft.gui
 
             for (int i = 0; i < 36; i++)
             {
-                buttons.Add(new GuiItemSlot(i, 0, 0, guiScale, null));
+                buttons.Add(new GuiItemSlot(i, 0, -1000000, guiScale, null));
             }
 
             inventoryBackground = new GuiTexture(TextureManager.LoadTexture("gui/inventory_bg"), 0, 0, 318, 163, guiScale);
@@ -75,15 +75,15 @@ namespace SharpCraft.gui
                 {
                     var alpha = 1f;
 
-                    if (targetBtn.stack != null && !targetBtn.stack.ItemSame(draggedStack) && draggedStack != null && !draggedStack.IsEmpty)
+                    if (targetBtn.Stack != null && !targetBtn.Stack.ItemSame(draggedStack) && draggedStack != null && !draggedStack.IsEmpty)
                         alpha = 0.85f;
 
-                    targetBtn.alphaForRender = alpha;
+                    targetBtn.AlphaForRender = alpha;
 
-                    targetBtn.posX = x;
-                    targetBtn.posY = hotbarY;
-                    targetBtn.stack = SharpCraft.Instance.Player.GetItemStackInInventory(i);
-                    targetBtn.scale = guiScale;
+                    targetBtn.PosX = x;
+                    targetBtn.PosY = hotbarY;
+                    targetBtn.Stack = SharpCraft.Instance.Player.GetItemStackInInventory(i);
+                    targetBtn.Scale = guiScale;
                 }
             }
 
@@ -100,10 +100,10 @@ namespace SharpCraft.gui
 
                     if (targetBtn != null)
                     {
-                        targetBtn.posX = x;
-                        targetBtn.posY = y;
-                        targetBtn.stack = SharpCraft.Instance.Player.GetItemStackInInventory(index);
-                        targetBtn.scale = guiScale;
+                        targetBtn.PosX = x;
+                        targetBtn.PosY = y;
+                        targetBtn.Stack = SharpCraft.Instance.Player.GetItemStackInInventory(index);
+                        targetBtn.Scale = guiScale;
                     }
                 }
             }
@@ -116,18 +116,18 @@ namespace SharpCraft.gui
             }
         }
 
-        public override void OnMouseClick(int x, int y)
+        public override void OnMouseClick(int x, int y, MouseButton button)
         {
-            base.OnMouseClick(x, y);
+            base.OnMouseClick(x, y, button);
 
-            if (x <= startPosX - 10 * guiScale / 2 || x > startPosX + totalInventoryWidth + 10 * guiScale /2||
+            if (x <= startPosX - 10 * guiScale / 2 || x > startPosX + totalInventoryWidth + 10 * guiScale / 2 ||
                 y <= startPosY - 10 * guiScale / 2 || y > startPosY + totalInventoryHeight + 10 * guiScale)
             {
                 SharpCraft.Instance.Player.ThrowStack(draggedStack);
             }
         }
 
-        protected override void ButtonClicked(GuiButton btn)
+        protected override void ButtonClicked(GuiButton btn, MouseButton button)
         {
             if (btn is GuiItemSlot slot)
             {
@@ -135,24 +135,42 @@ namespace SharpCraft.gui
                 {
                     SharpCraft.Instance.Player.FastMoveStack(slot.ID);
                 }
-                else if ((draggedStack == null || draggedStack.IsEmpty) && slot.stack != null && !slot.stack.IsEmpty)
+                else if ((draggedStack == null || draggedStack.IsEmpty) && slot.Stack != null && !slot.Stack.IsEmpty) //when not holding anything and clicked a non-empty stack in the inventory
                 {
-                    draggedStack = slot.stack.Copy();
-                    slot.stack.Count = 0;
+                    var toTake = slot.Stack.Count;
+
+                    if (button == MouseButton.Right)
+                    {
+                        toTake /= 2;
+                        toTake = toTake == 0 ? 1 : toTake;
+                    }
+
+                    draggedStack = slot.Stack.Copy(toTake);
+
+                    slot.Stack.Count -= toTake;
                 }
                 else
                 {
-                    if (slot.stack == null || slot.stack.IsEmpty)
+                    if (slot.Stack == null || slot.Stack.IsEmpty) // when holding a non-empty stack and clicking an empty slot
                     {
-                        SharpCraft.Instance.Player.SetItemStackInInventory(btn.ID, draggedStack);
+                        if (button == MouseButton.Right && draggedStack != null)
+                        {
+                            SharpCraft.Instance.Player.SetItemStackInInventory(btn.ID, draggedStack.Copy(1));
 
-                        draggedStack = null;
+                            draggedStack.Count--;
+                        }
+                        else
+                        {
+                            SharpCraft.Instance.Player.SetItemStackInInventory(btn.ID, draggedStack);
+
+                            draggedStack = null;
+                        }
                     }
-                    else if (draggedStack != null && slot.stack.ItemSame(draggedStack))
+                    else if (draggedStack != null && slot.Stack.ItemSame(draggedStack))
                     {
-                        var ammountToMove = Math.Min(slot.stack.Item.MaxStackSize() - slot.stack.Count, draggedStack.Count);
+                        var ammountToMove = Math.Min(slot.Stack.Item.MaxStackSize() - slot.Stack.Count, draggedStack.Count);
 
-                        slot.stack.Count += ammountToMove;
+                        slot.Stack.Count += ammountToMove;
                         draggedStack.Count -= ammountToMove;
                     }
                     else if (draggedStack != null && !draggedStack.IsEmpty)

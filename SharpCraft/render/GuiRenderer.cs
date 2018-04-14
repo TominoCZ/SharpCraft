@@ -33,13 +33,11 @@ namespace SharpCraft.render
             hudGui = new GuiHUD();
         }
 
-        public void render(Gui gui)
+        public void Render(Gui gui)
         {
             if (gui == null)
                 return;
-
-            GL.Enable(EnableCap.Blend);
-            GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
+            
             GL.Disable(EnableCap.DepthTest);
 
             GL.BindVertexArray(GuiQuad.vaoID);
@@ -56,12 +54,12 @@ namespace SharpCraft.render
 
         public void renderCrosshair()
         {
-            render(crosshairGui);
+            Render(crosshairGui);
         }
 
         public void renderHUD()
         {
-            render(hudGui);
+            Render(hudGui);
         }
     }
 }

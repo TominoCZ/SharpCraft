@@ -42,12 +42,12 @@ namespace SharpCraft.item
 
 		public ItemStack Copy()
 		{
-			return new ItemStack(Item, Count, Meta);
+		    return Copy(Count);
 		}
 
-		public ItemStack CopyUnit()
+		public ItemStack Copy(int size)
 		{
-			return new ItemStack(Item, 1, Meta);
+			return new ItemStack(Item, size, Meta);
 		}
 
 		public bool ItemSame(ItemStack other)
@@ -56,5 +56,7 @@ namespace SharpCraft.item
 			return Meta == other.Meta &&
 			       Item == other.Item;
 		}
+
+	    public override string ToString() => Item != null ? Item.ToString() : "";
 	}
 }

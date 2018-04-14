@@ -30,5 +30,10 @@ namespace SharpCraft.item
         {
             return 256;
         }
+
+        public override string ToString()
+        {
+            return DisplayName;
+        }
     }
 }

@@ -1,4 +1,5 @@
-﻿using OpenTK;
+﻿using System;
+using OpenTK;
 using OpenTK.Graphics.OpenGL;
 using SharpCraft.block;
 using SharpCraft.model;
@@ -33,6 +34,9 @@ namespace SharpCraft.render
         private Vector3 motion;
         private Vector3 lastMotion;
 
+        private float fov;
+        private float lastFov;
+
         public int RenderDistance
         {
             get => _renderDistance;
@@ -55,9 +59,17 @@ namespace SharpCraft.render
         {
             lastLookVec = lookVec;
             lastMotion = motion;
+            lastFov = fov;
 
             if (SharpCraft.Instance.Player != null)
+            {
                 motion = SharpCraft.Instance.Player.motion;
+
+                fov = SharpCraft.Instance.Player.motion.Xz.LengthFast > 0.2f && SharpCraft.Instance.Player.isRunning
+                    ? Math.Clamp(fov * 1.065f, 0, SharpCraft.Instance.Camera.TargetFov + 6)
+                    : Math.Clamp(fov * 0.965f, SharpCraft.Instance.Camera.TargetFov,
+                        SharpCraft.Instance.Camera.TargetFov + 6);
+            }
 
             lookVec = SharpCraft.Instance.Camera.GetLookVec();
 
@@ -86,6 +98,10 @@ namespace SharpCraft.render
             RenderChunks(world);
             RenderSelectedItemBlock(partialTicks);
             RenderDestroyProgress(world);
+
+            var partialFov = lastFov + (fov - lastFov) * partialTicks;
+
+            SharpCraft.Instance.Camera.SetFOV(partialFov);
         }
 
         private void RenderChunks(World world)
@@ -182,7 +198,7 @@ namespace SharpCraft.render
             if (bb == null)
                 return;
 
-            var size = Vector3.One * 0.0055f;
+            var size = Vector3.One * 0.0095f;
 
             _selectionOutline.Bind();
             _selectionOutline.SetColor(_selectionOutlineColor);

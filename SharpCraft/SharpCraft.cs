@@ -58,7 +58,7 @@ namespace SharpCraft
         public ParticleRenderer ParticleRenderer;
         public SkyboxRenderer SkyboxRenderer;
         public GuiRenderer GuiRenderer;
-
+        public FontRenderer FontRenderer;
         public KeyboardState KeyboardState;
         //public HashSet<Key> KeysDown = new HashSet<Key>();
         public MouseOverObject MouseOverObject = new MouseOverObject();
@@ -112,7 +112,7 @@ namespace SharpCraft
             _glVersion = GL.GetString(StringName.ShadingLanguageVersion);
             Title = _title = $"SharpCraft Alpha 0.0.3 [GLSL {_glVersion}]";
 
-            TargetRenderFrequency = 60;
+            //TargetRenderFrequency = 60;
 
             Console.WriteLine("DEBUG: stitching textures");
             TextureManager.LoadTextures();
@@ -176,6 +176,8 @@ namespace SharpCraft
             OpenGuiScreen(new GuiScreenMainMenu());
 
             timer.InfiniteFps = true;
+
+            FontRenderer = new FontRenderer();
         }
 
         public void StartGame()
@@ -307,7 +309,9 @@ namespace SharpCraft
             GL.Enable(EnableCap.DepthTest);
             GL.Enable(EnableCap.DepthClamp);
             GL.Enable(EnableCap.CullFace);
+            GL.Enable(EnableCap.Blend);
             GL.CullFace(CullFaceMode.Back);
+            GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
 
             if (World != null)
             {
@@ -328,7 +332,7 @@ namespace SharpCraft
             if (GuiScreen != null)
             {
                 CursorVisible = true;
-                GuiRenderer.render(GuiScreen);
+                GuiRenderer.Render(GuiScreen);
             }
 
             GL.Flush();
@@ -532,7 +536,7 @@ namespace SharpCraft
         private void CaptureScreen()
         {
             Bitmap bmp = new Bitmap(ClientSize.Width, ClientSize.Height,
-                System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+                System.Drawing.Imaging.PixelFormat.Format32bppRgb);
 
             using (bmp)
             {
@@ -629,7 +633,7 @@ namespace SharpCraft
                     var state = OpenTK.Input.Mouse.GetCursorState();
                     var point = PointToClient(new Point(state.X, state.Y));
 
-                    GuiScreen.OnMouseClick(point.X, point.Y);
+                    GuiScreen.OnMouseClick(point.X, point.Y, e.Button);
                 }
 
                 if (!_mouseButtonsDown.Contains(e.Button))

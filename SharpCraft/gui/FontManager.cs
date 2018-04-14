@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
 using System.Text.RegularExpressions;
+using System.Xml;
 using OpenTK;
 using SharpCraft.texture;
 using SharpCraft.util;
@@ -11,38 +11,47 @@ namespace SharpCraft.gui
 {
     class FontManager
     {
-        private static Dictionary<char, TextureUVNode> _dictionary = new Dictionary<char, TextureUVNode>();
+        private static Dictionary<char, FontMapCharacter> _dictionary = new Dictionary<char, FontMapCharacter>();
 
         public static void LoadCharacters(Texture tex, string fntFileName)
         {
+            _dictionary.Clear();
+            
             var file = $"SharpCraft_Data/assets/textures/{fntFileName}.fnt";
 
             var lines = File.ReadAllLines(file);
 
-            var start = false;
-
-            for (var i = 0; i < lines.Length; i++)
+            foreach (var line in lines)
             {
-                var line = lines[i];
-
-                if (!start && line.StartsWith("char"))
-                    start = true;
-                else
-                    continue;
-
                 var parsed = ParseFntCharLine(line);
+
+                if (parsed == null)
+                    continue;
 
                 var uv = GetUV(tex.textureSize.Width, tex.textureSize.Height, parsed.X, parsed.Y, parsed.W, parsed.H);
 
-                _dictionary.Add(parsed.Char, uv);
+                _dictionary.Add(parsed.Char, new FontMapCharacter(parsed, uv));
             }
         }
 
-        private static FontMapCharacter ParseFntCharLine(string line)
+        public static FontMapCharacter GetCharacter(char c)
+        {
+            if (!_dictionary.TryGetValue(c, out var node))
+                _dictionary.TryGetValue(' ', out node);
+
+            return node;
+        }
+
+        private static FontMapCharacterNode ParseFntCharLine(string line)
         {
             line = Regex.Replace(line, @"\s+", " ");
-            var dataStartIndex = line.IndexOf("id=", StringComparison.Ordinal);
-            line = line.Substring(dataStartIndex, line.Length - dataStartIndex);
+
+            if (!line.Contains("char id="))
+                return null;
+
+            var startIndex = line.IndexOf("id=", StringComparison.Ordinal);
+
+            line = line.Substring(startIndex, line.Length - startIndex);
 
             var data = line.Split(' ');
             //x=250   y=33    width=3     height=32
@@ -50,10 +59,13 @@ namespace SharpCraft.gui
             var x = int.Parse(data[1].Replace("x=", ""));
             var y = int.Parse(data[2].Replace("y=", ""));
 
-            var w = int.Parse(data[1].Replace("width=", ""));
-            var h = int.Parse(data[2].Replace("height=", ""));
+            var w = int.Parse(data[3].Replace("width=", ""));
+            var h = int.Parse(data[4].Replace("height=", ""));
 
-            return new FontMapCharacter(character, x, y, w, h);
+            var ox = int.Parse(data[5].Replace("xoffset=", ""));
+            var oy = int.Parse(data[6].Replace("yoffset=", ""));
+
+            return new FontMapCharacterNode(character, x, y, w, h, ox, oy);
         }
 
         private static TextureUVNode GetUV(int textureSizeX, int textureSizeY, int x, int y, int sizeX, int sizeY) //TODO i might move this to TextureManager or TextureHelper
@@ -73,6 +85,18 @@ namespace SharpCraft.gui
 
     class FontMapCharacter
     {
+        public FontMapCharacterNode Character { get; }
+        public TextureUVNode TextureUv { get; }
+
+        public FontMapCharacter(FontMapCharacterNode character, TextureUVNode textureUv)
+        {
+            Character = character;
+            TextureUv = textureUv;
+        }
+    }
+
+    class FontMapCharacterNode
+    {
         public char Char;
         public int X;
         public int Y;
@@ -80,13 +104,19 @@ namespace SharpCraft.gui
         public int W;
         public int H;
 
-        public FontMapCharacter(char c, int x, int y, int w, int h)
+        public int OffsetX;
+        public int OffsetY;
+
+        public FontMapCharacterNode(char c, int x, int y, int w, int h, int oX, int oY)
         {
             Char = c;
             X = x;
             Y = y;
             W = w;
             H = h;
+
+            OffsetX = oX;
+            OffsetY = oY;
         }
     }
 }
