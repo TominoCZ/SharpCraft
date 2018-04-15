@@ -14,7 +14,7 @@ uniform mat4 viewMatrix;
 void main(void) {
 	vec4 worldPos = transformationMatrix * vec4(position, 1.0);
 	gl_Position = projectionMatrix * viewMatrix * worldPos;
-
+	
 	pass_uv = textureCoords;
 	
 	float lightY = 0.875;
@@ -37,5 +37,5 @@ void main(void) {
 	float diffuse_value3 = max(dot(unitNormal, light3), 0.25);
 	float diffuse_value4 = max(dot(unitNormal, light4), 0.25);
 	
-	brightness = (diffuse_value1 + diffuse_value2 + diffuse_value3 + diffuse_value4) / 2.25;
+	brightness = (diffuse_value1 + diffuse_value2 + diffuse_value3 + diffuse_value4) / 2.15;
 }

@@ -83,11 +83,11 @@ namespace SharpCraft.render
                 if (dropShadow)
                 {
                     var mat1 = MatrixHelper.CreateTransformationMatrix(
-                        (pos + (Vector2.UnitX * 3 - Vector2.UnitY * 3) * scale) * unit * 2 +
+                        (pos + (Vector2.UnitX - Vector2.UnitY) * 4f * scale) * unit * 2 +
                         Vector2.UnitY - Vector2.UnitX,
                         ratio);
 
-                    Shader.SetColor(Vector3.One * 0.125f);
+                    Shader.SetColor(Vector3.One * 0.1f);
 
                     Shader.UpdateInstanceUniforms(mat1, node.TextureUv);
 

@@ -76,9 +76,9 @@ namespace SharpCraft.util
             if (count > 2) Console.WriteLine($"Warning: game is lagging behind, updating {(long)count} times ({count})");
             while (count-- > 1)
             {
-                time = GetNanoTime();
                 UpdateHook();
                 lastUpdateTime = GetNanoTime() - time;
+                time = GetNanoTime();
             }
 
             return true;
