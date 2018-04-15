@@ -24,6 +24,8 @@ namespace SharpCraft.render
         public void RenderText(string text, float x, float y, float scale, Vector3 color, bool centered = false, bool dropShadow = false, int spacing = 4) //#TODO
         {
             scale *= 0.5f;
+            x = (float) Math.Ceiling(x);
+            y = (float) Math.Ceiling(y);
 
             var tex = TextureManager.TEXTURE_TEXT;
 
@@ -37,11 +39,12 @@ namespace SharpCraft.render
 
             Shader.UpdateGlobalUniforms();
             Shader.UpdateModelUniforms();
-            //{ (.*?)\}
 
             var totalSize = Vector2.Zero;
+
+            Queue<Tuple<FontMapCharacter, Vector3>> present = new Queue<Tuple<FontMapCharacter, Vector3>>();
+
             var matches = Regex.Matches(text, @"\\{(.*?)\}");
-            List<Tuple<FontMapCharacter, Vector3>> present = new List<Tuple<FontMapCharacter, Vector3>>();
 
             var currentColor = color;
 
@@ -57,6 +60,7 @@ namespace SharpCraft.render
                 if (first != null && first.Length > 0)
                 {
                     var clr = ColorTranslator.FromHtml($"#{first.Value.Replace(@"\{", "").Replace("}", "")}");
+
                     currentColor.X = clr.R / 255f;
                     currentColor.Y = clr.G / 255f;
                     currentColor.Z = clr.B / 255f;
@@ -68,7 +72,7 @@ namespace SharpCraft.render
                 totalSize.X += node.Character.W + node.Character.OffsetX;
                 totalSize.Y += node.Character.H + node.Character.OffsetY;
 
-                present.Add(new Tuple<FontMapCharacter, Vector3>(node, currentColor));
+                present.Enqueue(new Tuple<FontMapCharacter, Vector3>(node, currentColor));
             }
 
             totalSize.X += (present.Count - 1) * spacing;
@@ -115,7 +119,7 @@ namespace SharpCraft.render
                     Vector2.UnitY - Vector2.UnitX,
                     ratio);
 
-                Shader.SetColor(tuple.Item2);
+                Shader.SetColor(tuple.Item2 == Vector3.One ? color : tuple.Item2);
 
                 Shader.UpdateInstanceUniforms(mat2, tuple.Item1.TextureUv);
 

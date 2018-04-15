@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Linq;
-using System.Security;
-using OpenTK;
 using OpenTK.Input;
 using SharpCraft.block;
-using SharpCraft.entity;
 using SharpCraft.item;
 using SharpCraft.texture;
 
@@ -35,7 +31,7 @@ namespace SharpCraft.gui
 
             for (int i = 0; i < 36; i++)
             {
-                buttons.Add(new GuiItemSlot(i, 0, -1000000, guiScale, null));
+                buttons.Add(new GuiItemSlot(i, 0, 0, guiScale, null));
             }
 
             inventoryBackground = new GuiTexture(TextureManager.LoadTexture("gui/inventory_bg"), 0, 0, 318, 163, guiScale);
@@ -56,12 +52,13 @@ namespace SharpCraft.gui
             totalInventoryHeight = 3 * scaledHeight + 2 * space + scaledHeight + space * 5;
 
             inventoryBackground.Scale = guiScale;
-            RenderTexture(inventoryBackground, startPosX - 10 * guiScale / 2, startPosY - 10 * guiScale / 2);
 
             var size = SharpCraft.Instance.ClientSize;
 
             startPosX = size.Width / 2f - totalInventoryWidth / 2f;
             startPosY = size.Height / 2f - totalInventoryHeight / 2f;
+
+            RenderTexture(inventoryBackground, startPosX - 10 * guiScale / 2, startPosY - 10 * guiScale / 2);
 
             var hotbarY = scaledHeight + startPosY + 2 * (scaledHeight + space * 5);
 

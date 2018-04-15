@@ -21,7 +21,6 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
-using SharpCraft.item;
 using SharpCraft.render.shader;
 using Bitmap = System.Drawing.Bitmap;
 using Point = OpenTK.Point;
