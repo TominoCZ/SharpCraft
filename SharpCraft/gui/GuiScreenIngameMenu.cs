@@ -8,7 +8,7 @@
 
             var size = SharpCraft.Instance.ClientSize;
 
-            RenderText("PAUSED", size.Width / 2f, size.Height / 2f, 5, true, true);
+            RenderText(@"\{FFDD000}PAUSED", size.Width / 2f, size.Height / 2f, 5, true, true);
 
             base.Render(mouseX, mouseY);
         }
