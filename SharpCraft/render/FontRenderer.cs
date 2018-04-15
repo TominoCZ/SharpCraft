@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
+using System.Linq;
+using System.Text.RegularExpressions;
 using OpenTK;
 using OpenTK.Graphics.OpenGL;
 using SharpCraft.gui;
@@ -34,10 +37,13 @@ namespace SharpCraft.render
 
             Shader.UpdateGlobalUniforms();
             Shader.UpdateModelUniforms();
+            //{ (.*?)\}
 
             var totalSize = Vector2.Zero;
+            var matches = Regex.Matches(text, @"\\{(.*?)\}");
+            List<Tuple<FontMapCharacter, Vector3>> present = new List<Tuple<FontMapCharacter, Vector3>>();
 
-            Queue<FontMapCharacter> present = new Queue<FontMapCharacter>();
+            var currentColor = color;
 
             for (var index = 0; index < text.Length; index++)
             {
@@ -47,10 +53,22 @@ namespace SharpCraft.render
                 if (node == null)
                     continue;
 
+                var first = matches.FirstOrDefault(match => match.Index == index);
+                if (first != null && first.Length > 0)
+                {
+                    var clr = ColorTranslator.FromHtml($"#{first.Value.Replace(@"\{", "").Replace("}", "")}");
+                    currentColor.X = clr.R / 255f;
+                    currentColor.Y = clr.G / 255f;
+                    currentColor.Z = clr.B / 255f;
+
+                    index += first.Length - 1;
+                    continue;
+                }
+
                 totalSize.X += node.Character.W + node.Character.OffsetX;
                 totalSize.Y += node.Character.H + node.Character.OffsetY;
 
-                present.Enqueue(node);
+                present.Add(new Tuple<FontMapCharacter, Vector3>(node, currentColor));
             }
 
             totalSize.X += (present.Count - 1) * spacing;
@@ -61,18 +79,16 @@ namespace SharpCraft.render
 
             var positionX = 0f;
 
-            while (present.Count > 0)
+            foreach (var tuple in present)
             {
-                var node = present.Dequeue();
-
-                float width = node.Character.W * scale;
-                float height = node.Character.H * scale;
+                float width = tuple.Item1.Character.W * scale;
+                float height = tuple.Item1.Character.H * scale;
 
                 var ratio = new Vector2(width / SharpCraft.Instance.ClientSize.Width, height / SharpCraft.Instance.ClientSize.Height);
                 var unit = new Vector2(1f / SharpCraft.Instance.ClientSize.Width, 1f / SharpCraft.Instance.ClientSize.Height);
                 var pos = new Vector2(x + positionX + width / 2, -(y + height / 2));
 
-                pos.Y -= node.Character.OffsetY * scale;
+                pos.Y -= tuple.Item1.Character.OffsetY * scale;
 
                 if (centered)
                 {
@@ -89,7 +105,7 @@ namespace SharpCraft.render
 
                     Shader.SetColor(Vector3.One * 0.1f);
 
-                    Shader.UpdateInstanceUniforms(mat1, node.TextureUv);
+                    Shader.UpdateInstanceUniforms(mat1, tuple.Item1.TextureUv);
 
                     GL.DrawArrays(PrimitiveType.Quads, 0, 4);
                 }
@@ -99,13 +115,13 @@ namespace SharpCraft.render
                     Vector2.UnitY - Vector2.UnitX,
                     ratio);
 
-                Shader.SetColor(color);
+                Shader.SetColor(tuple.Item2);
 
-                Shader.UpdateInstanceUniforms(mat2, node.TextureUv);
+                Shader.UpdateInstanceUniforms(mat2, tuple.Item1.TextureUv);
 
                 GL.DrawArrays(PrimitiveType.Quads, 0, 4);
 
-                positionX += width + (node.Character.OffsetX + spacing) * scale;
+                positionX += width + (tuple.Item1.Character.OffsetX + spacing) * scale;
             }
 
             GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);

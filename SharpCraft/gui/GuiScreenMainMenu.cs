@@ -6,7 +6,7 @@ namespace SharpCraft.gui
     {
         public GuiScreenMainMenu()
         {
-            buttons.Add(new GuiButton(0, 0, 200, 2, "START") { CenteredX = true, CenteredY = true});
+            buttons.Add(new GuiButton(0, 0, 200, 2, @"\{FF0000}S\{FF3300}T\{FFCC00}A\{66FF00}R\{33FF00}T") { CenteredX = true, CenteredY = true});
         }
 
         public override void Render(int mouseX, int mouseY)
