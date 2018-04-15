@@ -109,7 +109,7 @@ namespace SharpCraft
             MakeCurrent();
 
             _glVersion = GL.GetString(StringName.ShadingLanguageVersion);
-            Title = _title = $"SharpCraft Alpha 0.0.3 [GLSL {_glVersion}]";
+            Title = _title = $"SharpCraft Alpha 0.0.4 [GLSL {_glVersion}]";
 
             //TargetRenderFrequency = 60;
 
