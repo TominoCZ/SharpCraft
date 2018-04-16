@@ -5,12 +5,12 @@ namespace SharpCraft.util
     public class Texture
     {
         public int ID { get; }
-        public Size textureSize { get; }
+        public Size TextureSize { get; }
 
         public Texture(int id, Size textureSize)
         {
-            this.ID = id;
-            this.textureSize = textureSize;
+            ID = id;
+            TextureSize = textureSize;
         }
     }
 }

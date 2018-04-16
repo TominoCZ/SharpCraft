@@ -7,6 +7,7 @@ using SharpCraft.model;
 using SharpCraft.util;
 using SharpCraft.world;
 using System.Linq;
+using OpenTK.Graphics.OpenGL;
 using SharpCraft.item;
 
 namespace SharpCraft.entity
@@ -227,6 +228,8 @@ namespace SharpCraft.entity
             var entityDrop = new EntityItem(world, moo.blockPos.ToVec() + Vector3.One * 0.5f, motion, new ItemStack(new ItemBlock(block), 1, meta));
 
             world.AddEntity(entityDrop);
+
+            SharpCraft.Instance.GetMouseOverObject();
         }
 
         public void PlaceBlock()
@@ -264,6 +267,8 @@ namespace SharpCraft.entity
                 world.SetBlock(pos, heldBlock, stack.Meta);
 
             stack.Count--;
+
+            SharpCraft.Instance.GetMouseOverObject();
         }
 
         public void PickBlock()

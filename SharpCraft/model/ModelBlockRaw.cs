@@ -16,7 +16,7 @@ namespace SharpCraft.model
             this._quads = _quads;
         }
 
-        public RawQuad getQuadForSide(FaceSides side)
+        public RawQuad GetQuadForSide(FaceSides side)
         {
             _quads.TryGetValue(side, out var quad);
 

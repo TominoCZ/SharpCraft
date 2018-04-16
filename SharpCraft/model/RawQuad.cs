@@ -7,7 +7,7 @@ namespace SharpCraft.model
         public float[] vertices { get; }
         public float[] normal { get; }
         public float[] UVs { get; }
-        public int valuesPerVertice { get; }
+        public int ValuesPerVertice { get; }
 
         public bool Loaded { get; }
 
@@ -17,7 +17,7 @@ namespace SharpCraft.model
             this.normal = normal;
             this.UVs = UVs;
 
-            this.valuesPerVertice = valuesPerVertice;
+            ValuesPerVertice = valuesPerVertice;
             Loaded = true;
         }
 
@@ -29,7 +29,7 @@ namespace SharpCraft.model
         {
         }
 
-        public RawQuad offset(BlockPos pos)
+        public RawQuad Offset(BlockPos pos)
         {
             float[] newVertices = new float[vertices.Length];
 
@@ -40,7 +40,7 @@ namespace SharpCraft.model
                 newVertices[i + 2] = vertices[i + 2] + pos.Z;
             }
 
-            return new RawQuad(newVertices, UVs, normal, valuesPerVertice);
+            return new RawQuad(newVertices, UVs, normal, ValuesPerVertice);
         }
     }
 }

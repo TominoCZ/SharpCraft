@@ -37,8 +37,8 @@ namespace SharpCraft.gui
 
         protected virtual void DrawBackground()
         {
-            var sizeX = background.textureSize.Width * background.Scale;
-            var sizeY = background.textureSize.Height * background.Scale;
+            var sizeX = background.TextureSize.Width * background.Scale;
+            var sizeY = background.TextureSize.Height * background.Scale;
 
             var countX = Math.Ceiling(SharpCraft.Instance.ClientSize.Width / sizeX);
             var countY = Math.Ceiling(SharpCraft.Instance.ClientSize.Height / sizeY);
@@ -54,8 +54,8 @@ namespace SharpCraft.gui
 
         protected virtual void DrawDefaultBackground()
         {
-            var sizeX = background_default.textureSize.Width * background_default.Scale;
-            var sizeY = background_default.textureSize.Height * background_default.Scale;
+            var sizeX = background_default.TextureSize.Width * background_default.Scale;
+            var sizeY = background_default.TextureSize.Height * background_default.Scale;
 
             var countX = Math.Ceiling(SharpCraft.Instance.ClientSize.Width / sizeX);
             var countY = Math.Ceiling(SharpCraft.Instance.ClientSize.Height / sizeY);

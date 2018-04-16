@@ -62,7 +62,7 @@ namespace SharpCraft.util
             var count = (time - lastUpdate + lastUpdateTime) / (double)nanosPerUpdate;
             if (count > ups * 2)
             {
-                //count = 1;
+                count = 1;
                 Console.WriteLine("Game lagging really fucking badly man. Get yo shit together");
             }
 
@@ -71,14 +71,13 @@ namespace SharpCraft.util
                 return false;
             }
 
-            lastUpdate = time;
+            if (count > 2) Console.WriteLine($"Warning: game is lagging behind, skipping {(long)count - 1} ticks");
 
-            if (count > 1)
+            while (count-- >= 1)
             {
-                if (count > 2) Console.WriteLine($"Warning: game is lagging behind, skipping {(long)count - 1} ticks");
-
+                lastUpdate = GetNanoTime();
                 UpdateHook();
-                lastUpdateTime = GetNanoTime() - time;
+                lastUpdateTime = GetNanoTime() - lastUpdate;
             }
 
             return true;
@@ -86,7 +85,7 @@ namespace SharpCraft.util
 
         public static long GetNanoTime()
         {
-            return (long)(Stopwatch.GetTimestamp() / (Stopwatch.Frequency / 1000000000.0));
+            return (long)(Stopwatch.GetTimestamp() / (Stopwatch.Frequency / 1000000000D));
         }
 
         public float GetPartialTicks()

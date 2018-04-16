@@ -62,6 +62,7 @@ namespace SharpCraft.world.chunk
 
         public void NotifyImportantBuild(Chunk chunk)
         {
+            chunk.QueuedForModelBuild = true;
             _importantChunkBuilds.Enqueue(chunk);
         }
 

@@ -111,7 +111,7 @@ namespace SharpCraft.render
                 if (!chunk.ShouldRender(RenderDistance))
                     continue;
 
-                if (chunk.ModelBuilding)
+                if (chunk.QueuedForModelBuild)
                     RenderChunkOutline(chunk);
 
                 chunk.Render();

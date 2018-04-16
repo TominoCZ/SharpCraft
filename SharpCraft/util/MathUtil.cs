@@ -1,10 +1,9 @@
 ﻿using OpenTK;
 using System;
-using OpenTK.Graphics.ES20;
 
 namespace SharpCraft.util
 {
-    internal class MathUtil
+    static class MathUtil
     {
         private static Random rand;
 
@@ -13,23 +12,47 @@ namespace SharpCraft.util
             rand = new Random();
         }
 
-        public static Vector3 Rotate(Vector3 vec, float angleX, float angleY, float angleZ)
+        public static Vector2 Ceiling(this Vector2 vec)
         {
-            var sin = new Vector3((float)Math.Sin(angleX), (float)Math.Sin(angleY), (float)Math.Sin(angleZ));
-            var cos = new Vector3((float)Math.Cos(angleX), (float)Math.Cos(angleY), (float)Math.Cos(angleZ));
-
-            vec = new Vector3(vec.X, vec.Y * cos.X - vec.Z * sin.X, vec.Y * sin.X + vec.Z * cos.X);
-            vec = new Vector3(vec.X * cos.Y + vec.Z * sin.Y, vec.Y, vec.X * sin.Y - vec.Z * cos.Y);
-            vec = new Vector3(vec.X * cos.Z - vec.Y * sin.Z, vec.X * sin.Z + vec.Y * cos.Z, vec.Z);
+            vec.X = (float) Math.Ceiling(vec.X);
+            vec.Y = (float) Math.Ceiling(vec.Y);
 
             return vec;
         }
 
-        public static float Floor(float f)
+        public static Vector3 Rotate(this Vector3 vec, float angleX, float angleY, float angleZ)
         {
-            return (float) Math.Floor(f); // lol
-        }
+            var sinX = (float) Math.Sin(angleX);
+            var sinY = (float) Math.Sin(angleY);
+            var sinZ = (float) Math.Sin(angleZ);
 
+            var cosX = (float) Math.Cos(angleX);
+            var cosY = (float) Math.Cos(angleY);
+            var cosZ = (float) Math.Cos(angleZ);
+
+            var vecX = vec.X;
+            var vecY = vec.Y * cosX - vec.Z * sinX;
+            var vecZ = vec.Y * sinX + vec.Z * cosX;
+
+            vec.X = vecX;
+            vec.Y = vecY;
+            vec.Z = vecZ;
+
+            vecX = vec.X * cosY + vec.Z * sinY;
+            vecZ = vec.X * sinY - vec.Z * cosY;
+
+            vec.X = vecX;
+            vec.Z = vecZ;
+
+            vecX = vec.X * cosZ - vec.Y * sinZ;
+            vecY = vec.X * sinZ + vec.Y * cosZ;
+
+            vec.X = vecX;
+            vec.Y = vecY;
+
+            return vec;
+        }
+        
         public static float NextFloat(float min = 0, float max = 1)
         {
             return min + (float)rand.NextDouble() * (max - min);

@@ -4,10 +4,10 @@ using SharpCraft.entity;
 using SharpCraft.model;
 using SharpCraft.util;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Threading;
 using OpenTK.Graphics.OpenGL;
 using SharpCraft.render.shader;
 
@@ -183,10 +183,12 @@ namespace SharpCraft.world.chunk
 
         public void BuildChunkModelNow()
         {
-            //if (!CheckCanBuild()) TODO might not be necessary
-            //return;
+            if (ModelBuilding || !QueuedForModelBuild)
+                return;
 
-            var modelRaw = new Dictionary<Shader<ModelBlock>, List<RawQuad>>();
+            ModelBuilding = true;
+
+            var modelRaw = new ConcurrentDictionary<Shader<ModelBlock>, List<RawQuad>>();
 
             List<RawQuad> quads;
 
@@ -209,11 +211,7 @@ namespace SharpCraft.world.chunk
 
                         var blockModel = ModelRegistry.GetModelForBlock(block, World.GetMetadata(worldPos));
 
-                        lock (modelRaw)
-                        {
-                            if (!modelRaw.TryGetValue(blockModel.Shader, out quads))
-                                modelRaw.Add(blockModel.Shader, quads = new List<RawQuad>());
-                        }
+                        quads = modelRaw.GetOrAdd(blockModel.Shader, new List<RawQuad>());
 
                         foreach (var dir in FaceSides.AllSides)
                         {
@@ -225,15 +223,11 @@ namespace SharpCraft.world.chunk
                                   blockModelO.hasTransparency && !blockModel.hasTransparency))
                                 continue;
 
-                            var quad = ((ModelBlockRaw)blockModel.RawModel).getQuadForSide(dir).offset(localPos);
+                            var quad = ((ModelBlockRaw)blockModel.RawModel).GetQuadForSide(dir).Offset(localPos);
 
                             if (quad.Loaded)
-                            {
                                 lock (quads)
-                                {
-                                    quads.Add(quad); //TODO - rescale the model by the bounding box.. or do that while creating the model..
-                                }
-                            }
+                                    quads.Add(quad);
                         }
                     }
                 }
@@ -296,17 +290,14 @@ namespace SharpCraft.world.chunk
 
         public void Save()
         {
-            lock (this)
-            {
-                if (!NeedsSave) return;
-                NeedsSave = false;
+            if (!NeedsSave) return;
+            NeedsSave = false;
 
-                Console.WriteLine($"Saving chunk @ {Pos.x} x {Pos.z}");
+            Console.WriteLine($"Saving chunk @ {Pos.x} x {Pos.z}");
 
-                var data = new byte[World.ChunkData.Info.ChunkByteSize];
-                Buffer.BlockCopy(_chunkBlocks, 0, data, 0, data.Length);
-                World.ChunkData.WriteChunkData(Pos, data);
-            }
+            var data = new byte[World.ChunkData.Info.ChunkByteSize];
+            Buffer.BlockCopy(_chunkBlocks, 0, data, 0, data.Length);
+            World.ChunkData.WriteChunkData(Pos, data);
         }
 
         public void GeneratedData(short[,,] chunkData)

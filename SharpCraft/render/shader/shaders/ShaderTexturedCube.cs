@@ -29,7 +29,7 @@ namespace SharpCraft.render.shader.shaders
 
         public void UpdateUVs(Texture tex, float startU, float startV, int size)
         {
-            var pixel = new Vector2(1f / tex.textureSize.Width, 1f / tex.textureSize.Height);
+            var pixel = new Vector2(1f / tex.TextureSize.Width, 1f / tex.TextureSize.Height);
 
             var min = new Vector2(startU, startV) * pixel;
             var max = min + size * pixel;

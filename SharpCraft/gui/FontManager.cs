@@ -28,7 +28,7 @@ namespace SharpCraft.gui
                 if (parsed == null)
                     continue;
 
-                var uv = GetUV(tex.textureSize.Width, tex.textureSize.Height, parsed.X, parsed.Y, parsed.W, parsed.H);
+                var uv = GetUV(tex.TextureSize.Width, tex.TextureSize.Height, parsed.X, parsed.Y, parsed.W, parsed.H);
 
                 _dictionary.Add(parsed.Char, new FontMapCharacter(parsed, uv));
             }

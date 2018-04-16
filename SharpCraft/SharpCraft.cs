@@ -87,9 +87,8 @@ namespace SharpCraft
         private bool _takeScreenshot;
         private bool _wasSpaceDown;
         private int _fpsCounter;
-        private long _tickCounter;
+        private long _interactionTickCounter;
         private float _sensitivity = 1;
-        private float _lastPartialTicks;
 
         private string _glVersion;
 
@@ -249,7 +248,7 @@ namespace SharpCraft
 
                     if (lmb || rmb)
                     {
-                        _tickCounter++;
+                        _interactionTickCounter++;
 
                         var lastPos = _lastMouseOverObject.blockPos;
 
@@ -274,7 +273,7 @@ namespace SharpCraft
 
                         _lastMouseOverObject = MouseOverObject;
 
-                        if (_tickCounter % 4 == 0)
+                        if (_interactionTickCounter % 4 == 0)
                         {
                             GetMouseOverObject();
 
@@ -284,7 +283,7 @@ namespace SharpCraft
                     }
                     else
                     {
-                        _tickCounter = 0;
+                        _interactionTickCounter = 0;
                         ResetDestroyProgress(Player);
                     }
                 }
@@ -337,7 +336,7 @@ namespace SharpCraft
             GL.Flush();
         }
 
-        private void GetMouseOverObject()
+        public void GetMouseOverObject()
         {
             var radius = 5.5f;
 
@@ -491,7 +490,7 @@ namespace SharpCraft
 
         public float GetPartialTicksForRender()
         {
-            return IsPaused ? _lastPartialTicks : _lastPartialTicks = timer.GetPartialTicks();
+            return timer.GetPartialTicks();
         }
 
         private bool AllowInput()
@@ -625,7 +624,10 @@ namespace SharpCraft
 
                     //place/interact
                     if (e.Button == MouseButton.Right || e.Button == MouseButton.Left)
+                    {
+                        _interactionTickCounter = 0;
                         Player?.OnClick(e.Button);
+                    }
                 }
                 else
                 {
@@ -867,8 +869,7 @@ namespace SharpCraft
         [STAThread]
         private static void Main(string[] args)
         {
-            ThreadPool.SetMinThreads(0, 0);
-            ThreadPool.SetMaxThreads(Environment.ProcessorCount, Environment.ProcessorCount);
+            ThreadPool.SetMaxThreads(Environment.ProcessorCount * 25, 40);
 
             using (var game = new SharpCraft())
             {

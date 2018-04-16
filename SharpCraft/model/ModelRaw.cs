@@ -1,7 +1,5 @@
-﻿using System.Collections.Concurrent;
-using OpenTK.Graphics.OpenGL;
+﻿using OpenTK.Graphics.OpenGL;
 using System.Collections.Generic;
-using SharpCraft.block;
 
 namespace SharpCraft.model
 {
@@ -12,13 +10,9 @@ namespace SharpCraft.model
 
         public int vertexCount { get; protected set; }
 
-        public List<RawQuad> quads;
-
         public ModelRaw(int vaoID, int valuesPerVertice, List<RawQuad> quads, params int[] bufferIDs)
         {
             this.vaoID = vaoID;
-            this.quads = quads;
-
             this.bufferIDs = bufferIDs;
 
             foreach (var quad in quads)

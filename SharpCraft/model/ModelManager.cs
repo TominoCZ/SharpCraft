@@ -32,7 +32,7 @@ namespace SharpCraft.model
 
             return new ModelBlockRaw(vaoID, quads, buff0, buff1, buff2);
         }
-
+        
         public static ModelRaw loadModelToVAO(List<RawQuad> quads, int coordSize)
         {
             int vaoID = createVAO();

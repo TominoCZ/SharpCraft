@@ -53,7 +53,7 @@ namespace SharpCraft.gui
 
             var unit = new Vector2(1f / SharpCraft.Instance.ClientSize.Width, 1f / SharpCraft.Instance.ClientSize.Height);
 
-            var pos = new Vector2(x, -y);
+            var pos = new Vector2(x, -y).Ceiling();
 
             if (!cenetered)
             {
@@ -98,7 +98,7 @@ namespace SharpCraft.gui
             float posX = x + scaledWidth / 2;
             float posY = -y - scaledHeight / 2;
 
-            var pos = new Vector2(posX, posY) * unit;
+            var pos = new Vector2(posX, posY).Ceiling() * unit;
 
             var mat = MatrixHelper.CreateTransformationMatrix(pos * 2 - Vector2.UnitX + Vector2.UnitY, scale * new Vector2(width, height) * unit);
 
