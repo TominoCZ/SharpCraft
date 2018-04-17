@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using OpenTK;
 using OpenTK.Graphics.OpenGL;
 using SharpCraft.block;
@@ -73,8 +71,6 @@ namespace SharpCraft.particle
                     SetDead();
             }
 
-            rot += rotStep * Math.Clamp((motion.Xz * 5).LengthFast, onGround ? 0 : 0.2f, 0.275f);
-
             motion.Y -= 0.04f * gravity;
 
             Move();
@@ -84,7 +80,20 @@ namespace SharpCraft.particle
             if (onGround)
             {
                 motion.Xz *= 0.6676801f;
+
+                var angleInRad = MathHelper.PiOver2 / 180;
+
+                var angleX = MathHelper.RadiansToDegrees(rot.X);
+                var angleZ = MathHelper.RadiansToDegrees(rot.Z);
+
+                var aX = (int)Math.Round(angleX / 90) * 90;
+                var aZ = (int)Math.Round(angleZ / 90) * 90;
+
+                rot.X = angleInRad * aX;
+                rot.Z = angleInRad * aZ;
             }
+            else
+                rot += rotStep * Math.Clamp((motion.Xz * 5).LengthFast, onGround ? 0 : 0.2f, 0.275f);
         }
 
         public override void Render(float particalTicks)
@@ -97,7 +106,7 @@ namespace SharpCraft.particle
             var model = ParticleRenderer.ParticleModel;
             model.Shader.UpdateGlobalUniforms();
             model.Shader.UpdateModelUniforms();
-            model.Shader.UpdateInstanceUniforms(MatrixHelper.CreateTransformationMatrix(partialPos - Vector3.One * partialScale / 2, partialRot, partialScale), this);
+            model.Shader.UpdateInstanceUniforms(MatrixHelper.CreateTransformationMatrix(partialPos - (Vector3.UnitX + Vector3.UnitZ) * partialScale / 2, partialRot, partialScale), this);
 
             GL.ActiveTexture(TextureUnit.Texture0);
             GL.BindTexture(TextureTarget.Texture2D, textureID);
