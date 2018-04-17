@@ -42,15 +42,13 @@ namespace SharpCraft.particle
 
             particleMaxAge = (int)MathUtil.NextFloat(10, 50);
 
-            gravity = 0.975f;
+            gravity = 0.9f;
         }
 
         public override void Update()
         {
             lastParticleScale = particleScale;
             lastParticleAlpha = particleAlpha;
-
-            base.Update();
 
             if (particleAge++ >= particleMaxAge)
             {
@@ -62,6 +60,8 @@ namespace SharpCraft.particle
                 else
                     SetDead();
             }
+
+            base.Update();
         }
 
         public override void Render(float particalTicks)

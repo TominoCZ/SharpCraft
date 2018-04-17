@@ -86,7 +86,7 @@ namespace SharpCraft.particle
             }
             else
             {
-                rot += rotStep * Math.Clamp((motion.Xz * 5).LengthFast, onGround ? 0 : 0.2f, 0.275f);
+                rot += rotStep * Math.Clamp((motion.Xz * 5).LengthFast, onGround ? 0 : 0.2f, 0.3f);
 
                 rot.X %= 360f;
                 rot.Y %= 360f;

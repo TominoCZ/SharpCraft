@@ -100,6 +100,8 @@ namespace SharpCraft.render
                     pos.Y -= totalSize.Y / 2;
                 }
 
+                pos = pos.Ceiling();
+
                 if (dropShadow)
                 {
                     var mat1 = MatrixHelper.CreateTransformationMatrix(

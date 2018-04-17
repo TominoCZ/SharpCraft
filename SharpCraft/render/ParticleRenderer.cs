@@ -114,7 +114,7 @@ namespace SharpCraft.render
                     for (var z = 0f; z < perAxis; z++)
                     {
                         var newPos = new Vector3(x, y, z) * step + Vector3.One * step / 2f;
-                        var motion = new Vector3(MathUtil.NextFloat(-0.2f, 0.2f), MathUtil.NextFloat(-0.1f + y / perAxis * 0.2f, 0.2f), MathUtil.NextFloat(-0.2f, 0.2f));
+                        var motion = new Vector3(MathUtil.NextFloat(-0.15f, 0.15f), MathUtil.NextFloat(-0.1f + y / perAxis * 0.2f, 0.2f), MathUtil.NextFloat(-0.15f, 0.15f));
 
                         var particle = new ParticleDigging(SharpCraft.Instance.World, posVec + newPos, motion, MathUtil.NextFloat(1, 1.5f), block, meta);
 

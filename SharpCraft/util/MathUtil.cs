@@ -1,34 +1,41 @@
 ﻿using OpenTK;
 using System;
+using System.Security.Cryptography;
 
 namespace SharpCraft.util
 {
     static class MathUtil
     {
-        private static Random rand;
-
-        static MathUtil()
+        private static RandomNumberGenerator _rand = RandomNumberGenerator.Create();
+        
+        public static float GetNext()
         {
-            rand = new Random();
+            var bytes = new byte[8];
+            _rand.GetBytes(bytes);
+
+            var ul = BitConverter.ToUInt64(bytes, 0) / (1 << 11);
+            double d = ul / (double)(1UL << 53);
+
+            return (float) d;
         }
 
         public static Vector2 Ceiling(this Vector2 vec)
         {
-            vec.X = (float) Math.Ceiling(vec.X);
-            vec.Y = (float) Math.Ceiling(vec.Y);
+            vec.X = (float)Math.Ceiling(vec.X);
+            vec.Y = (float)Math.Ceiling(vec.Y);
 
             return vec;
         }
 
         public static Vector3 Rotate(this Vector3 vec, float angleX, float angleY, float angleZ)
         {
-            var sinX = (float) Math.Sin(angleX);
-            var sinY = (float) Math.Sin(angleY);
-            var sinZ = (float) Math.Sin(angleZ);
+            var sinX = (float)Math.Sin(angleX);
+            var sinY = (float)Math.Sin(angleY);
+            var sinZ = (float)Math.Sin(angleZ);
 
-            var cosX = (float) Math.Cos(angleX);
-            var cosY = (float) Math.Cos(angleY);
-            var cosZ = (float) Math.Cos(angleZ);
+            var cosX = (float)Math.Cos(angleX);
+            var cosY = (float)Math.Cos(angleY);
+            var cosZ = (float)Math.Cos(angleZ);
 
             var vecX = vec.X;
             var vecY = vec.Y * cosX - vec.Z * sinX;
@@ -52,10 +59,12 @@ namespace SharpCraft.util
 
             return vec;
         }
-        
+
         public static float NextFloat(float min = 0, float max = 1)
         {
-            return min + (float)rand.NextDouble() * (max - min);
+            var f = GetNext();
+
+            return min + f * (max - min);
         }
 
         public static float Min(params float[] values)

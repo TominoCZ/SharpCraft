@@ -1,14 +1,14 @@
-﻿using System;
-using OpenTK;
+﻿using OpenTK;
 using OpenTK.Graphics.OpenGL;
 using SharpCraft.block;
+using SharpCraft.item;
 using SharpCraft.model;
+using SharpCraft.render.shader.shaders;
 using SharpCraft.texture;
 using SharpCraft.util;
 using SharpCraft.world;
 using SharpCraft.world.chunk;
-using SharpCraft.item;
-using SharpCraft.render.shader.shaders;
+using System;
 using GL = OpenTK.Graphics.OpenGL.GL;
 using TextureTarget = OpenTK.Graphics.OpenGL.TextureTarget;
 using TextureUnit = OpenTK.Graphics.OpenGL.TextureUnit;
@@ -65,17 +65,15 @@ namespace SharpCraft.render
             {
                 motion = SharpCraft.Instance.Player.motion;
 
-                fov = SharpCraft.Instance.Player.motion.Xz.LengthFast > 0.2f && SharpCraft.Instance.Player.isRunning
+                fov = SharpCraft.Instance.Player.motion.Xz.LengthFast > 0.15f && SharpCraft.Instance.Player.isRunning
                     ? Math.Clamp(fov * 1.065f, 0, SharpCraft.Instance.Camera.TargetFov + 6)
                     : Math.Clamp(fov * 0.965f, SharpCraft.Instance.Camera.TargetFov,
                         SharpCraft.Instance.Camera.TargetFov + 6);
             }
 
+            _selectionOutlineColor = MathUtil.Hue(_hue = (_hue + 5) % 360);
+
             lookVec = SharpCraft.Instance.Camera.GetLookVec();
-
-            _hue = (_hue + 5) % 360;
-
-            _selectionOutlineColor = MathUtil.Hue(_hue);
         }
 
         public void Render(World world, float partialTicks)
@@ -100,7 +98,9 @@ namespace SharpCraft.render
             RenderDestroyProgress(world);
 
             var partialFov = lastFov + (fov - lastFov) * partialTicks;
+            var partialMotion = lastMotion + (motion - lastMotion) * partialTicks;
 
+            SharpCraft.Instance.Camera.pitchOffset = partialMotion.Y * 0.025f;
             SharpCraft.Instance.Camera.SetFOV(partialFov);
         }
 

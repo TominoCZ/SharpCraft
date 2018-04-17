@@ -14,7 +14,7 @@ namespace SharpCraft.entity
 {
     public class EntityPlayerSP : Entity
     {
-        private float maxMoveSpeed = 0.235f;
+        private float maxMoveSpeed = 0.22f;
         private float moveSpeedMult = 1;
 
         public float EyeHeight = 1.625f;

@@ -1,7 +1,6 @@
 ﻿using OpenTK;
 using SharpCraft.util;
 using System;
-using System.Drawing.Text;
 
 namespace SharpCraft.render
 {
@@ -10,7 +9,7 @@ namespace SharpCraft.render
         public const float NearPlane = 0.15f;
         public const float FarPlane = 1000f;
 
-        public float TargetFov { get; private set; }
+        public float TargetFov { get; }
 
         public float PartialFov { get; private set; }
 
@@ -19,13 +18,7 @@ namespace SharpCraft.render
 
         public Vector3 pos;
 
-        public Camera()
-        {
-            PartialFov = TargetFov = 70;
-
-            UpdateViewMatrix();
-            UpdateProjectionMatrix();
-        }
+        public float pitchOffset;
 
         public float pitch
         {
@@ -41,6 +34,14 @@ namespace SharpCraft.render
             set => _yaw = value;
         }
 
+        public Camera()
+        {
+            PartialFov = TargetFov = 70;
+
+            UpdateViewMatrix();
+            UpdateProjectionMatrix();
+        }
+
         public void SetFOV(float fov)
         {
             PartialFov = fov;
@@ -50,7 +51,7 @@ namespace SharpCraft.render
 
         public void UpdateViewMatrix()
         {
-            var x = Matrix4.CreateRotationX(pitch);
+            var x = Matrix4.CreateRotationX(pitch + pitchOffset);
             var y = Matrix4.CreateRotationY(yaw);
 
             var t = Matrix4.CreateTranslation(-pos);
@@ -81,7 +82,7 @@ namespace SharpCraft.render
         {
             return MathUtil.Rotate(Vector3.UnitZ, pitch, _yaw, 0).Normalized();
         }
-
+        
         public Vector2 left
         {
             get

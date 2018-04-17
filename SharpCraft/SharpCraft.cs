@@ -31,8 +31,8 @@ namespace SharpCraft
 {
     internal class SharpCraft : GameWindow
     {
-        //string _dir = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\.sharpcraft";
-        string _dir = ".\\";
+        //string _dir = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "/.sharpcraft";
+        string _dir = "./";
 
         public string GameFolderDir
         {
@@ -296,8 +296,7 @@ namespace SharpCraft
             World?.Update(Player, WorldRenderer.RenderDistance);
 
             WorldRenderer?.Update();
-            SkyboxRenderer.Update();
-
+            SkyboxRenderer?.Update();
             ParticleRenderer?.TickParticles();
         }
 
@@ -551,8 +550,8 @@ namespace SharpCraft
 
                 var time = DateTime.UtcNow;
 
-                var dir = $"{GameFolderDir}\\screenshots";
-                var file = $"{dir}\\{time.ToShortDateString()}_{time.TimeOfDay.Hours}.{time.TimeOfDay.Minutes}.{time.TimeOfDay.Seconds}.png";
+                var dir = $"{GameFolderDir}/screenshots";
+                var file = $"{dir}/{time.ToShortDateString()}_{time.TimeOfDay.Hours}.{time.TimeOfDay.Minutes}.{time.TimeOfDay.Seconds}.png";
 
                 if (!Directory.Exists(dir))
                     Directory.CreateDirectory(dir);
@@ -573,13 +572,10 @@ namespace SharpCraft
 
             var partialTicks = timer.GetPartialTicks();
 
-            if (partialTicks >= 1 || IsPaused)
+            if (timer.TryUpdate())
             {
-                if (timer.TryUpdate())
-                {
-                    timer.CalculatePartialTicks();
-                    partialTicks = timer.GetPartialTicks();
-                }
+                timer.CalculatePartialTicks();
+                partialTicks = timer.GetPartialTicks();
             }
 
             Render(partialTicks);
