@@ -198,7 +198,7 @@ namespace SharpCraft.render
             if (bb == null)
                 return;
 
-            var size = Vector3.One * 0.0095f;
+            var size = Vector3.One * 0.005f;
 
             _selectionOutline.Bind();
             _selectionOutline.SetColor(_selectionOutlineColor);

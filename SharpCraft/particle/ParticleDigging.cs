@@ -47,7 +47,7 @@ namespace SharpCraft.particle
             var vec = new Vector3(MathUtil.NextFloat(-1), MathUtil.NextFloat(-1), MathUtil.NextFloat(-1));
             var l = vec.LengthFast / 1;
             vec *= l;
-            rotStep = vec * MathHelper.Pi * 18;
+            rotStep = vec * 75;
         }
 
         public override void Update()
@@ -81,19 +81,17 @@ namespace SharpCraft.particle
             {
                 motion.Xz *= 0.6676801f;
 
-                var angleInRad = MathHelper.PiOver2 / 180;
-
-                var angleX = MathHelper.RadiansToDegrees(rot.X);
-                var angleZ = MathHelper.RadiansToDegrees(rot.Z);
-
-                var aX = (int)Math.Round(angleX / 90) * 90;
-                var aZ = (int)Math.Round(angleZ / 90) * 90;
-
-                rot.X = angleInRad * aX;
-                rot.Z = angleInRad * aZ;
+                rot.X = (float)Math.Round(rot.X / 90) * 90;
+                rot.Z = (float)Math.Round(rot.Z / 90) * 90;
             }
             else
+            {
                 rot += rotStep * Math.Clamp((motion.Xz * 5).LengthFast, onGround ? 0 : 0.2f, 0.275f);
+
+                rot.X %= 360f;
+                rot.Y %= 360f;
+                rot.Z %= 360f;
+            }
         }
 
         public override void Render(float particalTicks)
