@@ -149,14 +149,17 @@ namespace SharpCraft.entity
 
         public bool OnPickup(ItemStack dropped)
         {
-            for (var i = 0; i < hotbar.Length + inventory.Length; i++)
+            var inventorySize = hotbar.Length + inventory.Length;
+
+            var lastKnownEmpty = -1;
+
+            for (var i = inventorySize - 1; i >= 0; i--)
             {
                 var stack = GetItemStackInInventory(i);
 
                 if (stack == null || stack.IsEmpty)
                 {
-                    SetItemStackInInventory(i, dropped.Copy());
-                    dropped.Count = 0;
+                    lastKnownEmpty = i;
                     continue;
                 }
 
@@ -170,6 +173,12 @@ namespace SharpCraft.entity
 
                 if (dropped.IsEmpty)
                     break;
+            }
+
+            if (lastKnownEmpty != -1)
+            {
+                SetItemStackInInventory(lastKnownEmpty, dropped.Copy());
+                dropped.Count = 0;
             }
 
             return dropped.IsEmpty;
@@ -284,9 +293,19 @@ namespace SharpCraft.entity
                     for (int i = 0; i < hotbar.Length; i++)
                     {
                         var stack = hotbar[i];
-
+                        
                         if (stack?.Item?.InnerItem == clickedBlock && stack.Meta == clickedMeta)
                         {
+                            SetSelectedSlot(i);
+                            return;
+                        }
+
+                        if (stack?.IsEmpty == true)
+                        {
+                            var itemBlock = new ItemBlock(clickedBlock);
+                            var itemStack = new ItemStack(itemBlock, 1, world.GetMetadata(moo.blockPos));
+
+                            SetItemStackInHotbar(i, itemStack);
                             SetSelectedSlot(i);
                             return;
                         }

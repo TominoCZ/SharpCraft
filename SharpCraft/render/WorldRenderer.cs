@@ -241,7 +241,7 @@ namespace SharpCraft.render
                 var r1 = Matrix4.CreateRotationY(MathHelper.DegreesToRadians(45));
                 var r2 = Matrix4.CreateRotationX(rotVec.X - SharpCraft.Instance.Camera.pitchOffset) * Matrix4.CreateRotationY(rotVec.Y);
 
-                var s = Matrix4.CreateScale(0.575f);
+                var s = Matrix4.CreateScale(0.5525f);
                 var t0 = Matrix4.CreateTranslation(Vector3.One * -0.5f);
                 var t1 = Matrix4.CreateTranslation(SharpCraft.Instance.Camera.pos + SharpCraft.Instance.Camera.GetLookVec() + partialLookVec * 0.1f);
                 var t_final = Matrix4.CreateTranslation(offset);

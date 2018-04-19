@@ -1,4 +1,5 @@
 ﻿using System;
+using OpenTK;
 using OpenTK.Input;
 using SharpCraft.block;
 using SharpCraft.item;
@@ -109,7 +110,14 @@ namespace SharpCraft.gui
 
             if (draggedStack != null && !draggedStack.IsEmpty && draggedStack.Item?.InnerItem is EnumBlock block)
             {
-                RenderBlock(block, mouseX - 16 * guiScale / 2, mouseY - 16 * guiScale / 2, guiScale); //TODO - make this render Items too once they're implemented
+                var x = mouseX - 16 * guiScale / 2;
+                var y = mouseY - 16 * guiScale / 2;
+
+                RenderBlock(block, x, y, guiScale); //TODO - make this render Items too once they're implemented
+
+                if (draggedStack.Count > 1)
+                    RenderText(draggedStack.Count.ToString(), x + 16 * guiScale / 2f, y + 16 * guiScale / 2f + 14, 1,
+                        Vector3.One, true, true);
             }
         }
 
@@ -165,7 +173,7 @@ namespace SharpCraft.gui
                     }
                     else if (draggedStack != null && slot.Stack.ItemSame(draggedStack))
                     {
-                        var ammountToMove = Math.Min(slot.Stack.Item.MaxStackSize() - slot.Stack.Count, draggedStack.Count);
+                        var ammountToMove = button == MouseButton.Right ? 1 : Math.Min(slot.Stack.Item.MaxStackSize() - slot.Stack.Count, draggedStack.Count);
 
                         slot.Stack.Count += ammountToMove;
                         draggedStack.Count -= ammountToMove;

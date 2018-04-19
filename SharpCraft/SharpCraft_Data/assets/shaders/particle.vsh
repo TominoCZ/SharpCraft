@@ -15,18 +15,12 @@ uniform vec2 UVmax;
 
 float calcLight(in vec3 lightPos)
 {
-	mat3 normalMatrix = transpose(inverse(mat3(transformationMatrix)));
-	vec3 _normal = normalize(normalMatrix * normal);
+	vec3 _normal = normalize((transformationMatrix * vec4(normal, 0)).xyz);
 
-	//calculate the location of this fragment (pixel) in world coordinates
 	vec3 fragPosition = vec3(transformationMatrix * vec4(position, 1));
+	vec3 surfaceToLight = normalize(lightPos - position);
 
-	//calculate the vector from this pixels surface to the light source
-	vec3 surfaceToLight = lightPos - position;
-
-	//calculate the cosine of the angle of incidence
-	float brightness = dot(normalize(_normal), normalize(surfaceToLight));// / (length(surfaceToLight) * length(_normal));
-	return clamp(brightness, 0.25, 1);
+	return clamp(dot(_normal, surfaceToLight), 0.25, 1);
 }
 
 void main(void)
