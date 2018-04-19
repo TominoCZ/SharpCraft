@@ -568,17 +568,10 @@ namespace SharpCraft
             if (!timer.CanRender())
                 return;
 
+            timer.TryUpdate();
             timer.CalculatePartialTicks();
 
-            var partialTicks = timer.GetPartialTicks();
-
-            if (timer.TryUpdate())
-            {
-                timer.CalculatePartialTicks();
-                partialTicks = timer.GetPartialTicks();
-            }
-
-            Render(partialTicks);
+            Render(timer.GetPartialTicks());
         }
 
         private void Render(float partialTicks)

@@ -48,7 +48,7 @@ namespace SharpCraft.util
             return true;
         }
 
-        public bool TryUpdate()
+        public void TryUpdate()
         {
             long time = GetNanoTime();
 
@@ -56,7 +56,7 @@ namespace SharpCraft.util
             {
                 lastUpdate = time;
 
-                return false;
+                return;
             }
 
             var count = (time - lastUpdate + lastUpdateTime) / (double)nanosPerUpdate;
@@ -67,9 +67,7 @@ namespace SharpCraft.util
             }
 
             if (count < 1)
-            {
-                return false;
-            }
+                return;
 
             if (count > 2) Console.WriteLine($"Warning: game is lagging behind, skipping {(long)count - 1} ticks");
 
@@ -79,8 +77,6 @@ namespace SharpCraft.util
                 UpdateHook();
                 lastUpdateTime = GetNanoTime() - lastUpdate;
             }
-
-            return true;
         }
 
         public static long GetNanoTime()

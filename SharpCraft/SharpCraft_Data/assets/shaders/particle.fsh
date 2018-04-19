@@ -14,8 +14,7 @@ void main(void){
 	if(pixelColor.a == 0)discard;
 	
 	pixelColor.a *= alpha;
+	pixelColor.xyz *= brightness;
 	
-	vec3 diffuse = vec3(brightness * 1.65);
-	
-	out_Color = vec4(diffuse, 1.0) * pixelColor;
+	out_Color = pixelColor;
 }

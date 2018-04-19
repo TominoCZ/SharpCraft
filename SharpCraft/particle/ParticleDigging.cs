@@ -45,9 +45,8 @@ namespace SharpCraft.particle
                 this.motion.Xz = SharpCraft.Instance.Camera.GetLookVec().Xz * 0.15f;
 
             var vec = new Vector3(MathUtil.NextFloat(-1), MathUtil.NextFloat(-1), MathUtil.NextFloat(-1));
-            var l = vec.LengthFast / 1;
-            vec *= l;
-            rotStep = vec * 75;
+            
+            rotStep = vec.Normalized() * MathUtil.NextFloat(40, 75);
         }
 
         public override void Update()
@@ -87,10 +86,6 @@ namespace SharpCraft.particle
             else
             {
                 rot += rotStep * Math.Clamp((motion.Xz * 5).LengthFast, onGround ? 0 : 0.2f, 0.3f);
-
-                rot.X %= 360f;
-                rot.Y %= 360f;
-                rot.Z %= 360f;
             }
         }
 

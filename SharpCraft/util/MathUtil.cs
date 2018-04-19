@@ -7,7 +7,7 @@ namespace SharpCraft.util
     static class MathUtil
     {
         private static RandomNumberGenerator _rand = RandomNumberGenerator.Create();
-        
+
         public static float GetNext()
         {
             var bytes = new byte[8];
@@ -16,7 +16,7 @@ namespace SharpCraft.util
             var ul = BitConverter.ToUInt64(bytes, 0) / (1 << 11);
             double d = ul / (double)(1UL << 53);
 
-            return (float) d;
+            return (float)d;
         }
 
         public static Vector2 Ceiling(this Vector2 vec)

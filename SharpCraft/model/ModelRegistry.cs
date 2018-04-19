@@ -56,17 +56,4 @@ namespace SharpCraft.model
             return null;
         }
     }
-
-    internal class BlockState
-    {
-        public ModelBlock Model { get; }
-        public int meta { get; }
-
-        public BlockState(ModelBlock model, int meta)
-        {
-            Model = model;
-
-            this.meta = meta;
-        }
-    }
 }

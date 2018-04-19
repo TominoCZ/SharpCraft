@@ -13,44 +13,44 @@ uniform mat4 viewMatrix;
 uniform vec2 UVmin;
 uniform vec2 UVmax;
 
-void main(void) {
-	vec4 worldPos = transformationMatrix * vec4(position, 1.0);
+float calcLight(in vec3 lightPos)
+{
+	mat3 normalMatrix = transpose(inverse(mat3(transformationMatrix)));
+	vec3 _normal = normalize(normalMatrix * normal);
+
+	//calculate the location of this fragment (pixel) in world coordinates
+	vec3 fragPosition = vec3(transformationMatrix * vec4(position, 1));
+
+	//calculate the vector from this pixels surface to the light source
+	vec3 surfaceToLight = lightPos - position;
+
+	//calculate the cosine of the angle of incidence
+	float brightness = dot(normalize(_normal), normalize(surfaceToLight));// / (length(surfaceToLight) * length(_normal));
+	return clamp(brightness, 0.25, 1);
+}
+
+void main(void)
+{
+	vec4 worldPos = transformationMatrix * vec4(position, 1);
 	gl_Position = projectionMatrix * viewMatrix * worldPos;
 
 	int i = gl_VertexID % 4;
-	
-	if (i == 0){
+
+	if (i == 0) {
 		pass_uv = UVmin;
 	}
-	else if (i == 1){
+	else if (i == 1) {
 		pass_uv = vec2(UVmin.x, UVmax.y);
 	}
-	else if (i == 2){
+	else if (i == 2) {
 		pass_uv = UVmax;
 	}
-	else if (i == 3){
+	else if (i == 3) {
 		pass_uv = vec2(UVmax.x, UVmin.y);
 	}
-	
-	float lightY = 1;
-	
-	vec3 vector1 = vec3(1, lightY, 0);
-	vec3 vector2 = vec3(-1, lightY, 0.15);
-	
-	vec3 vector3 = vec3(0, -lightY, 1);
-	vec3 vector4 = vec3(0.15, -lightY, -1);
-	
-	vec3 light1 = normalize(vector1) * 1.5;
-	vec3 light2 = normalize(vector2) * 1.35;
-	vec3 light3 = normalize(vector3) * 1.0;
-	vec3 light4 = normalize(vector4) * 0.75;
-	
-	vec3 unitNormal = normalize((transformationMatrix * vec4(normal, 0.0)).xyz);
-	
-	float diffuse_value1 = max(dot(unitNormal, light1), 0.55);
-	float diffuse_value2 = max(dot(unitNormal, light2), 0.45);
-	float diffuse_value3 = max(dot(unitNormal, light3), 0.35);
-	float diffuse_value4 = max(dot(unitNormal, light4), 0.25);
-	
-	brightness = (diffuse_value1 + diffuse_value2 + diffuse_value3 + diffuse_value4) / 3.25;
+
+	vec3 light1 = vec3(7000, 20000, 500);
+	vec3 light2 = vec3(-7000, -10000, -500);
+
+	brightness = (calcLight(light1) + calcLight(light2)) * 1.3;
 }
