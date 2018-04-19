@@ -29,7 +29,7 @@ using Size = OpenTK.Size;
 
 namespace SharpCraft
 {
-    internal class SharpCraft : GameWindow
+    internal class SharpCraft : BetterWindow
     {
         //string _dir = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "/.sharpcraft";
         string _dir = "./";
@@ -97,8 +97,7 @@ namespace SharpCraft
 
         private GameTimer timer = new GameTimer(60, 20);
 
-        public SharpCraft() : base(680, 480, GraphicsMode.Default, _title, GameWindowFlags.Default, DisplayDevice.Default, 3, 3,
-            GraphicsContextFlags.ForwardCompatible)
+        public SharpCraft() : base(680, 480, GraphicsMode.Default, _title, GameWindowFlags.Default, DisplayDevice.Default, 3, 3, GraphicsContextFlags.ForwardCompatible)
         {
             Instance = this;
             Camera = new Camera();
@@ -563,17 +562,6 @@ namespace SharpCraft
             }
         }
 
-        protected override void OnRenderFrame(FrameEventArgs e)
-        {
-            if (!timer.CanRender())
-                return;
-
-            timer.TryUpdate();
-            timer.CalculatePartialTicks();
-
-            Render(timer.GetPartialTicks());
-        }
-
         private void Render(float partialTicks)
         {
             RunGlTasks();
@@ -595,6 +583,17 @@ namespace SharpCraft
 
             SwapBuffers();
             ProcessEvents(false);
+        }
+
+        protected override void OnRenderFrame()
+        {
+            if (!timer.CanRender())
+                return;
+
+            timer.TryUpdate();
+            timer.CalculatePartialTicks();
+            
+            Render(timer.GetPartialTicks());
         }
 
         protected override void OnMouseDown(MouseButtonEventArgs e)
@@ -862,7 +861,7 @@ namespace SharpCraft
 
             using (var game = new SharpCraft())
             {
-                game.Run(30.0);
+                game.Run();
             }
         }
     }
