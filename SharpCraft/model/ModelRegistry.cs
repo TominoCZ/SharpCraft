@@ -5,11 +5,11 @@ namespace SharpCraft.model
 {
     internal class ModelRegistry
     {
-        private static Dictionary<EnumBlock, List<BlockState>> models = new Dictionary<EnumBlock, List<BlockState>>();
+        private static Dictionary<EnumBlock, List<BlockNode>> models = new Dictionary<EnumBlock, List<BlockNode>>();
 
         public static void RegisterBlockModel(ModelBlock model, int meta, int hardness = 10)
         {
-            List<BlockState> states;
+            List<BlockNode> states;
 
             //if already contains state with this meta tag, remove and set a new one
             if (models.TryGetValue(model.block, out states))
@@ -27,10 +27,10 @@ namespace SharpCraft.model
             }
             else
             {
-                models.Add(model.block, states = new List<BlockState>());
+                models.Add(model.block, states = new List<BlockNode>());
             }
 
-            states.Add(new BlockState(model, meta));
+            states.Add(new BlockNode(model, meta));
         }
 
         public static ModelBlock GetModelForBlock(EnumBlock blockType, int meta)
@@ -38,7 +38,7 @@ namespace SharpCraft.model
             return GetBlockState(blockType, meta < 0 ? 0 : meta)?.Model;
         }
 
-        public static BlockState GetBlockState(EnumBlock blockType, int meta)
+        public static BlockNode GetBlockState(EnumBlock blockType, int meta)
         {
             meta = meta < 0 ? 0 : meta;
 

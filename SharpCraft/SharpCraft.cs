@@ -19,8 +19,10 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading;
+using SharpCraft.item;
 using SharpCraft.render.shader;
 using Bitmap = System.Drawing.Bitmap;
 using Point = OpenTK.Point;
@@ -29,6 +31,63 @@ using Size = OpenTK.Size;
 
 namespace SharpCraft
 {
+    class ModInfo
+    {
+        public readonly string ID;
+
+        public readonly string Name;
+        public readonly string Version;
+        public readonly string Author;
+
+        public bool IsValid =>
+            String.IsNullOrEmpty(ID) ||
+            String.IsNullOrEmpty(Name) ||
+            String.IsNullOrEmpty(Version) ||
+            String.IsNullOrEmpty(Author);
+
+        public ModInfo(string id, string name, string version, string author)
+        {
+            ID = id;
+            Name = name;
+            Version = version;
+            Author = author;
+        }
+    }
+
+    abstract class ModMain
+    {
+        public ModInfo ModInfo { get; protected set; }
+
+        protected ModMain(ModInfo modInfo)
+        {
+            ModInfo = modInfo;
+        }
+
+        public abstract void OnItemsAndBlocksRegistry(ItemsAndBlockRegistryEventArgs args);
+    }
+
+    class ItemsAndBlockRegistryEventArgs : EventArgs
+    {
+        private readonly Action<Item> _funcRegisterItem;
+        private readonly Action<Block> _funcRegisterBlock;
+
+        public ItemsAndBlockRegistryEventArgs(BlockRegistry blockRegistry, ItemRegistry itemRegistry)
+        {
+            _funcRegisterBlock = blockRegistry.Put;
+            _funcRegisterItem = itemRegistry.Put;
+        }
+
+        public void Register(Block block)
+        {
+            _funcRegisterBlock(block);
+        }
+
+        public void Register(Item item)
+        {
+            _funcRegisterItem(item);
+        }
+    }
+
     internal class SharpCraft : BetterWindow
     {
         //string _dir = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "/.sharpcraft";
@@ -51,6 +110,13 @@ namespace SharpCraft
                     Directory.CreateDirectory(_dir);
             }
         }
+
+        private List<ModMain> installedMods;
+
+        private ItemRegistry itemRegistry;
+        private BlockRegistry blockRegistry;
+
+        public EventHandler<ItemsAndBlockRegistryEventArgs> OnBlockRegistryEvent;
 
         public WorldRenderer WorldRenderer;
         public EntityRenderer EntityRenderer;
@@ -119,6 +185,10 @@ namespace SharpCraft
 
         private void Init()
         {
+            itemRegistry = new ItemRegistry();
+            blockRegistry = new BlockRegistry();
+
+            #region model loading
             Console.WriteLine("DEBUG: loading models");
 
             //TODO - merge shaders and use strings as block IDs like sharpcraft:dirt
@@ -158,6 +228,7 @@ namespace SharpCraft
             ModelRegistry.RegisterBlockModel(leavesModel, 0);
 
             ModelRegistry.RegisterBlockModel(xrayModel, 0);
+            #endregion
 
             SettingsManager.Load();
 
@@ -167,14 +238,53 @@ namespace SharpCraft
             SkyboxRenderer = new SkyboxRenderer();
             GuiRenderer = new GuiRenderer();
 
+            LoadMods();
+            RegisterItemsAndBlocks();
+
             _sensitivity = SettingsManager.GetFloat("sensitivity");
             WorldRenderer.RenderDistance = SettingsManager.GetInt("renderdistance");
-
-            OpenGuiScreen(new GuiScreenMainMenu());
 
             timer.InfiniteFps = true;
 
             FontRenderer = new FontRenderer();
+
+            OpenGuiScreen(new GuiScreenMainMenu());
+        }
+
+        private void LoadMods()
+        {
+            if (Directory.Exists(_dir + "mods"))
+            {
+                string[] modFiles = Directory.GetFiles(_dir + "mods");
+
+                foreach (var modFile in modFiles)
+                {
+                    var modClassType = Assembly.LoadFile(modFile).GetModules().SelectMany(t => t.GetTypes())
+                        .Where(t => t.IsSubclassOf(typeof(ModMain)));
+
+                    if (modClassType.FirstOrDefault() is Type type && Activator.CreateInstance(type) is ModMain mm)
+                    {
+                        if (mm.ModInfo.IsValid)
+                        {
+                            Console.WriteLine("registered mod '" + mm.ModInfo.Name + "'!");
+
+                            installedMods.Add(mm);
+                        }
+                        else
+                        {
+                            Console.WriteLine("registering mod '" + mm.ModInfo.Name + "' failed!");
+                        }
+                    }
+                }
+            }
+        }
+
+        private void RegisterItemsAndBlocks()
+        {
+            foreach (var mod in installedMods)
+            {
+                mod.OnItemsAndBlocksRegistry(new ItemsAndBlockRegistryEventArgs(blockRegistry, itemRegistry));
+            }
         }
 
         public void StartGame()
@@ -592,7 +702,7 @@ namespace SharpCraft
 
             timer.TryUpdate();
             timer.CalculatePartialTicks();
-            
+
             Render(timer.GetPartialTicks());
         }
 

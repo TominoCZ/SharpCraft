@@ -1,31 +1,59 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 using SharpCraft.model;
 
 namespace SharpCraft.block
 {
-    class Block
+
+    abstract class Block
     {
-        public int Hardness;
+        private Dictionary<short, BlockState> _otherStates = new Dictionary<short, BlockState>();
 
-        public bool IsOpaque;
-        public bool HasTransparency;
+        public BlockState DefaultState { get; private set; }
 
-        public Block()
+        public string UnlocalizedName { get; protected set; }
+
+        public int Hardness { get; protected set; } = 8;
+
+        public bool IsOpaque { get; protected set; } = true;
+        public bool HasTransparency { get; protected set; }
+        public bool IsSolid { get; protected set; } = true;
+
+        protected Block(string unlocalizedName)
         {
-            Hardness = 8;
-            IsOpaque = true;
-            HasTransparency = false;
+            UnlocalizedName = unlocalizedName;
+        }
+
+        public virtual void OnRegisterStates()
+        {
+
+        }
+
+        protected void RegisterState(short meta, BlockState state)
+        {
+            _otherStates.Add(meta, state);
+        }
+
+        public BlockState GetStateFromMeta(short meta)
+        {
+            if (meta <= 0 || !_otherStates.TryGetValue(meta, out var state))
+                return DefaultState;
+
+            return state;
         }
     }
 
-    internal class BlockState
+    class BlockState
+    {
+        public Block Block { get; }
+        public ModelBlock Model { get; }
+    }
+
+    internal class BlockNode
     {
         public ModelBlock Model { get; }
         public int meta { get; }
 
-        public BlockState(ModelBlock model, int meta)
+        public BlockNode(ModelBlock model, int meta)
         {
             Model = model;
 
