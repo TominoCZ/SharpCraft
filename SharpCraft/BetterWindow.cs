@@ -89,13 +89,26 @@ namespace SharpCraft
 
             Visible = true;
             OnResize(EventArgs.Empty);
-            Debug.Print("Entering main loop.");
 
-            while (Exists && !IsExiting)
+            var sw = Stopwatch.StartNew();
+
+            var span = TimeSpan.FromMilliseconds(1000.0 / 60);
+
+            while (true)
             {
                 ProcessEvents();
 
-                OnRenderFrame();
+                if (Exists && !IsExiting)
+                {
+                    if (sw.Elapsed >= span)
+                    {
+                        sw.Restart();
+
+                        OnRenderFrame();
+                    }
+                }
+                else
+                    break;
             }
         }
 
@@ -187,7 +200,7 @@ namespace SharpCraft
                 Context.Update(WindowInfo);
             }
         }
-        
+
         protected virtual void Dispose(bool manual)
         {
         }

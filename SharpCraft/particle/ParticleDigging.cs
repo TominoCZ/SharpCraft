@@ -63,8 +63,8 @@ namespace SharpCraft.particle
             {
                 if (particleAlpha >= 0.0015f)
                 {
-                    particleAlpha *= 0.525f;
-                    particleScale *= 0.725f;
+                    particleAlpha *= 0.52f;
+                    particleScale *= 0.65f;
                 }
                 else
                     SetDead();

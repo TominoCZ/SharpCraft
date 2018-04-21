@@ -1,11 +1,9 @@
 ﻿using OpenTK;
-using SharpCraft.texture;
 using SharpCraft.util;
-using Size = System.Drawing.Size;
 
 namespace SharpCraft.gui
 {
-    public class GuiTexture : Texture
+    class GuiTexture : Texture
     {
         public float Scale;
         public Vector2 Size;

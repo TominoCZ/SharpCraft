@@ -14,8 +14,10 @@ namespace SharpCraft.util
 
         private int maxFps;
         private int ups;
+
         private long nanosPerFrame;
         private long nanosPerUpdate;
+
         private float partialTicks;
         private float lastPartialTicks;
 
@@ -50,16 +52,18 @@ namespace SharpCraft.util
 
         public void TryUpdate()
         {
-            long time = GetNanoTime();
+            var nanos = GetNanoTime();
 
             if (SharpCraft.Instance.IsPaused)
             {
-                lastUpdate = time;
+                lastUpdate = nanos;
 
                 return;
             }
 
-            var count = (time - lastUpdate + lastUpdateTime) / (double)nanosPerUpdate;
+            CalculatePartialTicks();
+            var count = GetPartialTicks();
+
             if (count > ups * 2)
             {
                 count = 1;
@@ -73,10 +77,15 @@ namespace SharpCraft.util
 
             while (count-- >= 1)
             {
-                lastUpdate = GetNanoTime();
+                var start = GetNanoTime();
                 UpdateHook();
-                lastUpdateTime = GetNanoTime() - lastUpdate;
+                var end = GetNanoTime();
+
+                lastUpdate = start;
+                lastUpdateTime = end - start;
             }
+
+            CalculatePartialTicks();
         }
 
         public static long GetNanoTime()

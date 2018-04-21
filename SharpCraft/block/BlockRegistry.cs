@@ -14,7 +14,7 @@ namespace SharpCraft.block
             _typeRegistry.Add(b.GetType(), b);
         }
 
-        public void RegisterBlocks()
+        public void RegisterBlocksPost()
         {
             foreach (var value in _registry.Values)
             {

@@ -111,7 +111,7 @@ namespace SharpCraft
             }
         }
 
-        private List<ModMain> installedMods;
+        private List<ModMain> installedMods = new List<ModMain>();
 
         private ItemRegistry itemRegistry;
         private BlockRegistry blockRegistry;
@@ -237,16 +237,17 @@ namespace SharpCraft
             ParticleRenderer = new ParticleRenderer();
             SkyboxRenderer = new SkyboxRenderer();
             GuiRenderer = new GuiRenderer();
-
-            LoadMods();
-            RegisterItemsAndBlocks();
-
-            _sensitivity = SettingsManager.GetFloat("sensitivity");
-            WorldRenderer.RenderDistance = SettingsManager.GetInt("renderdistance");
+            FontRenderer = new FontRenderer();
 
             timer.InfiniteFps = true;
 
-            FontRenderer = new FontRenderer();
+            LoadMods();
+
+            RegisterItemsAndBlocks();
+
+            //load settings
+            _sensitivity = SettingsManager.GetFloat("sensitivity");
+            WorldRenderer.RenderDistance = SettingsManager.GetInt("renderdistance");
 
             OpenGuiScreen(new GuiScreenMainMenu());
         }
@@ -281,10 +282,15 @@ namespace SharpCraft
 
         private void RegisterItemsAndBlocks()
         {
+            blockRegistry.Put(new BlockGrass());
+
+            //POST - MOD Blocks and Items
             foreach (var mod in installedMods)
             {
                 mod.OnItemsAndBlocksRegistry(new ItemsAndBlockRegistryEventArgs(blockRegistry, itemRegistry));
             }
+
+            blockRegistry.RegisterBlocksPost();
         }
 
         public void StartGame()
@@ -700,8 +706,10 @@ namespace SharpCraft
             if (!timer.CanRender())
                 return;
 
-            timer.TryUpdate();
             timer.CalculatePartialTicks();
+
+            timer.TryUpdate();
+            
 
             Render(timer.GetPartialTicks());
         }

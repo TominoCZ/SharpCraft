@@ -1,16 +1,21 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using SharpCraft.model;
+using SharpCraft.render.shader;
 
 namespace SharpCraft.block
 {
 
     abstract class Block
     {
-        private Dictionary<short, BlockState> _otherStates = new Dictionary<short, BlockState>();
+        private static readonly Shader<ModelBlock> DefaultShader = new Shader<ModelBlock>("block");
+        public Shader<ModelBlock> Shader { get; protected set; }
 
-        public BlockState DefaultState { get; private set; }
+        private List<BlockState> _states = new List<BlockState>();
 
         public string UnlocalizedName { get; protected set; }
+
+        public int StateCount => _states.Count;
 
         public int Hardness { get; protected set; } = 8;
 
@@ -21,24 +26,26 @@ namespace SharpCraft.block
         protected Block(string unlocalizedName)
         {
             UnlocalizedName = unlocalizedName;
+            Shader = DefaultShader;
         }
 
-        public virtual void OnRegisterStates()
-        {
+        /// <summary>
+        /// Used to register the states of this block. Including the default one. Is called after all blocks are registered
+        /// </summary>
+        public abstract void OnRegisterStates();
 
+        protected void RegisterState(string modelJson)
+        {
+            var state = new BlockState(this, new ModelBlock(EnumBlock.MISSING, Shader));
+            
+            //TODO LOAD MODEL AND TEXTURE INFO FROM JSON
+
+            _states.Add(state);
         }
 
-        protected void RegisterState(short meta, BlockState state)
+        public BlockState GetState(short meta)
         {
-            _otherStates.Add(meta, state);
-        }
-
-        public BlockState GetStateFromMeta(short meta)
-        {
-            if (meta <= 0 || !_otherStates.TryGetValue(meta, out var state))
-                return DefaultState;
-
-            return state;
+            return _states[meta > 0 ? meta : 0];
         }
     }
 
@@ -46,6 +53,12 @@ namespace SharpCraft.block
     {
         public Block Block { get; }
         public ModelBlock Model { get; }
+
+        public BlockState(Block block, ModelBlock model)
+        {
+            Block = block;
+            Model = model;
+        }
     }
 
     internal class BlockNode
