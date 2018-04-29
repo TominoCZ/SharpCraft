@@ -1,4 +1,4 @@
-# .NETCRAFT
+# SharpCraft
 Yet another C# Minecraft clone
 
 This is sort of a school project for fun..
