@@ -446,8 +446,6 @@ namespace SharpCraft
                 CursorVisible = true;
                 GuiRenderer.Render(GuiScreen);
             }
-
-            GL.Flush();
         }
 
         public void GetMouseOverObject()
@@ -586,14 +584,6 @@ namespace SharpCraft
             }
 
             _mouseLast = point;
-
-            if (_frameTimer.ElapsedMilliseconds >= 1000)
-            {
-                _frameTimer.Restart();
-
-                Title = $"{_title} - FPS: {_fpsCounter}";
-                _fpsCounter = 0;
-            }
         }
 
         public void RunGlContext(Action a)
@@ -666,7 +656,7 @@ namespace SharpCraft
                 var time = DateTime.UtcNow;
 
                 var dir = $"{GameFolderDir}/screenshots";
-                var file = $"{dir}/{time.ToShortDateString()}_{time.TimeOfDay.Hours}.{time.TimeOfDay.Minutes}.{time.TimeOfDay.Seconds}.png";
+                var file = $"{dir}/{time.Year}-{time.Month}-{time.Day}_{time.TimeOfDay.Hours}.{time.TimeOfDay.Minutes}.{time.TimeOfDay.Seconds}.png";
 
                 if (!Directory.Exists(dir))
                     Directory.CreateDirectory(dir);
@@ -688,8 +678,6 @@ namespace SharpCraft
 
             RenderScreen(partialTicks);
 
-            _fpsCounter++;
-
             if (_takeScreenshot)
             {
                 _takeScreenshot = false;
@@ -698,7 +686,6 @@ namespace SharpCraft
             }
 
             SwapBuffers();
-            ProcessEvents(false);
         }
 
         protected override void OnRenderFrame()
@@ -709,7 +696,6 @@ namespace SharpCraft
             timer.CalculatePartialTicks();
 
             timer.TryUpdate();
-            
 
             Render(timer.GetPartialTicks());
         }

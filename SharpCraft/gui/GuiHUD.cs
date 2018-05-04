@@ -1,4 +1,6 @@
-﻿using SharpCraft.item;
+﻿using System;
+using OpenTK;
+using SharpCraft.item;
 using SharpCraft.texture;
 
 namespace SharpCraft.gui
@@ -56,6 +58,8 @@ namespace SharpCraft.gui
                 if (stack.Count > 1)
                     RenderText(stack.Count.ToString(), x + scaledWidth / 2f - 14, hotbarY + scaledHeight / 2f + 14, 1, true, true);
             }
+
+            RenderText(Math.Round(1000 / SharpCraft.Instance.LastFrameRenderTime) + " FPS", 5, 6, 1, Vector3.UnitY, false, true);
         }
     }
 }

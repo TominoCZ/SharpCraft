@@ -12,6 +12,8 @@ namespace SharpCraft
         private IGraphicsContext glContext;
         private bool isExiting;
 
+        public float LastFrameRenderTime { get; private set; }
+
         public BetterWindow(int width, int height, GraphicsMode mode, string title, GameWindowFlags options, DisplayDevice device)
           : this(width, height, mode, title, options, device, 1, 0, GraphicsContextFlags.Default)
         {
@@ -92,20 +94,15 @@ namespace SharpCraft
 
             var sw = Stopwatch.StartNew();
 
-            var span = TimeSpan.FromMilliseconds(1000.0 / 60);
-
             while (true)
             {
                 ProcessEvents();
 
                 if (Exists && !IsExiting)
                 {
-                    if (sw.Elapsed >= span)
-                    {
-                        sw.Restart();
-
-                        OnRenderFrame();
-                    }
+                    OnRenderFrame();
+                    LastFrameRenderTime = (float)sw.Elapsed.TotalMilliseconds;
+                    sw.Restart();
                 }
                 else
                     break;
