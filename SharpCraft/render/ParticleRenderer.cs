@@ -5,10 +5,8 @@ using SharpCraft.block;
 using SharpCraft.entity;
 using SharpCraft.model;
 using SharpCraft.particle;
-using SharpCraft.render.shader;
 using SharpCraft.render.shader.shaders;
 using SharpCraft.util;
-using SharpCraft.world;
 
 namespace SharpCraft.render
 {
@@ -106,8 +104,10 @@ namespace SharpCraft.render
         {
             var posVec = pos.ToVec();
 
-            var perAxis = 3;
+            var perAxis = 4;
             var step = 1f / perAxis;
+
+            var halfVec = Vector3.One * 0.5f;
 
             for (var x = 0f; x < perAxis; x++)
             {
@@ -115,10 +115,13 @@ namespace SharpCraft.render
                 {
                     for (var z = 0f; z < perAxis; z++)
                     {
-                        var newPos = new Vector3(x, y, z) * step + Vector3.One * step / 2f;
-                        var motion = new Vector3(MathUtil.NextFloat(-0.15f, 0.15f), MathUtil.NextFloat(-0.1f + y / perAxis * 0.2f, 0.2f), MathUtil.NextFloat(-0.15f, 0.15f));
+                        var localPos = new Vector3(x, y, z) * step;
+                        var worldPos = localPos + halfVec * step;
 
-                        var particle = new ParticleDigging(SharpCraft.Instance.World, posVec + newPos, motion, MathUtil.NextFloat(1, 1.5f), block, meta);
+                        var vec = localPos - halfVec;
+                        var motion = vec.Normalized() * 0.2f;
+
+                        var particle = new ParticleDigging(SharpCraft.Instance.World, posVec + worldPos, motion, MathUtil.NextFloat(1, 1.5f), block, meta);
 
                         AddParticle(particle);
                     }
