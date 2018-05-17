@@ -21,7 +21,7 @@ namespace SharpCraft.texture
 
         private static List<int> _allTextures = new List<int>();
 
-        private static Bitmap TEXTURE_MISSING = CreateMissingTexture();
+        private static readonly Bitmap TEXTURE_MISSING = CreateMissingTexture();
 
         public static Texture TEXTURE_DESTROY_PROGRESS;
         public static Texture TEXTURE_BLOCKS;

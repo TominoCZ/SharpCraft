@@ -398,12 +398,12 @@ namespace SharpCraft.util
             hash = (hash >> 13) ^ hash;
 
             hash &= 31;
-            FN_DECIMAL a = yd, b = zd, c = wd;            // X,Y,Z
+            FN_DECIMAL a = yd, b = zd, c = wd;            // x,Y,z
             switch (hash >> 3)
             {          // OR, DEPENDING ON HIGH ORDER 2 BITS:
-                case 1: a = wd; b = xd; c = yd; break;     // W,X,Y
-                case 2: a = zd; b = wd; c = xd; break;     // Z,W,X
-                case 3: a = yd; b = zd; c = wd; break;     // Y,Z,W
+                case 1: a = wd; b = xd; c = yd; break;     // W,x,Y
+                case 2: a = zd; b = wd; c = xd; break;     // z,W,x
+                case 3: a = yd; b = zd; c = wd; break;     // Y,z,W
             }
             return ((hash & 4) == 0 ? -a : a) + ((hash & 2) == 0 ? -b : b) + ((hash & 1) == 0 ? -c : c);
         }

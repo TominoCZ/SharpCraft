@@ -84,8 +84,8 @@ namespace SharpCraft.gui
 
     internal class FontMapCharacter
     {
-        public FontMapCharacterNode Character { get; }
-        public TextureUVNode TextureUv { get; }
+        public readonly FontMapCharacterNode Character;
+        public readonly TextureUVNode TextureUv;
 
         public FontMapCharacter(FontMapCharacterNode character, TextureUVNode textureUv)
         {
@@ -96,15 +96,15 @@ namespace SharpCraft.gui
 
     internal class FontMapCharacterNode
     {
-        public char Char;
-        public int X;
-        public int Y;
+        public readonly char Char;
+        public readonly int X;
+        public readonly int Y;
 
-        public int W;
-        public int H;
+        public readonly int W;
+        public readonly int H;
 
-        public int OffsetX;
-        public int OffsetY;
+        public readonly int OffsetX;
+        public readonly int OffsetY;
 
         public FontMapCharacterNode(char c, int x, int y, int w, int h, int oX, int oY)
         {

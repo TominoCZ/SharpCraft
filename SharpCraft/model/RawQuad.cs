@@ -4,10 +4,10 @@ namespace SharpCraft.model
 {
     internal struct RawQuad
     {
-        public float[] vertices { get; }
-        public float[] normal { get; }
-        public float[] UVs { get; }
-        public int ValuesPerVertice { get; }
+        public readonly float[] vertices;
+        public readonly float[] normal;
+        public readonly float[] UVs;
+        public readonly int ValuesPerVertice;
 
         public bool Loaded { get; }
 

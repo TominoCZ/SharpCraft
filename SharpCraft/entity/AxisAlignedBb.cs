@@ -6,12 +6,12 @@ namespace SharpCraft.entity
 {
     public class AxisAlignedBB
     {
-        public static AxisAlignedBB BLOCK_FULL { get; } = new AxisAlignedBB(Vector3.Zero, Vector3.One);
-        public static AxisAlignedBB NULL { get; } = new AxisAlignedBB(Vector3.Zero, Vector3.Zero);
-        public Vector3 min { get; }
-        public Vector3 max { get; }
+        public static readonly AxisAlignedBB BLOCK_FULL = new AxisAlignedBB(Vector3.Zero, Vector3.One);
+        public static readonly AxisAlignedBB NULL = new AxisAlignedBB(Vector3.Zero, Vector3.Zero);
+        public readonly Vector3 min;
+        public readonly Vector3 max;
 
-        public Vector3 size { get; }
+        public readonly Vector3 size;
 
         public AxisAlignedBB(float size) : this(Vector3.One * size)
         {
@@ -97,7 +97,7 @@ namespace SharpCraft.entity
 
         public float CalculateXOffset(AxisAlignedBB other, float offset)
         {
-            //X
+            //x
             if (other.max.Y > min.Y && other.min.Y < max.Y && other.max.Z > min.Z && other.min.Z < max.Z)
             {
                 if (offset > 0.0D && other.max.X <= min.X)
@@ -125,7 +125,7 @@ namespace SharpCraft.entity
 
         public float CalculateZOffset(AxisAlignedBB other, float offset)
         {
-            //Z
+            //z
             if (other.max.X > min.X && other.min.X < max.X && other.max.Y > min.Y && other.min.Y < max.Y)
             {
                 if (offset > 0.0D && other.max.Z <= min.Z)

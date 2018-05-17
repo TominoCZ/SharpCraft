@@ -3,7 +3,7 @@ using SharpCraft.block;
 
 namespace SharpCraft.entity
 {
-    internal class MouseOverObject
+    internal struct MouseOverObject
     {
         public FaceSides sideHit;
 
@@ -13,7 +13,7 @@ namespace SharpCraft.entity
 
         public BlockPos blockPos;
 
-        public AxisAlignedBB boundingBox = AxisAlignedBB.NULL;
+        public AxisAlignedBB boundingBox;
 
         public dynamic hit;
     }
