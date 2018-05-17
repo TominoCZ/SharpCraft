@@ -96,6 +96,7 @@ namespace SharpCraft.render
             RenderChunks(world);
             RenderSelectedItemBlock(partialTicks);
             RenderDestroyProgress(world);
+            RenderWorldWaypoints(world);
 
             var partialFov = lastFov + (fov - lastFov) * partialTicks;
             var partialMotion = lastMotion + (motion - lastMotion) * partialTicks;
@@ -115,6 +116,32 @@ namespace SharpCraft.render
                     RenderChunkOutline(chunk);
 
                 chunk.Render();
+            }
+        }
+
+        private void RenderWorldWaypoints(World world)
+        {
+            var wps = world.GetWaypoints();
+
+            foreach (var wp in wps)
+            {
+                var model = ModelRegistry.GetModelForBlock(EnumBlock.RARE, 0);
+
+                var size = 0.25f;
+
+                GL.DepthRange(0, 0.1f);
+
+                model.Bind();
+
+                model.Shader.UpdateGlobalUniforms();
+                model.Shader.UpdateModelUniforms(model.RawModel);
+                model.Shader.UpdateInstanceUniforms(MatrixHelper.CreateTransformationMatrix(wp.Pos.ToVec() + Vector3.One / 2 * (1 - size), (Vector3.UnitX + Vector3.UnitZ) * 42.5f, size), model);
+
+                model.RawModel.Render(PrimitiveType.Quads);
+
+                model.Unbind();
+
+                GL.DepthRange(0, 1);
             }
         }
 

@@ -121,6 +121,10 @@ namespace SharpCraft.render
                         var vec = localPos - halfVec;
                         var motion = vec.Normalized() * 0.2f;
 
+                        motion.X += MathUtil.NextFloat(-0.05f, 0.05f);
+                        motion.Y += MathUtil.NextFloat(-0.05f, 0.05f);
+                        motion.Z += MathUtil.NextFloat(-0.05f, 0.05f);
+
                         var particle = new ParticleDigging(SharpCraft.Instance.World, posVec + worldPos, motion, MathUtil.NextFloat(1, 1.5f), block, meta);
 
                         AddParticle(particle);

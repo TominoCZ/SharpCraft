@@ -750,6 +750,13 @@ namespace SharpCraft
 
             switch (e.Key)
             {
+                case Key.P:
+                    var vec = new BlockPos(Player.pos).ToVec() + Vector3.One * 0.5f;
+                    vec.Y = Player.pos.Y;
+                    Player.TeleportTo(vec);
+
+                    Player?.world?.AddWaypoint(new BlockPos(Player.pos).Offset(FaceSides.Up), new OpenTK.Color(255, 0, 0, 127), "TEST");
+                    break;
                 case Key.Escape:
                     if (GuiScreen is GuiScreenMainMenu || KeyboardState.IsKeyDown(Key.Escape))
                         return;
