@@ -137,7 +137,7 @@ namespace SharpCraft
 
         private List<MouseButton> _mouseButtonsDown = new List<MouseButton>();
         private ConcurrentQueue<Action> _glContextQueue = new ConcurrentQueue<Action>();
-        private Stopwatch _frameTimer = Stopwatch.StartNew();
+        private DateTime _lastFpsDate;
         private WindowState _lastWindowState;
 
         public static SharpCraft Instance { get; private set; }
@@ -153,6 +153,7 @@ namespace SharpCraft
         private bool _takeScreenshot;
         private bool _wasSpaceDown;
         private int _fpsCounter;
+        private int _fpsCounterLast;
         private long _interactionTickCounter;
         private float _sensitivity = 1;
 
@@ -413,6 +414,15 @@ namespace SharpCraft
             WorldRenderer?.Update();
             SkyboxRenderer?.Update();
             ParticleRenderer?.TickParticles();
+
+            var now = DateTime.Now;
+
+            if ((now - _lastFpsDate).TotalMilliseconds >= 1000)
+            {
+                _fpsCounterLast = _fpsCounter;
+                _fpsCounter = 0;
+                _lastFpsDate = now;
+            }
         }
 
         private void RenderScreen(float partialTicks)
@@ -698,6 +708,13 @@ namespace SharpCraft
             timer.TryUpdate();
 
             Render(timer.GetPartialTicks());
+
+            _fpsCounter++;
+        }
+
+        public int GetFPS()
+        {
+            return _fpsCounterLast;
         }
 
         protected override void OnMouseDown(MouseButtonEventArgs e)
