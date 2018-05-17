@@ -327,9 +327,8 @@ namespace SharpCraft.texture
 
         public static TextureBlockUV GetUVsFromBlock(EnumBlock block)
         {
-            TextureBlockUV uv;
 
-            _blockUVs.TryGetValue(block, out uv);
+            _blockUVs.TryGetValue(block, out TextureBlockUV uv);
 
             if (uv == null)
                 _blockUVs.TryGetValue(EnumBlock.MISSING, out uv);

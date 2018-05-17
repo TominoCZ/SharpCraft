@@ -25,7 +25,9 @@ namespace SharpCraft.world.chunk
                 var w = SharpCraft.Instance.World;
                 if (w.GetChunk(c) != null) return;
 
+#pragma warning disable CS0642 // Possible mistaken empty statement
                 if (w.LoadChunk(c)) ;//Console.WriteLine($"chunk loaded    @ {c.x} x {c.z}");
+#pragma warning restore CS0642 // Possible mistaken empty statement
                 else
                 {
                     w.GenerateChunk(c, true);

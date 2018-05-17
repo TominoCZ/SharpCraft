@@ -5,6 +5,7 @@ using System.IO;
 
 namespace SharpCraft.world.chunk.region
 {
+    //WHAT THE FUCK FACES MADE THIS SHIT?! WHAT THE FUCKING HELL?!
     public class ChunkDataManager<TReg, TCord> where TReg : IRegion where TCord : IRegionCord, new()
     {
         private readonly string _dataRoot;

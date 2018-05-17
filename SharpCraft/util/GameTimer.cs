@@ -12,11 +12,11 @@ namespace SharpCraft.util
 
         public bool InfiniteFps = false;
 
-        private int maxFps;
-        private int ups;
+        private readonly int maxFps;
+        private readonly int ups;
 
-        private long nanosPerFrame;
-        private long nanosPerUpdate;
+        private readonly long nanosPerFrame;
+        private readonly long nanosPerUpdate;
 
         private float partialTicks;
         private float lastPartialTicks;

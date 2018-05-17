@@ -9,10 +9,9 @@ namespace SharpCraft.model
 
         public static void RegisterBlockModel(ModelBlock model, int meta, int hardness = 10)
         {
-            List<BlockNode> states;
 
             //if already contains state with this meta tag, remove and set a new one
-            if (models.TryGetValue(model.block, out states))
+            if (models.TryGetValue(model.block, out List<BlockNode> states))
             {
                 for (int i = 0; i < states.Count; i++)
                 {

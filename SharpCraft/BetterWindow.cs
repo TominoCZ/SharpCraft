@@ -29,7 +29,7 @@ namespace SharpCraft
         {
             try
             {
-                glContext = new GraphicsContext(mode == null ? GraphicsMode.Default : mode, WindowInfo, major, minor, flags);
+                glContext = new GraphicsContext(mode ?? GraphicsMode.Default, WindowInfo, major, minor, flags);
                 glContext.MakeCurrent(WindowInfo);
                 (glContext as IGraphicsContextInternal).LoadAll();
                 VSync = VSyncMode.On;
@@ -137,6 +137,7 @@ namespace SharpCraft
         {
             get
             {
+#pragma warning disable CS0612 // Type or member is obsolete
                 if (InputDriver.Keyboard.Count <= 0)
                     return null;
                 return InputDriver.Keyboard[0];
@@ -150,6 +151,8 @@ namespace SharpCraft
                 if (InputDriver.Mouse.Count <= 0)
                     return null;
                 return InputDriver.Mouse[0];
+#pragma warning restore CS0612 // Type or member is obsolete
+
             }
         }
 

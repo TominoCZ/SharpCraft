@@ -52,6 +52,32 @@ namespace SharpCraft.block
             return Name;
         }
 
+        public override bool Equals(object obj)
+        {
+            if (!(obj is FaceSides))
+            {
+                return false;
+            }
+
+            var sides = (FaceSides)obj;
+            return x == sides.x &&
+                   y == sides.y &&
+                   z == sides.z &&
+                   id == sides.id &&
+                   Name == sides.Name;
+        }
+
+        public override int GetHashCode()
+        {
+            var hashCode = -1813808738;
+            hashCode = hashCode * -1521134295 + x.GetHashCode();
+            hashCode = hashCode * -1521134295 + y.GetHashCode();
+            hashCode = hashCode * -1521134295 + z.GetHashCode();
+            hashCode = hashCode * -1521134295 + id.GetHashCode();
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(Name);
+            return hashCode;
+        }
+
         public static BlockPos operator +(BlockPos l, FaceSides r) => new BlockPos(l.X + r.x, l.Y + r.y, l.Z + r.z);
 
         public static ChunkPos operator +(ChunkPos l, FaceSides r) => new ChunkPos(l.x + r.x, l.z + r.z);

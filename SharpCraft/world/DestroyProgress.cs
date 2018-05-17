@@ -41,7 +41,7 @@ namespace SharpCraft.world
         private int _progress;
         private int _lastProgress;
 
-        private int _blockHardness;
+        private readonly int _blockHardness;
 
         public DestroyProgress(BlockPos pos, EntityPlayerSP player) //TODO - once again, change this for multiplayer once its implemented
         {

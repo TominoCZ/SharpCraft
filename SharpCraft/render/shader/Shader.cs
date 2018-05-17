@@ -49,7 +49,7 @@ namespace SharpCraft.render.shader
         private int vshID;
         private int fshID;
 
-        private string shaderName;
+        private readonly string shaderName;
 
         public Shader(string shaderName)
         {

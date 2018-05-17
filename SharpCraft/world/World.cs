@@ -22,7 +22,7 @@ namespace SharpCraft.world
         public readonly string LevelName;
 
         private NoiseUtil _noiseUtil;
-        private int _dimension = 0;
+        private readonly int _dimension = 0;
         public readonly String SaveRoot;
 
         internal readonly ChunkDataManager<RegionStaticImpl<ChunkPos>, ChunkPos> ChunkData;

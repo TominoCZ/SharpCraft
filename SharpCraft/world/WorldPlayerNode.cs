@@ -8,8 +8,8 @@ namespace SharpCraft.world
     [Serializable]
     internal class WorldPlayerNode
     {
-        private float pitch;
-        private float yaw;
+        private readonly float pitch;
+        private readonly float yaw;
 
         private Vector3 pos;
 
@@ -21,8 +21,8 @@ namespace SharpCraft.world
             pitch = SharpCraft.Instance.Camera.pitch;
             yaw = SharpCraft.Instance.Camera.yaw;
             pos = player.pos;
-            hotbar = player.hotbar;
-            inventory = player.inventory;
+            hotbar = player.Hotbar;
+            inventory = player.Inventory;
         }
 
         public EntityPlayerSP GetPlayer(World world)
@@ -33,12 +33,12 @@ namespace SharpCraft.world
 
             for (int i = 0; i < hotbar.Length; i++)
             {
-                player.hotbar[i] = hotbar[i];
+                player.Hotbar[i] = hotbar[i];
             }
 
             for (int i = 0; i < inventory.Length; i++)
             {
-                player.inventory[i] = inventory[i];
+                player.Inventory[i] = inventory[i];
             }
 
             return player;

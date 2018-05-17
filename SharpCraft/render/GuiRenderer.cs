@@ -13,8 +13,8 @@ namespace SharpCraft.render
     {
         public static ModelRaw GuiQuad;
 
-        private GuiCrosshair crosshairGui;
-        private GuiHUD hudGui;
+        private readonly GuiCrosshair crosshairGui;
+        private readonly GuiHUD hudGui;
 
         static GuiRenderer()
         {
@@ -52,12 +52,12 @@ namespace SharpCraft.render
             GL.Enable(EnableCap.DepthTest);
         }
 
-        public void renderCrosshair()
+        public void RenderCrosshair()
         {
             Render(crosshairGui);
         }
 
-        public void renderHUD()
+        public void RenderHUD()
         {
             Render(hudGui);
         }

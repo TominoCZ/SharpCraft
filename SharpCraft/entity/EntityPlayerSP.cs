@@ -14,21 +14,21 @@ namespace SharpCraft.entity
 {
     public class EntityPlayerSP : Entity
     {
-        private float maxMoveSpeed = 0.22f;
+        private readonly float maxMoveSpeed = 0.22f;
         private float moveSpeedMult = 1;
 
         public float EyeHeight = 1.625f;
 
         private Vector2 moveSpeed;
 
-        public bool isRunning { get; private set; }
+        public bool IsRunning { get; private set; }
 
         public int HotbarIndex { get; private set; }
 
-        public ItemStack[] hotbar { get; }
-        public ItemStack[] inventory { get; }
+        public ItemStack[] Hotbar { get; }
+        public ItemStack[] Inventory { get; }
 
-        public bool HasFullInventory => hotbar.All(stack => stack != null && !stack.IsEmpty) && inventory.All(stack => stack != null && !stack.IsEmpty);
+        public bool HasFullInventory => Hotbar.All(stack => stack != null && !stack.IsEmpty) && Inventory.All(stack => stack != null && !stack.IsEmpty);
 
         public EntityPlayerSP(World world, Vector3 pos = new Vector3()) : base(world, pos)
         {
@@ -37,8 +37,8 @@ namespace SharpCraft.entity
             collisionBoundingBox = new AxisAlignedBB(new Vector3(0.6f, 1.65f, 0.6f));
             boundingBox = collisionBoundingBox.offset(pos - (Vector3.UnitX * collisionBoundingBox.size.X / 2 + Vector3.UnitZ * collisionBoundingBox.size.Z / 2));
 
-            hotbar = new ItemStack[9];
-            inventory = new ItemStack[27];
+            Hotbar = new ItemStack[9];
+            Inventory = new ItemStack[27];
         }
 
         public override void Update()
@@ -77,7 +77,7 @@ namespace SharpCraft.entity
 
             float mult = 1;
 
-            if (isRunning = state.IsKeyDown(Key.LShift))
+            if (IsRunning = state.IsKeyDown(Key.LShift))
                 mult = 1.5f;
 
             if (dirVec != Vector2.Zero)
@@ -100,9 +100,9 @@ namespace SharpCraft.entity
             //TODO - finish :D dont forget, that there is a possibility that the item in the stacks are the same, so they merge
             int i = 0;
 
-            for (; i < inventory.Length; i++)
+            for (; i < Inventory.Length; i++)
             {
-                if (inventory[i] == null || inventory[i].IsEmpty)
+                if (Inventory[i] == null || Inventory[i].IsEmpty)
                     break;
             }
 
@@ -112,44 +112,44 @@ namespace SharpCraft.entity
 
         public void SetItemStackInInventory(int index, ItemStack stack)
         {
-            if (index < hotbar.Length)
+            if (index < Hotbar.Length)
                 SetItemStackInHotbar(index, stack);
             else
-                inventory[index % inventory.Length] = stack;
+                Inventory[index % Inventory.Length] = stack;
         }
 
         private void SetItemStackInHotbar(int index, ItemStack stack)
         {
-            hotbar[index % hotbar.Length] = stack;
+            Hotbar[index % Hotbar.Length] = stack;
         }
 
         public ItemStack GetItemStackInInventory(int index)
         {
-            if (index < hotbar.Length)
+            if (index < Hotbar.Length)
                 return GetItemStackInHotbar(index);
 
-            return inventory[index % inventory.Length];
+            return Inventory[index % Inventory.Length];
         }
 
         private ItemStack GetItemStackInHotbar(int index)
         {
-            return hotbar[index % hotbar.Length];
+            return Hotbar[index % Hotbar.Length];
         }
 
         public void SetItemStackInSelectedSlot(ItemStack stack)
         {
-            hotbar[HotbarIndex] = stack;
+            Hotbar[HotbarIndex] = stack;
         }
 
         public bool CanPickUpStack(ItemStack dropped)
         {
-            return hotbar.Any(stack => stack == null || stack.IsEmpty || stack.ItemSame(dropped) && stack.Count + dropped.Count <= dropped.Item.MaxStackSize()) ||
-                   inventory.Any(stack => stack == null || stack.IsEmpty || stack.ItemSame(dropped) && stack.Count + dropped.Count <= dropped.Item.MaxStackSize());
+            return Hotbar.Any(stack => stack == null || stack.IsEmpty || stack.ItemSame(dropped) && stack.Count + dropped.Count <= dropped.Item.MaxStackSize()) ||
+                   Inventory.Any(stack => stack == null || stack.IsEmpty || stack.ItemSame(dropped) && stack.Count + dropped.Count <= dropped.Item.MaxStackSize());
         }
 
         public bool OnPickup(ItemStack dropped)
         {
-            var inventorySize = hotbar.Length + inventory.Length;
+            var inventorySize = Hotbar.Length + Inventory.Length;
 
             var lastKnownEmpty = -1;
 
@@ -290,9 +290,9 @@ namespace SharpCraft.entity
 
                 if (clickedBlock != EnumBlock.AIR)
                 {
-                    for (int i = 0; i < hotbar.Length; i++)
+                    for (int i = 0; i < Hotbar.Length; i++)
                     {
-                        var stack = hotbar[i];
+                        var stack = Hotbar[i];
                         
                         if (stack?.Item?.InnerItem == clickedBlock && stack.Meta == clickedMeta)
                         {
@@ -353,7 +353,7 @@ namespace SharpCraft.entity
 
         public ItemStack GetEquippedItemStack()
         {
-            return hotbar[HotbarIndex];
+            return Hotbar[HotbarIndex];
         }
 
         public void SetSelectedSlot(int index)

@@ -40,7 +40,7 @@ namespace SharpCraft.gui
 
                 RenderTexture(TextureManager.TEXTURE_GUI_WIDGETS, x, hotbarY, u, v, 32, 32, 2);
 
-                var stack = SharpCraft.Instance.Player.hotbar[i];
+                var stack = SharpCraft.Instance.Player.Hotbar[i];
 
                 if (stack == null || stack.IsEmpty)
                     continue;

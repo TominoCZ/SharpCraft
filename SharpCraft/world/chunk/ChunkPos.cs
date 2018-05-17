@@ -15,7 +15,7 @@ namespace SharpCraft.world.chunk
 
         public override bool Equals(object obj)
         {
-            if (ReferenceEquals(null, obj)) return false;
+            if (obj is null) return false;
             return obj is ChunkPos chp && Equals(chp);
         }
 

@@ -157,7 +157,7 @@ namespace SharpCraft
         private long _interactionTickCounter;
         private float _sensitivity = 1;
 
-        private string _glVersion;
+        private readonly string _glVersion;
 
         private static string _title;
         private static Thread _renderThread;
@@ -253,7 +253,7 @@ namespace SharpCraft
             OpenGuiScreen(new GuiScreenMainMenu());
         }
 
-        private void LoadMods()
+        private void LoadMods() //WHY THE FUCK IS THIS IMPLEMENTED RIGHT NOW IN THIS GAME PHASE???!
         {
             if (Directory.Exists(_dir + "mods"))
             {
@@ -446,8 +446,8 @@ namespace SharpCraft
             //render other gui
             if (Player != null)
             {
-                GuiRenderer.renderCrosshair();
-                GuiRenderer.renderHUD();
+                GuiRenderer.RenderCrosshair();
+                GuiRenderer.RenderHUD();
             }
 
             //render gui screen

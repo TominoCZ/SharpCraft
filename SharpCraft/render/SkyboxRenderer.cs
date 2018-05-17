@@ -59,7 +59,7 @@ namespace SharpCraft.render
             SIZE, -SIZE,  SIZE
         };
         private ModelBaked<object> cube;
-        private int texture;
+        private readonly int texture;
 
         private long tick;
         private long lastTick;

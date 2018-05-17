@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace SharpCraft.item
 {
@@ -34,6 +35,22 @@ namespace SharpCraft.item
         public override string ToString()
         {
             return DisplayName;
+        }
+
+        public override bool Equals(object obj)
+        {
+            var item = obj as Item;
+            return item != null &&
+                   EqualityComparer<dynamic>.Default.Equals(InnerItem, item.InnerItem) &&
+                   DisplayName == item.DisplayName;
+        }
+
+        public override int GetHashCode()
+        {
+            var hashCode = 1145637622;
+            hashCode = hashCode * -1521134295 + EqualityComparer<dynamic>.Default.GetHashCode(InnerItem);
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(DisplayName);
+            return hashCode;
         }
     }
 }
