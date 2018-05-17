@@ -31,6 +31,9 @@ namespace SharpCraft.world
 
         public ChunkLoadManager LoadManager { get; } = new ChunkLoadManager();
 
+        //TODO - clientside only
+        private Dictionary<BlockPos, Waypoint> _waypoints = new Dictionary<BlockPos, Waypoint>();
+
         public World(string saveName, string levelName, int seed)
         {
             _noiseUtil = new NoiseUtil(Seed = seed);
@@ -340,6 +343,30 @@ namespace SharpCraft.world
             }
 
             UpdateEntities();
+        }
+
+        public void AddWaypoint(BlockPos pos, Color color, string name)
+        {
+            _waypoints.TryAdd(pos, new Waypoint(pos, color, name));
+        }
+
+        public void RemoveWaypoint(BlockPos pos)
+        {
+            _waypoints.Remove(pos);
+        }
+
+        public void EditWaypoint(BlockPos pos, Color color, string name)
+        {
+            if (_waypoints.TryGetValue(pos, out var wp))
+            {
+                wp.Color = color;
+                wp.Name = name;
+            }
+        }
+
+        public Dictionary<BlockPos, Waypoint>.ValueCollection GetWaypoints()
+        {
+            return _waypoints.Values;
         }
     }
 }

@@ -1,3 +1,0 @@
-sensitivity=1
-renderdistance=6
-worldseed=yeet
