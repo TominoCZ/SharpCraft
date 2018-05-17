@@ -1,9 +1,8 @@
-﻿using System.Collections.Concurrent;
+﻿using OpenTK;
 using SharpCraft.block;
+using SharpCraft.texture;
 using System.Collections.Generic;
 using System.Linq;
-using OpenTK;
-using SharpCraft.texture;
 
 namespace SharpCraft.model
 {

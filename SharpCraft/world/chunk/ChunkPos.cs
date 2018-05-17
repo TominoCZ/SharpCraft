@@ -6,7 +6,7 @@ using System;
 
 namespace SharpCraft.world.chunk
 {
-	public struct ChunkPos : IRegionCord
+    public struct ChunkPos : IRegionCord
     {
         public bool Equals(ChunkPos other)
         {

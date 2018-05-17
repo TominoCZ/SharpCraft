@@ -5,7 +5,7 @@ using SharpCraft.util;
 
 namespace SharpCraft.model
 {
-    class ModelParticle : ModelBaked<Particle>
+    internal class ModelParticle : ModelBaked<Particle>
     {
         public ModelParticle(ShaderParticle shader) : base(null, shader)
         {

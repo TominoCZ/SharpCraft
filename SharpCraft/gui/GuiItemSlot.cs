@@ -10,7 +10,6 @@ namespace SharpCraft.gui
 
         public GuiItemSlot(int ID, float x, float y, ItemStack stack) : this(ID, x, y, 1, stack)
         {
-
         }
 
         public GuiItemSlot(int ID, float x, float y, float scale, ItemStack stack) : base(ID, x, y, scale)

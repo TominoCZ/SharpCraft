@@ -2,10 +2,7 @@
 using OpenTK.Graphics.OpenGL;
 using SharpCraft.gui;
 using SharpCraft.model;
-using SharpCraft.texture;
 using System.Collections.Generic;
-using SharpCraft.render.shader;
-using SharpCraft.render.shader.shaders;
 
 namespace SharpCraft.render
 {
@@ -37,14 +34,14 @@ namespace SharpCraft.render
         {
             if (gui == null)
                 return;
-            
+
             GL.Disable(EnableCap.DepthTest);
 
             GL.BindVertexArray(GuiQuad.vaoID);
 
             var state = OpenTK.Input.Mouse.GetCursorState();
             var mouse = SharpCraft.Instance.PointToClient(new Point(state.X, state.Y));
-            
+
             gui.Render(mouse.X, mouse.Y);
 
             GL.BindVertexArray(0);

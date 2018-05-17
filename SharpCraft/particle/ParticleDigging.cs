@@ -1,5 +1,4 @@
-﻿using System;
-using OpenTK;
+﻿using OpenTK;
 using OpenTK.Graphics.OpenGL;
 using SharpCraft.block;
 using SharpCraft.model;
@@ -7,6 +6,7 @@ using SharpCraft.render;
 using SharpCraft.texture;
 using SharpCraft.util;
 using SharpCraft.world;
+using System;
 
 namespace SharpCraft.particle
 {
@@ -45,7 +45,7 @@ namespace SharpCraft.particle
                 this.motion.Xz = SharpCraft.Instance.Camera.GetLookVec().Xz * 0.15f;
 
             var vec = new Vector3(MathUtil.NextFloat(-1), MathUtil.NextFloat(-1), MathUtil.NextFloat(-1));
-            
+
             rotStep = vec.Normalized() * MathUtil.NextFloat(40, 75);
         }
 

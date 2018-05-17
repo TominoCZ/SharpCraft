@@ -1,6 +1,4 @@
-﻿using OpenTK;
-
-namespace SharpCraft.render
+﻿namespace SharpCraft.render
 {
     internal class EntityRenderer
     {

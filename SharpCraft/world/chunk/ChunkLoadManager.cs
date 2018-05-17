@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace SharpCraft.world.chunk
 {
-	public class ChunkLoadManager
+    public class ChunkLoadManager
     {
         private readonly ConcurrentQueue<Chunk> _importantChunkBuilds = new ConcurrentQueue<Chunk>();
         private readonly object _buildLock = new object();

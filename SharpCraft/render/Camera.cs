@@ -82,7 +82,7 @@ namespace SharpCraft.render
         {
             return MathUtil.Rotate(Vector3.UnitZ, pitch, _yaw, 0).Normalized();
         }
-        
+
         public Vector2 left
         {
             get

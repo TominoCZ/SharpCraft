@@ -1,8 +1,8 @@
-﻿using System;
-using OpenTK;
-using SharpCraft.texture;
-using System.Collections.Generic;
+﻿using OpenTK;
 using OpenTK.Input;
+using SharpCraft.texture;
+using System;
+using System.Collections.Generic;
 
 namespace SharpCraft.gui
 {
@@ -30,7 +30,7 @@ namespace SharpCraft.gui
                 btn.Render(mouseX, mouseY);
                 //hovered? HoverColor : Vector3.One
                 //if (btn is GuiItemSlot slot && !slot.stack?.IsEmpty == true && slot.stack.Count > 1)
-                    //RenderText(slot.stack.Count.ToString(), slot.PosX + 32 * slot.Scale / 2f, slot.PosY + 32 * slot.Scale / 2f + 14, 1, true);
+                //RenderText(slot.stack.Count.ToString(), slot.PosX + 32 * slot.Scale / 2f, slot.PosY + 32 * slot.Scale / 2f + 14, 1, true);
             }
             //render stuff
         }
@@ -89,7 +89,6 @@ namespace SharpCraft.gui
 
         public virtual void OnClose()
         {
-
         }
     }
 }

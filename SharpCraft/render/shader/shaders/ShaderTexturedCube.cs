@@ -1,5 +1,4 @@
 ﻿using OpenTK;
-using SharpCraft.particle;
 using SharpCraft.render.shader.uniform;
 using SharpCraft.util;
 

@@ -26,7 +26,6 @@ namespace SharpCraft.particle
 
         protected Particle(World world, Vector3 pos, Vector3 motion, float particleScale, int textureID) : this(world, pos, motion, particleScale, textureID, Vector2.Zero, Vector2.Zero)
         {
-
         }
 
         protected Particle(World world, Vector3 pos, Vector3 motion, float scale, int textureID, Vector2 UVmin, Vector2 UVmax) : base(world, pos, motion)

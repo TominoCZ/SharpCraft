@@ -1,13 +1,13 @@
-﻿using System;
-using OpenTK;
+﻿using OpenTK;
 using OpenTK.Input;
 using SharpCraft.block;
 using SharpCraft.item;
 using SharpCraft.texture;
+using System;
 
 namespace SharpCraft.gui
 {
-    class GuiScreenInventory : GuiScreen
+    internal class GuiScreenInventory : GuiScreen
     {
         private static float guiScale = 1.75f;
 

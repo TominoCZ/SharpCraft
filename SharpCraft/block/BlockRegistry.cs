@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace SharpCraft.block
 {
-    class BlockRegistry
+    internal class BlockRegistry
     {
         private static Dictionary<string, Block> _registry = new Dictionary<string, Block>();
         private static Dictionary<Type, Block> _typeRegistry = new Dictionary<Type, Block>();

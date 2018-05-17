@@ -1,14 +1,13 @@
-﻿using System;
-using OpenTK;
+﻿using OpenTK;
 using OpenTK.Input;
 using SharpCraft.block;
 using SharpCraft.gui;
+using SharpCraft.item;
 using SharpCraft.model;
 using SharpCraft.util;
 using SharpCraft.world;
+using System;
 using System.Linq;
-using OpenTK.Graphics.OpenGL;
-using SharpCraft.item;
 
 namespace SharpCraft.entity
 {
@@ -293,7 +292,7 @@ namespace SharpCraft.entity
                     for (int i = 0; i < Hotbar.Length; i++)
                     {
                         var stack = Hotbar[i];
-                        
+
                         if (stack?.Item?.InnerItem == clickedBlock && stack.Meta == clickedMeta)
                         {
                             SetSelectedSlot(i);

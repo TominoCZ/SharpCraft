@@ -1,15 +1,14 @@
 ﻿using OpenTK;
 using OpenTK.Graphics.OpenGL;
 using SharpCraft.block;
+using SharpCraft.item;
 using SharpCraft.model;
+using SharpCraft.render.shader;
 using SharpCraft.texture;
 using SharpCraft.util;
 using SharpCraft.world;
 using System;
 using System.Linq;
-using System.Threading;
-using SharpCraft.item;
-using SharpCraft.render.shader;
 
 namespace SharpCraft.entity
 {
@@ -181,9 +180,9 @@ namespace SharpCraft.entity
 
                 if (stack.Count > 1)
                     itemsToRender = 2;
-                if (stack.Count >= 32*4)
+                if (stack.Count >= 32 * 4)
                     itemsToRender = 3;
-                if (stack.Count == 64*4)
+                if (stack.Count == 64 * 4)
                     itemsToRender = 4;
 
                 for (int i = 0; i < itemsToRender; i++)

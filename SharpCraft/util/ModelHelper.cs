@@ -117,7 +117,7 @@ namespace SharpCraft.util
             return quads;
         }
 
-        static float[] toFloats(Vector3 vec)
+        private static float[] toFloats(Vector3 vec)
         {
             return new[]
             {

@@ -1,22 +1,21 @@
-﻿using System;
+﻿using OpenTK;
+using SharpCraft.texture;
+using SharpCraft.util;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
-using System.Xml;
-using OpenTK;
-using SharpCraft.texture;
-using SharpCraft.util;
 
 namespace SharpCraft.gui
 {
-    class FontManager
+    internal class FontManager
     {
         private static Dictionary<char, FontMapCharacter> _dictionary = new Dictionary<char, FontMapCharacter>();
 
         public static void LoadCharacters(Texture tex, string fntFileName)
         {
             _dictionary.Clear();
-            
+
             var file = $"SharpCraft_Data/assets/textures/{fntFileName}.fnt";
 
             var lines = File.ReadAllLines(file);
@@ -83,7 +82,7 @@ namespace SharpCraft.gui
         }
     }
 
-    class FontMapCharacter
+    internal class FontMapCharacter
     {
         public FontMapCharacterNode Character { get; }
         public TextureUVNode TextureUv { get; }
@@ -95,7 +94,7 @@ namespace SharpCraft.gui
         }
     }
 
-    class FontMapCharacterNode
+    internal class FontMapCharacterNode
     {
         public char Char;
         public int X;

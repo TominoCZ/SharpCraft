@@ -1,12 +1,10 @@
-﻿using System;
-using System.Diagnostics;
-using SharpCraft.block;
+﻿using SharpCraft.block;
 using SharpCraft.entity;
-using SharpCraft.model;
+using System;
 
 namespace SharpCraft.world
 {
-    class DestroyProgress
+    internal class DestroyProgress
     {
         public EntityPlayerSP Player { get; }
         public BlockPos Pos { get; }

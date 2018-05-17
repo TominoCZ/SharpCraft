@@ -1,11 +1,10 @@
-﻿using System;
-using OpenTK;
+﻿using OpenTK;
 using SharpCraft.item;
 using SharpCraft.texture;
 
 namespace SharpCraft.gui
 {
-    class GuiHUD : Gui
+    internal class GuiHUD : Gui
     {
         public override void Render(int mouseX, int mouseY)
         {

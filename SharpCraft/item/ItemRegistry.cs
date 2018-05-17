@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace SharpCraft.item
 {
-    class ItemRegistry //TODO
+    internal class ItemRegistry //TODO
     {
         private static Dictionary<string, Item> _registry = new Dictionary<string, Item>();
         private static Dictionary<Type, Item> _typeRegistry = new Dictionary<Type, Item>();

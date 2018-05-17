@@ -1,6 +1,4 @@
-﻿using System;
-using OpenTK;
-using SharpCraft.model;
+﻿using OpenTK;
 using SharpCraft.render.shader.uniform;
 
 namespace SharpCraft.render.shader.module
@@ -17,7 +15,7 @@ namespace SharpCraft.render.shader.module
 
         public override void InitUniforms()
         {
-            Projection =  Parent.GetUniformMat4("projectionMatrix");
+            Projection = Parent.GetUniformMat4("projectionMatrix");
             View = Parent.GetUniformMat4("viewMatrix");
             Transform = Parent.GetUniformMat4("transformationMatrix");
         }

@@ -1,7 +1,7 @@
 ﻿using OpenTK;
 using SharpCraft.entity;
-using System;
 using SharpCraft.item;
+using System;
 
 namespace SharpCraft.world
 {

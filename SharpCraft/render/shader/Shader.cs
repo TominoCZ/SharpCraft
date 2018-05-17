@@ -1,12 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Dynamic;
-using System.IO;
-using OpenTK;
+﻿using OpenTK;
 using OpenTK.Graphics.OpenGL;
 using SharpCraft.model;
 using SharpCraft.render.shader.module;
 using SharpCraft.render.shader.uniform;
+using System.Collections.Generic;
+using System.IO;
 
 namespace SharpCraft.render.shader
 {

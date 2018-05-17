@@ -1,7 +1,7 @@
-﻿using System;
-using System.Diagnostics;
-using OpenTK;
+﻿using OpenTK;
 using SharpCraft.render.shader.uniform;
+using System;
+using System.Diagnostics;
 
 namespace SharpCraft.render.shader.shaders
 {
@@ -13,7 +13,7 @@ namespace SharpCraft.render.shader.shaders
 
         private Stopwatch _updateTimer;
 
-        int _hue;
+        private int _hue;
 
         public ShaderBlockOutline(string shaderName) : base(shaderName)
         {
@@ -40,7 +40,6 @@ namespace SharpCraft.render.shader.shaders
             base.UpdateInstanceUniforms(transform, renderable);
             colorIn?.Update(_selectionOutlineColor);
         }
-
 
         private Vector4 GetHue(int hue)
         {

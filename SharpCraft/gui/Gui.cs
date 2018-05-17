@@ -117,7 +117,6 @@ namespace SharpCraft.gui
 
         public virtual void Render(int mouseX, int mouseY)
         {
-
         }
     }
 }

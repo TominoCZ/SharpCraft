@@ -1,12 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using SharpCraft.model;
+﻿using SharpCraft.model;
 using SharpCraft.render.shader;
+using System.Collections.Generic;
 
 namespace SharpCraft.block
 {
-
-    abstract class Block
+    internal abstract class Block
     {
         private static readonly Shader<ModelBlock> DefaultShader = new Shader<ModelBlock>("block");
         public Shader<ModelBlock> Shader { get; protected set; }
@@ -37,7 +35,7 @@ namespace SharpCraft.block
         protected void RegisterState(string modelJson)
         {
             var state = new BlockState(this, new ModelBlock(EnumBlock.MISSING, Shader));
-            
+
             //TODO LOAD MODEL AND TEXTURE INFO FROM JSON
 
             _states.Add(state);
@@ -49,7 +47,7 @@ namespace SharpCraft.block
         }
     }
 
-    class BlockState
+    internal class BlockState
     {
         public Block Block { get; }
         public ModelBlock Model { get; }

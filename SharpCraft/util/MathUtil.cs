@@ -4,10 +4,10 @@ using System.Security.Cryptography;
 
 namespace SharpCraft.util
 {
-    static class MathUtil
+    internal static class MathUtil
     {
         private static RandomNumberGenerator _rand = RandomNumberGenerator.Create();
-        
+
         public static float GetNext()
         {
             var bytes = new byte[8];

@@ -1,18 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
-using System.Text.RegularExpressions;
-using OpenTK;
+﻿using OpenTK;
 using OpenTK.Graphics.OpenGL;
 using SharpCraft.gui;
 using SharpCraft.render.shader.shaders;
 using SharpCraft.texture;
 using SharpCraft.util;
+using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace SharpCraft.render
 {
-    class FontRenderer
+    internal class FontRenderer
     {
         public static ShaderText Shader { get; private set; }
 
@@ -24,8 +24,8 @@ namespace SharpCraft.render
         public void RenderText(string text, float x, float y, float scale, Vector3 color, bool centered = false, bool dropShadow = false, int spacing = 4) //#TODO
         {
             scale *= 0.5f;
-            x = (float) Math.Ceiling(x);
-            y = (float) Math.Ceiling(y);
+            x = (float)Math.Ceiling(x);
+            y = (float)Math.Ceiling(y);
 
             var tex = TextureManager.TEXTURE_TEXT;
 

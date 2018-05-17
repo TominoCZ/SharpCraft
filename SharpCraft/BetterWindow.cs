@@ -1,9 +1,9 @@
-﻿using System;
-using System.ComponentModel;
-using System.Diagnostics;
-using OpenTK;
+﻿using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Input;
+using System;
+using System.ComponentModel;
+using System.Diagnostics;
 
 namespace SharpCraft
 {
@@ -152,7 +152,6 @@ namespace SharpCraft
                     return null;
                 return InputDriver.Mouse[0];
 #pragma warning restore CS0612 // Type or member is obsolete
-
             }
         }
 
@@ -175,9 +174,11 @@ namespace SharpCraft
                     case VSyncMode.Off:
                         Context.SwapInterval = 0;
                         break;
+
                     case VSyncMode.On:
                         Context.SwapInterval = 1;
                         break;
+
                     case VSyncMode.Adaptive:
                         Context.SwapInterval = -1;
                         break;

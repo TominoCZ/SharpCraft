@@ -3,7 +3,6 @@ using System.Collections.Generic;
 
 namespace SharpCraft.item
 {
-
     [Serializable]
     public abstract class Item
     {

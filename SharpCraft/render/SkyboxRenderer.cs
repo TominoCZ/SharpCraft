@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections.Concurrent;
-using OpenTK.Graphics.OpenGL;
+﻿using OpenTK.Graphics.OpenGL;
 using SharpCraft.model;
-using SharpCraft.texture;
-using System.Collections.Generic;
-using System.Numerics;
 using SharpCraft.render.shader;
-using SharpCraft.render.shader.shaders;
+using SharpCraft.texture;
 using SharpCraft.util;
+using System.Collections.Generic;
 using Vector3 = OpenTK.Vector3;
 
 namespace SharpCraft.render
@@ -15,6 +11,7 @@ namespace SharpCraft.render
     internal class SkyboxRenderer
     {
         private static float SIZE = 500f;
+
         private static float[] VERTICES = {
             -SIZE,  SIZE, -SIZE,
             -SIZE, -SIZE, -SIZE,
@@ -58,6 +55,7 @@ namespace SharpCraft.render
             -SIZE, -SIZE,  SIZE,
             SIZE, -SIZE,  SIZE
         };
+
         private ModelBaked<object> cube;
         private readonly int texture;
 

@@ -1,6 +1,5 @@
-﻿using System.Collections.Concurrent;
+﻿using SharpCraft.render.shader;
 using System.Collections.Generic;
-using SharpCraft.render.shader;
 
 namespace SharpCraft.model
 {

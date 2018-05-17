@@ -5,8 +5,10 @@ using OpenTK.Input;
 using SharpCraft.block;
 using SharpCraft.entity;
 using SharpCraft.gui;
+using SharpCraft.item;
 using SharpCraft.model;
 using SharpCraft.render;
+using SharpCraft.render.shader;
 using SharpCraft.texture;
 using SharpCraft.util;
 using SharpCraft.world;
@@ -14,7 +16,6 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
@@ -22,8 +23,6 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading;
-using SharpCraft.item;
-using SharpCraft.render.shader;
 using Bitmap = System.Drawing.Bitmap;
 using Point = OpenTK.Point;
 using Rectangle = System.Drawing.Rectangle;
@@ -31,7 +30,7 @@ using Size = OpenTK.Size;
 
 namespace SharpCraft
 {
-    class ModInfo
+    internal class ModInfo
     {
         public readonly string ID;
 
@@ -54,7 +53,7 @@ namespace SharpCraft
         }
     }
 
-    abstract class ModMain
+    internal abstract class ModMain
     {
         public ModInfo ModInfo { get; protected set; }
 
@@ -66,7 +65,7 @@ namespace SharpCraft
         public abstract void OnItemsAndBlocksRegistry(ItemsAndBlockRegistryEventArgs args);
     }
 
-    class ItemsAndBlockRegistryEventArgs : EventArgs
+    internal class ItemsAndBlockRegistryEventArgs : EventArgs
     {
         private readonly Action<Item> _funcRegisterItem;
         private readonly Action<Block> _funcRegisterBlock;
@@ -91,7 +90,7 @@ namespace SharpCraft
     internal class SharpCraft : BetterWindow
     {
         //string _dir = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "/.sharpcraft";
-        string _dir = "./";
+        private string _dir = "./";
 
         public string GameFolderDir
         {
@@ -125,8 +124,10 @@ namespace SharpCraft
         public GuiRenderer GuiRenderer;
         public FontRenderer FontRenderer;
         public KeyboardState KeyboardState;
+
         //public HashSet<Key> KeysDown = new HashSet<Key>();
         public MouseOverObject MouseOverObject = new MouseOverObject();
+
         private MouseOverObject _lastMouseOverObject = new MouseOverObject();
 
         public EntityPlayerSP Player;
@@ -190,6 +191,7 @@ namespace SharpCraft
             blockRegistry = new BlockRegistry();
 
             #region model loading
+
             Console.WriteLine("DEBUG: loading models");
 
             //TODO - merge shaders and use strings as block IDs like sharpcraft:dirt
@@ -229,7 +231,8 @@ namespace SharpCraft
             ModelRegistry.RegisterBlockModel(leavesModel, 0);
 
             ModelRegistry.RegisterBlockModel(xrayModel, 0);
-            #endregion
+
+            #endregion model loading
 
             SettingsManager.Load();
 
@@ -770,6 +773,7 @@ namespace SharpCraft
                 case Key.P:
                     Player?.world?.AddWaypoint(new BlockPos(Player.pos).Offset(FaceSides.Up), new OpenTK.Color(255, 0, 0, 127), "TEST");
                     break;
+
                 case Key.Escape:
                     if (GuiScreen is GuiScreenMainMenu || KeyboardState.IsKeyDown(Key.Escape))
                         return;
@@ -779,6 +783,7 @@ namespace SharpCraft
                     else
                         OpenGuiScreen(new GuiScreenIngameMenu());
                     break;
+
                 case Key.E:
                     if (KeyboardState.IsKeyDown(Key.E))
                         return;
@@ -792,9 +797,11 @@ namespace SharpCraft
                     if (GuiScreen == null)
                         OpenGuiScreen(new GuiScreenInventory());
                     break;
+
                 case Key.F2:
                     _takeScreenshot = true;
                     break;
+
                 case Key.F11:
                     if (WindowState != WindowState.Fullscreen)
                     {

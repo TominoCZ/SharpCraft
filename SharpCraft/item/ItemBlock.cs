@@ -1,5 +1,5 @@
-﻿using System;
-using SharpCraft.block;
+﻿using SharpCraft.block;
+using System;
 
 namespace SharpCraft.item
 {

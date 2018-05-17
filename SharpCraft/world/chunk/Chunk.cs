@@ -1,15 +1,15 @@
 ﻿using OpenTK;
+using OpenTK.Graphics.OpenGL;
 using SharpCraft.block;
 using SharpCraft.entity;
 using SharpCraft.model;
+using SharpCraft.render.shader;
 using SharpCraft.util;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using OpenTK.Graphics.OpenGL;
-using SharpCraft.render.shader;
 
 namespace SharpCraft.world.chunk
 {

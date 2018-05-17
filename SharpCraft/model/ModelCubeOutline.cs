@@ -1,5 +1,4 @@
 ﻿using OpenTK;
-using SharpCraft.render.shader;
 using SharpCraft.render.shader.shaders;
 using SharpCraft.util;
 

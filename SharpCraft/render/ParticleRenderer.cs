@@ -1,16 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using OpenTK;
+﻿using OpenTK;
 using SharpCraft.block;
 using SharpCraft.entity;
 using SharpCraft.model;
 using SharpCraft.particle;
 using SharpCraft.render.shader.shaders;
 using SharpCraft.util;
+using System;
+using System.Collections.Generic;
 
 namespace SharpCraft.render
 {
-    class ParticleRenderer
+    internal class ParticleRenderer
     {
         private List<Particle> _particles;
 
