@@ -417,15 +417,6 @@ namespace SharpCraft
             WorldRenderer?.Update();
             SkyboxRenderer?.Update();
             ParticleRenderer?.TickParticles();
-
-            var now = DateTime.Now;
-
-            if ((now - _lastFpsDate).TotalMilliseconds >= 1000)
-            {
-                _fpsCounterLast = _fpsCounter;
-                _fpsCounter = 0;
-                _lastFpsDate = now;
-            }
         }
 
         private void RenderScreen(float partialTicks)
@@ -707,8 +698,16 @@ namespace SharpCraft
                 return;
 
             timer.CalculatePartialTicks();
-
             timer.TryUpdate();
+
+            var now = DateTime.Now;
+
+            if ((now - _lastFpsDate).TotalMilliseconds >= 1000)
+            {
+                _fpsCounterLast = _fpsCounter;
+                _fpsCounter = 0;
+                _lastFpsDate = now;
+            }
 
             Render(timer.GetPartialTicks());
 
