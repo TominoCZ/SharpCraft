@@ -16,6 +16,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
@@ -87,7 +88,7 @@ namespace SharpCraft
         }
     }
 
-    internal class SharpCraft : BetterWindow
+    internal class SharpCraft : GameWindow
     {
         //string _dir = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "/.sharpcraft";
         private string _dir = "./";
@@ -138,8 +139,10 @@ namespace SharpCraft
 
         private List<MouseButton> _mouseButtonsDown = new List<MouseButton>();
         private ConcurrentQueue<Action> _glContextQueue = new ConcurrentQueue<Action>();
+        private Stopwatch _updateTimer = new Stopwatch();
         private DateTime _lastFpsDate;
         private WindowState _lastWindowState;
+        private Thread _renderThread = Thread.CurrentThread;
 
         public static SharpCraft Instance { get; private set; }
 
@@ -157,19 +160,17 @@ namespace SharpCraft
         private int _fpsCounterLast;
         private long _interactionTickCounter;
         private float _sensitivity = 1;
-
+        private float _partialTicks;
         private readonly string _glVersion;
 
         private static string _title;
-        private static Thread _renderThread;
 
-        private GameTimer timer = new GameTimer(60, 20);
+        //private GameTimer timer = new GameTimer(60, 20);
 
         public SharpCraft() : base(680, 480, GraphicsMode.Default, _title, GameWindowFlags.Default, DisplayDevice.Default, 3, 3, GraphicsContextFlags.ForwardCompatible)
         {
             Instance = this;
             Camera = new Camera();
-            _renderThread = Thread.CurrentThread;
 
             VSync = VSyncMode.Off;
             MakeCurrent();
@@ -243,7 +244,7 @@ namespace SharpCraft
             GuiRenderer = new GuiRenderer();
             FontRenderer = new FontRenderer();
 
-            timer.InfiniteFps = true;
+            //timer.InfiniteFps = true;
 
             LoadMods();
 
@@ -329,17 +330,6 @@ namespace SharpCraft
 
             var state = OpenTK.Input.Mouse.GetState();
             _mouseLast = new Point(state.X, state.Y);
-
-            timer.UpdateHook = () =>
-            {
-                if (!IsDisposed && Visible)
-                {
-                    GetMouseOverObject();
-                }
-
-                GameLoop();
-            };
-
             //world.setBlock(new BlockPos(player.pos), EnumBlock.RARE, 1, true); //test of block metadata, works perfectly
         }
 
@@ -419,7 +409,7 @@ namespace SharpCraft
             ParticleRenderer?.TickParticles();
         }
 
-        private void RenderScreen(float partialTicks)
+        private void RenderScreen()
         {
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
             GL.Enable(EnableCap.DepthTest);
@@ -431,10 +421,10 @@ namespace SharpCraft
 
             if (World != null)
             {
-                WorldRenderer.Render(World, partialTicks);
-                ParticleRenderer.Render(partialTicks);
-                EntityRenderer.Render(partialTicks);
-                SkyboxRenderer.Render(partialTicks);
+                WorldRenderer.Render(World, _partialTicks);
+                ParticleRenderer.Render(_partialTicks);
+                EntityRenderer.Render(_partialTicks);
+                SkyboxRenderer.Render(_partialTicks);
             }
 
             //render other gui
@@ -454,6 +444,9 @@ namespace SharpCraft
 
         public void GetMouseOverObject()
         {
+            if (World == null)
+                return;
+
             var radius = 5.5f;
 
             var final = new MouseOverObject();
@@ -596,11 +589,6 @@ namespace SharpCraft
             else _glContextQueue.Enqueue(a);
         }
 
-        public float GetPartialTicksForRender()
-        {
-            return timer.GetPartialTicks();
-        }
-
         private bool AllowInput()
         {
             return GuiScreen == null && !(CursorVisible = !Focused);
@@ -672,7 +660,17 @@ namespace SharpCraft
             }
         }
 
-        private void Render(float partialTicks)
+        public int GetFPS()
+        {
+            return _fpsCounterLast;
+        }
+
+        public float GetPartialTicksForRender()
+        {
+            return _partialTicks;
+        }
+
+        private void Render()
         {
             RunGlTasks();
 
@@ -680,7 +678,7 @@ namespace SharpCraft
 
             Camera.UpdateViewMatrix();
 
-            RenderScreen(partialTicks);
+            RenderScreen();
 
             if (_takeScreenshot)
             {
@@ -692,13 +690,9 @@ namespace SharpCraft
             SwapBuffers();
         }
 
-        protected override void OnRenderFrame()
+        protected override void OnRenderFrame(FrameEventArgs e)
         {
-            if (!timer.CanRender())
-                return;
-
-            timer.CalculatePartialTicks();
-            timer.TryUpdate();
+            _partialTicks = (float)_updateTimer.Elapsed.TotalMilliseconds / 50;
 
             var now = DateTime.Now;
 
@@ -709,14 +703,21 @@ namespace SharpCraft
                 _lastFpsDate = now;
             }
 
-            Render(timer.GetPartialTicks());
+            Render();
 
             _fpsCounter++;
         }
 
-        public int GetFPS()
+        protected override void OnUpdateFrame(FrameEventArgs e)
         {
-            return _fpsCounterLast;
+            if (!IsDisposed && Visible)
+            {
+                GetMouseOverObject();
+            }
+
+            GameLoop();
+            
+            _updateTimer.Restart();
         }
 
         protected override void OnMouseDown(MouseButtonEventArgs e)
@@ -991,7 +992,7 @@ namespace SharpCraft
 
             using (var game = new SharpCraft())
             {
-                game.Run();
+                game.Run(20);
             }
         }
     }

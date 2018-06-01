@@ -12,6 +12,9 @@
     <Optimize>false</Optimize>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <Optimize>false</Optimize>
+  </PropertyGroup>
   <ItemGroup>
     <Compile Remove="render\shader\uniforms\**" />
     <Compile Remove="saves\**" />

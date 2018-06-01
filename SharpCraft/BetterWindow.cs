@@ -77,14 +77,6 @@ namespace SharpCraft
             Context.MakeCurrent(WindowInfo);
         }
 
-        protected override void OnClosing(CancelEventArgs e)
-        {
-            base.OnClosing(e);
-            if (e.Cancel)
-                return;
-            isExiting = true;
-        }
-
         public void Run()
         {
             EnsureUndisposed();
@@ -214,6 +206,14 @@ namespace SharpCraft
         {
             base.OnResize(e);
             glContext.Update(WindowInfo);
+        }
+
+        protected override void OnClosing(CancelEventArgs e)
+        {
+            base.OnClosing(e);
+            if (e.Cancel)
+                return;
+            isExiting = true;
         }
     }
 }
