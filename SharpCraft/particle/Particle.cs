@@ -63,10 +63,10 @@ namespace SharpCraft.particle
             base.Update();
         }
 
-        public override void Render(float particalTicks)
+        public override void Render(float partialTicks)
         {
-            var partialPos = Vector3.Lerp(lastPos, pos, particalTicks);
-            var partialScale = lastParticleScale + (particleScale - lastParticleScale) * particalTicks;
+            var partialPos = Vector3.Lerp(lastPos, pos, partialTicks);
+            var partialScale = lastParticleScale + (particleScale - lastParticleScale) * partialTicks;
 
             var model = ParticleRenderer.ParticleModel;
 

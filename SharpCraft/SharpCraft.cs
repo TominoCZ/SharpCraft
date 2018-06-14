@@ -139,8 +139,8 @@ namespace SharpCraft
 
         private List<MouseButton> _mouseButtonsDown = new List<MouseButton>();
         private ConcurrentQueue<Action> _glContextQueue = new ConcurrentQueue<Action>();
-        private Stopwatch _updateTimer = new Stopwatch();
-        private DateTime _lastFpsDate;
+        private DateTime _updateTimer = DateTime.Now;
+        private DateTime _lastFpsDate = DateTime.Now;
         private WindowState _lastWindowState;
         private Thread _renderThread = Thread.CurrentThread;
 
@@ -167,7 +167,7 @@ namespace SharpCraft
 
         //private GameTimer timer = new GameTimer(60, 20);
 
-        public SharpCraft() : base(680, 480, GraphicsMode.Default, _title, GameWindowFlags.Default, DisplayDevice.Default, 3, 3, GraphicsContextFlags.ForwardCompatible)
+        public SharpCraft() : base(680, 480, new GraphicsMode(32, 32, 0, 0), _title, GameWindowFlags.Default, DisplayDevice.Default, 3, 3, GraphicsContextFlags.ForwardCompatible)
         {
             Instance = this;
             Camera = new Camera();
@@ -188,6 +188,8 @@ namespace SharpCraft
 
         private void Init()
         {
+            GlSetup();
+
             itemRegistry = new ItemRegistry();
             blockRegistry = new BlockRegistry();
 
@@ -409,15 +411,19 @@ namespace SharpCraft
             ParticleRenderer?.TickParticles();
         }
 
-        private void RenderScreen()
+        private void GlSetup()
         {
-            GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
             GL.Enable(EnableCap.DepthTest);
             GL.Enable(EnableCap.DepthClamp);
             GL.Enable(EnableCap.CullFace);
             GL.Enable(EnableCap.Blend);
             GL.CullFace(CullFaceMode.Back);
             GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
+        }
+
+        private void RenderScreen()
+        {
+            GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
             if (World != null)
             {
@@ -692,9 +698,9 @@ namespace SharpCraft
 
         protected override void OnRenderFrame(FrameEventArgs e)
         {
-            _partialTicks = (float)_updateTimer.Elapsed.TotalMilliseconds / 50;
-
             var now = DateTime.Now;
+
+            _partialTicks = (float)Math.Min((now - _updateTimer).TotalMilliseconds / 50, 1);
 
             if ((now - _lastFpsDate).TotalMilliseconds >= 1000)
             {
@@ -711,13 +717,11 @@ namespace SharpCraft
         protected override void OnUpdateFrame(FrameEventArgs e)
         {
             if (!IsDisposed && Visible)
-            {
                 GetMouseOverObject();
-            }
 
             GameLoop();
-            
-            _updateTimer.Restart();
+
+            _updateTimer = DateTime.Now;
         }
 
         protected override void OnMouseDown(MouseButtonEventArgs e)
@@ -856,10 +860,10 @@ namespace SharpCraft
                         }
                     }
                 }
-
-                if (e.Key == (Key.LAlt | Key.F4))
-                    Exit();
             }
+
+            if (e.Alt && e.Key == Key.F4)
+                Exit();
 
             KeyboardState = e.Keyboard;
         }
@@ -879,9 +883,9 @@ namespace SharpCraft
                 ClientSize = new Size(ClientSize.Width, 480);
 
             GL.Viewport(ClientRectangle);
-            GL.MatrixMode(MatrixMode.Projection);
-            GL.LoadIdentity();
-            GL.Ortho(0, ClientRectangle.Width, ClientRectangle.Height, 0, Camera.NearPlane, Camera.FarPlane);
+            //GL.MatrixMode(MatrixMode.Projection);
+            //GL.LoadIdentity();
+            //GL.Ortho(0, ClientRectangle.Width, ClientRectangle.Height, 0, Camera.NearPlane, Camera.FarPlane);
 
             Camera.UpdateProjectionMatrix();
         }

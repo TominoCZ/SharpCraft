@@ -48,9 +48,9 @@ namespace SharpCraft.entity
             base.Update();
         }
 
-        public override void Render(float particalTicks)
+        public override void Render(float partialTicks)
         {
-            var interpolatedPos = lastPos + (pos - lastPos) * particalTicks;
+            var interpolatedPos = lastPos + (pos - lastPos) * partialTicks;
 
             SharpCraft.Instance.Camera.pos = interpolatedPos + Vector3.UnitY * EyeHeight;
         }

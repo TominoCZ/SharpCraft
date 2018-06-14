@@ -116,7 +116,7 @@ namespace SharpCraft.entity
                 motion.Y = 0;
         }
 
-        public virtual void Render(float particalTicks)
+        public virtual void Render(float partialTicks)
         {
         }
 

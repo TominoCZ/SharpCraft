@@ -13,14 +13,14 @@ uniform mat4 viewMatrix;
 uniform vec2 UVmin;
 uniform vec2 UVmax;
 
-float calcLight(in vec3 lightDir)
+float calcLight(in vec3 lightPos)
 {
 	vec3 _normal = normalize((transformationMatrix * vec4(normal, 0)).xyz);
 
-	//vec3 fragPosition = vec3(transformationMatrix * vec4(position, 0));
-	//vec3 surfaceToLight = normalize(lightPos - position);
+	vec3 fragPosition = vec3(transformationMatrix * vec4(position, 1));
+	vec3 surfaceToLight = normalize(lightPos - position);
 
-	return max(dot(_normal, lightDir), 0.1);
+	return abs(dot(_normal, surfaceToLight)) + 0.5;
 }
 
 void main(void)
@@ -43,11 +43,8 @@ void main(void)
 		pass_uv = vec2(UVmax.x, UVmin.y);
 	}
 
-	vec3 light1 = normalize(vec3(700, 1000, 750));
-	vec3 light2 =  normalize(vec3(-700, -800, -750));
-	
-	vec3 light3 = normalize(vec3(-700, 900, -750));
-	vec3 light4 =  normalize(vec3(700, -700, 750));
+	vec3 light1 = vec3(10, 100, 50);
+	vec3 light2 = vec3(-50, -100, -10);
 
-	brightness = (calcLight(normalize(vec3(0.5,0.5,0.4))) + calcLight(normalize(vec3(-0.5,-0.3,-0.4))) * 1.2) * 1.25;
+	brightness = (calcLight(light1) + calcLight(light2)) / 2;
 }

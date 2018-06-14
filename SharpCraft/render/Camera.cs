@@ -6,7 +6,7 @@ namespace SharpCraft.render
 {
     public class Camera
     {
-        public const float NearPlane = 0.15f;
+        public const float NearPlane = 0.01f;//15f;
         public const float FarPlane = 1000f;
 
         public float TargetFov { get; }

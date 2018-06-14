@@ -151,10 +151,10 @@ namespace SharpCraft.entity
             if (stack.IsEmpty) SetDead();
         }
 
-        public override void Render(float particalTicks)
+        public override void Render(float partialTicks)
         {
-            var partialPos = lastPos + (pos - lastPos) * particalTicks;
-            var partialTime = lastTick + (tick - lastTick) * particalTicks;
+            var partialPos = lastPos + (pos - lastPos) * partialTicks;
+            var partialTime = lastTick + (tick - lastTick) * partialTicks;
 
             if (stack?.Item?.InnerItem is EnumBlock block)
             {

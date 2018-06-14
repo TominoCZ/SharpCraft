@@ -7,6 +7,7 @@ using SharpCraft.texture;
 using SharpCraft.util;
 using SharpCraft.world;
 using System;
+using System.Diagnostics;
 
 namespace SharpCraft.particle
 {
@@ -63,8 +64,8 @@ namespace SharpCraft.particle
             {
                 if (particleAlpha >= 0.0015f)
                 {
-                    particleAlpha *= 0.52f;
-                    particleScale *= 0.65f;
+                    particleAlpha *= 0.575f;
+                    particleScale *= 0.625f;
                 }
                 else
                     SetDead();
@@ -89,12 +90,12 @@ namespace SharpCraft.particle
             }
         }
 
-        public override void Render(float particalTicks)
+        public override void Render(float partialTicks)
         {
-            var partialPos = Vector3.Lerp(lastPos, pos, particalTicks);
-            var partialRot = Vector3.Lerp(lastRot, rot, particalTicks);
+            var partialPos = Vector3.Lerp(lastPos, pos, partialTicks);
+            var partialRot = Vector3.Lerp(lastRot, rot, partialTicks);
 
-            var partialScale = lastParticleScale + (particleScale - lastParticleScale) * particalTicks;
+            var partialScale = lastParticleScale + (particleScale - lastParticleScale) * partialTicks;
 
             var model = ParticleRenderer.ParticleModel;
             model.Shader.UpdateGlobalUniforms();
