@@ -97,45 +97,31 @@ namespace SharpCraft.entity
         public void FastMoveStack(int index)
         {
             ItemStack stack = GetItemStackInInventory(index);
-            int maxStackSize = stack.Item.MaxStackSize();
 
             // return if there is no item to move
             if (stack == null || stack.Item == null)
                 return;
 
+            int maxStackSize = stack.Item.MaxStackSize();
 
             // Hotbar to Inventory
             if (index < Hotbar.Length)
             {
-                // TODO: Add to Itemstack as a function(Find in stack?)
                 // 1. find same object in inventory to stack
                 for (int inventoryIdx = 0; inventoryIdx < Inventory.Length; inventoryIdx++)
                 {
-                    // empty so continue
-                    if (Inventory[inventoryIdx] == null || Inventory[inventoryIdx].Item == null)
-                        continue;
+                    // Continue if:
+                     if (Inventory[inventoryIdx] == null || Inventory[inventoryIdx].Item == null  // different item 
+                     || Inventory[inventoryIdx].IsEmpty  // empty
+                         || Inventory[inventoryIdx].Count >= maxStackSize) // full   
+                     {
+                         continue;
+                     }
 
-                    // check if same item
-                    if (Inventory[inventoryIdx].Item != Hotbar[index].Item)
-                        continue;
-
-                    // check if enough space
-                    if (Inventory[inventoryIdx].Count >= maxStackSize)
-                        continue;
-
-                    // if there is enough for whole inventory stack then combine
-                    if (Inventory[inventoryIdx].Count + Hotbar[index].Count <= maxStackSize)
-                    {
-                        Inventory[inventoryIdx].Count += Hotbar[index].Count;
-                        SetItemStackInHotbar(index, null);
-                        return;
-                    }
-                    else
-                    {
-                        Inventory[inventoryIdx].Count -= maxStackSize - Hotbar[index].Count;
-                        Hotbar[index].Count = maxStackSize;
-
-                    }
+                    // Combine stacks, storing any remainder
+                    ItemStack remainingStack = Inventory[inventoryIdx].Combine(Hotbar[index]);
+                    // Assign remainder as new value
+                    SetItemStackInHotbar(index, remainingStack);
                 }
 
                 // 2. find first free inventory spot
@@ -143,6 +129,10 @@ namespace SharpCraft.entity
                 {
                     // not empty
                     if (Inventory[inventoryIdx] != null && Inventory[inventoryIdx].Item != null)
+                        continue;
+
+                   
+                    if (Hotbar[index] == null)
                         continue;
 
                     // empty slot found
@@ -204,6 +194,9 @@ namespace SharpCraft.entity
                 {
                     // not empty
                     if (Hotbar[hotBarIdx] != null && Hotbar[hotBarIdx].Item != null)
+                        continue;
+
+                    if (Inventory[inventoryItemIdx] == null)
                         continue;
 
                     // empty slot found
