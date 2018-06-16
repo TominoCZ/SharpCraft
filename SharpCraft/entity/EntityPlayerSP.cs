@@ -94,6 +94,8 @@ namespace SharpCraft.entity
             }
         }
 
+        
+
         public void FastMoveStack(int index)
         {
             ItemStack stack = GetItemStackInInventory(index);
@@ -104,90 +106,61 @@ namespace SharpCraft.entity
 
             int maxStackSize = stack.Item.MaxStackSize();
 
+            ItemStack[] tempHotbar = Hotbar;
+            ItemStack[] tempInventory = Inventory;
+
             // Hotbar to Inventory
             if (index < Hotbar.Length)
-            {
-                // 1. find same object in inventory to stack
-                for (int inventoryIdx = 0; inventoryIdx < Inventory.Length; inventoryIdx++)
-                {
-                     if (Inventory[inventoryIdx] == null || Inventory[inventoryIdx].Item == null 
-                        || Hotbar[index] == null || Hotbar[index].Item == null
-                        // Continue if:
-                        || Inventory[inventoryIdx].Item != Hotbar[index].Item // different item
-                        || Inventory[inventoryIdx].IsEmpty  // empty
-                        || Inventory[inventoryIdx].Count >= maxStackSize) // full   
-                     {
-                         continue;
-                     }
-
-                    // Combine stacks, storing any remainder
-                    ItemStack remainingStack = Inventory[inventoryIdx].Combine(Hotbar[index]);
-                    // Assign remainder as new value
-                    SetItemStackInHotbar(index, remainingStack);
-                }
-
-                // 2. find first free inventory spot
-                for (int inventoryIdx = 0; inventoryIdx < Inventory.Length; inventoryIdx++)
-                {                 
-                    if (Inventory[inventoryIdx] != null && Inventory[inventoryIdx].Item != null
-                        || Hotbar[index] == null)
-                    {
-                        continue;
-                    }                 
-
-                    // Initialise inventory slot without an item
-                    if (Inventory[inventoryIdx] == null)
-                        Inventory[inventoryIdx] = new ItemStack(null);
-
-                    // Combine stacks, storing any remainder
-                    ItemStack remainingStack = Inventory[inventoryIdx].Combine(Hotbar[index]);
-                    // Assign remainder as new value
-                    SetItemStackInHotbar(index, remainingStack);
-
-                }
-            }
+                FastMoveStackHelper(ref tempHotbar, ref tempInventory, SetItemStackInHotbar, index, index);
             // Inventory to Hotbar
             else
+                FastMoveStackHelper(ref tempInventory, ref tempHotbar, SetItemStackInInventory, index, index - Hotbar.Length);
+
+            tempHotbar.CopyTo(Hotbar, 0);
+            tempInventory.CopyTo(Inventory, 0);
+        }
+
+        private void FastMoveStackHelper(ref ItemStack[] from, ref ItemStack[] to, Action<int, ItemStack> setItemFunction, int slotIndex, int localSlotIndex)
+        {
+            int maxStackSize = GetItemStackInInventory(slotIndex).Item.MaxStackSize();
+
+            // 1. find same object in inventory to stack
+            for (int inventoryIdx = 0; inventoryIdx < to.Length; inventoryIdx++)
             {
-                int inventoryItemIdx = index - Hotbar.Length;
-        
-                // 1. find same object in hotbar to stack
-                for (int hotBarIdx = 0; hotBarIdx < Hotbar.Length; hotBarIdx++)
+                if (to[inventoryIdx] == null || to[inventoryIdx].Item == null
+                   || from[localSlotIndex] == null || from[localSlotIndex].Item == null
+                   // Continue if:
+                   || to[inventoryIdx].Item != from[localSlotIndex].Item // different item
+                   || to[inventoryIdx].IsEmpty  // empty
+                   || to[inventoryIdx].Count >= maxStackSize) // full   
                 {
-                    if (Hotbar[hotBarIdx] == null || Hotbar[hotBarIdx].Item == null
-                        || Inventory[inventoryItemIdx] == null || Inventory[inventoryItemIdx].Item == null 
-                        // Continue if:
-                        || Hotbar[hotBarIdx].Item != Inventory[inventoryItemIdx].Item // different item
-                        || Hotbar[hotBarIdx].IsEmpty  // empty
-                        || Hotbar[hotBarIdx].Count >= maxStackSize) // full   
-                    {
-                        continue;
-                    }
-                    
-                    // Combine stacks, storing any remainder
-                    ItemStack remainingStack = Hotbar[hotBarIdx].Combine(Inventory[inventoryItemIdx]);
-                    // Leave remainder
-                    SetItemStackInInventory(index, remainingStack);
+                    continue;
                 }
 
-                // 2. find first free hotbar spot
-                for (int hotBarIdx = 0; hotBarIdx < Hotbar.Length; hotBarIdx++)
+                // Combine stacks, storing any remainder
+                ItemStack remainingStack = to[inventoryIdx].Combine(from[localSlotIndex]);
+                // Assign remainder as new value
+                setItemFunction(slotIndex, remainingStack);
+            }
+
+            // 2. find first free inventory spot
+            for (int inventoryIdx = 0; inventoryIdx < to.Length; inventoryIdx++)
+            {
+                if (to[inventoryIdx] != null && to[inventoryIdx].Item != null
+                    || from[localSlotIndex] == null)
                 {
-                    if (Hotbar[hotBarIdx] != null && Hotbar[hotBarIdx].Item != null // not empty
-                        || Inventory[inventoryItemIdx] == null)
-                    {
-                        continue;
-                    }
-
-                    // Initialise hotbar slot without an item
-                    if (Hotbar[hotBarIdx] == null)
-                        Hotbar[hotBarIdx] = new ItemStack(null);
-
-                    // Combine stacks, storing any remainder
-                    ItemStack remainingStack = Hotbar[hotBarIdx].Combine(Inventory[inventoryItemIdx]);
-                    // Leave remainder
-                    SetItemStackInInventory(index, remainingStack);
+                    continue;
                 }
+
+                // Initialise inventory slot without an item
+                if (to[inventoryIdx] == null)
+                    to[inventoryIdx] = new ItemStack(null);
+
+                // Combine stacks, storing any remainder
+                ItemStack remainingStack = to[inventoryIdx].Combine(from[localSlotIndex]);
+                // Assign remainder as new value
+                setItemFunction(slotIndex, remainingStack);
+
             }
         }
 
