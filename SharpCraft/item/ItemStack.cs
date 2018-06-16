@@ -80,10 +80,11 @@ namespace SharpCraft.item
             // otherwise, combine as much as possible
             else
             {
-                this.Count -= this.Item.MaxStackSize() - other.Count;
+                int difference = this.Item.MaxStackSize() - this.Count;
+                this.Count += difference;
 
                 remainingStack = other.Copy();
-                remainingStack.Count = this.Item.MaxStackSize();
+                remainingStack.Count -= difference;
             }           
 
             return remainingStack;

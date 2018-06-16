@@ -94,7 +94,6 @@ namespace SharpCraft.entity
             }
         }
 
-        
 
         public void FastMoveStack(int index)
         {
@@ -141,6 +140,10 @@ namespace SharpCraft.entity
                 ItemStack remainingStack = to[inventoryIdx].Combine(from[localSlotIndex]);
                 // Assign remainder as new value
                 setItemFunction(slotIndex, remainingStack);
+
+                // finished
+                if (remainingStack == null || remainingStack.Count <= 0)
+                    return;
             }
 
             // 2. find first free inventory spot
@@ -160,9 +163,9 @@ namespace SharpCraft.entity
                 ItemStack remainingStack = to[inventoryIdx].Combine(from[localSlotIndex]);
                 // Assign remainder as new value
                 setItemFunction(slotIndex, remainingStack);
-
             }
         }
+
 
         public void SetItemStackInInventory(int index, ItemStack stack)
         {
