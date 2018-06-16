@@ -96,60 +96,135 @@ namespace SharpCraft.entity
 
         public void FastMoveStack(int index)
         {
-            int inventoryItemIdx = index;
-            int maxStackSize = 10;// Inventory[inventoryItemIdx].Item.MaxStackSize();
-            ItemStack stack = GetItemStackInInventory(inventoryItemIdx);
-
-            //TODO: different behaviour when shift+click the hotbar item
+            ItemStack stack = GetItemStackInInventory(index);
+            int maxStackSize = stack.Item.MaxStackSize();
 
             // return if there is no item to move
-            if (Inventory[inventoryItemIdx] == null || Inventory[inventoryItemIdx].Item == null)
+            if (stack == null || stack.Item == null)
                 return;
 
-            // 1. find same object in hotbar to stack
-            for (int hotBarIdx = 0; hotBarIdx < Hotbar.Length; hotBarIdx++)
+
+            // Hotbar to Inventory
+            if (index < Hotbar.Length)
             {
-                // empty so continue
-                if (Hotbar[hotBarIdx] == null || Hotbar[hotBarIdx].Item == null)
-                    continue;
-
-                // check if same item
-                if (Hotbar[hotBarIdx].Item != Inventory[inventoryItemIdx].Item)
-                    continue;
-
-                // check if enough space
-                if (Hotbar[hotBarIdx].Count >= maxStackSize)
-                    continue;
-
-                // if there is enough for whole inventory stack then combine
-                if(Hotbar[hotBarIdx].Count + Inventory[inventoryItemIdx].Count <= maxStackSize)
+                // TODO: Add to Itemstack as a function(Find in stack?)
+                // 1. find same object in inventory to stack
+                for (int inventoryIdx = 0; inventoryIdx < Inventory.Length; inventoryIdx++)
                 {
-                    Hotbar[hotBarIdx].Count += Inventory[inventoryItemIdx].Count;
-                    SetItemStackInInventory(inventoryItemIdx, null);
-                    return;
+                    // empty so continue
+                    if (Inventory[inventoryIdx] == null || Inventory[inventoryIdx].Item == null)
+                        continue;
+
+                    // check if same item
+                    if (Inventory[inventoryIdx].Item != Hotbar[index].Item)
+                        continue;
+
+                    // check if enough space
+                    if (Inventory[inventoryIdx].Count >= maxStackSize)
+                        continue;
+
+                    // if there is enough for whole inventory stack then combine
+                    if (Inventory[inventoryIdx].Count + Hotbar[index].Count <= maxStackSize)
+                    {
+                        Inventory[inventoryIdx].Count += Hotbar[index].Count;
+                        SetItemStackInHotbar(index, null);
+                        return;
+                    }
+                    else
+                    {
+                        Inventory[inventoryIdx].Count -= maxStackSize - Hotbar[index].Count;
+                        Hotbar[index].Count = maxStackSize;
+
+                    }
                 }
-                else
-                {
-                    Inventory[inventoryItemIdx].Count -= maxStackSize - Hotbar[hotBarIdx].Count;
-                    Hotbar[hotBarIdx].Count = maxStackSize;
 
+                // 2. find first free inventory spot
+                for (int inventoryIdx = 0; inventoryIdx < Inventory.Length; inventoryIdx++)
+                {
+                    // not empty
+                    if (Inventory[inventoryIdx] != null && Inventory[inventoryIdx].Item != null)
+                        continue;
+
+                    // empty slot found
+                    if (Hotbar[index].Count > maxStackSize)
+                    {
+                        ItemStack newStack = Hotbar[index].Copy();      
+                        newStack.Count = maxStackSize;
+                        SetItemStackInInventory(inventoryIdx + Hotbar.Length, newStack);
+
+                        Hotbar[index].Count -= maxStackSize;
+                        continue;
+                    }
+                    else
+                    {
+                        SetItemStackInInventory(inventoryIdx + Hotbar.Length, Hotbar[index].Copy());
+                        SetItemStackInHotbar(index, null);
+                        return;
+                    }
+                 
                 }
             }
-            
-            // 2. find first free hotbar spot
-            for (int hotBarIdx = 0; hotBarIdx < Hotbar.Length; hotBarIdx++)
+            // Inventory to Hotbar
+            else
             {
-                // not empty
-                if (Hotbar[hotBarIdx] != null && Hotbar[hotBarIdx].Item != null)
-                    continue;
+                int inventoryItemIdx = index - Hotbar.Length;
+        
+                // 1. find same object in hotbar to stack
+                for (int hotBarIdx = 0; hotBarIdx < Hotbar.Length; hotBarIdx++)
+                {
+                    // empty so continue
+                    if (Hotbar[hotBarIdx] == null || Hotbar[hotBarIdx].Item == null)
+                        continue;
 
-                // empty slot found
-                SetItemStackInHotbar(hotBarIdx, Inventory[inventoryItemIdx]);
-                SetItemStackInInventory(inventoryItemIdx, null);
-                return;
+                    // check if same item
+                    if (Hotbar[hotBarIdx].Item != Inventory[inventoryItemIdx].Item)
+                        continue;
+
+                    // check if enough space
+                    if (Hotbar[hotBarIdx].Count >= maxStackSize)
+                        continue;
+
+                    // if there is enough for whole inventory stack then combine
+                    if (Hotbar[hotBarIdx].Count + Inventory[inventoryItemIdx].Count <= maxStackSize)
+                    {
+                        Hotbar[hotBarIdx].Count += Inventory[inventoryItemIdx].Count;
+                        SetItemStackInInventory(index, null);
+                        return;
+                    }
+                    else
+                    {
+                        Inventory[inventoryItemIdx].Count -= maxStackSize - Hotbar[hotBarIdx].Count;
+                        Hotbar[hotBarIdx].Count = maxStackSize;
+
+                    }
+                }
+
+                // 2. find first free hotbar spot
+                for (int hotBarIdx = 0; hotBarIdx < Hotbar.Length; hotBarIdx++)
+                {
+                    // not empty
+                    if (Hotbar[hotBarIdx] != null && Hotbar[hotBarIdx].Item != null)
+                        continue;
+
+                    // empty slot found
+                    if (Inventory[inventoryItemIdx].Count > maxStackSize)
+                    {
+                        ItemStack newStack = Inventory[inventoryItemIdx].Copy();
+                        newStack.Count = maxStackSize;
+                        SetItemStackInHotbar(hotBarIdx, newStack);
+
+                        Inventory[inventoryItemIdx].Count -= maxStackSize;
+                        continue;
+                    }
+                    else
+                    {
+                        SetItemStackInHotbar(hotBarIdx, Inventory[inventoryItemIdx]);
+                        SetItemStackInInventory(index, null);
+                        return;
+                    }
+                  
+                }
             }
-
-
         }
 
         public void SetItemStackInInventory(int index, ItemStack stack)
@@ -157,7 +232,8 @@ namespace SharpCraft.entity
             if (index < Hotbar.Length)
                 SetItemStackInHotbar(index, stack);
             else
-                Inventory[index % Inventory.Length] = stack;
+                Inventory[index - Hotbar.Length] = stack;
+            //  BEFORE: Inventory[index % Inventory.Length] = stack;
         }
 
         private void SetItemStackInHotbar(int index, ItemStack stack)
@@ -170,7 +246,7 @@ namespace SharpCraft.entity
             if (index < Hotbar.Length)
                 return GetItemStackInHotbar(index);
 
-            return Inventory[index % Inventory.Length];
+            return Inventory[index - Hotbar.Length];
         }
 
         private ItemStack GetItemStackInHotbar(int index)
