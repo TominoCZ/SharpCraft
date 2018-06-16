@@ -128,32 +128,22 @@ namespace SharpCraft.entity
 
                 // 2. find first free inventory spot
                 for (int inventoryIdx = 0; inventoryIdx < Inventory.Length; inventoryIdx++)
-                {
-                    // not empty
-                    if (Inventory[inventoryIdx] != null && Inventory[inventoryIdx].Item != null)
-                        continue;
-
-                   
-                    if (Hotbar[index] == null)
-                        continue;
-
-                    // empty slot found
-                    if (Hotbar[index].Count > maxStackSize)
+                {                 
+                    if (Inventory[inventoryIdx] != null && Inventory[inventoryIdx].Item != null
+                        || Hotbar[index] == null)
                     {
-                        ItemStack newStack = Hotbar[index].Copy();      
-                        newStack.Count = maxStackSize;
-                        SetItemStackInInventory(inventoryIdx + Hotbar.Length, newStack);
-
-                        Hotbar[index].Count -= maxStackSize;
                         continue;
-                    }
-                    else
-                    {
-                        SetItemStackInInventory(inventoryIdx + Hotbar.Length, Hotbar[index].Copy());
-                        SetItemStackInHotbar(index, null);
-                        return;
-                    }
-                 
+                    }                 
+
+                    // Initialise inventory slot without an item
+                    if (Inventory[inventoryIdx] == null)
+                        Inventory[inventoryIdx] = new ItemStack(null);
+
+                    // Combine stacks, storing any remainder
+                    ItemStack remainingStack = Inventory[inventoryIdx].Combine(Hotbar[index]);
+                    // Assign remainder as new value
+                    SetItemStackInHotbar(index, remainingStack);
+
                 }
             }
             // Inventory to Hotbar
@@ -176,37 +166,27 @@ namespace SharpCraft.entity
                     
                     // Combine stacks, storing any remainder
                     ItemStack remainingStack = Hotbar[hotBarIdx].Combine(Inventory[inventoryItemIdx]);
-                    // Assign remainder as new value
+                    // Leave remainder
                     SetItemStackInInventory(index, remainingStack);
                 }
 
                 // 2. find first free hotbar spot
                 for (int hotBarIdx = 0; hotBarIdx < Hotbar.Length; hotBarIdx++)
                 {
-                    // not empty
-                    if (Hotbar[hotBarIdx] != null && Hotbar[hotBarIdx].Item != null)
-                        continue;
-
-                    if (Inventory[inventoryItemIdx] == null)
-                        continue;
-
-                    // empty slot found
-                    if (Inventory[inventoryItemIdx].Count > maxStackSize)
+                    if (Hotbar[hotBarIdx] != null && Hotbar[hotBarIdx].Item != null // not empty
+                        || Inventory[inventoryItemIdx] == null)
                     {
-                        ItemStack newStack = Inventory[inventoryItemIdx].Copy();
-                        newStack.Count = maxStackSize;
-                        SetItemStackInHotbar(hotBarIdx, newStack);
-
-                        Inventory[inventoryItemIdx].Count -= maxStackSize;
                         continue;
                     }
-                    else
-                    {
-                        SetItemStackInHotbar(hotBarIdx, Inventory[inventoryItemIdx]);
-                        SetItemStackInInventory(index, null);
-                        return;
-                    }
-                  
+
+                    // Initialise hotbar slot without an item
+                    if (Hotbar[hotBarIdx] == null)
+                        Hotbar[hotBarIdx] = new ItemStack(null);
+
+                    // Combine stacks, storing any remainder
+                    ItemStack remainingStack = Hotbar[hotBarIdx].Combine(Inventory[inventoryItemIdx]);
+                    // Leave remainder
+                    SetItemStackInInventory(index, remainingStack);
                 }
             }
         }
@@ -217,7 +197,6 @@ namespace SharpCraft.entity
                 SetItemStackInHotbar(index, stack);
             else
                 Inventory[index - Hotbar.Length] = stack;
-            //  BEFORE: Inventory[index % Inventory.Length] = stack;
         }
 
         private void SetItemStackInHotbar(int index, ItemStack stack)

@@ -60,7 +60,16 @@ namespace SharpCraft.item
 
         public ItemStack Combine(ItemStack other)
         {
-            ItemStack remainingStack;
+            ItemStack remainingStack = null;
+
+            // Copy item if an item isn't present here
+            if(this.Item == null)
+            {
+                if(other.Item == null)
+                    return remainingStack; // error
+                else
+                    this.Item = other.Item;
+            }
 
             // Combine stacks if enough space
             if (this.Count + other.Count <= this.Item.MaxStackSize())
@@ -68,16 +77,17 @@ namespace SharpCraft.item
                 this.Count += other.Count;
                 remainingStack = null;
             }
-            // Combine as much as possible
+            // otherwise, combine as much as possible
             else
             {
                 this.Count -= this.Item.MaxStackSize() - other.Count;
 
                 remainingStack = other.Copy();
                 remainingStack.Count = this.Item.MaxStackSize();
-            }
+            }           
 
             return remainingStack;
         }
+
     }
 }
