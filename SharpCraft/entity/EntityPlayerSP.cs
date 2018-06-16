@@ -96,17 +96,60 @@ namespace SharpCraft.entity
 
         public void FastMoveStack(int index)
         {
-            //TODO - finish :D dont forget, that there is a possibility that the item in the stacks are the same, so they merge
-            int i = 0;
+            int inventoryItemIdx = index;
+            int maxStackSize = 10;// Inventory[inventoryItemIdx].Item.MaxStackSize();
+            ItemStack stack = GetItemStackInInventory(inventoryItemIdx);
 
-            for (; i < Inventory.Length; i++)
+            //TODO: different behaviour when shift+click the hotbar item
+
+            // return if there is no item to move
+            if (Inventory[inventoryItemIdx] == null || Inventory[inventoryItemIdx].Item == null)
+                return;
+
+            // 1. find same object in hotbar to stack
+            for (int hotBarIdx = 0; hotBarIdx < Hotbar.Length; hotBarIdx++)
             {
-                if (Inventory[i] == null || Inventory[i].IsEmpty)
-                    break;
+                // empty so continue
+                if (Hotbar[hotBarIdx] == null || Hotbar[hotBarIdx].Item == null)
+                    continue;
+
+                // check if same item
+                if (Hotbar[hotBarIdx].Item != Inventory[inventoryItemIdx].Item)
+                    continue;
+
+                // check if enough space
+                if (Hotbar[hotBarIdx].Count >= maxStackSize)
+                    continue;
+
+                // if there is enough for whole inventory stack then combine
+                if(Hotbar[hotBarIdx].Count + Inventory[inventoryItemIdx].Count <= maxStackSize)
+                {
+                    Hotbar[hotBarIdx].Count += Inventory[inventoryItemIdx].Count;
+                    SetItemStackInInventory(inventoryItemIdx, null);
+                    return;
+                }
+                else
+                {
+                    Inventory[inventoryItemIdx].Count -= maxStackSize - Hotbar[hotBarIdx].Count;
+                    Hotbar[hotBarIdx].Count = maxStackSize;
+
+                }
+            }
+            
+            // 2. find first free hotbar spot
+            for (int hotBarIdx = 0; hotBarIdx < Hotbar.Length; hotBarIdx++)
+            {
+                // not empty
+                if (Hotbar[hotBarIdx] != null && Hotbar[hotBarIdx].Item != null)
+                    continue;
+
+                // empty slot found
+                SetItemStackInHotbar(hotBarIdx, Inventory[inventoryItemIdx]);
+                SetItemStackInInventory(inventoryItemIdx, null);
+                return;
             }
 
-            if (i >= index)
-                return;
+
         }
 
         public void SetItemStackInInventory(int index, ItemStack stack)
@@ -152,6 +195,26 @@ namespace SharpCraft.entity
 
             var lastKnownEmpty = -1;
 
+            // Check Hotbar first
+            for(int i = 0; i < Hotbar.Length; i++)
+            {
+                ItemStack stack = GetItemStackInInventory(i);
+                if (stack == null || stack.IsEmpty)
+                    continue;
+
+                if (dropped.Item == stack.Item && stack.Count <= stack.Item.MaxStackSize())
+                {
+                    int toPickUp = Math.Min(stack.Item.MaxStackSize() - stack.Count, dropped.Count);
+
+                    stack.Count += toPickUp;
+                    dropped.Count -= toPickUp;
+                }
+
+                // return if fully combined
+                if (dropped.IsEmpty)
+                    return true;
+            }
+
             for (var i = inventorySize - 1; i >= 0; i--)
             {
                 var stack = GetItemStackInInventory(i);
@@ -162,6 +225,11 @@ namespace SharpCraft.entity
                     continue;
                 }
 
+                // Continue as already looked at Hotbar 
+                if (i > Hotbar.Length)
+                    continue;
+
+                
                 if (dropped.Item == stack.Item && stack.Count <= stack.Item.MaxStackSize())
                 {
                     var toPickUp = Math.Min(stack.Item.MaxStackSize() - stack.Count, dropped.Count);
