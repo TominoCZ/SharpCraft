@@ -92,7 +92,7 @@ namespace SharpCraft.entity
                     fallDistance = fallYPosition - pos.Y;
 
                     // damage calculation:
-                    // do half a heart a heart damage for every block passed past 3 blocks
+                    // do half a heart of damage for every block passed past 3 blocks
                     const float halfHeartPercentage = 5.0f;
                     const int lowestBlockHeight = 3;
 
