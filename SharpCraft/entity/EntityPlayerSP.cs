@@ -26,6 +26,11 @@ namespace SharpCraft.entity
 
         public ItemStack[] Hotbar { get; }
         public ItemStack[] Inventory { get; }
+        public float healthPercentage = 100.0f;
+
+        public float fallDistance = 0;
+        public bool isFalling = false;
+        public float fallYPosition = 0.0f;
 
         public bool HasFullInventory => Hotbar.All(stack => stack != null && !stack.IsEmpty) && Inventory.All(stack => stack != null && !stack.IsEmpty);
 
@@ -45,6 +50,12 @@ namespace SharpCraft.entity
             if (SharpCraft.Instance.Focused)
                 UpdateCameraMovement();
 
+            if (SharpCraft.Instance.IsPaused == false)
+            {
+                FallDamage();
+                LifeRegen();
+            }
+
             base.Update();
         }
 
@@ -53,6 +64,62 @@ namespace SharpCraft.entity
             var interpolatedPos = lastPos + (pos - lastPos) * partialTicks;
 
             SharpCraft.Instance.Camera.pos = interpolatedPos + Vector3.UnitY * EyeHeight;
+        }
+
+        private void FallDamage()
+        {
+            // 1 block is 1 unit
+
+
+            if(pos.Y < lastPos.Y)
+            {
+                if (isFalling == false)
+                {
+                    isFalling = true;
+                    fallYPosition = pos.Y;
+                }
+            }
+            else
+            {
+                // hit the ground
+                if(isFalling == true)
+                {
+                    fallDistance = fallYPosition - pos.Y;
+                    if (fallDistance >= 1.26f)
+                    {
+                        // Do damage calculations
+                        if (fallDistance > 3)
+                        {
+                            TakeDamage((fallDistance - 3) * 5.0f);
+                        }
+                    }
+                }
+                
+                isFalling = false;
+                fallYPosition = 0.0f;
+            }
+        }
+
+        private void TakeDamage(float percentage)
+        {
+            if(healthPercentage - percentage < 0)
+            {
+                healthPercentage = 0.0f;
+                return;
+            }
+
+            healthPercentage -= percentage;
+        }
+
+        private void LifeRegen()
+        {
+            if (healthPercentage > 100.0f)
+                healthPercentage = 100.0f;
+
+            if (healthPercentage == 100.0f)
+                return;
+
+            healthPercentage += 0.06f; // 0.5 heart in 4 seconds
         }
 
         private void UpdateCameraMovement()
