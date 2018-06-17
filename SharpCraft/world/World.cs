@@ -80,9 +80,9 @@ namespace SharpCraft.world
 
         public List<AxisAlignedBB> GetBlockCollisionBoxes(AxisAlignedBB box)
         {
-            var blocks = new List<AxisAlignedBB>();
+            List<AxisAlignedBB> blocks = new List<AxisAlignedBB>();
 
-            var bb = box.Union(box);
+            AxisAlignedBB bb = box.Union(box);
 
             for (int x = (int)bb.min.X, maxX = (int)bb.max.X; x < maxX; x++)
             {
@@ -90,8 +90,8 @@ namespace SharpCraft.world
                 {
                     for (int z = (int)bb.min.Z, maxZ = (int)bb.max.Z; z < maxZ; z++)
                     {
-                        var pos = new BlockPos(x, y, z);
-                        var block = SharpCraft.Instance.World.GetBlock(pos);
+                        BlockPos pos = new BlockPos(x, y, z);
+                        EnumBlock block = SharpCraft.Instance.World.GetBlock(pos);
                         if (block == EnumBlock.AIR)
                             continue;
 
@@ -105,7 +105,7 @@ namespace SharpCraft.world
 
         public Chunk GetChunk(ChunkPos pos)
         {
-            return Chunks.TryGetValue(pos, out var chunkData) ? chunkData : null;
+            return Chunks.TryGetValue(pos, out Chunk chunkData) ? chunkData : null;
         }
 
         public EnumBlock GetBlock(BlockPos pos)
@@ -113,7 +113,7 @@ namespace SharpCraft.world
             if (pos.Y < 0 || pos.Y >= Chunk.ChunkHeight)
                 return EnumBlock.AIR;
 
-            var chunk = GetChunk(ChunkPos.FromWorldSpace(pos));
+            Chunk chunk = GetChunk(ChunkPos.FromWorldSpace(pos));
             if (chunk == null || !chunk.HasData)
                 return EnumBlock.AIR;
 
@@ -122,7 +122,7 @@ namespace SharpCraft.world
 
         public void SetBlock(BlockPos pos, EnumBlock blockType, int meta)
         {
-            var chunk = GetChunk(ChunkPos.FromWorldSpace(pos));
+            Chunk chunk = GetChunk(ChunkPos.FromWorldSpace(pos));
             if (chunk == null || !chunk.HasData)
                 return;
 
@@ -131,7 +131,7 @@ namespace SharpCraft.world
 
         public void UnloadChunk(ChunkPos pos)
         {
-            if (Chunks.TryRemove(pos, out var chunk)) // && data.model.isGenerated)
+            if (Chunks.TryRemove(pos, out Chunk chunk)) // && data.model.isGenerated)
             {
                 chunk.DestroyModel();
                 chunk.Save();
@@ -140,10 +140,10 @@ namespace SharpCraft.world
 
         public bool LoadChunk(ChunkPos chunkPos)
         {
-            var data = ChunkData.GetChunkData(chunkPos);
+            byte[] data = ChunkData.GetChunkData(chunkPos);
             if (data == null) return false;
 
-            var blockData = new short[Chunk.ChunkSize, Chunk.ChunkHeight, Chunk.ChunkSize];
+            short[,,] blockData = new short[Chunk.ChunkSize, Chunk.ChunkHeight, Chunk.ChunkSize];
             Buffer.BlockCopy(data, 0, blockData, 0, data.Length);
 
             CreateChunk(chunkPos, blockData);
@@ -152,7 +152,7 @@ namespace SharpCraft.world
 
         public void SaveAllChunks()
         {
-            foreach (var data in Chunks.Values)
+            foreach (Chunk data in Chunks.Values)
             {
                 data.Save();
             }
@@ -160,7 +160,7 @@ namespace SharpCraft.world
 
         public void DestroyChunkModels()
         {
-            foreach (var data in Chunks.Values)
+            foreach (Chunk data in Chunks.Values)
             {
                 data.DestroyModel();
             }
@@ -168,7 +168,7 @@ namespace SharpCraft.world
 
         public int GetMetadata(BlockPos pos)
         {
-            var chunk = GetChunk(ChunkPos.FromWorldSpace(pos));
+            Chunk chunk = GetChunk(ChunkPos.FromWorldSpace(pos));
             if (chunk == null || !chunk.HasData)
                 return -1;
 
@@ -177,7 +177,7 @@ namespace SharpCraft.world
 
         public void SetMetadata(BlockPos pos, int meta)
         {
-            var chunk = GetChunk(ChunkPos.FromWorldSpace(pos));
+            Chunk chunk = GetChunk(ChunkPos.FromWorldSpace(pos));
             if (chunk == null || !chunk.HasData)
                 return;
 
@@ -186,9 +186,9 @@ namespace SharpCraft.world
 
         public int GetHeightAtPos(float x, float z)
         {
-            var pos = new BlockPos(x, 0, z);
+            BlockPos pos = new BlockPos(x, 0, z);
 
-            var chunk = GetChunk(pos.ChunkPos());
+            Chunk chunk = GetChunk(pos.ChunkPos());
             if (chunk == null || !chunk.HasData)
                 return 0;
 
@@ -204,7 +204,7 @@ namespace SharpCraft.world
         {
             lock (Chunks)
             {
-                var chunk = data == null ? new Chunk(pos, this) : new Chunk(pos, this, data);
+                Chunk chunk = data == null ? new Chunk(pos, this) : new Chunk(pos, this, data);
                 if (!Chunks.TryAdd(chunk.Pos, chunk))
                 {
                     Console.Error.WriteLine("Chunk already exists at " + chunk.Pos);
@@ -217,11 +217,11 @@ namespace SharpCraft.world
 
         public void GenerateChunk(ChunkPos chunkPos, bool updateContainingEntities)
         {
-            var chunk = CreateChunk(chunkPos, null);
+            Chunk chunk = CreateChunk(chunkPos, null);
             if (chunk == null)
                 return;
 
-            var chunkData = new short[Chunk.ChunkSize, Chunk.ChunkHeight, Chunk.ChunkSize];
+            short[,,] chunkData = new short[Chunk.ChunkSize, Chunk.ChunkHeight, Chunk.ChunkSize];
 
             void SetBlock(int x, int y, int z, EnumBlock b)
             {
@@ -234,19 +234,20 @@ namespace SharpCraft.world
                 return chunkData[x, y, z] >> 4 == (int)EnumBlock.AIR;
             }
 
-            for (var z = 0; z < Chunk.ChunkSize; z++)
+            Enumerable.Range(0, Chunk.ChunkSize).AsParallel().ForAll(z =>
             {
-                for (var x = 0; x < Chunk.ChunkSize; x++)
+                for (int x = 0; x < Chunk.ChunkSize; x++)
                 {
-                    var wsX = chunk.Pos.WorldSpaceX();
-                    var wsZ = chunk.Pos.WorldSpaceZ();
+                    float wsX = chunk.Pos.WorldSpaceX();
+                    float wsZ = chunk.Pos.WorldSpaceZ();
 
-                    var xCh = x + wsX;
-                    var zCh = z + wsZ;
+                    float xCh = x + wsX;
+                    float zCh = z + wsZ;
 
-                    var peakY = 32 + (int)Math.Abs(MathHelper.Clamp(0.35f + _noiseUtil.GetPerlinFractal(xCh, zCh), 0, 1) * 32);
+                    int peakY = 32 + (int)Math.Abs(
+                                    MathHelper.Clamp(0.35f + _noiseUtil.GetPerlinFractal(xCh, zCh), 0, 1) * 32);
 
-                    for (var y = peakY; y >= 0; y--)
+                    for (int y = peakY; y >= 0; y--)
                     {
                         if (y == peakY) SetBlock(x, y, z, EnumBlock.GRASS);
                         else if (y > 0 && peakY - y > 0 && peakY - y < 3) SetBlock(x, y, z, EnumBlock.DIRT);
@@ -254,22 +255,22 @@ namespace SharpCraft.world
                             SetBlock(x, y, z, EnumBlock.BEDROCK);
                         else
                         {
-                            var f = _noiseUtil.GetNoise(xCh * 32 - y * 16, zCh * 32 + x * 16);
+                            float f = _noiseUtil.GetNoise(xCh * 32 - y * 16, zCh * 32 + x * 16);
 
                             SetBlock(x, y, z, f >= 0.75f ? EnumBlock.RARE : EnumBlock.STONE);
                         }
                     }
 
-                    var treeSeed = Math.Abs(MathHelper.Clamp(_noiseUtil.GetWhiteNoise(xCh, zCh), 0, 1));
+                    float treeSeed = Math.Abs(MathHelper.Clamp(_noiseUtil.GetWhiteNoise(xCh, zCh), 0, 1));
                     //var treeSeed2 = Math.Abs(MathHelper.Clamp(0.35f + _noiseUtil.GetPerlinFractal(zCh, xCh), 0, 1));
 
                     if (treeSeed >= 0.85f && x >= 3 && z >= 3 && x <= 13 && z <= 13 && x % 4 == 0 && z % 4 == 0)
                     {
-                        var treeTop = 0;
+                        int treeTop = 0;
 
-                        var height = (int)Math.Clamp(peakY * treeSeed / 64f * 7.5f, 3, 4);
+                        int height = (int)Math.Clamp(peakY * treeSeed / 64f * 7.5f, 3, 4);
 
-                        for (var treeY = 0; treeY < height; treeY++)
+                        for (int treeY = 0; treeY < height; treeY++)
                         {
                             treeTop = peakY + 1 + treeY;
                             SetBlock(x, treeTop, z, EnumBlock.LOG);
@@ -285,14 +286,14 @@ namespace SharpCraft.world
                                     if (i == 0 && k == 0 && j <= 0)
                                         continue;
 
-                                    var pX = x + i;
-                                    var pY = treeTop + j - 1;
-                                    var pZ = z + k;
+                                    int pX = x + i;
+                                    int pY = treeTop + j - 1;
+                                    int pZ = z + k;
 
                                     if (!IsAir(pX, pY, pZ))
                                         continue;
 
-                                    var vec = new Vector3(i, j, k);
+                                    Vector3 vec = new Vector3(i, j, k);
 
                                     if (MathUtil.Distance(vec, Vector3.Zero) <= 2.5f)
                                         SetBlock(pX, pY, pZ, EnumBlock.LEAVES);
@@ -301,19 +302,19 @@ namespace SharpCraft.world
                         }
                     }
                 }
-            }
+            });
 
             chunk.GeneratedData(chunkData);
 
             if (updateContainingEntities)
             {
-                foreach (var entity in Entities)
+                foreach (Entity entity in Entities)
                 {
-                    var pos = new BlockPos(entity.pos);
+                    BlockPos pos = new BlockPos(entity.pos);
 
                     if (chunk.Pos == pos.ChunkPos())
                     {
-                        var height = chunk.GetHeightAtPos(MathUtil.ToLocal(pos.X, Chunk.ChunkSize), MathUtil.ToLocal(pos.Z, Chunk.ChunkSize));
+                        int height = chunk.GetHeightAtPos(MathUtil.ToLocal(pos.X, Chunk.ChunkSize), MathUtil.ToLocal(pos.Z, Chunk.ChunkSize));
 
                         if (entity.pos.Y < height)
                             entity.TeleportTo(new Vector3(entity.pos.X, entity.lastPos.Y = height, entity.pos.Z));
@@ -335,7 +336,7 @@ namespace SharpCraft.world
             LoadManager.UpdateLoad(player, renderDistance, initalLoad);
             initalLoad = false;
 
-            foreach (var chunk in Chunks.Values)
+            foreach (Chunk chunk in Chunks.Values)
             {
                 chunk.Update();
 
@@ -357,7 +358,7 @@ namespace SharpCraft.world
 
         public void EditWaypoint(BlockPos pos, Color color, string name)
         {
-            if (_waypoints.TryGetValue(pos, out var wp))
+            if (_waypoints.TryGetValue(pos, out Waypoint wp))
             {
                 wp.Color = color;
                 wp.Name = name;

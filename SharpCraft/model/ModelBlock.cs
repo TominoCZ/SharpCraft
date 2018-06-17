@@ -2,6 +2,7 @@
 using SharpCraft.entity;
 using SharpCraft.render.shader;
 using SharpCraft.util;
+using System.Collections.Generic;
 
 namespace SharpCraft.model
 {
@@ -21,7 +22,7 @@ namespace SharpCraft.model
             this.hasTransparency = hasTransparency;
             this.canBeInteractedWith = canBeInteractedWith;
 
-            var cube = ModelHelper.createTexturedCubeModel(block);
+            Dictionary<FaceSides, RawQuad> cube = ModelHelper.createTexturedCubeModel(block);
 
             RawModel = ModelManager.loadBlockModelToVAO(cube);
 

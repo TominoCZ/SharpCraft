@@ -73,7 +73,7 @@ namespace SharpCraft.block
                 return false;
             }
 
-            var pos = (BlockPos)obj;
+            BlockPos pos = (BlockPos)obj;
             return X == pos.X &&
                    Y == pos.Y &&
                    Z == pos.Z;
@@ -81,7 +81,7 @@ namespace SharpCraft.block
 
         public override int GetHashCode()
         {
-            var hashCode = -307843816;
+            int hashCode = -307843816;
             hashCode = hashCode * -1521134295 + X.GetHashCode();
             hashCode = hashCode * -1521134295 + Y.GetHashCode();
             hashCode = hashCode * -1521134295 + Z.GetHashCode();

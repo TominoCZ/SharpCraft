@@ -52,7 +52,7 @@ namespace SharpCraft.util
 
         public void TryUpdate()
         {
-            var nanos = GetNanoTime();
+            long nanos = GetNanoTime();
 
             if (SharpCraft.Instance.IsPaused)
             {
@@ -62,7 +62,7 @@ namespace SharpCraft.util
             }
 
             CalculatePartialTicks();
-            var count = GetPartialTicks();
+            float count = GetPartialTicks();
 
             if (count > ups * 2)
             {
@@ -77,9 +77,9 @@ namespace SharpCraft.util
 
             while (count-- >= 1)
             {
-                var start = GetNanoTime();
+                long start = GetNanoTime();
                 UpdateHook();
-                var end = GetNanoTime();
+                long end = GetNanoTime();
 
                 lastUpdate = start;
                 lastUpdateTime = end - start;

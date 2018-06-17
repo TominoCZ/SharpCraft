@@ -41,7 +41,7 @@ namespace SharpCraft.world.chunk.region
 
         private void CreateAndPopulate()
         {
-            var chunkCount = _info.ChunkCount;
+            int chunkCount = _info.ChunkCount;
             PopulateBlank(chunkCount);
             CacheFlags(chunkCount);
         }
@@ -52,7 +52,7 @@ namespace SharpCraft.world.chunk.region
 
             using (FileStream stream = Read())
             {
-                for (var i = 0; i < chunkCount; i++)
+                for (int i = 0; i < chunkCount; i++)
                 {
                     stream.Seek((_info.ChunkByteSize + 1) * i, SeekOrigin.Begin);
                     _cacheFlags[i] = (byte)stream.ReadByte();
@@ -69,7 +69,7 @@ namespace SharpCraft.world.chunk.region
                 byte[] blankChunk = new byte[_info.ChunkByteSize + 1];
                 blankChunk[0] = BlankChunk;
 
-                for (var i = 0; i < chunkCount; i++)
+                for (int i = 0; i < chunkCount; i++)
                 {
                     newFile.Write(blankChunk, 0, blankChunk.Length);
                 }
@@ -98,14 +98,14 @@ namespace SharpCraft.world.chunk.region
         {
             if (IsBlank(id)) return null;
 
-            using (var stream = Read())
+            using (FileStream stream = Read())
             {
                 stream.Seek((_info.ChunkByteSize + 1) * id, SeekOrigin.Begin);
 
                 _cacheFlags[id] = (byte)stream.ReadByte();
                 if (IsBlank(id)) return null;
 
-                var data = new byte[_info.ChunkByteSize];
+                byte[] data = new byte[_info.ChunkByteSize];
                 stream.Read(data, 0, data.Length);
                 stream.Close();
                 return data;

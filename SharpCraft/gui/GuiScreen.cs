@@ -25,7 +25,7 @@ namespace SharpCraft.gui
         {
             for (int i = 0; i < buttons.Count; i++)
             {
-                var btn = buttons[i];
+                GuiButton btn = buttons[i];
 
                 btn.Render(mouseX, mouseY);
                 //hovered? HoverColor : Vector3.One
@@ -37,11 +37,11 @@ namespace SharpCraft.gui
 
         protected virtual void DrawBackground()
         {
-            var sizeX = background.TextureSize.Width * background.Scale;
-            var sizeY = background.TextureSize.Height * background.Scale;
+            float sizeX = background.TextureSize.Width * background.Scale;
+            float sizeY = background.TextureSize.Height * background.Scale;
 
-            var countX = Math.Ceiling(SharpCraft.Instance.ClientSize.Width / sizeX);
-            var countY = Math.Ceiling(SharpCraft.Instance.ClientSize.Height / sizeY);
+            double countX = Math.Ceiling(SharpCraft.Instance.ClientSize.Width / sizeX);
+            double countY = Math.Ceiling(SharpCraft.Instance.ClientSize.Height / sizeY);
 
             for (int x = 0; x <= countX; x++)
             {
@@ -54,11 +54,11 @@ namespace SharpCraft.gui
 
         protected virtual void DrawDefaultBackground()
         {
-            var sizeX = background_default.TextureSize.Width * background_default.Scale;
-            var sizeY = background_default.TextureSize.Height * background_default.Scale;
+            float sizeX = background_default.TextureSize.Width * background_default.Scale;
+            float sizeY = background_default.TextureSize.Height * background_default.Scale;
 
-            var countX = Math.Ceiling(SharpCraft.Instance.ClientSize.Width / sizeX);
-            var countY = Math.Ceiling(SharpCraft.Instance.ClientSize.Height / sizeY);
+            double countX = Math.Ceiling(SharpCraft.Instance.ClientSize.Width / sizeX);
+            double countY = Math.Ceiling(SharpCraft.Instance.ClientSize.Height / sizeY);
 
             for (int x = 0; x <= countX; x++)
             {
@@ -73,7 +73,7 @@ namespace SharpCraft.gui
         {
             for (int i = buttons.Count - 1; i >= 0; i--)
             {
-                var btn = buttons[i];
+                GuiButton btn = buttons[i];
 
                 if (btn.IsMouseOver(x, y))
                 {

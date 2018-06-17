@@ -22,7 +22,7 @@ namespace SharpCraft.world.chunk
         private SwapList<ChunkPos> _chunkLoads = new SwapList<ChunkPos>(
             c =>
             {
-                var w = SharpCraft.Instance.World;
+                World w = SharpCraft.Instance.World;
                 if (w.GetChunk(c) != null) return;
 
 #pragma warning disable CS0642 // Possible mistaken empty statement
@@ -57,7 +57,7 @@ namespace SharpCraft.world.chunk
         {
             while (!_importantChunkBuilds.IsEmpty)
             {
-                if (_importantChunkBuilds.TryDequeue(out var chunk)) chunk.BuildChunkModelNow();
+                if (_importantChunkBuilds.TryDequeue(out Chunk chunk)) chunk.BuildChunkModelNow();
             }
             SharpCraft.Instance.RunGlTasks();
         }
@@ -97,7 +97,7 @@ namespace SharpCraft.world.chunk
         {
             while (!_importantChunkLoads.IsEmpty)
             {
-                if (_importantChunkLoads.TryDequeue(out var pos) && SharpCraft.Instance.World.GetChunk(pos) == null)
+                if (_importantChunkLoads.TryDequeue(out ChunkPos pos) && SharpCraft.Instance.World.GetChunk(pos) == null)
                 {
                     lock (_chunkLoads)
                     {
@@ -123,15 +123,15 @@ namespace SharpCraft.world.chunk
 
         public void UpdateLoad(EntityPlayerSP player, int renderDistance, bool important)
         {
-            var world = SharpCraft.Instance.World;
+            World world = SharpCraft.Instance.World;
 
-            var playerChunkPos = ChunkPos.FromWorldSpace(SharpCraft.Instance.Player.pos);
+            ChunkPos playerChunkPos = ChunkPos.FromWorldSpace(SharpCraft.Instance.Player.pos);
 
-            for (var z = -renderDistance; z <= renderDistance; z++)
+            for (int z = -renderDistance; z <= renderDistance; z++)
             {
-                for (var x = -renderDistance; x <= renderDistance; x++)
+                for (int x = -renderDistance; x <= renderDistance; x++)
                 {
-                    var pos = playerChunkPos + new ChunkPos(x, z);
+                    ChunkPos pos = playerChunkPos + new ChunkPos(x, z);
                     if (pos.DistanceTo(player.pos.Xz) < renderDistance * Chunk.ChunkSize)
                     {
                         if (world.GetChunk(pos) == null)
@@ -169,7 +169,7 @@ namespace SharpCraft.world.chunk
             else _primary.ForEach(_action);
             _primary.Clear();
 
-            var ch = _primary;
+            List<T> ch = _primary;
             _primary = _backup;
             _backup = ch;
 

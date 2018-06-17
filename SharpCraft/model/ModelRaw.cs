@@ -15,7 +15,7 @@ namespace SharpCraft.model
             this.vaoID = vaoID;
             this.bufferIDs = bufferIDs;
 
-            foreach (var quad in quads)
+            foreach (RawQuad quad in quads)
                 vertexCount += quad.vertices.Length / valuesPerVertice;
         }
 

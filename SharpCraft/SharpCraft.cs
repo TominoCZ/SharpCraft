@@ -16,7 +16,6 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
@@ -198,24 +197,24 @@ namespace SharpCraft
             Console.WriteLine("DEBUG: loading models");
 
             //TODO - merge shaders and use strings as block IDs like sharpcraft:dirt
-            var shader = new Shader<ModelBlock>("block");
-            var shaderUnlit = new Shader<ModelBlock>("block_unlit");
+            Shader<ModelBlock> shader = new Shader<ModelBlock>("block");
+            Shader<ModelBlock> shaderUnlit = new Shader<ModelBlock>("block_unlit");
 
-            var missingModel = new ModelBlock(EnumBlock.MISSING, shader);
-            var stoneModel = new ModelBlock(EnumBlock.STONE, shader);
-            var grassModel = new ModelBlock(EnumBlock.GRASS, shader);
-            var dirtModel = new ModelBlock(EnumBlock.DIRT, shader);
-            var cobblestoneModel = new ModelBlock(EnumBlock.COBBLESTONE, shader);
-            var planksModel = new ModelBlock(EnumBlock.PLANKS, shader);
-            var craftingTableModel = new ModelBlock(EnumBlock.CRAFTING_TABLE, shader, true);
-            var furnaceModel = new ModelBlock(EnumBlock.FURNACE, shader, true);
-            var bedrockModel = new ModelBlock(EnumBlock.BEDROCK, shader);
-            var rareModel = new ModelBlock(EnumBlock.RARE, shader);
-            var glassModel = new ModelBlock(EnumBlock.GLASS, shader, false, true);
-            var logModel = new ModelBlock(EnumBlock.LOG, shader);
-            var leavesModel = new ModelBlock(EnumBlock.LEAVES, shader, false, true);
+            ModelBlock missingModel = new ModelBlock(EnumBlock.MISSING, shader);
+            ModelBlock stoneModel = new ModelBlock(EnumBlock.STONE, shader);
+            ModelBlock grassModel = new ModelBlock(EnumBlock.GRASS, shader);
+            ModelBlock dirtModel = new ModelBlock(EnumBlock.DIRT, shader);
+            ModelBlock cobblestoneModel = new ModelBlock(EnumBlock.COBBLESTONE, shader);
+            ModelBlock planksModel = new ModelBlock(EnumBlock.PLANKS, shader);
+            ModelBlock craftingTableModel = new ModelBlock(EnumBlock.CRAFTING_TABLE, shader, true);
+            ModelBlock furnaceModel = new ModelBlock(EnumBlock.FURNACE, shader, true);
+            ModelBlock bedrockModel = new ModelBlock(EnumBlock.BEDROCK, shader);
+            ModelBlock rareModel = new ModelBlock(EnumBlock.RARE, shader);
+            ModelBlock glassModel = new ModelBlock(EnumBlock.GLASS, shader, false, true);
+            ModelBlock logModel = new ModelBlock(EnumBlock.LOG, shader);
+            ModelBlock leavesModel = new ModelBlock(EnumBlock.LEAVES, shader, false, true);
 
-            var xrayModel = new ModelBlock(EnumBlock.XRAY, shader);
+            ModelBlock xrayModel = new ModelBlock(EnumBlock.XRAY, shader);
 
             ModelRegistry.RegisterBlockModel(missingModel, 0);
 
@@ -265,9 +264,9 @@ namespace SharpCraft
             {
                 string[] modFiles = Directory.GetFiles(_dir + "mods");
 
-                foreach (var modFile in modFiles)
+                foreach (string modFile in modFiles)
                 {
-                    var modClassType = Assembly.LoadFile(modFile).GetModules().SelectMany(t => t.GetTypes())
+                    IEnumerable<Type> modClassType = Assembly.LoadFile(modFile).GetModules().SelectMany(t => t.GetTypes())
                         .Where(t => t.IsSubclassOf(typeof(ModMain)));
 
                     if (modClassType.FirstOrDefault() is Type type && Activator.CreateInstance(type) is ModMain mm)
@@ -292,7 +291,7 @@ namespace SharpCraft
             blockRegistry.Put(new BlockGrass());
 
             //POST - MOD Blocks and Items
-            foreach (var mod in installedMods)
+            foreach (ModMain mod in installedMods)
             {
                 mod.OnItemsAndBlocksRegistry(new ItemsAndBlockRegistryEventArgs(blockRegistry, itemRegistry));
             }
@@ -302,13 +301,13 @@ namespace SharpCraft
 
         public void StartGame()
         {
-            var loadedWorld = WorldLoader.LoadWorld("MyWorld");
+            World loadedWorld = WorldLoader.LoadWorld("MyWorld");
 
             if (loadedWorld == null)
             {
                 Console.WriteLine("DEBUG: generating world");
 
-                var playerPos = new BlockPos(MathUtil.NextFloat(-100, 100), 10, MathUtil.NextFloat(-100, 100));
+                BlockPos playerPos = new BlockPos(MathUtil.NextFloat(-100, 100), 10, MathUtil.NextFloat(-100, 100));
 
                 World = new World("MyWorld", "Tomlow's Fuckaround", SettingsManager.GetValue("worldseed").GetHashCode());
 
@@ -330,7 +329,7 @@ namespace SharpCraft
 
             ResetMouse();
 
-            var state = OpenTK.Input.Mouse.GetState();
+            MouseState state = OpenTK.Input.Mouse.GetState();
             _mouseLast = new Point(state.X, state.Y);
             //world.setBlock(new BlockPos(player.pos), EnumBlock.RARE, 1, true); //test of block metadata, works perfectly
         }
@@ -340,7 +339,7 @@ namespace SharpCraft
             if (GuiScreen == null && !Focused)
                 OpenGuiScreen(new GuiScreenIngameMenu());
 
-            var wheelValue = Mouse.WheelPrecise;
+            float wheelValue = Mouse.WheelPrecise;
 
             if (Player != null) // && GuiScreen == null)
             {
@@ -354,14 +353,14 @@ namespace SharpCraft
                     if (World?.GetChunk(new BlockPos(Player.pos).ChunkPos()) == null)
                         Player.motion = Vector3.Zero;
 
-                    var lmb = _mouseButtonsDown.Contains(MouseButton.Left);
-                    var rmb = _mouseButtonsDown.Contains(MouseButton.Right);
+                    bool lmb = _mouseButtonsDown.Contains(MouseButton.Left);
+                    bool rmb = _mouseButtonsDown.Contains(MouseButton.Right);
 
                     if (lmb || rmb)
                     {
                         _interactionTickCounter++;
 
-                        var lastPos = _lastMouseOverObject.blockPos;
+                        BlockPos lastPos = _lastMouseOverObject.blockPos;
 
                         if (lmb && _lastMouseOverObject.hit is EnumBlock)
                         {
@@ -370,14 +369,14 @@ namespace SharpCraft
                             if (MouseOverObject.hit != null && _lastMouseOverObject.hit == MouseOverObject.hit &&
                                 lastPos == MouseOverObject.blockPos)
                             {
-                                if (!DestroyProgresses.TryGetValue(lastPos, out var progress))
+                                if (!DestroyProgresses.TryGetValue(lastPos, out DestroyProgress progress))
                                     DestroyProgresses.TryAdd(lastPos,
                                         progress = new DestroyProgress(lastPos, Player));
                                 else
                                     progress.Progress++;
 
                                 if (progress.Destroyed)
-                                    DestroyProgresses.TryRemove(progress.Pos, out var removed);
+                                    DestroyProgresses.TryRemove(progress.Pos, out DestroyProgress removed);
                             }
                             else ResetDestroyProgress(Player);
                         }
@@ -421,71 +420,44 @@ namespace SharpCraft
             GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
         }
 
-        private void RenderScreen()
-        {
-            GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
-
-            if (World != null)
-            {
-                WorldRenderer.Render(World, _partialTicks);
-                ParticleRenderer.Render(_partialTicks);
-                EntityRenderer.Render(_partialTicks);
-                SkyboxRenderer.Render(_partialTicks);
-            }
-
-            //render other gui
-            if (Player != null)
-            {
-                GuiRenderer.RenderCrosshair();
-                GuiRenderer.RenderHUD();
-            }
-
-            //render gui screen
-            if (GuiScreen != null)
-            {
-                CursorVisible = true;
-                GuiRenderer.Render(GuiScreen);
-            }
-        }
-
         public void GetMouseOverObject()
         {
             if (World == null)
                 return;
 
-            var radius = 5.5f;
+            float radius = 5.5f;
 
-            var final = new MouseOverObject();
+            MouseOverObject final = new MouseOverObject();
 
-            var dist = float.MaxValue;
+            float dist = float.MaxValue;
 
-            var camPos = Vector3.One * 0.5f + Camera.pos;
+            Vector3 camPos = Vector3.One * 0.5f + Camera.pos;
 
-            for (var z = -radius; z <= radius; z++)
+            for (float z = -radius; z <= radius; z++)
             {
-                for (var y = -radius; y <= radius; y++)
+                for (float y = -radius; y <= radius; y++)
                 {
-                    for (var x = -radius; x <= radius; x++)
+                    for (float x = -radius; x <= radius; x++)
                     {
-                        var vec = camPos;
+                        Vector3 vec = camPos;
                         vec.X += x;
                         vec.Y += y;
                         vec.Z += z;
 
-                        var f = (vec - Camera.pos).LengthFast;
+                        float f = (vec - Camera.pos).LengthFast;
 
                         if (f <= radius + 0.5f)
                         {
-                            var pos = new BlockPos(vec);
-                            var block = World.GetBlock(pos);
+                            BlockPos pos = new BlockPos(vec);
+                            EnumBlock block = World.GetBlock(pos);
 
                             if (block != EnumBlock.AIR)
                             {
-                                var model = ModelRegistry.GetModelForBlock(block, World.GetMetadata(pos));
-                                var bb = model.boundingBox.offset(pos.ToVec());
+                                ModelBlock model = ModelRegistry.GetModelForBlock(block, World.GetMetadata(pos));
+                                AxisAlignedBB bb = model.boundingBox.offset(pos.ToVec());
 
-                                var hitSomething = RayHelper.rayIntersectsBB(Camera.pos,
-                                    Camera.GetLookVec(), bb, out var hitPos, out var normal);
+                                bool hitSomething = RayHelper.rayIntersectsBB(Camera.pos,
+                                    Camera.GetLookVec(), bb, out Vector3 hitPos, out Vector3 normal);
 
                                 if (hitSomething)
                                 {
@@ -504,12 +476,12 @@ namespace SharpCraft
                                     else if (normal.Z > 0)
                                         sideHit = FaceSides.South;
 
-                                    var p = new BlockPos(hitPos - normal * 0.5f); ;
+                                    BlockPos p = new BlockPos(hitPos - normal * 0.5f); ;
 
                                     if (sideHit == FaceSides.Null)
                                         continue;
 
-                                    var l = Math.Abs((Camera.pos - (p.ToVec() + Vector3.One * 0.5f)).Length);
+                                    float l = Math.Abs((Camera.pos - (p.ToVec() + Vector3.One * 0.5f)).Length);
 
                                     if (l < dist)
                                     {
@@ -535,16 +507,16 @@ namespace SharpCraft
 
         private void ResetDestroyProgress(EntityPlayerSP player)
         {
-            foreach (var progress in DestroyProgresses.Values)
+            foreach (DestroyProgress progress in DestroyProgresses.Values)
             {
                 if (progress.Player == player)
-                    DestroyProgresses.TryRemove(progress.Pos, out var removed);
+                    DestroyProgresses.TryRemove(progress.Pos, out DestroyProgress removed);
             }
         }
 
         private void ResetMouse()
         {
-            var middle = PointToScreen(new Point(ClientSize.Width / 2, ClientSize.Height / 2));
+            Point middle = PointToScreen(new Point(ClientSize.Width / 2, ClientSize.Height / 2));
             OpenTK.Input.Mouse.SetPosition(middle.X, middle.Y);
         }
 
@@ -555,7 +527,7 @@ namespace SharpCraft
 
             while (_glContextQueue.Count > 0)
             {
-                if (_glContextQueue.TryDequeue(out var func))
+                if (_glContextQueue.TryDequeue(out Action func))
                     func?.Invoke();
             }
 
@@ -564,13 +536,13 @@ namespace SharpCraft
 
         private void HandleMouseMovement()
         {
-            var state = Mouse.GetState();
+            MouseState state = Mouse.GetState();
 
-            var point = new Point(state.X, state.Y);
+            Point point = new Point(state.X, state.Y);
 
             if (AllowInput())
             {
-                var delta = new Point(_mouseLast.X - point.X, _mouseLast.Y - point.Y);
+                Point delta = new Point(_mouseLast.X - point.X, _mouseLast.Y - point.Y);
 
                 Camera.yaw -= delta.X / 1000f * _sensitivity;
                 Camera.pitch -= delta.Y / 1000f * _sensitivity;
@@ -613,7 +585,7 @@ namespace SharpCraft
             if (guiScreen.DoesGuiPauseGame)
                 IsPaused = true;
 
-            var middle = new Point(ClientRectangle.Width / 2, ClientRectangle.Height / 2);
+            Point middle = new Point(ClientRectangle.Width / 2, ClientRectangle.Height / 2);
             middle = PointToScreen(middle);
 
             OpenTK.Input.Mouse.SetPosition(middle.X, middle.Y);
@@ -651,15 +623,15 @@ namespace SharpCraft
                 bmp.UnlockBits(bData);
                 bmp.RotateFlip(RotateFlipType.RotateNoneFlipY);
 
-                var time = DateTime.UtcNow;
+                DateTime time = DateTime.UtcNow;
 
-                var dir = $"{GameFolderDir}/screenshots";
-                var file = $"{dir}/{time.Year}-{time.Month}-{time.Day}_{time.TimeOfDay.Hours}.{time.TimeOfDay.Minutes}.{time.TimeOfDay.Seconds}.png";
+                string dir = $"{GameFolderDir}/screenshots";
+                string file = $"{dir}/{time.Year}-{time.Month}-{time.Day}_{time.TimeOfDay.Hours}.{time.TimeOfDay.Minutes}.{time.TimeOfDay.Seconds}.png";
 
                 if (!Directory.Exists(dir))
                     Directory.CreateDirectory(dir);
 
-                using (var fs = new FileStream(file, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite))
+                using (FileStream fs = new FileStream(file, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite))
                 {
                     bmp.Save(fs, ImageFormat.Png);
                 }
@@ -676,15 +648,48 @@ namespace SharpCraft
             return _partialTicks;
         }
 
-        private void Render()
+        protected override void OnRenderFrame(FrameEventArgs e)
         {
+            GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+
+            DateTime now = DateTime.Now;
+
+            _partialTicks = (float)(now - _updateTimer).TotalMilliseconds / 50;
+
+            if ((now - _lastFpsDate).TotalMilliseconds >= 1000)
+            {
+                _fpsCounterLast = _fpsCounter;
+                _fpsCounter = 0;
+                _lastFpsDate = now;
+            }
+
             RunGlTasks();
 
             HandleMouseMovement();
-
             Camera.UpdateViewMatrix();
 
-            RenderScreen();
+            //RENDER SCREEN
+            if (World != null)
+            {
+                WorldRenderer.Render(World, _partialTicks);
+                ParticleRenderer.Render(_partialTicks);
+                EntityRenderer.Render(_partialTicks);
+                SkyboxRenderer.Render(_partialTicks);
+            }
+
+            //render other gui
+            if (Player != null)
+            {
+                GuiRenderer.RenderCrosshair();
+                GuiRenderer.RenderHUD();
+            }
+
+            //render gui screen
+            if (GuiScreen != null)
+            {
+                CursorVisible = true;
+                GuiRenderer.Render(GuiScreen);
+            }
 
             if (_takeScreenshot)
             {
@@ -694,22 +699,6 @@ namespace SharpCraft
             }
 
             SwapBuffers();
-        }
-
-        protected override void OnRenderFrame(FrameEventArgs e)
-        {
-            var now = DateTime.Now;
-
-            _partialTicks = (float)Math.Min((now - _updateTimer).TotalMilliseconds / 50, 1);
-
-            if ((now - _lastFpsDate).TotalMilliseconds >= 1000)
-            {
-                _fpsCounterLast = _fpsCounter;
-                _fpsCounter = 0;
-                _lastFpsDate = now;
-            }
-
-            Render();
 
             _fpsCounter++;
         }
@@ -747,8 +736,8 @@ namespace SharpCraft
                 }
                 else
                 {
-                    var state = OpenTK.Input.Mouse.GetCursorState();
-                    var point = PointToClient(new Point(state.X, state.Y));
+                    MouseState state = OpenTK.Input.Mouse.GetCursorState();
+                    Point point = PointToClient(new Point(state.X, state.Y));
 
                     GuiScreen.OnMouseClick(point.X, point.Y, e.Button);
                 }
@@ -850,7 +839,7 @@ namespace SharpCraft
 
                 if (GuiScreen == null)
                 {
-                    for (var i = 0; i < 9; i++)
+                    for (int i = 0; i < 9; i++)
                     {
                         if (e.Key == Key.Number1 + i)
                         {
@@ -916,22 +905,22 @@ namespace SharpCraft
 
         public static void Load()
         {
-            var file = SharpCraft.Instance.GameFolderDir + "/settings.txt";
+            string file = SharpCraft.Instance.GameFolderDir + "/settings.txt";
 
             if (File.Exists(file))
             {
-                var data = File.ReadLines(file);
+                IEnumerable<string> data = File.ReadLines(file);
 
-                foreach (var line in data)
+                foreach (string line in data)
                 {
-                    var parsed = line.Trim().Replace(" ", "").ToLower();
-                    var split = parsed.Split('=');
+                    string parsed = line.Trim().Replace(" ", "").ToLower();
+                    string[] split = parsed.Split('=');
 
                     if (split.Length < 2)
                         continue;
 
-                    var variable = split[0];
-                    var value = split[1];
+                    string variable = split[0];
+                    string value = split[1];
 
                     if (_settings.ContainsKey(variable))
                     {
@@ -946,20 +935,20 @@ namespace SharpCraft
 
         public static void Save()
         {
-            var file = SharpCraft.Instance.GameFolderDir + "/settings.txt";
+            string file = SharpCraft.Instance.GameFolderDir + "/settings.txt";
 
-            var sb = new StringBuilder();
+            StringBuilder sb = new StringBuilder();
 
-            var keys = _settings.Keys.ToArray();
+            string[] keys = _settings.Keys.ToArray();
 
-            for (var index = 0; index < keys.Length - 1; index++)
+            for (int index = 0; index < keys.Length - 1; index++)
             {
-                var key = keys[index];
+                string key = keys[index];
 
                 sb.AppendLine($"{key}={GetValue(key)}");
             }
 
-            var last = _settings.Last();
+            KeyValuePair<string, string> last = _settings.Last();
 
             sb.Append($"{last.Key}={GetValue(last.Key)}");
 
@@ -992,9 +981,9 @@ namespace SharpCraft
         [STAThread]
         private static void Main(string[] args)
         {
-            ThreadPool.SetMaxThreads(Environment.ProcessorCount * 25, 40);
+            ThreadPool.SetMaxThreads(1000, 0);
 
-            using (var game = new SharpCraft())
+            using (SharpCraft game = new SharpCraft())
             {
                 game.Run(20);
             }

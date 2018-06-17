@@ -67,42 +67,42 @@ namespace SharpCraft.entity
 
         public virtual void Move()
         {
-            var bb_o = boundingBox.Union(boundingBox.offset(motion));
+            AxisAlignedBB bb_o = boundingBox.Union(boundingBox.offset(motion));
 
             List<AxisAlignedBB> list = SharpCraft.Instance.World.GetBlockCollisionBoxes(bb_o);
 
-            var m_orig = motion;
+            Vector3 m_orig = motion;
 
             for (int i = 0; i < list.Count; i++)
             {
-                var blockBB = list[i];
+                AxisAlignedBB blockBB = list[i];
                 motion.Y = blockBB.CalculateYOffset(boundingBox, motion.Y);
             }
             boundingBox = boundingBox.offset(motion * Vector3.UnitY);
 
             for (int i = 0; i < list.Count; i++)
             {
-                var blockBB = list[i];
+                AxisAlignedBB blockBB = list[i];
                 motion.X = blockBB.CalculateXOffset(boundingBox, motion.X);
             }
             boundingBox = boundingBox.offset(motion * Vector3.UnitX);
 
             for (int i = 0; i < list.Count; i++)
             {
-                var blockBB = list[i];
+                AxisAlignedBB blockBB = list[i];
                 motion.Z = blockBB.CalculateZOffset(boundingBox, motion.Z);
             }
             boundingBox = boundingBox.offset(motion * Vector3.UnitZ);
 
             setPositionToBB();
 
-            var stoppedX = Math.Abs(m_orig.X - motion.X) > 0.00001f;
-            var stoppedY = Math.Abs(m_orig.Y - motion.Y) > 0.00001f;
-            var stoppedZ = Math.Abs(m_orig.Z - motion.Z) > 0.00001f;
+            bool stoppedX = Math.Abs(m_orig.X - motion.X) > 0.00001f;
+            bool stoppedY = Math.Abs(m_orig.Y - motion.Y) > 0.00001f;
+            bool stoppedZ = Math.Abs(m_orig.Z - motion.Z) > 0.00001f;
 
             onGround = stoppedY && m_orig.Y < 0.0D;
 
-            var onCeiling = stoppedY && m_orig.Y > 0.0D;
+            bool onCeiling = stoppedY && m_orig.Y > 0.0D;
 
             if (stoppedX)
                 motion.X = 0;

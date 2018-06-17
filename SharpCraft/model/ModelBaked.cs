@@ -46,9 +46,9 @@ namespace SharpCraft.model
         {
             Shader.Unbind();
 
-            for (var index = 0; index < RawModel.bufferIDs.Length; index++)
+            for (int index = 0; index < RawModel.bufferIDs.Length; index++)
             {
-                var bufferId = RawModel.bufferIDs[index];
+                int bufferId = RawModel.bufferIDs[index];
 
                 GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
                 GL.DisableVertexAttribArray(index);

@@ -16,7 +16,7 @@ namespace SharpCraft.item
 
         public void RegisterItems()
         {
-            foreach (var value in _registry.Values)
+            foreach (Item value in _registry.Values)
             {
                 //value.RegisterSomeShitInItemsLaterOnBoiFunc();
             }

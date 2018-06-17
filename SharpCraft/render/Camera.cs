@@ -6,7 +6,7 @@ namespace SharpCraft.render
 {
     public class Camera
     {
-        public const float NearPlane = 0.01f;//15f;
+        public const float NearPlane = 0.1f;
         public const float FarPlane = 1000f;
 
         public float TargetFov { get; }
@@ -51,20 +51,20 @@ namespace SharpCraft.render
 
         public void UpdateViewMatrix()
         {
-            var x = Matrix4.CreateRotationX(pitch + pitchOffset);
-            var y = Matrix4.CreateRotationY(yaw);
+            Matrix4 x = Matrix4.CreateRotationX(pitch + pitchOffset);
+            Matrix4 y = Matrix4.CreateRotationY(yaw);
 
-            var t = Matrix4.CreateTranslation(-pos);
+            Matrix4 t = Matrix4.CreateTranslation(-pos);
 
             View = t * y * x;
         }
 
         public void UpdateProjectionMatrix()
         {
-            var matrix = Matrix4.Identity;
+            //var matrix = Matrix4.Identity;
 
-            var aspectRatio = (float)SharpCraft.Instance.Width / SharpCraft.Instance.Height;
-            var yScale = (float)(1f / Math.Tan(MathHelper.DegreesToRadians(PartialFov / 2f)));
+            float aspectRatio = (float)SharpCraft.Instance.Width / SharpCraft.Instance.Height;
+            /*var yScale = (float)(1f / Math.Tan(MathHelper.DegreesToRadians(PartialFov / 2f)));
             var xScale = yScale / aspectRatio;
             var frustumLength = FarPlane - NearPlane;
 
@@ -75,7 +75,10 @@ namespace SharpCraft.render
             matrix.M43 = -(2 * NearPlane * FarPlane / frustumLength);
             matrix.M44 = 0;
 
-            Projection = matrix;
+            Projection = matrix;*/
+
+            Projection = Matrix4.CreatePerspectiveFieldOfView(MathHelper.DegreesToRadians(PartialFov), aspectRatio,
+                NearPlane, FarPlane);
         }
 
         public Vector3 GetLookVec()
@@ -87,8 +90,8 @@ namespace SharpCraft.render
         {
             get
             {
-                var s = (float)Math.Sin(-(_yaw + MathHelper.PiOver2));
-                var c = (float)Math.Cos(_yaw + MathHelper.PiOver2);
+                float s = (float)Math.Sin(-(_yaw + MathHelper.PiOver2));
+                float c = (float)Math.Cos(_yaw + MathHelper.PiOver2);
 
                 return new Vector2(s, c).Normalized();
             }
@@ -98,8 +101,8 @@ namespace SharpCraft.render
         {
             get
             {
-                var s = -(float)Math.Sin(-_yaw);
-                var c = -(float)Math.Cos(_yaw);
+                float s = -(float)Math.Sin(-_yaw);
+                float c = -(float)Math.Cos(_yaw);
 
                 return new Vector2(s, c).Normalized();
             }

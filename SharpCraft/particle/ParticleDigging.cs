@@ -7,7 +7,6 @@ using SharpCraft.texture;
 using SharpCraft.util;
 using SharpCraft.world;
 using System;
-using System.Diagnostics;
 
 namespace SharpCraft.particle
 {
@@ -28,15 +27,15 @@ namespace SharpCraft.particle
         {
             this.block = block;
 
-            var model = ModelRegistry.GetModelForBlock(block, meta);
+            ModelBlock model = ModelRegistry.GetModelForBlock(block, meta);
 
             if (model.RawModel is ModelBlockRaw mbr)
             {
-                var uvs = mbr.GetUVs(side);
+                TextureUVNode uvs = mbr.GetUVs(side);
 
-                var size = uvs.end - uvs.start;
+                Vector2 size = uvs.end - uvs.start;
 
-                var pixel = size / 16;
+                Vector2 pixel = size / 16;
 
                 UVmin = uvs.start + pixel * new Vector2(MathUtil.NextFloat(0, 12), MathUtil.NextFloat(0, 12));
                 UVmax = UVmin + pixel * 4;
@@ -45,7 +44,7 @@ namespace SharpCraft.particle
             if (side == FaceSides.Up)
                 this.motion.Xz = SharpCraft.Instance.Camera.GetLookVec().Xz * 0.15f;
 
-            var vec = new Vector3(MathUtil.NextFloat(-1), MathUtil.NextFloat(-1), MathUtil.NextFloat(-1));
+            Vector3 vec = new Vector3(MathUtil.NextFloat(-1), MathUtil.NextFloat(-1), MathUtil.NextFloat(-1));
 
             rotStep = vec.Normalized() * MathUtil.NextFloat(40, 75);
         }
@@ -92,12 +91,12 @@ namespace SharpCraft.particle
 
         public override void Render(float partialTicks)
         {
-            var partialPos = Vector3.Lerp(lastPos, pos, partialTicks);
-            var partialRot = Vector3.Lerp(lastRot, rot, partialTicks);
+            Vector3 partialPos = Vector3.Lerp(lastPos, pos, partialTicks);
+            Vector3 partialRot = Vector3.Lerp(lastRot, rot, partialTicks);
 
-            var partialScale = lastParticleScale + (particleScale - lastParticleScale) * partialTicks;
+            float partialScale = lastParticleScale + (particleScale - lastParticleScale) * partialTicks;
 
-            var model = ParticleRenderer.ParticleModel;
+            ModelBaked<Particle> model = ParticleRenderer.ParticleModel;
             model.Shader.UpdateGlobalUniforms();
             model.Shader.UpdateModelUniforms();
             model.Shader.UpdateInstanceUniforms(MatrixHelper.CreateTransformationMatrix(partialPos - (Vector3.UnitX + Vector3.UnitZ) * partialScale / 2, partialRot, partialScale), this);

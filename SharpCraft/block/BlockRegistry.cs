@@ -16,7 +16,7 @@ namespace SharpCraft.block
 
         public void RegisterBlocksPost()
         {
-            foreach (var value in _registry.Values)
+            foreach (Block value in _registry.Values)
             {
                 value.OnRegisterStates();
             }

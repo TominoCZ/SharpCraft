@@ -1,4 +1,5 @@
 ﻿using OpenTK;
+using SharpCraft.block;
 using SharpCraft.item;
 using SharpCraft.texture;
 
@@ -19,15 +20,15 @@ namespace SharpCraft.gui
 
         public override void Render(int mouseX, int mouseY)
         {
-            var v = 0;
+            int v = 0;
 
             Hovered = IsMouseOver(mouseX, mouseY);
 
             if (Hovered)
                 v += 32;
 
-            var x = PosX;
-            var y = PosY;
+            float x = PosX;
+            float y = PosY;
 
             if (CenteredX)
                 x = (int)(SharpCraft.Instance.ClientSize.Width / 2f - 32 * Scale / 2);
@@ -39,7 +40,7 @@ namespace SharpCraft.gui
 
             if (Stack.Item is ItemBlock itemBlock)
             {
-                var block = itemBlock.GetBlock();
+                EnumBlock block = itemBlock.GetBlock();
 
                 x += 14 * Scale / 2;
                 y += 14 * Scale / 2;

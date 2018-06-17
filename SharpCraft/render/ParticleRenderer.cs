@@ -5,6 +5,7 @@ using SharpCraft.model;
 using SharpCraft.particle;
 using SharpCraft.render.shader.shaders;
 using SharpCraft.util;
+using SharpCraft.world;
 using System;
 using System.Collections.Generic;
 
@@ -46,7 +47,7 @@ namespace SharpCraft.render
         {
             for (int i = 0; i < _particles.Count; i++)
             {
-                var particle = _particles[i];
+                Particle particle = _particles[i];
 
                 particle.Update();
 
@@ -59,11 +60,11 @@ namespace SharpCraft.render
         {
             if (moo.hit is EnumBlock block)
             {
-                var f0 = moo.hitVec.X
+                float f0 = moo.hitVec.X
                      + MathUtil.NextFloat(-0.21f, 0.21f) * Math.Abs(moo.boundingBox.max.X - moo.boundingBox.min.X);
-                var f1 = moo.hitVec.Y
+                float f1 = moo.hitVec.Y
                      + MathUtil.NextFloat(0, 0.1f) * Math.Abs(moo.boundingBox.max.Y - moo.boundingBox.min.Y);
-                var f2 = moo.hitVec.Z
+                float f2 = moo.hitVec.Z
                      + MathUtil.NextFloat(-0.21f, 0.21f) * Math.Abs(moo.boundingBox.max.Z - moo.boundingBox.min.Z);
 
                 if (moo.sideHit == FaceSides.Down)
@@ -79,15 +80,15 @@ namespace SharpCraft.render
                 else if (moo.sideHit == FaceSides.West)
                     f0 = moo.boundingBox.min.X - 0.05f;
 
-                var pos = new Vector3(f0, f1, f2) + moo.normal * 0.1f;
+                Vector3 pos = new Vector3(f0, f1, f2) + moo.normal * 0.1f;
 
-                var motion = moo.normal * MathUtil.NextFloat(0.0075f, 0.03f);
-                var mult = 0.75f / (MathUtil.Distance(pos, moo.hitVec) + 0.01f);
+                Vector3 motion = moo.normal * MathUtil.NextFloat(0.0075f, 0.03f);
+                float mult = 0.75f / (MathUtil.Distance(pos, moo.hitVec) + 0.01f);
                 motion.Xz *= mult;
 
                 motion.Y += 0.02f;
 
-                var ok = SharpCraft.Instance.DestroyProgresses.TryGetValue(moo.blockPos, out var progress);
+                bool ok = SharpCraft.Instance.DestroyProgresses.TryGetValue(moo.blockPos, out DestroyProgress progress);
 
                 AddParticle(new ParticleDigging(
                     SharpCraft.Instance.World,
@@ -102,30 +103,30 @@ namespace SharpCraft.render
 
         public void SpawnDestroyParticles(BlockPos pos, EnumBlock block, int meta)
         {
-            var posVec = pos.ToVec();
+            Vector3 posVec = pos.ToVec();
 
-            var perAxis = 4;
-            var step = 1f / perAxis;
+            int perAxis = 4;
+            float step = 1f / perAxis;
 
-            var halfVec = Vector3.One * 0.5f;
+            Vector3 halfVec = Vector3.One * 0.5f;
 
-            for (var x = 0f; x < perAxis; x++)
+            for (float x = 0f; x < perAxis; x++)
             {
-                for (var y = 0f; y < perAxis; y++)
+                for (float y = 0f; y < perAxis; y++)
                 {
-                    for (var z = 0f; z < perAxis; z++)
+                    for (float z = 0f; z < perAxis; z++)
                     {
-                        var localPos = new Vector3(x, y, z) * step;
-                        var worldPos = localPos + halfVec * step;
+                        Vector3 localPos = new Vector3(x, y, z) * step;
+                        Vector3 worldPos = localPos + halfVec * step;
 
-                        var vec = localPos - halfVec;
-                        var motion = vec.Normalized() * 0.2f;
+                        Vector3 vec = localPos - halfVec;
+                        Vector3 motion = vec.Normalized() * 0.2f;
 
                         motion.X += MathUtil.NextFloat(-0.05f, 0.05f);
                         motion.Y += MathUtil.NextFloat(-0.05f, 0.05f);
                         motion.Z += MathUtil.NextFloat(-0.05f, 0.05f);
 
-                        var particle = new ParticleDigging(SharpCraft.Instance.World, posVec + worldPos, motion, MathUtil.NextFloat(1, 1.5f), block, meta);
+                        ParticleDigging particle = new ParticleDigging(SharpCraft.Instance.World, posVec + worldPos, motion, MathUtil.NextFloat(1, 1.5f), block, meta);
 
                         AddParticle(particle);
                     }

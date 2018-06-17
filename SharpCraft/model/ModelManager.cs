@@ -17,7 +17,7 @@ namespace SharpCraft.model
             List<float> normals = new List<float>();
             List<float> UVs = new List<float>();
 
-            foreach (var q in quads)
+            foreach (KeyValuePair<FaceSides, RawQuad> q in quads)
             {
                 vertices.AddRange(q.Value.vertices);
                 normals.AddRange(q.Value.normal);
@@ -41,18 +41,18 @@ namespace SharpCraft.model
             List<float> normals = new List<float>();
             List<float> UVs = new List<float>();
 
-            for (var index = 0; index < quads.Count; index++)
+            for (int index = 0; index < quads.Count; index++)
             {
-                var quad = quads[index];
+                RawQuad quad = quads[index];
 
                 vertices.AddRange(quad.vertices);
                 normals.AddRange(quad.normal);
                 UVs.AddRange(quad.UVs);
             }
 
-            var buff0 = storeDataInAttribList(0, coordSize, vertices.ToArray());
-            var buff1 = storeDataInAttribList(1, 2, UVs.ToArray());
-            var buff2 = storeDataInAttribList(2, 3, normals.ToArray());
+            int buff0 = storeDataInAttribList(0, coordSize, vertices.ToArray());
+            int buff1 = storeDataInAttribList(1, 2, UVs.ToArray());
+            int buff2 = storeDataInAttribList(2, 3, normals.ToArray());
 
             GL.Flush();
 
@@ -67,9 +67,9 @@ namespace SharpCraft.model
             List<float> normals = new List<float>();
             List<float> UVs = new List<float>();
 
-            for (var index = 0; index < quads.Count; index++)
+            for (int index = 0; index < quads.Count; index++)
             {
-                var quad = quads[index];
+                RawQuad quad = quads[index];
 
                 vertices.AddRange(quad.vertices);
                 normals.AddRange(quad.normal);
@@ -129,10 +129,10 @@ namespace SharpCraft.model
 
         public static void cleanup()
         {
-            foreach (var vao in VAOs)
+            foreach (int vao in VAOs)
                 GL.DeleteVertexArray(vao);
 
-            foreach (var vbo in VBOs)
+            foreach (int vbo in VBOs)
                 GL.DeleteVertexArray(vbo);
         }
     }

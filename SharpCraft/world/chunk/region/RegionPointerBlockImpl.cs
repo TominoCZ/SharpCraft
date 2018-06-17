@@ -63,14 +63,14 @@ namespace SharpCraft.world.chunk.region
 
         private void InitFile()
         {
-            using (var stream = Read())
+            using (FileStream stream = Read())
             {
-                var pointerCount = stream.ReadInt32();
+                int pointerCount = stream.ReadInt32();
                 if (pointerCount != _info.ChunkCount) throw new IOException("Foormat change");
 
                 _pointerTable = new int[_info.ChunkCount];
 
-                for (var i = 0; i < _pointerTable.Length; i++)
+                for (int i = 0; i < _pointerTable.Length; i++)
                 {
                     _pointerTable[i] = stream.ReadInt32();
                 }
@@ -79,7 +79,7 @@ namespace SharpCraft.world.chunk.region
 
         private void CreateFile()
         {
-            using (var stream = File.Create(_filePath))
+            using (FileStream stream = File.Create(_filePath))
             {
                 stream.WriteInt32(_info.ChunkCount);
                 for (int i = 0; i < _info.ChunkCount; i++)
@@ -123,7 +123,7 @@ namespace SharpCraft.world.chunk.region
                 while (pos != data.Length)
                 {
                     stream.Seek(nextChunk, SeekOrigin.Begin);
-                    var blockSize = stream.ReadInt32();
+                    int blockSize = stream.ReadInt32();
                     stream.Write(data, pos, blockSize);
                     pos += blockSize;
 
@@ -149,7 +149,7 @@ namespace SharpCraft.world.chunk.region
             //TODO fill gaps
 
             int pointer = (int)new FileInfo(_filePath).Length - 1;
-            using (var stream = Write())
+            using (FileStream stream = Write())
             {
                 stream.Seek(pointer, SeekOrigin.Begin);
                 stream.WriteInt32(size);//array size
@@ -171,7 +171,7 @@ namespace SharpCraft.world.chunk.region
             int pointer = _pointerTable[id];
             if (pointer == 0) return null;
 
-            using (var stream = Read())
+            using (FileStream stream = Read())
             {
                 stream.Seek(ArrayPos(id) + 4, SeekOrigin.Begin);
 
@@ -183,7 +183,7 @@ namespace SharpCraft.world.chunk.region
                 {
                     stream.Seek(pointer, SeekOrigin.Begin);
 
-                    var blockSize = stream.ReadInt32();
+                    int blockSize = stream.ReadInt32();
                     stream.Read(dest, destPos, blockSize);
 
                     pointer = stream.ReadInt32();

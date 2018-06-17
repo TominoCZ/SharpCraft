@@ -60,9 +60,9 @@ namespace SharpCraft.util
 
         public static float[] calculateNormals(float[] vertices)
         {
-            var normals = new float[vertices.Length];
+            float[] normals = new float[vertices.Length];
 
-            for (var i = 0; i < vertices.Length; i += 12)
+            for (int i = 0; i < vertices.Length; i += 12)
             {
                 V2.X = vertices[i + 3];
                 V2.Y = vertices[i + 4];
@@ -78,7 +78,7 @@ namespace SharpCraft.util
 
                 NORMAL = Vector3.Cross(V4 - V2, V2 - V3);
 
-                for (var j = 0; j < 4; j++)
+                for (int j = 0; j < 4; j++)
                 {
                     for (int k = 0; k < 3; k++)
                     {
@@ -92,18 +92,18 @@ namespace SharpCraft.util
 
         public static Dictionary<FaceSides, RawQuad> createTexturedCubeModel(EnumBlock block)
         {
-            var quads = new Dictionary<FaceSides, RawQuad>();
-            var uvs = TextureManager.GetUVsFromBlock(block);
+            Dictionary<FaceSides, RawQuad> quads = new Dictionary<FaceSides, RawQuad>();
+            TextureBlockUV uvs = TextureManager.GetUVsFromBlock(block);
 
-            foreach (var face in CUBE.Keys)
+            foreach (FaceSides face in CUBE.Keys)
             {
-                if (CUBE.TryGetValue(face, out var data))
+                if (CUBE.TryGetValue(face, out float[] data))
                 {
-                    var uvNode = uvs.getUVForSide(face);
+                    TextureUVNode uvNode = uvs.getUVForSide(face);
 
                     if (uvNode != null)
                     {
-                        var quad = new RawQuad(
+                        RawQuad quad = new RawQuad(
                             data,
                             uvNode.ToArray(),
                             calculateNormals(data),
@@ -130,11 +130,11 @@ namespace SharpCraft.util
 
         public static List<RawQuad> createCubeModel()
         {
-            var quads = new List<RawQuad>();
+            List<RawQuad> quads = new List<RawQuad>();
 
-            foreach (var face in CUBE.Keys)
+            foreach (FaceSides face in CUBE.Keys)
             {
-                if (CUBE.TryGetValue(face, out var vertices))
+                if (CUBE.TryGetValue(face, out float[] vertices))
                 {
                     quads.Add(new RawQuad(vertices, 3));
                 }

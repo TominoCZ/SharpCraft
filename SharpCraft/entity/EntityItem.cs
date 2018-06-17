@@ -8,6 +8,7 @@ using SharpCraft.texture;
 using SharpCraft.util;
 using SharpCraft.world;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace SharpCraft.entity
@@ -49,14 +50,14 @@ namespace SharpCraft.entity
 
             motion.Xz *= 0.8664021f;
 
-            var bbs = SharpCraft.Instance.World.GetBlockCollisionBoxes(boundingBox);
+            List<AxisAlignedBB> bbs = SharpCraft.Instance.World.GetBlockCollisionBoxes(boundingBox);
 
             if (bbs.Count > 0)
             {
-                var bp = new BlockPos(pos);
+                BlockPos bp = new BlockPos(pos);
 
-                var lastFace = FaceSides.Up;
-                var blocksAround = FaceSides.YPlane.All(face => world.GetBlock(bp.Offset(lastFace = face)) != EnumBlock.AIR)
+                FaceSides lastFace = FaceSides.Up;
+                bool blocksAround = FaceSides.YPlane.All(face => world.GetBlock(bp.Offset(lastFace = face)) != EnumBlock.AIR)
                                    && world.GetBlock(bp.Offset(lastFace = FaceSides.Up)) != EnumBlock.AIR
                                    && world.GetBlock(bp.Offset(lastFace = FaceSides.Down)) != EnumBlock.AIR; //has to be in this order
 
@@ -80,20 +81,20 @@ namespace SharpCraft.entity
             if (entityAge < 5)
                 return;
 
-            var inAttractionArea = world.Entities.OfType<EntityItem>().Where(e => e != this && e.isAlive && e.stack.ItemSame(stack)).OrderByDescending(e => e.stack.Count).ToList();
-            var attractionRange = 1.8F;
-            var mergeRange = 0.15F;
+            List<EntityItem> inAttractionArea = world.Entities.OfType<EntityItem>().Where(e => e != this && e.isAlive && e.stack.ItemSame(stack)).OrderByDescending(e => e.stack.Count).ToList();
+            float attractionRange = 1.8F;
+            float mergeRange = 0.15F;
 
-            foreach (var entity in inAttractionArea)
+            foreach (EntityItem entity in inAttractionArea)
             {
                 if (stack.IsEmpty || entity.stack.IsEmpty || entity.stack.Count == entity.stack.Item.MaxStackSize())
                     continue;
 
                 Vector3 distanceVector = entity.pos - pos;
-                var distance = distanceVector.Length;
+                float distance = distanceVector.Length;
                 if (distance >= attractionRange) continue;
 
-                var ammountToTake = Math.Min(stack.Item.MaxStackSize() - stack.Count, entity.stack.Count);
+                int ammountToTake = Math.Min(stack.Item.MaxStackSize() - stack.Count, entity.stack.Count);
                 if (ammountToTake == 0) continue;
 
                 if (distance <= mergeRange)
@@ -112,9 +113,9 @@ namespace SharpCraft.entity
 
                 distanceVector.Normalize();
 
-                var distanceMul = (float)Math.Sqrt(1 - distance / attractionRange);
+                float distanceMul = (float)Math.Sqrt(1 - distance / attractionRange);
                 if (distanceMul > 0.8) distanceMul = ((1 - distanceMul) / 0.2F) * 0.6F + 0.2F;
-                var baseForce = distanceVector * 0.02f * distanceMul * MathUtil.Remap(stack.Count / (float)entity.stack.Count, 1, entity.stack.Item.MaxStackSize(), 2, 5);
+                Vector3 baseForce = distanceVector * 0.02f * distanceMul * MathUtil.Remap(stack.Count / (float)entity.stack.Count, 1, entity.stack.Item.MaxStackSize(), 2, 5);
 
                 motion += baseForce * entity.stack.Count / Math.Max(entity.stack.Count, stack.Count);
                 entity.motion -= baseForce * stack.Count / Math.Max(entity.stack.Count, stack.Count);
@@ -124,16 +125,16 @@ namespace SharpCraft.entity
                 return;
 
             //TODO change this for multiplayer
-            var players = world.Entities.OfType<EntityPlayerSP>()
+            IEnumerable<EntityPlayerSP> players = world.Entities.OfType<EntityPlayerSP>()
                                .OrderBy(entity => MathUtil.Distance(entity.pos, pos))
                                .Where(e => MathUtil.Distance(e.pos, pos) <= attractionRange);
 
-            foreach (var player in players)
+            foreach (EntityPlayerSP player in players)
             {
                 if (!player.CanPickUpStack(stack))
                     continue;
 
-                var attrTarget = player.pos;
+                Vector3 attrTarget = player.pos;
                 attrTarget.Y += player.getCollisionBoundingBox().size.Y / 2;
 
                 Vector3 distanceVector = attrTarget - pos;
@@ -153,17 +154,17 @@ namespace SharpCraft.entity
 
         public override void Render(float partialTicks)
         {
-            var partialPos = lastPos + (pos - lastPos) * partialTicks;
-            var partialTime = lastTick + (tick - lastTick) * partialTicks;
+            Vector3 partialPos = lastPos + (pos - lastPos) * partialTicks;
+            float partialTime = lastTick + (tick - lastTick) * partialTicks;
 
             if (stack?.Item?.InnerItem is EnumBlock block)
             {
-                var model = ModelRegistry.GetModelForBlock(block, stack.Meta);
+                ModelBlock model = ModelRegistry.GetModelForBlock(block, stack.Meta);
 
                 if (model.RawModel == null)
                     return;
 
-                var time = onGround ? (float)((Math.Sin(partialTime / 8) + 1) / 16) : 0;
+                float time = onGround ? (float)((Math.Sin(partialTime / 8) + 1) / 16) : 0;
 
                 _shader.Bind();
 
@@ -176,7 +177,7 @@ namespace SharpCraft.entity
                 GL.ActiveTexture(TextureUnit.Texture0);
                 GL.BindTexture(TextureTarget.Texture2D, TextureManager.TEXTURE_BLOCKS.ID);
 
-                var itemsToRender = 1;
+                int itemsToRender = 1;
 
                 if (stack.Count > 1)
                     itemsToRender = 2;
@@ -187,22 +188,22 @@ namespace SharpCraft.entity
 
                 for (int i = 0; i < itemsToRender; i++)
                 {
-                    var rot = Vector3.UnitY * partialTime * 3;
-                    var pos = partialPos - (Vector3.UnitX * 0.125f + Vector3.UnitZ * 0.125f) + Vector3.UnitY * time;
-                    var pos_o = Vector3.One * (i / 8f);
+                    Vector3 rot = Vector3.UnitY * partialTime * 3;
+                    Vector3 pos = partialPos - (Vector3.UnitX * 0.125f + Vector3.UnitZ * 0.125f) + Vector3.UnitY * time;
+                    Vector3 pos_o = Vector3.One * (i / 8f);
 
-                    var x = Matrix4.CreateRotationX(MathHelper.DegreesToRadians(rot.X));
-                    var y = Matrix4.CreateRotationY(MathHelper.DegreesToRadians(rot.Y));
-                    var z = Matrix4.CreateRotationZ(MathHelper.DegreesToRadians(rot.Z));
+                    Matrix4 x = Matrix4.CreateRotationX(MathHelper.DegreesToRadians(rot.X));
+                    Matrix4 y = Matrix4.CreateRotationY(MathHelper.DegreesToRadians(rot.Y));
+                    Matrix4 z = Matrix4.CreateRotationZ(MathHelper.DegreesToRadians(rot.Z));
 
-                    var vec = Vector3.One * 0.5f;
+                    Vector3 vec = Vector3.One * 0.5f;
 
-                    var s = Matrix4.CreateScale(0.25f);
-                    var t = Matrix4.CreateTranslation(pos + vec * 0.25f);
-                    var t2 = Matrix4.CreateTranslation(-vec);
-                    var t3 = Matrix4.CreateTranslation(pos_o);
+                    Matrix4 s = Matrix4.CreateScale(0.25f);
+                    Matrix4 t = Matrix4.CreateTranslation(pos + vec * 0.25f);
+                    Matrix4 t2 = Matrix4.CreateTranslation(-vec);
+                    Matrix4 t3 = Matrix4.CreateTranslation(pos_o);
 
-                    var mat = t3 * t2 * (z * y * x * s) * t;
+                    Matrix4 mat = t3 * t2 * (z * y * x * s) * t;
 
                     _shader.UpdateGlobalUniforms();
                     _shader.UpdateModelUniforms(model.RawModel);

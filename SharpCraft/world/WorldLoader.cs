@@ -1,4 +1,5 @@
 ﻿using SharpCraft.block;
+using SharpCraft.entity;
 using System;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
@@ -12,21 +13,21 @@ namespace SharpCraft.world
             if (w == null)
                 return;
 
-            var bf = new BinaryFormatter();
+            BinaryFormatter bf = new BinaryFormatter();
 
             w.SaveAllChunks();
 
             try
             {
-                var wpn = new WorldPlayerNode(SharpCraft.Instance.Player);
-                var wdn = new WorldDataNode(w);
+                WorldPlayerNode wpn = new WorldPlayerNode(SharpCraft.Instance.Player);
+                WorldDataNode wdn = new WorldDataNode(w);
 
-                using (var fs = File.OpenWrite(w.SaveRoot + "/player.dat"))
+                using (FileStream fs = File.OpenWrite(w.SaveRoot + "/player.dat"))
                 {
                     bf.Serialize(fs, wpn);
                 }
 
-                using (var fs = File.OpenWrite(w.SaveRoot + "/level.dat"))
+                using (FileStream fs = File.OpenWrite(w.SaveRoot + "/level.dat"))
                 {
                     bf.Serialize(fs, wdn);
                 }
@@ -39,9 +40,9 @@ namespace SharpCraft.world
 
         public static World LoadWorld(string saveName)
         {
-            var bf = new BinaryFormatter();
+            BinaryFormatter bf = new BinaryFormatter();
 
-            var dir = $"{SharpCraft.Instance.GameFolderDir}saves/{saveName}";
+            string dir = $"{SharpCraft.Instance.GameFolderDir}saves/{saveName}";
 
             if (!Directory.Exists(dir))
                 return null;
@@ -53,19 +54,19 @@ namespace SharpCraft.world
                 WorldDataNode wdn;
                 WorldPlayerNode wpn;
 
-                using (var fs = File.OpenRead(dir + "/player.dat"))
+                using (FileStream fs = File.OpenRead(dir + "/player.dat"))
                 {
                     wpn = (WorldPlayerNode)bf.Deserialize(fs);
                 }
 
-                using (var fs = File.OpenRead(dir + "/level.dat"))
+                using (FileStream fs = File.OpenRead(dir + "/level.dat"))
                 {
                     wdn = (WorldDataNode)bf.Deserialize(fs);
                 }
 
                 world = wdn.GetWorld(saveName);
 
-                var player = wpn.GetPlayer(world);
+                EntityPlayerSP player = wpn.GetPlayer(world);
 
                 world.AddEntity(player);
                 world.LoadChunk(new BlockPos(player.pos).ChunkPos());

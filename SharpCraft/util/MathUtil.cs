@@ -10,10 +10,10 @@ namespace SharpCraft.util
 
         public static float GetNext()
         {
-            var bytes = new byte[8];
+            byte[] bytes = new byte[8];
             _rand.GetBytes(bytes);
 
-            var ul = BitConverter.ToUInt64(bytes, 0) / (1 << 11);
+            ulong ul = BitConverter.ToUInt64(bytes, 0) / (1 << 11);
             double d = ul / (double)(1UL << 53);
 
             return (float)d;
@@ -29,17 +29,17 @@ namespace SharpCraft.util
 
         public static Vector3 Rotate(this Vector3 vec, float angleX, float angleY, float angleZ)
         {
-            var sinX = (float)Math.Sin(angleX);
-            var sinY = (float)Math.Sin(angleY);
-            var sinZ = (float)Math.Sin(angleZ);
+            float sinX = (float)Math.Sin(angleX);
+            float sinY = (float)Math.Sin(angleY);
+            float sinZ = (float)Math.Sin(angleZ);
 
-            var cosX = (float)Math.Cos(angleX);
-            var cosY = (float)Math.Cos(angleY);
-            var cosZ = (float)Math.Cos(angleZ);
+            float cosX = (float)Math.Cos(angleX);
+            float cosY = (float)Math.Cos(angleY);
+            float cosZ = (float)Math.Cos(angleZ);
 
-            var vecX = vec.X;
-            var vecY = vec.Y * cosX - vec.Z * sinX;
-            var vecZ = vec.Y * sinX + vec.Z * cosX;
+            float vecX = vec.X;
+            float vecY = vec.Y * cosX - vec.Z * sinX;
+            float vecZ = vec.Y * sinX + vec.Z * cosX;
 
             vec.X = vecX;
             vec.Y = vecY;
@@ -62,16 +62,16 @@ namespace SharpCraft.util
 
         public static float NextFloat(float min = 0, float max = 1)
         {
-            var f = GetNext();
+            float f = GetNext();
 
             return min + f * (max - min);
         }
 
         public static float Min(params float[] values)
         {
-            var min = float.MaxValue;
+            float min = float.MaxValue;
 
-            foreach (var f in values)
+            foreach (float f in values)
                 min = Math.Min(min, f);
 
             return min;
@@ -79,9 +79,9 @@ namespace SharpCraft.util
 
         public static float Max(params float[] values)
         {
-            var max = float.MinValue;
+            float max = float.MinValue;
 
-            foreach (var f in values)
+            foreach (float f in values)
                 max = Math.Max(max, f);
 
             return max;
@@ -136,17 +136,17 @@ namespace SharpCraft.util
         {
             if (pos >= 0) return pos % partSize;
 
-            var partPos = (pos + 1) / partSize - 1;
+            int partPos = (pos + 1) / partSize - 1;
             return pos - partPos * partSize;
         }
 
         public static Vector4 Hue(int angle)
         {
-            var rad = MathHelper.DegreesToRadians(angle);
+            float rad = MathHelper.DegreesToRadians(angle);
 
-            var r = (float)(Math.Sin(rad) * 0.5 + 0.5);
-            var g = (float)(Math.Sin(rad + MathHelper.PiOver3 * 2) * 0.5 + 0.5);
-            var b = (float)(Math.Sin(rad + MathHelper.PiOver3 * 4) * 0.5 + 0.5);
+            float r = (float)(Math.Sin(rad) * 0.5 + 0.5);
+            float g = (float)(Math.Sin(rad + MathHelper.PiOver3 * 2) * 0.5 + 0.5);
+            float b = (float)(Math.Sin(rad + MathHelper.PiOver3 * 4) * 0.5 + 0.5);
 
             return new Vector4(r, g, b, 1);
         }

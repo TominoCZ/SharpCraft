@@ -59,7 +59,7 @@ namespace SharpCraft.block
                 return false;
             }
 
-            var sides = (FaceSides)obj;
+            FaceSides sides = (FaceSides)obj;
             return x == sides.x &&
                    y == sides.y &&
                    z == sides.z &&
@@ -69,7 +69,7 @@ namespace SharpCraft.block
 
         public override int GetHashCode()
         {
-            var hashCode = -1813808738;
+            int hashCode = -1813808738;
             hashCode = hashCode * -1521134295 + x.GetHashCode();
             hashCode = hashCode * -1521134295 + y.GetHashCode();
             hashCode = hashCode * -1521134295 + z.GetHashCode();

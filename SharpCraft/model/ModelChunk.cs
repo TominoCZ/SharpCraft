@@ -17,7 +17,7 @@ namespace SharpCraft.model
 
         public void setFragmentModelWithShader(Shader<ModelBlock> shader, ModelChunkFragment model)
         {
-            fragmentPerShader.TryRemove(shader, out var removed);
+            fragmentPerShader.TryRemove(shader, out ModelChunkFragment removed);
 
             //_shaders.Add(shader);
 
@@ -26,12 +26,12 @@ namespace SharpCraft.model
 
         public ModelChunkFragment getFragmentModelWithShader(Shader<ModelBlock> shader)
         {
-            return fragmentPerShader.TryGetValue(shader, out var model) ? model : null;
+            return fragmentPerShader.TryGetValue(shader, out ModelChunkFragment model) ? model : null;
         }
 
         public void destroyFragmentModelWithShader(Shader<ModelBlock> shader)
         {
-            if (fragmentPerShader.TryRemove(shader, out var removed))
+            if (fragmentPerShader.TryRemove(shader, out ModelChunkFragment removed))
             {
                 removed.Destroy();
                 //_shaders.Remove(shader);
@@ -45,7 +45,7 @@ namespace SharpCraft.model
 
         public void destroy()
         {
-            foreach (var shader in fragmentPerShader.Keys)
+            foreach (Shader<ModelBlock> shader in fragmentPerShader.Keys)
             {
                 destroyFragmentModelWithShader(shader);
             }

@@ -1,4 +1,6 @@
-﻿namespace SharpCraft.render
+﻿using SharpCraft.entity;
+
+namespace SharpCraft.render
 {
     internal class EntityRenderer
     {
@@ -6,7 +8,7 @@
         {
             for (int i = 0; i < SharpCraft.Instance.World.Entities.Count; i++)
             {
-                var entity = SharpCraft.Instance.World.Entities[i];
+                Entity entity = SharpCraft.Instance.World.Entities[i];
 
                 entity.Render(partialTicks);
             }

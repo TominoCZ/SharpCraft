@@ -14,7 +14,7 @@ namespace SharpCraft.model
             {
                 for (int i = 0; i < states.Count; i++)
                 {
-                    var state = states[i];
+                    BlockNode state = states[i];
 
                     if (state.meta == meta)
                     {
@@ -40,15 +40,13 @@ namespace SharpCraft.model
         {
             meta = meta < 0 ? 0 : meta;
 
-            if (blockType == EnumBlock.AIR || !models.TryGetValue(blockType, out var states))
+            if (blockType == EnumBlock.AIR || !models.TryGetValue(blockType, out List<BlockNode> states))
                 return models[EnumBlock.MISSING][0];
 
-            for (int i = 0; i < states.Count; i++)
+            foreach (BlockNode node in states)
             {
-                var state = states[i];
-
-                if (state.meta == meta)
-                    return state;
+                if (node.meta == meta)
+                    return node;
             }
 
             return null;

@@ -54,24 +54,24 @@ namespace SharpCraft.gui
 
             inventoryBackground.Scale = guiScale;
 
-            var size = SharpCraft.Instance.ClientSize;
+            Size size = SharpCraft.Instance.ClientSize;
 
             startPosX = size.Width / 2f - totalInventoryWidth / 2f;
             startPosY = size.Height / 2f - totalInventoryHeight / 2f;
 
             RenderTexture(inventoryBackground, startPosX - 10 * guiScale / 2, startPosY - 10 * guiScale / 2);
 
-            var hotbarY = scaledHeight + startPosY + 2 * (scaledHeight + space * 5);
+            float hotbarY = scaledHeight + startPosY + 2 * (scaledHeight + space * 5);
 
             for (int i = 0; i < 9; i++)
             {
-                var x = startPosX + i * (scaledWidth + space);
+                float x = startPosX + i * (scaledWidth + space);
 
                 GuiItemSlot targetBtn = (GuiItemSlot)buttons.Find(btn => btn.ID == i && btn is GuiItemSlot);
 
                 if (targetBtn != null)
                 {
-                    var alpha = 1f;
+                    float alpha = 1f;
 
                     if (targetBtn.Stack != null && !targetBtn.Stack.ItemSame(draggedStack) && draggedStack != null && !draggedStack.IsEmpty)
                         alpha = 0.85f;
@@ -89,10 +89,10 @@ namespace SharpCraft.gui
             {
                 for (int j = 0; j < 9; j++)
                 {
-                    var x = startPosX + j * (scaledWidth + space);
-                    var y = startPosY + i * (scaledHeight + space);
+                    float x = startPosX + j * (scaledWidth + space);
+                    float y = startPosY + i * (scaledHeight + space);
 
-                    var index = 9 + i * 9 + j;
+                    int index = 9 + i * 9 + j;
 
                     GuiItemSlot targetBtn = (GuiItemSlot)buttons.Find(btn => btn.ID == index && btn is GuiItemSlot);
 
@@ -110,8 +110,8 @@ namespace SharpCraft.gui
 
             if (draggedStack != null && !draggedStack.IsEmpty && draggedStack.Item?.InnerItem is EnumBlock block)
             {
-                var x = mouseX - 16 * guiScale / 2;
-                var y = mouseY - 16 * guiScale / 2;
+                float x = mouseX - 16 * guiScale / 2;
+                float y = mouseY - 16 * guiScale / 2;
 
                 RenderBlock(block, x, y, guiScale); //TODO - make this render Items too once they're implemented
 
@@ -142,7 +142,7 @@ namespace SharpCraft.gui
                 }
                 else if ((draggedStack == null || draggedStack.IsEmpty) && slot.Stack != null && !slot.Stack.IsEmpty) //when not holding anything and clicked a non-empty stack in the inventory
                 {
-                    var toTake = slot.Stack.Count;
+                    int toTake = slot.Stack.Count;
 
                     if (button == MouseButton.Right)
                     {
@@ -173,14 +173,14 @@ namespace SharpCraft.gui
                     }
                     else if (draggedStack != null && slot.Stack.ItemSame(draggedStack))
                     {
-                        var ammountToMove = button == MouseButton.Right ? 1 : Math.Min(slot.Stack.Item.MaxStackSize() - slot.Stack.Count, draggedStack.Count);
+                        int ammountToMove = button == MouseButton.Right ? 1 : Math.Min(slot.Stack.Item.MaxStackSize() - slot.Stack.Count, draggedStack.Count);
 
                         slot.Stack.Count += ammountToMove;
                         draggedStack.Count -= ammountToMove;
                     }
                     else if (draggedStack != null && !draggedStack.IsEmpty)
                     {
-                        var stackInSlot = SharpCraft.Instance.Player.GetItemStackInInventory(btn.ID);
+                        ItemStack stackInSlot = SharpCraft.Instance.Player.GetItemStackInInventory(btn.ID);
                         SharpCraft.Instance.Player.SetItemStackInInventory(btn.ID, draggedStack.Copy());
 
                         draggedStack = stackInSlot.Copy();

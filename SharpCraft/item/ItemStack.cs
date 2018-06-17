@@ -63,9 +63,9 @@ namespace SharpCraft.item
             ItemStack remainingStack = null;
 
             // Copy item if an item isn't present here
-            if(this.Item == null)
+            if (this.Item == null)
             {
-                if(other.Item == null)
+                if (other.Item == null)
                     return remainingStack; // error
                 else
                     this.Item = other.Item;
@@ -85,10 +85,9 @@ namespace SharpCraft.item
 
                 remainingStack = other.Copy();
                 remainingStack.Count -= difference;
-            }           
+            }
 
             return remainingStack;
         }
-
     }
 }

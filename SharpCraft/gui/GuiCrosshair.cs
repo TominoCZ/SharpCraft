@@ -1,6 +1,7 @@
 ﻿using OpenTK;
 using OpenTK.Graphics.OpenGL;
 using SharpCraft.texture;
+using SharpCraft.util;
 
 namespace SharpCraft.gui
 {
@@ -10,7 +11,7 @@ namespace SharpCraft.gui
 
         public GuiCrosshair()
         {
-            var texture = TextureManager.LoadTexture("gui/cross");
+            Texture texture = TextureManager.LoadTexture("gui/cross");
 
             _texture = new GuiTexture(texture, Vector2.Zero, new Vector2(texture.TextureSize.Width, texture.TextureSize.Height), 1.4f);
         }

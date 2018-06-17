@@ -19,9 +19,9 @@ namespace SharpCraft.render.shader
 
         public static void ReloadAll()
         {
-            for (var index = 0; index < _shaders.Count; index++)
+            for (int index = 0; index < _shaders.Count; index++)
             {
-                var shader = _shaders[index];
+                dynamic shader = _shaders[index];
 
                 shader.Reload(); //TODO WARNING: keep this name of the function the same
             }
@@ -29,9 +29,9 @@ namespace SharpCraft.render.shader
 
         public static void DestroyAll()
         {
-            for (var index = 0; index < _shaders.Count; index++)
+            for (int index = 0; index < _shaders.Count; index++)
             {
-                var shader = _shaders[index];
+                dynamic shader = _shaders[index];
 
                 shader.Destroy(); //TODO WARNING: keep this name of the function the same
             }
@@ -87,7 +87,7 @@ namespace SharpCraft.render.shader
 
         protected virtual void RegisterUniforms()
         {
-            foreach (var m in _modules)
+            foreach (ShaderModule<TRenderable> m in _modules)
             {
                 m.InitUniforms();
             }
@@ -95,7 +95,7 @@ namespace SharpCraft.render.shader
 
         public virtual void UpdateGlobalUniforms()
         {
-            foreach (var m in _modules)
+            foreach (ShaderModule<TRenderable> m in _modules)
             {
                 m.UpdateGlobalUniforms();
             }
@@ -103,7 +103,7 @@ namespace SharpCraft.render.shader
 
         public virtual void UpdateModelUniforms(IModelRaw model = null)
         {
-            foreach (var m in _modules)
+            foreach (ShaderModule<TRenderable> m in _modules)
             {
                 m.UpdateModelUniforms(model);
             }
@@ -111,7 +111,7 @@ namespace SharpCraft.render.shader
 
         public virtual void UpdateInstanceUniforms(Matrix4 transform, TRenderable renderable)
         {
-            foreach (var m in _modules)
+            foreach (ShaderModule<TRenderable> m in _modules)
             {
                 m.UpdateInstanceUniforms(transform, renderable);
             }
@@ -178,35 +178,35 @@ namespace SharpCraft.render.shader
 
         public UniformMat4 GetUniformMat4(string name)
         {
-            var id = GetUniformId(name);
+            int id = GetUniformId(name);
 
             return id != -1 ? new UniformMat4(id) : null;
         }
 
         public UniformVec4 GetUniformVec4(string name)
         {
-            var id = GetUniformId(name);
+            int id = GetUniformId(name);
 
             return id != -1 ? new UniformVec4(id) : null;
         }
 
         public UniformVec3 GetUniformVec3(string name)
         {
-            var id = GetUniformId(name);
+            int id = GetUniformId(name);
 
             return id != -1 ? new UniformVec3(id) : null;
         }
 
         public UniformVec2 GetUniformVec2(string name)
         {
-            var id = GetUniformId(name);
+            int id = GetUniformId(name);
 
             return id != -1 ? new UniformVec2(id) : null;
         }
 
         public UniformFloat GetUniformFloat(string name)
         {
-            var id = GetUniformId(name);
+            int id = GetUniformId(name);
 
             return id != -1 ? new UniformFloat(id) : null;
         }

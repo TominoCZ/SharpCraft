@@ -17,19 +17,19 @@ namespace SharpCraft.model
 
         public RawQuad GetQuadForSide(FaceSides side)
         {
-            _quads.TryGetValue(side, out var quad);
+            _quads.TryGetValue(side, out RawQuad quad);
 
             return quad;
         }
 
         public TextureUVNode GetUVs(FaceSides side)
         {
-            if (_quads.TryGetValue(side, out var quad))
+            if (_quads.TryGetValue(side, out RawQuad quad))
             {
                 if (quad.UVs.Length == 8)
                 {
-                    var start = new Vector2(quad.UVs[0], quad.UVs[1]);
-                    var end = new Vector2(quad.UVs[4], quad.UVs[5]);
+                    Vector2 start = new Vector2(quad.UVs[0], quad.UVs[1]);
+                    Vector2 end = new Vector2(quad.UVs[4], quad.UVs[5]);
 
                     return new TextureUVNode(start, end);
                 }

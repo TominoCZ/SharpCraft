@@ -25,12 +25,12 @@ namespace SharpCraft.world
             pos = player.pos;
             hotbar = player.Hotbar;
             inventory = player.Inventory;
-            healthPercentage = player.healthPercentage;
+            healthPercentage = player.Health;
         }
 
         public EntityPlayerSP GetPlayer(World world)
         {
-            var player = new EntityPlayerSP(world, pos);
+            EntityPlayerSP player = new EntityPlayerSP(world, pos);
             SharpCraft.Instance.Camera.pitch = pitch;
             SharpCraft.Instance.Camera.yaw = yaw;
 
@@ -44,7 +44,7 @@ namespace SharpCraft.world
                 player.Inventory[i] = inventory[i];
             }
 
-            player.healthPercentage = healthPercentage;
+            player.Health = healthPercentage;
 
             return player;
         }

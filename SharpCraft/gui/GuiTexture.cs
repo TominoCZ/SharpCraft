@@ -28,7 +28,7 @@ namespace SharpCraft.gui
             Size = size;
             Scale = scale;
 
-            var pixel = new Vector2(1f / TextureSize.Width, 1f / TextureSize.Height);
+            Vector2 pixel = new Vector2(1f / TextureSize.Width, 1f / TextureSize.Height);
 
             UVmin = textureStart * pixel;
             UVmax = UVmin + size * pixel;

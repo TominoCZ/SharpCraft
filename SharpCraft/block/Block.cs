@@ -34,7 +34,7 @@ namespace SharpCraft.block
 
         protected void RegisterState(string modelJson)
         {
-            var state = new BlockState(this, new ModelBlock(EnumBlock.MISSING, Shader));
+            BlockState state = new BlockState(this, new ModelBlock(EnumBlock.MISSING, Shader));
 
             //TODO LOAD MODEL AND TEXTURE INFO FROM JSON
 

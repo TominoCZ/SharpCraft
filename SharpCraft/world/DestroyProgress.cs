@@ -17,7 +17,7 @@ namespace SharpCraft.world
         {
             get
             {
-                var partialTicks = SharpCraft.Instance.GetPartialTicksForRender();
+                float partialTicks = SharpCraft.Instance.GetPartialTicksForRender();
 
                 return Math.Clamp((_lastProgress + (Progress - _lastProgress) * partialTicks) / _blockHardness, 0, _blockHardness);
             }
@@ -45,8 +45,8 @@ namespace SharpCraft.world
         {
             Pos = pos;
 
-            var block = player.world.GetBlock(pos);
-            var meta = player.world.GetMetadata(pos);
+            EnumBlock block = player.world.GetBlock(pos);
+            int meta = player.world.GetMetadata(pos);
 
             _blockHardness = 12; //TODO
             //_blockHardness = ModelRegistry.GetBlockState(block, meta).hardness;

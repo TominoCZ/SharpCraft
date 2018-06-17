@@ -13,7 +13,7 @@ namespace SharpCraft.util
             hitPosition = Vector3.Zero;
 
             float tmin, tmax, tymin, tymax, tzmin, tzmax;
-            var invrd = direction;
+            Vector3 invrd = direction;
             invrd.X = 1.0f / invrd.X;
             invrd.Y = 1.0f / invrd.Y;
             invrd.Z = 1.0f / invrd.Z;
@@ -71,25 +71,25 @@ namespace SharpCraft.util
                 return false;
             }
 
-            var t = tmin;
+            float t = tmin;
             hitPosition = origin + t * direction;
 
-            var AABBCenter = (bb.min + bb.max) * 0.5f;
+            Vector3 AABBCenter = (bb.min + bb.max) * 0.5f;
 
-            var dir = hitPosition - AABBCenter;
+            Vector3 dir = hitPosition - AABBCenter;
 
-            var width = bb.max - bb.min;
+            Vector3 width = bb.max - bb.min;
             width.X = Math.Abs(width.X);
             width.Y = Math.Abs(width.Y);
             width.Z = Math.Abs(width.Z);
 
-            var ratio = Vector3.One;
+            Vector3 ratio = Vector3.One;
             ratio.X = Math.Abs(dir.X / width.X);
             ratio.Y = Math.Abs(dir.Y / width.Y);
             ratio.Z = Math.Abs(dir.Z / width.Z);
 
             hitNormal = Vector3.Zero;
-            var maxDir = 0; // x
+            int maxDir = 0; // x
             if (ratio.X >= ratio.Y && ratio.X >= ratio.Z)
             { // x is the greatest
                 maxDir = 0;

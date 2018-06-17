@@ -49,11 +49,11 @@ namespace SharpCraft.gui
             float width = tex.Size.X * tex.Scale;
             float height = tex.Size.Y * tex.Scale;
 
-            var ratio = new Vector2(width / SharpCraft.Instance.ClientSize.Width, height / SharpCraft.Instance.ClientSize.Height);
+            Vector2 ratio = new Vector2(width / SharpCraft.Instance.ClientSize.Width, height / SharpCraft.Instance.ClientSize.Height);
 
-            var unit = new Vector2(1f / SharpCraft.Instance.ClientSize.Width, 1f / SharpCraft.Instance.ClientSize.Height);
+            Vector2 unit = new Vector2(1f / SharpCraft.Instance.ClientSize.Width, 1f / SharpCraft.Instance.ClientSize.Height);
 
-            var pos = new Vector2(x, -y);
+            Vector2 pos = new Vector2(x, -y);
 
             if (!cenetered)
             {
@@ -61,7 +61,7 @@ namespace SharpCraft.gui
                 pos.Y -= height / 2;
             }
 
-            var mat = MatrixHelper.CreateTransformationMatrix(pos.Ceiling() * unit * 2 + Vector2.UnitY - Vector2.UnitX, ratio);
+            Matrix4 mat = MatrixHelper.CreateTransformationMatrix(pos.Ceiling() * unit * 2 + Vector2.UnitY - Vector2.UnitX, ratio);
 
             Shader.Bind();
 
@@ -84,10 +84,10 @@ namespace SharpCraft.gui
 
         protected virtual void RenderBlock(EnumBlock block, float x, float y, float scale)
         {
-            var UVs = TextureManager.GetUVsFromBlock(block);
+            TextureBlockUV UVs = TextureManager.GetUVsFromBlock(block);
             ModelManager.overrideModelUVsInVAO(_item.RawModel.bufferIDs[1], UVs.getUVForSide(FaceSides.South).ToArray());
 
-            var unit = new Vector2(1f / SharpCraft.Instance.ClientSize.Width, 1f / SharpCraft.Instance.ClientSize.Height);
+            Vector2 unit = new Vector2(1f / SharpCraft.Instance.ClientSize.Width, 1f / SharpCraft.Instance.ClientSize.Height);
 
             float width = 16;
             float height = 16;
@@ -98,9 +98,9 @@ namespace SharpCraft.gui
             float posX = x + scaledWidth / 2;
             float posY = -y - scaledHeight / 2;
 
-            var pos = new Vector2(posX, posY).Ceiling() * unit;
+            Vector2 pos = new Vector2(posX, posY).Ceiling() * unit;
 
-            var mat = MatrixHelper.CreateTransformationMatrix(pos * 2 - Vector2.UnitX + Vector2.UnitY, scale * new Vector2(width, height) * unit);
+            Matrix4 mat = MatrixHelper.CreateTransformationMatrix(pos * 2 - Vector2.UnitX + Vector2.UnitY, scale * new Vector2(width, height) * unit);
 
             _item.Bind();
 

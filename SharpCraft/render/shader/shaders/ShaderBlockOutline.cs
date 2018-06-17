@@ -43,11 +43,11 @@ namespace SharpCraft.render.shader.shaders
 
         private Vector4 GetHue(int hue)
         {
-            var rads = MathHelper.DegreesToRadians(hue);
+            float rads = MathHelper.DegreesToRadians(hue);
 
-            var r = (float)(Math.Sin(rads) * 0.5 + 0.5);
-            var g = (float)(Math.Sin(rads + MathHelper.PiOver3 * 2) * 0.5 + 0.5);
-            var b = (float)(Math.Sin(rads + MathHelper.PiOver3 * 4) * 0.5 + 0.5);
+            float r = (float)(Math.Sin(rads) * 0.5 + 0.5);
+            float g = (float)(Math.Sin(rads + MathHelper.PiOver3 * 2) * 0.5 + 0.5);
+            float b = (float)(Math.Sin(rads + MathHelper.PiOver3 * 4) * 0.5 + 0.5);
 
             return Vector4.UnitX * r + Vector4.UnitY * g + Vector4.UnitZ * b + Vector4.UnitW;
         }

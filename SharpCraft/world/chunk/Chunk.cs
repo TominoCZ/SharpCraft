@@ -105,7 +105,7 @@ namespace SharpCraft.world.chunk
         public void SetMetadata(BlockPos localPos, int meta)
         {
             CheckPos(localPos);
-            var id = (short)(_chunkBlocks[localPos.X, localPos.Y, localPos.Z] & 4095 | meta);
+            short id = (short)(_chunkBlocks[localPos.X, localPos.Y, localPos.Z] & 4095 | meta);
 
             if (id != _chunkBlocks[localPos.X, localPos.Y, localPos.Z])
             {
@@ -130,11 +130,11 @@ namespace SharpCraft.world.chunk
 
         public int GetHeightAtPos(int x, int z)
         {
-            var pos = new BlockPos(x, 256, z);
+            BlockPos pos = new BlockPos(x, 256, z);
 
-            for (var y = ChunkHeight - 1; y >= 0; y--)
+            for (int y = ChunkHeight - 1; y >= 0; y--)
             {
-                var block = GetBlock(pos = pos.Offset(FaceSides.Down));
+                EnumBlock block = GetBlock(pos = pos.Offset(FaceSides.Down));
 
                 if (block != EnumBlock.AIR)
                     return y + 1;
@@ -151,9 +151,9 @@ namespace SharpCraft.world.chunk
                 return;
             }
 
-            foreach (var shader in _model.fragmentPerShader.Keys)
+            foreach (Shader<ModelBlock> shader in _model.fragmentPerShader.Keys)
             {
-                var chunkFragmentModel = _model.getFragmentModelWithShader(shader);
+                ModelChunkFragment chunkFragmentModel = _model.getFragmentModelWithShader(shader);
                 if (chunkFragmentModel == null) continue;
 
                 chunkFragmentModel.Bind();
@@ -188,11 +188,11 @@ namespace SharpCraft.world.chunk
 
             ModelBuilding = true;
 
-            var modelRaw = new ConcurrentDictionary<Shader<ModelBlock>, List<RawQuad>>();
+            ConcurrentDictionary<Shader<ModelBlock>, List<RawQuad>> modelRaw = new ConcurrentDictionary<Shader<ModelBlock>, List<RawQuad>>();
 
             List<RawQuad> quads;
 
-            var sw = Stopwatch.StartNew();
+            Stopwatch sw = Stopwatch.StartNew();
 
             //generate the model - fill MODEL_RAW
             Enumerable.Range(0, ChunkHeight).AsParallel().ForAll(y =>
@@ -201,29 +201,29 @@ namespace SharpCraft.world.chunk
                 {
                     for (int z = 0; z < ChunkSize; z++)
                     {
-                        var worldPos = new BlockPos(x + Pos.WorldSpaceX(), y, z + Pos.WorldSpaceZ());
+                        BlockPos worldPos = new BlockPos(x + Pos.WorldSpaceX(), y, z + Pos.WorldSpaceZ());
 
-                        var block = World.GetBlock(worldPos);
+                        EnumBlock block = World.GetBlock(worldPos);
                         if (block == EnumBlock.AIR)
                             continue;
 
-                        var localPos = new BlockPos(x, y, z);
+                        BlockPos localPos = new BlockPos(x, y, z);
 
-                        var blockModel = ModelRegistry.GetModelForBlock(block, World.GetMetadata(worldPos));
+                        ModelBlock blockModel = ModelRegistry.GetModelForBlock(block, World.GetMetadata(worldPos));
 
                         quads = modelRaw.GetOrAdd(blockModel.Shader, new List<RawQuad>());
 
-                        foreach (var dir in FaceSides.AllSides)
+                        foreach (FaceSides dir in FaceSides.AllSides)
                         {
-                            var worldPosO = worldPos.Offset(dir);
-                            var blockO = World.GetBlock(worldPosO);
-                            var blockModelO = ModelRegistry.GetModelForBlock(blockO, World.GetMetadata(worldPosO));
+                            BlockPos worldPosO = worldPos.Offset(dir);
+                            EnumBlock blockO = World.GetBlock(worldPosO);
+                            ModelBlock blockModelO = ModelRegistry.GetModelForBlock(blockO, World.GetMetadata(worldPosO));
 
                             if (!(blockO == EnumBlock.AIR ||
                                   blockModelO.hasTransparency && !blockModel.hasTransparency))
                                 continue;
 
-                            var quad = ((ModelBlockRaw)blockModel.RawModel).GetQuadForSide(dir).Offset(localPos);
+                            RawQuad quad = ((ModelBlockRaw)blockModel.RawModel).GetQuadForSide(dir).Offset(localPos);
 
                             if (quad.Loaded)
                                 lock (quads)
@@ -240,7 +240,7 @@ namespace SharpCraft.world.chunk
             {
                 if (_model != null)
                 {
-                    foreach (var oldShader in _model.fragmentPerShader.Keys)
+                    foreach (Shader<ModelBlock> oldShader in _model.fragmentPerShader.Keys)
                     {
                         if (modelRaw.Keys.Contains<object>(oldShader))
                             continue;
@@ -250,14 +250,14 @@ namespace SharpCraft.world.chunk
                 }
                 else _model = new ModelChunk();
 
-                foreach (var value in modelRaw)
+                foreach (KeyValuePair<Shader<ModelBlock>, List<RawQuad>> value in modelRaw)
                 {
-                    var newShader = value.Key;
-                    var newData = value.Value;
+                    Shader<ModelBlock> newShader = value.Key;
+                    List<RawQuad> newData = value.Value;
 
                     if (!_model.fragmentPerShader.Keys.Contains<object>(newShader))
                     {
-                        var newFragment = new ModelChunkFragment(newShader, newData);
+                        ModelChunkFragment newFragment = new ModelChunkFragment(newShader, newData);
                         _model.setFragmentModelWithShader(newShader, newFragment);
                         continue;
                     }
@@ -295,7 +295,7 @@ namespace SharpCraft.world.chunk
 
             Console.WriteLine($"Saving chunk @ {Pos.x} x {Pos.z}");
 
-            var data = new byte[World.ChunkData.Info.ChunkByteSize];
+            byte[] data = new byte[World.ChunkData.Info.ChunkByteSize];
             Buffer.BlockCopy(_chunkBlocks, 0, data, 0, data.Length);
             World.ChunkData.WriteChunkData(Pos, data);
         }

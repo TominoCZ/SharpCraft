@@ -47,8 +47,8 @@ namespace SharpCraft.world.chunk
 
         public static ChunkPos FromWorldSpace(int xWorld, int zWorld)
         {
-            MathUtil.ToLocal(xWorld, Chunk.ChunkSize, out var _, out var x);
-            MathUtil.ToLocal(zWorld, Chunk.ChunkSize, out var _, out var z);
+            MathUtil.ToLocal(xWorld, Chunk.ChunkSize, out int _, out int x);
+            MathUtil.ToLocal(zWorld, Chunk.ChunkSize, out int _, out int z);
             return new ChunkPos(x, z);
         }
 

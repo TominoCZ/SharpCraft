@@ -26,16 +26,16 @@ namespace SharpCraft.entity
             this.min = min;
             this.max = max;
 
-            var minX = MathUtil.Min(min.X, max.X);
-            var minY = MathUtil.Min(min.Y, max.Y);
-            var minZ = MathUtil.Min(min.Z, max.Z);
+            float minX = MathUtil.Min(min.X, max.X);
+            float minY = MathUtil.Min(min.Y, max.Y);
+            float minZ = MathUtil.Min(min.Z, max.Z);
 
-            var maxX = MathUtil.Max(min.X, max.X);
-            var maxY = MathUtil.Max(min.Y, max.Y);
-            var maxZ = MathUtil.Max(min.Z, max.Z);
+            float maxX = MathUtil.Max(min.X, max.X);
+            float maxY = MathUtil.Max(min.Y, max.Y);
+            float maxZ = MathUtil.Max(min.Z, max.Z);
 
-            var v1 = new Vector3(minX, minY, minZ);
-            var v2 = new Vector3(maxX, maxY, maxZ);
+            Vector3 v1 = new Vector3(minX, minY, minZ);
+            Vector3 v2 = new Vector3(maxX, maxY, maxZ);
 
             size = v2 - v1;
         }
@@ -56,13 +56,13 @@ namespace SharpCraft.entity
 
         public AxisAlignedBB Union(AxisAlignedBB other)
         {
-            var minX = (int)Math.Floor(MathUtil.Min(min.X, max.X, other.min.X, other.max.X));
-            var minY = (int)Math.Floor(MathUtil.Min(min.Y, max.Y, other.min.Y, other.max.Y));
-            var minZ = (int)Math.Floor(MathUtil.Min(min.Z, max.Z, other.min.Z, other.max.Z));
+            int minX = (int)Math.Floor(MathUtil.Min(min.X, max.X, other.min.X, other.max.X));
+            int minY = (int)Math.Floor(MathUtil.Min(min.Y, max.Y, other.min.Y, other.max.Y));
+            int minZ = (int)Math.Floor(MathUtil.Min(min.Z, max.Z, other.min.Z, other.max.Z));
 
-            var maxX = (int)Math.Ceiling(MathUtil.Max(min.X, max.X, other.min.X, other.max.X));
-            var maxY = (int)Math.Ceiling(MathUtil.Max(min.Y, max.Y, other.min.Y, other.max.Y));
-            var maxZ = (int)Math.Ceiling(MathUtil.Max(min.Z, max.Z, other.min.Z, other.max.Z));
+            int maxX = (int)Math.Ceiling(MathUtil.Max(min.X, max.X, other.min.X, other.max.X));
+            int maxY = (int)Math.Ceiling(MathUtil.Max(min.Y, max.Y, other.min.Y, other.max.Y));
+            int maxZ = (int)Math.Ceiling(MathUtil.Max(min.Z, max.Z, other.min.Z, other.max.Z));
 
             return new AxisAlignedBB(minX, minY, minZ, maxX, maxY, maxZ);
         }

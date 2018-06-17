@@ -1,5 +1,6 @@
 ﻿using OpenTK;
 using SharpCraft.texture;
+using SharpCraft.util;
 
 namespace SharpCraft.gui
 {
@@ -40,14 +41,14 @@ namespace SharpCraft.gui
 
         public override void Render(int mouseX, int mouseY)
         {
-            var v = 0;
+            int v = 0;
 
             Hovered = IsMouseOver(mouseX, mouseY);
 
             if (Hovered)
                 v += 20;
 
-            var tex = TextureManager.TEXTURE_GUI_WIDGETS;
+            Texture tex = TextureManager.TEXTURE_GUI_WIDGETS;
 
             if (CenteredX)
                 PosX = (int)(SharpCraft.Instance.ClientSize.Width / 2f - 200 * Scale / 2);

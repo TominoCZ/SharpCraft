@@ -8,55 +8,55 @@ namespace SharpCraft.util
     {
         public static Matrix4 CreateTransformationMatrix(Vector3 translation, Vector3 rot, float scale)
         {
-            var x = Matrix4.CreateRotationX(MathHelper.DegreesToRadians(rot.X));
-            var y = Matrix4.CreateRotationY(MathHelper.DegreesToRadians(rot.Y));
-            var z = Matrix4.CreateRotationZ(MathHelper.DegreesToRadians(rot.Z));
+            Matrix4 x = Matrix4.CreateRotationX(MathHelper.DegreesToRadians(rot.X));
+            Matrix4 y = Matrix4.CreateRotationY(MathHelper.DegreesToRadians(rot.Y));
+            Matrix4 z = Matrix4.CreateRotationZ(MathHelper.DegreesToRadians(rot.Z));
 
-            var vec = Vector3.One * 0.5f;
+            Vector3 vec = Vector3.One * 0.5f;
 
-            var s = Matrix4.CreateScale(scale);
-            var t = Matrix4.CreateTranslation(translation + vec * scale);
-            var t2 = Matrix4.CreateTranslation(-vec);
+            Matrix4 s = Matrix4.CreateScale(scale);
+            Matrix4 t = Matrix4.CreateTranslation(translation + vec * scale);
+            Matrix4 t2 = Matrix4.CreateTranslation(-vec);
 
             return t2 * (x * z * y * s) * t;
         }
 
         public static Matrix4 CreateTransformationMatrix(Vector2 translation, Vector2 scale)
         {
-            var s = Matrix4.CreateScale(scale.X, scale.Y, 1);
-            var t = Matrix4.CreateTranslation(translation.X, translation.Y, 0);
+            Matrix4 s = Matrix4.CreateScale(scale.X, scale.Y, 1);
+            Matrix4 t = Matrix4.CreateTranslation(translation.X, translation.Y, 0);
 
             return s * t;
         }
 
         public static Matrix4 CreateTransformationMatrix(float translationX, float translationY, float scale)
         {
-            var s = Matrix4.CreateScale(scale);
-            var t = Matrix4.CreateTranslation(translationX, translationY, 0);
+            Matrix4 s = Matrix4.CreateScale(scale);
+            Matrix4 t = Matrix4.CreateTranslation(translationX, translationY, 0);
 
             return s * t;
         }
 
         public static Matrix4 CreateTransformationMatrix(Vector3 translation, Vector3 scale)
         {
-            var s = Matrix4.CreateScale(scale.X, scale.Y, scale.Z);
-            var t = Matrix4.CreateTranslation(translation.X, translation.Y, translation.Z);
+            Matrix4 s = Matrix4.CreateScale(scale.X, scale.Y, scale.Z);
+            Matrix4 t = Matrix4.CreateTranslation(translation.X, translation.Y, translation.Z);
 
             return s * t;
         }
 
         public static Matrix4 CreateTransformationMatrix(BlockPos translation, Vector3 scale)
         {
-            var s = Matrix4.CreateScale(scale.X, scale.Y, scale.Z);
-            var t = Matrix4.CreateTranslation(translation.X, translation.Y, translation.Z);
+            Matrix4 s = Matrix4.CreateScale(scale.X, scale.Y, scale.Z);
+            Matrix4 t = Matrix4.CreateTranslation(translation.X, translation.Y, translation.Z);
 
             return s * t;
         }
 
         public static Matrix4 CreateTransformationMatrix(ChunkPos translation, Vector3 scale)
         {
-            var s = Matrix4.CreateScale(scale.X, scale.Y, scale.Z);
-            var t = Matrix4.CreateTranslation(translation.WorldSpaceX(), 0, translation.WorldSpaceZ());
+            Matrix4 s = Matrix4.CreateScale(scale.X, scale.Y, scale.Z);
+            Matrix4 t = Matrix4.CreateTranslation(translation.WorldSpaceX(), 0, translation.WorldSpaceZ());
 
             return s * t;
         }

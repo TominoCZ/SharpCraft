@@ -1,5 +1,6 @@
 ﻿using OpenTK;
 using OpenTK.Graphics.OpenGL;
+using OpenTK.Input;
 using SharpCraft.gui;
 using SharpCraft.model;
 using System.Collections.Generic;
@@ -15,7 +16,7 @@ namespace SharpCraft.render
 
         static GuiRenderer()
         {
-            var rawQuad = new RawQuad(new float[] {
+            RawQuad rawQuad = new RawQuad(new float[] {
                 -1,  1,
                 -1, -1,
                 1, -1,
@@ -39,8 +40,8 @@ namespace SharpCraft.render
 
             GL.BindVertexArray(GuiQuad.vaoID);
 
-            var state = OpenTK.Input.Mouse.GetCursorState();
-            var mouse = SharpCraft.Instance.PointToClient(new Point(state.X, state.Y));
+            MouseState state = OpenTK.Input.Mouse.GetCursorState();
+            Point mouse = SharpCraft.Instance.PointToClient(new Point(state.X, state.Y));
 
             gui.Render(mouse.X, mouse.Y);
 

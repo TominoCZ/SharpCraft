@@ -23,7 +23,7 @@ namespace SharpCraft.texture
 
         public TextureUVNode getUVForSide(FaceSides side)
         {
-            UVs.TryGetValue(side, out var uv);
+            UVs.TryGetValue(side, out TextureUVNode uv);
 
             return uv;
         }

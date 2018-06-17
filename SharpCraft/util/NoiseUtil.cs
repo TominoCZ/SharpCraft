@@ -256,15 +256,15 @@ namespace SharpCraft.util
         [MethodImpl(FN_INLINE)]
         private static FN_DECIMAL CubicLerp(FN_DECIMAL a, FN_DECIMAL b, FN_DECIMAL c, FN_DECIMAL d, FN_DECIMAL t)
         {
-            var p = d - c - (a - b);
+            float p = d - c - (a - b);
             return t * t * t * p + t * t * (a - b - p) + t * (c - a) + b;
         }
 
         private void CalculateFractalBounding()
         {
-            var amp = m_gain;
+            float amp = m_gain;
             FN_DECIMAL ampFractal = 1;
-            for (var i = 1; i < m_octaves; i++)
+            for (int i = 1; i < m_octaves; i++)
             {
                 ampFractal += amp;
                 amp *= m_gain;
@@ -282,7 +282,7 @@ namespace SharpCraft.util
         [MethodImpl(FN_INLINE)]
         private static int Hash2D(int seed, int x, int y)
         {
-            var hash = seed;
+            int hash = seed;
             hash ^= X_PRIME * x;
             hash ^= Y_PRIME * y;
 
@@ -295,7 +295,7 @@ namespace SharpCraft.util
         [MethodImpl(FN_INLINE)]
         private static int Hash3D(int seed, int x, int y, int z)
         {
-            var hash = seed;
+            int hash = seed;
             hash ^= X_PRIME * x;
             hash ^= Y_PRIME * y;
             hash ^= Z_PRIME * z;
@@ -309,7 +309,7 @@ namespace SharpCraft.util
         [MethodImpl(FN_INLINE)]
         private static int Hash4D(int seed, int x, int y, int z, int w)
         {
-            var hash = seed;
+            int hash = seed;
             hash ^= X_PRIME * x;
             hash ^= Y_PRIME * y;
             hash ^= Z_PRIME * z;
@@ -324,7 +324,7 @@ namespace SharpCraft.util
         [MethodImpl(FN_INLINE)]
         private static FN_DECIMAL ValCoord2D(int seed, int x, int y)
         {
-            var n = seed;
+            int n = seed;
             n ^= X_PRIME * x;
             n ^= Y_PRIME * y;
 
@@ -334,7 +334,7 @@ namespace SharpCraft.util
         [MethodImpl(FN_INLINE)]
         private static FN_DECIMAL ValCoord3D(int seed, int x, int y, int z)
         {
-            var n = seed;
+            int n = seed;
             n ^= X_PRIME * x;
             n ^= Y_PRIME * y;
             n ^= Z_PRIME * z;
@@ -345,7 +345,7 @@ namespace SharpCraft.util
         [MethodImpl(FN_INLINE)]
         private static FN_DECIMAL ValCoord4D(int seed, int x, int y, int z, int w)
         {
-            var n = seed;
+            int n = seed;
             n ^= X_PRIME * x;
             n ^= Y_PRIME * y;
             n ^= Z_PRIME * z;
@@ -357,14 +357,14 @@ namespace SharpCraft.util
         [MethodImpl(FN_INLINE)]
         private static FN_DECIMAL GradCoord2D(int seed, int x, int y, FN_DECIMAL xd, FN_DECIMAL yd)
         {
-            var hash = seed;
+            int hash = seed;
             hash ^= X_PRIME * x;
             hash ^= Y_PRIME * y;
 
             hash = hash * hash * hash * 60493;
             hash = (hash >> 13) ^ hash;
 
-            var g = GRAD_2D[hash & 7];
+            Float2 g = GRAD_2D[hash & 7];
 
             return xd * g.x + yd * g.y;
         }
@@ -372,7 +372,7 @@ namespace SharpCraft.util
         [MethodImpl(FN_INLINE)]
         private static FN_DECIMAL GradCoord3D(int seed, int x, int y, int z, FN_DECIMAL xd, FN_DECIMAL yd, FN_DECIMAL zd)
         {
-            var hash = seed;
+            int hash = seed;
             hash ^= X_PRIME * x;
             hash ^= Y_PRIME * y;
             hash ^= Z_PRIME * z;
@@ -380,7 +380,7 @@ namespace SharpCraft.util
             hash = hash * hash * hash * 60493;
             hash = (hash >> 13) ^ hash;
 
-            var g = GRAD_3D[hash & 15];
+            Float3 g = GRAD_3D[hash & 15];
 
             return xd * g.x + yd * g.y + zd * g.z;
         }
@@ -388,7 +388,7 @@ namespace SharpCraft.util
         [MethodImpl(FN_INLINE)]
         private static FN_DECIMAL GradCoord4D(int seed, int x, int y, int z, int w, FN_DECIMAL xd, FN_DECIMAL yd, FN_DECIMAL zd, FN_DECIMAL wd)
         {
-            var hash = seed;
+            int hash = seed;
             hash ^= X_PRIME * x;
             hash ^= Y_PRIME * y;
             hash ^= Z_PRIME * z;
@@ -609,34 +609,34 @@ namespace SharpCraft.util
         [MethodImpl(FN_INLINE)]
         private int FloatCast2Int(FN_DECIMAL f)
         {
-            var i = BitConverter.DoubleToInt64Bits(f);
+            long i = BitConverter.DoubleToInt64Bits(f);
 
             return (int)(i ^ (i >> 32));
         }
 
         public FN_DECIMAL GetWhiteNoise(FN_DECIMAL x, FN_DECIMAL y, FN_DECIMAL z, FN_DECIMAL w)
         {
-            var xi = FloatCast2Int(x);
-            var yi = FloatCast2Int(y);
-            var zi = FloatCast2Int(z);
-            var wi = FloatCast2Int(w);
+            int xi = FloatCast2Int(x);
+            int yi = FloatCast2Int(y);
+            int zi = FloatCast2Int(z);
+            int wi = FloatCast2Int(w);
 
             return ValCoord4D(m_seed, xi, yi, zi, wi);
         }
 
         public FN_DECIMAL GetWhiteNoise(FN_DECIMAL x, FN_DECIMAL y, FN_DECIMAL z)
         {
-            var xi = FloatCast2Int(x);
-            var yi = FloatCast2Int(y);
-            var zi = FloatCast2Int(z);
+            int xi = FloatCast2Int(x);
+            int yi = FloatCast2Int(y);
+            int zi = FloatCast2Int(z);
 
             return ValCoord3D(m_seed, xi, yi, zi);
         }
 
         public FN_DECIMAL GetWhiteNoise(FN_DECIMAL x, FN_DECIMAL y)
         {
-            var xi = FloatCast2Int(x);
-            var yi = FloatCast2Int(y);
+            int xi = FloatCast2Int(x);
+            int yi = FloatCast2Int(y);
 
             return ValCoord2D(m_seed, xi, yi);
         }
@@ -681,11 +681,11 @@ namespace SharpCraft.util
 
         private FN_DECIMAL SingleValueFractalFBM(FN_DECIMAL x, FN_DECIMAL y, FN_DECIMAL z)
         {
-            var seed = m_seed;
-            var sum = SingleValue(seed, x, y, z);
+            int seed = m_seed;
+            float sum = SingleValue(seed, x, y, z);
             FN_DECIMAL amp = 1;
 
-            for (var i = 1; i < m_octaves; i++)
+            for (int i = 1; i < m_octaves; i++)
             {
                 x *= m_lacunarity;
                 y *= m_lacunarity;
@@ -700,11 +700,11 @@ namespace SharpCraft.util
 
         private FN_DECIMAL SingleValueFractalBillow(FN_DECIMAL x, FN_DECIMAL y, FN_DECIMAL z)
         {
-            var seed = m_seed;
-            var sum = Math.Abs(SingleValue(seed, x, y, z)) * 2 - 1;
+            int seed = m_seed;
+            float sum = Math.Abs(SingleValue(seed, x, y, z)) * 2 - 1;
             FN_DECIMAL amp = 1;
 
-            for (var i = 1; i < m_octaves; i++)
+            for (int i = 1; i < m_octaves; i++)
             {
                 x *= m_lacunarity;
                 y *= m_lacunarity;
@@ -719,11 +719,11 @@ namespace SharpCraft.util
 
         private FN_DECIMAL SingleValueFractalRigidMulti(FN_DECIMAL x, FN_DECIMAL y, FN_DECIMAL z)
         {
-            var seed = m_seed;
-            var sum = 1 - Math.Abs(SingleValue(seed, x, y, z));
+            int seed = m_seed;
+            float sum = 1 - Math.Abs(SingleValue(seed, x, y, z));
             FN_DECIMAL amp = 1;
 
-            for (var i = 1; i < m_octaves; i++)
+            for (int i = 1; i < m_octaves; i++)
             {
                 x *= m_lacunarity;
                 y *= m_lacunarity;
@@ -743,12 +743,12 @@ namespace SharpCraft.util
 
         private FN_DECIMAL SingleValue(int seed, FN_DECIMAL x, FN_DECIMAL y, FN_DECIMAL z)
         {
-            var x0 = FastFloor(x);
-            var y0 = FastFloor(y);
-            var z0 = FastFloor(z);
-            var x1 = x0 + 1;
-            var y1 = y0 + 1;
-            var z1 = z0 + 1;
+            int x0 = FastFloor(x);
+            int y0 = FastFloor(y);
+            int z0 = FastFloor(z);
+            int x1 = x0 + 1;
+            int y1 = y0 + 1;
+            int z1 = z0 + 1;
 
             FN_DECIMAL xs, ys, zs;
             switch (m_interp)
@@ -773,13 +773,13 @@ namespace SharpCraft.util
                     break;
             }
 
-            var xf00 = Lerp(ValCoord3D(seed, x0, y0, z0), ValCoord3D(seed, x1, y0, z0), xs);
-            var xf10 = Lerp(ValCoord3D(seed, x0, y1, z0), ValCoord3D(seed, x1, y1, z0), xs);
-            var xf01 = Lerp(ValCoord3D(seed, x0, y0, z1), ValCoord3D(seed, x1, y0, z1), xs);
-            var xf11 = Lerp(ValCoord3D(seed, x0, y1, z1), ValCoord3D(seed, x1, y1, z1), xs);
+            float xf00 = Lerp(ValCoord3D(seed, x0, y0, z0), ValCoord3D(seed, x1, y0, z0), xs);
+            float xf10 = Lerp(ValCoord3D(seed, x0, y1, z0), ValCoord3D(seed, x1, y1, z0), xs);
+            float xf01 = Lerp(ValCoord3D(seed, x0, y0, z1), ValCoord3D(seed, x1, y0, z1), xs);
+            float xf11 = Lerp(ValCoord3D(seed, x0, y1, z1), ValCoord3D(seed, x1, y1, z1), xs);
 
-            var yf0 = Lerp(xf00, xf10, ys);
-            var yf1 = Lerp(xf01, xf11, ys);
+            float yf0 = Lerp(xf00, xf10, ys);
+            float yf1 = Lerp(xf01, xf11, ys);
 
             return Lerp(yf0, yf1, zs);
         }
@@ -807,11 +807,11 @@ namespace SharpCraft.util
 
         private FN_DECIMAL SingleValueFractalFBM(FN_DECIMAL x, FN_DECIMAL y)
         {
-            var seed = m_seed;
-            var sum = SingleValue(seed, x, y);
+            int seed = m_seed;
+            float sum = SingleValue(seed, x, y);
             FN_DECIMAL amp = 1;
 
-            for (var i = 1; i < m_octaves; i++)
+            for (int i = 1; i < m_octaves; i++)
             {
                 x *= m_lacunarity;
                 y *= m_lacunarity;
@@ -825,11 +825,11 @@ namespace SharpCraft.util
 
         private FN_DECIMAL SingleValueFractalBillow(FN_DECIMAL x, FN_DECIMAL y)
         {
-            var seed = m_seed;
-            var sum = Math.Abs(SingleValue(seed, x, y)) * 2 - 1;
+            int seed = m_seed;
+            float sum = Math.Abs(SingleValue(seed, x, y)) * 2 - 1;
             FN_DECIMAL amp = 1;
 
-            for (var i = 1; i < m_octaves; i++)
+            for (int i = 1; i < m_octaves; i++)
             {
                 x *= m_lacunarity;
                 y *= m_lacunarity;
@@ -842,11 +842,11 @@ namespace SharpCraft.util
 
         private FN_DECIMAL SingleValueFractalRigidMulti(FN_DECIMAL x, FN_DECIMAL y)
         {
-            var seed = m_seed;
-            var sum = 1 - Math.Abs(SingleValue(seed, x, y));
+            int seed = m_seed;
+            float sum = 1 - Math.Abs(SingleValue(seed, x, y));
             FN_DECIMAL amp = 1;
 
-            for (var i = 1; i < m_octaves; i++)
+            for (int i = 1; i < m_octaves; i++)
             {
                 x *= m_lacunarity;
                 y *= m_lacunarity;
@@ -865,10 +865,10 @@ namespace SharpCraft.util
 
         private FN_DECIMAL SingleValue(int seed, FN_DECIMAL x, FN_DECIMAL y)
         {
-            var x0 = FastFloor(x);
-            var y0 = FastFloor(y);
-            var x1 = x0 + 1;
-            var y1 = y0 + 1;
+            int x0 = FastFloor(x);
+            int y0 = FastFloor(y);
+            int x1 = x0 + 1;
+            int y1 = y0 + 1;
 
             FN_DECIMAL xs, ys;
             switch (m_interp)
@@ -890,8 +890,8 @@ namespace SharpCraft.util
                     break;
             }
 
-            var xf0 = Lerp(ValCoord2D(seed, x0, y0), ValCoord2D(seed, x1, y0), xs);
-            var xf1 = Lerp(ValCoord2D(seed, x0, y1), ValCoord2D(seed, x1, y1), xs);
+            float xf0 = Lerp(ValCoord2D(seed, x0, y0), ValCoord2D(seed, x1, y0), xs);
+            float xf1 = Lerp(ValCoord2D(seed, x0, y1), ValCoord2D(seed, x1, y1), xs);
 
             return Lerp(xf0, xf1, ys);
         }
@@ -921,11 +921,11 @@ namespace SharpCraft.util
 
         private FN_DECIMAL SinglePerlinFractalFBM(FN_DECIMAL x, FN_DECIMAL y, FN_DECIMAL z)
         {
-            var seed = m_seed;
-            var sum = SinglePerlin(seed, x, y, z);
+            int seed = m_seed;
+            float sum = SinglePerlin(seed, x, y, z);
             FN_DECIMAL amp = 1;
 
-            for (var i = 1; i < m_octaves; i++)
+            for (int i = 1; i < m_octaves; i++)
             {
                 x *= m_lacunarity;
                 y *= m_lacunarity;
@@ -940,11 +940,11 @@ namespace SharpCraft.util
 
         private FN_DECIMAL SinglePerlinFractalBillow(FN_DECIMAL x, FN_DECIMAL y, FN_DECIMAL z)
         {
-            var seed = m_seed;
-            var sum = Math.Abs(SinglePerlin(seed, x, y, z)) * 2 - 1;
+            int seed = m_seed;
+            float sum = Math.Abs(SinglePerlin(seed, x, y, z)) * 2 - 1;
             FN_DECIMAL amp = 1;
 
-            for (var i = 1; i < m_octaves; i++)
+            for (int i = 1; i < m_octaves; i++)
             {
                 x *= m_lacunarity;
                 y *= m_lacunarity;
@@ -959,11 +959,11 @@ namespace SharpCraft.util
 
         private FN_DECIMAL SinglePerlinFractalRigidMulti(FN_DECIMAL x, FN_DECIMAL y, FN_DECIMAL z)
         {
-            var seed = m_seed;
-            var sum = 1 - Math.Abs(SinglePerlin(seed, x, y, z));
+            int seed = m_seed;
+            float sum = 1 - Math.Abs(SinglePerlin(seed, x, y, z));
             FN_DECIMAL amp = 1;
 
-            for (var i = 1; i < m_octaves; i++)
+            for (int i = 1; i < m_octaves; i++)
             {
                 x *= m_lacunarity;
                 y *= m_lacunarity;
@@ -983,12 +983,12 @@ namespace SharpCraft.util
 
         private FN_DECIMAL SinglePerlin(int seed, FN_DECIMAL x, FN_DECIMAL y, FN_DECIMAL z)
         {
-            var x0 = FastFloor(x);
-            var y0 = FastFloor(y);
-            var z0 = FastFloor(z);
-            var x1 = x0 + 1;
-            var y1 = y0 + 1;
-            var z1 = z0 + 1;
+            int x0 = FastFloor(x);
+            int y0 = FastFloor(y);
+            int z0 = FastFloor(z);
+            int x1 = x0 + 1;
+            int y1 = y0 + 1;
+            int z1 = z0 + 1;
 
             FN_DECIMAL xs, ys, zs;
             switch (m_interp)
@@ -1013,20 +1013,20 @@ namespace SharpCraft.util
                     break;
             }
 
-            var xd0 = x - x0;
-            var yd0 = y - y0;
-            var zd0 = z - z0;
-            var xd1 = xd0 - 1;
-            var yd1 = yd0 - 1;
-            var zd1 = zd0 - 1;
+            float xd0 = x - x0;
+            float yd0 = y - y0;
+            float zd0 = z - z0;
+            float xd1 = xd0 - 1;
+            float yd1 = yd0 - 1;
+            float zd1 = zd0 - 1;
 
-            var xf00 = Lerp(GradCoord3D(seed, x0, y0, z0, xd0, yd0, zd0), GradCoord3D(seed, x1, y0, z0, xd1, yd0, zd0), xs);
-            var xf10 = Lerp(GradCoord3D(seed, x0, y1, z0, xd0, yd1, zd0), GradCoord3D(seed, x1, y1, z0, xd1, yd1, zd0), xs);
-            var xf01 = Lerp(GradCoord3D(seed, x0, y0, z1, xd0, yd0, zd1), GradCoord3D(seed, x1, y0, z1, xd1, yd0, zd1), xs);
-            var xf11 = Lerp(GradCoord3D(seed, x0, y1, z1, xd0, yd1, zd1), GradCoord3D(seed, x1, y1, z1, xd1, yd1, zd1), xs);
+            float xf00 = Lerp(GradCoord3D(seed, x0, y0, z0, xd0, yd0, zd0), GradCoord3D(seed, x1, y0, z0, xd1, yd0, zd0), xs);
+            float xf10 = Lerp(GradCoord3D(seed, x0, y1, z0, xd0, yd1, zd0), GradCoord3D(seed, x1, y1, z0, xd1, yd1, zd0), xs);
+            float xf01 = Lerp(GradCoord3D(seed, x0, y0, z1, xd0, yd0, zd1), GradCoord3D(seed, x1, y0, z1, xd1, yd0, zd1), xs);
+            float xf11 = Lerp(GradCoord3D(seed, x0, y1, z1, xd0, yd1, zd1), GradCoord3D(seed, x1, y1, z1, xd1, yd1, zd1), xs);
 
-            var yf0 = Lerp(xf00, xf10, ys);
-            var yf1 = Lerp(xf01, xf11, ys);
+            float yf0 = Lerp(xf00, xf10, ys);
+            float yf1 = Lerp(xf01, xf11, ys);
 
             return Lerp(yf0, yf1, zs);
         }
@@ -1054,11 +1054,11 @@ namespace SharpCraft.util
 
         private FN_DECIMAL SinglePerlinFractalFBM(FN_DECIMAL x, FN_DECIMAL y)
         {
-            var seed = m_seed;
-            var sum = SinglePerlin(seed, x, y);
+            int seed = m_seed;
+            float sum = SinglePerlin(seed, x, y);
             FN_DECIMAL amp = 1;
 
-            for (var i = 1; i < m_octaves; i++)
+            for (int i = 1; i < m_octaves; i++)
             {
                 x *= m_lacunarity;
                 y *= m_lacunarity;
@@ -1072,11 +1072,11 @@ namespace SharpCraft.util
 
         private FN_DECIMAL SinglePerlinFractalBillow(FN_DECIMAL x, FN_DECIMAL y)
         {
-            var seed = m_seed;
-            var sum = Math.Abs(SinglePerlin(seed, x, y)) * 2 - 1;
+            int seed = m_seed;
+            float sum = Math.Abs(SinglePerlin(seed, x, y)) * 2 - 1;
             FN_DECIMAL amp = 1;
 
-            for (var i = 1; i < m_octaves; i++)
+            for (int i = 1; i < m_octaves; i++)
             {
                 x *= m_lacunarity;
                 y *= m_lacunarity;
@@ -1090,11 +1090,11 @@ namespace SharpCraft.util
 
         private FN_DECIMAL SinglePerlinFractalRigidMulti(FN_DECIMAL x, FN_DECIMAL y)
         {
-            var seed = m_seed;
-            var sum = 1 - Math.Abs(SinglePerlin(seed, x, y));
+            int seed = m_seed;
+            float sum = 1 - Math.Abs(SinglePerlin(seed, x, y));
             FN_DECIMAL amp = 1;
 
-            for (var i = 1; i < m_octaves; i++)
+            for (int i = 1; i < m_octaves; i++)
             {
                 x *= m_lacunarity;
                 y *= m_lacunarity;
@@ -1113,10 +1113,10 @@ namespace SharpCraft.util
 
         private FN_DECIMAL SinglePerlin(int seed, FN_DECIMAL x, FN_DECIMAL y)
         {
-            var x0 = FastFloor(x);
-            var y0 = FastFloor(y);
-            var x1 = x0 + 1;
-            var y1 = y0 + 1;
+            int x0 = FastFloor(x);
+            int y0 = FastFloor(y);
+            int x1 = x0 + 1;
+            int y1 = y0 + 1;
 
             FN_DECIMAL xs, ys;
             switch (m_interp)
@@ -1138,13 +1138,13 @@ namespace SharpCraft.util
                     break;
             }
 
-            var xd0 = x - x0;
-            var yd0 = y - y0;
-            var xd1 = xd0 - 1;
-            var yd1 = yd0 - 1;
+            float xd0 = x - x0;
+            float yd0 = y - y0;
+            float xd1 = xd0 - 1;
+            float yd1 = yd0 - 1;
 
-            var xf0 = Lerp(GradCoord2D(seed, x0, y0, xd0, yd0), GradCoord2D(seed, x1, y0, xd1, yd0), xs);
-            var xf1 = Lerp(GradCoord2D(seed, x0, y1, xd0, yd1), GradCoord2D(seed, x1, y1, xd1, yd1), xs);
+            float xf0 = Lerp(GradCoord2D(seed, x0, y0, xd0, yd0), GradCoord2D(seed, x1, y0, xd1, yd0), xs);
+            float xf1 = Lerp(GradCoord2D(seed, x0, y1, xd0, yd1), GradCoord2D(seed, x1, y1, xd1, yd1), xs);
 
             return Lerp(xf0, xf1, ys);
         }
@@ -1174,11 +1174,11 @@ namespace SharpCraft.util
 
         private FN_DECIMAL SingleSimplexFractalFBM(FN_DECIMAL x, FN_DECIMAL y, FN_DECIMAL z)
         {
-            var seed = m_seed;
-            var sum = SingleSimplex(seed, x, y, z);
+            int seed = m_seed;
+            float sum = SingleSimplex(seed, x, y, z);
             FN_DECIMAL amp = 1;
 
-            for (var i = 1; i < m_octaves; i++)
+            for (int i = 1; i < m_octaves; i++)
             {
                 x *= m_lacunarity;
                 y *= m_lacunarity;
@@ -1193,11 +1193,11 @@ namespace SharpCraft.util
 
         private FN_DECIMAL SingleSimplexFractalBillow(FN_DECIMAL x, FN_DECIMAL y, FN_DECIMAL z)
         {
-            var seed = m_seed;
-            var sum = Math.Abs(SingleSimplex(seed, x, y, z)) * 2 - 1;
+            int seed = m_seed;
+            float sum = Math.Abs(SingleSimplex(seed, x, y, z)) * 2 - 1;
             FN_DECIMAL amp = 1;
 
-            for (var i = 1; i < m_octaves; i++)
+            for (int i = 1; i < m_octaves; i++)
             {
                 x *= m_lacunarity;
                 y *= m_lacunarity;
@@ -1212,11 +1212,11 @@ namespace SharpCraft.util
 
         private FN_DECIMAL SingleSimplexFractalRigidMulti(FN_DECIMAL x, FN_DECIMAL y, FN_DECIMAL z)
         {
-            var seed = m_seed;
-            var sum = 1 - Math.Abs(SingleSimplex(seed, x, y, z));
+            int seed = m_seed;
+            float sum = 1 - Math.Abs(SingleSimplex(seed, x, y, z));
             FN_DECIMAL amp = 1;
 
-            for (var i = 1; i < m_octaves; i++)
+            for (int i = 1; i < m_octaves; i++)
             {
                 x *= m_lacunarity;
                 y *= m_lacunarity;
@@ -1240,15 +1240,15 @@ namespace SharpCraft.util
 
         private FN_DECIMAL SingleSimplex(int seed, FN_DECIMAL x, FN_DECIMAL y, FN_DECIMAL z)
         {
-            var t = (x + y + z) * F3;
-            var i = FastFloor(x + t);
-            var j = FastFloor(y + t);
-            var k = FastFloor(z + t);
+            float t = (x + y + z) * F3;
+            int i = FastFloor(x + t);
+            int j = FastFloor(y + t);
+            int k = FastFloor(z + t);
 
             t = (i + j + k) * G3;
-            var x0 = x - (i - t);
-            var y0 = y - (j - t);
-            var z0 = z - (k - t);
+            float x0 = x - (i - t);
+            float y0 = y - (j - t);
+            float z0 = z - (k - t);
 
             int i1, j1, k1;
             int i2, j2, k2;
@@ -1284,15 +1284,15 @@ namespace SharpCraft.util
                 }
             }
 
-            var x1 = x0 - i1 + G3;
-            var y1 = y0 - j1 + G3;
-            var z1 = z0 - k1 + G3;
-            var x2 = x0 - i2 + F3;
-            var y2 = y0 - j2 + F3;
-            var z2 = z0 - k2 + F3;
-            var x3 = x0 + G33;
-            var y3 = y0 + G33;
-            var z3 = z0 + G33;
+            float x1 = x0 - i1 + G3;
+            float y1 = y0 - j1 + G3;
+            float z1 = z0 - k1 + G3;
+            float x2 = x0 - i2 + F3;
+            float y2 = y0 - j2 + F3;
+            float z2 = z0 - k2 + F3;
+            float x3 = x0 + G33;
+            float y3 = y0 + G33;
+            float z3 = z0 + G33;
 
             FN_DECIMAL n0, n1, n2, n3;
 
@@ -1354,11 +1354,11 @@ namespace SharpCraft.util
 
         private FN_DECIMAL SingleSimplexFractalFBM(FN_DECIMAL x, FN_DECIMAL y)
         {
-            var seed = m_seed;
-            var sum = SingleSimplex(seed, x, y);
+            int seed = m_seed;
+            float sum = SingleSimplex(seed, x, y);
             FN_DECIMAL amp = 1;
 
-            for (var i = 1; i < m_octaves; i++)
+            for (int i = 1; i < m_octaves; i++)
             {
                 x *= m_lacunarity;
                 y *= m_lacunarity;
@@ -1372,11 +1372,11 @@ namespace SharpCraft.util
 
         private FN_DECIMAL SingleSimplexFractalBillow(FN_DECIMAL x, FN_DECIMAL y)
         {
-            var seed = m_seed;
-            var sum = Math.Abs(SingleSimplex(seed, x, y)) * 2 - 1;
+            int seed = m_seed;
+            float sum = Math.Abs(SingleSimplex(seed, x, y)) * 2 - 1;
             FN_DECIMAL amp = 1;
 
-            for (var i = 1; i < m_octaves; i++)
+            for (int i = 1; i < m_octaves; i++)
             {
                 x *= m_lacunarity;
                 y *= m_lacunarity;
@@ -1390,11 +1390,11 @@ namespace SharpCraft.util
 
         private FN_DECIMAL SingleSimplexFractalRigidMulti(FN_DECIMAL x, FN_DECIMAL y)
         {
-            var seed = m_seed;
-            var sum = 1 - Math.Abs(SingleSimplex(seed, x, y));
+            int seed = m_seed;
+            float sum = 1 - Math.Abs(SingleSimplex(seed, x, y));
             FN_DECIMAL amp = 1;
 
-            for (var i = 1; i < m_octaves; i++)
+            for (int i = 1; i < m_octaves; i++)
             {
                 x *= m_lacunarity;
                 y *= m_lacunarity;
@@ -1416,16 +1416,16 @@ namespace SharpCraft.util
 
         private FN_DECIMAL SingleSimplex(int seed, FN_DECIMAL x, FN_DECIMAL y)
         {
-            var t = (x + y) * F2;
-            var i = FastFloor(x + t);
-            var j = FastFloor(y + t);
+            float t = (x + y) * F2;
+            int i = FastFloor(x + t);
+            int j = FastFloor(y + t);
 
             t = (i + j) * G2;
-            var X0 = i - t;
-            var Y0 = j - t;
+            float X0 = i - t;
+            float Y0 = j - t;
 
-            var x0 = x - X0;
-            var y0 = y - Y0;
+            float x0 = x - X0;
+            float y0 = y - Y0;
 
             int i1, j1;
             if (x0 > y0)
@@ -1437,10 +1437,10 @@ namespace SharpCraft.util
                 i1 = 0; j1 = 1;
             }
 
-            var x1 = x0 - i1 + G2;
-            var y1 = y0 - j1 + G2;
-            var x2 = x0 - 1 + F2;
-            var y2 = y0 - 1 + F2;
+            float x1 = x0 - i1 + G2;
+            float y1 = y0 - j1 + G2;
+            float x2 = x0 - 1 + F2;
+            float y2 = y0 - 1 + F2;
 
             FN_DECIMAL n0, n1, n2;
 
@@ -1494,22 +1494,22 @@ namespace SharpCraft.util
         private FN_DECIMAL SingleSimplex(int seed, FN_DECIMAL x, FN_DECIMAL y, FN_DECIMAL z, FN_DECIMAL w)
         {
             FN_DECIMAL n0, n1, n2, n3, n4;
-            var t = (x + y + z + w) * F4;
-            var i = FastFloor(x + t);
-            var j = FastFloor(y + t);
-            var k = FastFloor(z + t);
-            var l = FastFloor(w + t);
+            float t = (x + y + z + w) * F4;
+            int i = FastFloor(x + t);
+            int j = FastFloor(y + t);
+            int k = FastFloor(z + t);
+            int l = FastFloor(w + t);
             t = (i + j + k + l) * G4;
-            var X0 = i - t;
-            var Y0 = j - t;
-            var Z0 = k - t;
-            var W0 = l - t;
-            var x0 = x - X0;
-            var y0 = y - Y0;
-            var z0 = z - Z0;
-            var w0 = w - W0;
+            float X0 = i - t;
+            float Y0 = j - t;
+            float Z0 = k - t;
+            float W0 = l - t;
+            float x0 = x - X0;
+            float y0 = y - Y0;
+            float z0 = z - Z0;
+            float w0 = w - W0;
 
-            var c = x0 > y0 ? 32 : 0;
+            int c = x0 > y0 ? 32 : 0;
             c += x0 > z0 ? 16 : 0;
             c += y0 > z0 ? 8 : 0;
             c += x0 > w0 ? 4 : 0;
@@ -1517,35 +1517,35 @@ namespace SharpCraft.util
             c += z0 > w0 ? 1 : 0;
             c <<= 2;
 
-            var i1 = SIMPLEX_4D[c] >= 3 ? 1 : 0;
-            var i2 = SIMPLEX_4D[c] >= 2 ? 1 : 0;
-            var i3 = SIMPLEX_4D[c++] >= 1 ? 1 : 0;
-            var j1 = SIMPLEX_4D[c] >= 3 ? 1 : 0;
-            var j2 = SIMPLEX_4D[c] >= 2 ? 1 : 0;
-            var j3 = SIMPLEX_4D[c++] >= 1 ? 1 : 0;
-            var k1 = SIMPLEX_4D[c] >= 3 ? 1 : 0;
-            var k2 = SIMPLEX_4D[c] >= 2 ? 1 : 0;
-            var k3 = SIMPLEX_4D[c++] >= 1 ? 1 : 0;
-            var l1 = SIMPLEX_4D[c] >= 3 ? 1 : 0;
-            var l2 = SIMPLEX_4D[c] >= 2 ? 1 : 0;
-            var l3 = SIMPLEX_4D[c] >= 1 ? 1 : 0;
+            int i1 = SIMPLEX_4D[c] >= 3 ? 1 : 0;
+            int i2 = SIMPLEX_4D[c] >= 2 ? 1 : 0;
+            int i3 = SIMPLEX_4D[c++] >= 1 ? 1 : 0;
+            int j1 = SIMPLEX_4D[c] >= 3 ? 1 : 0;
+            int j2 = SIMPLEX_4D[c] >= 2 ? 1 : 0;
+            int j3 = SIMPLEX_4D[c++] >= 1 ? 1 : 0;
+            int k1 = SIMPLEX_4D[c] >= 3 ? 1 : 0;
+            int k2 = SIMPLEX_4D[c] >= 2 ? 1 : 0;
+            int k3 = SIMPLEX_4D[c++] >= 1 ? 1 : 0;
+            int l1 = SIMPLEX_4D[c] >= 3 ? 1 : 0;
+            int l2 = SIMPLEX_4D[c] >= 2 ? 1 : 0;
+            int l3 = SIMPLEX_4D[c] >= 1 ? 1 : 0;
 
-            var x1 = x0 - i1 + G4;
-            var y1 = y0 - j1 + G4;
-            var z1 = z0 - k1 + G4;
-            var w1 = w0 - l1 + G4;
-            var x2 = x0 - i2 + 2 * G4;
-            var y2 = y0 - j2 + 2 * G4;
-            var z2 = z0 - k2 + 2 * G4;
-            var w2 = w0 - l2 + 2 * G4;
-            var x3 = x0 - i3 + 3 * G4;
-            var y3 = y0 - j3 + 3 * G4;
-            var z3 = z0 - k3 + 3 * G4;
-            var w3 = w0 - l3 + 3 * G4;
-            var x4 = x0 - 1 + 4 * G4;
-            var y4 = y0 - 1 + 4 * G4;
-            var z4 = z0 - 1 + 4 * G4;
-            var w4 = w0 - 1 + 4 * G4;
+            float x1 = x0 - i1 + G4;
+            float y1 = y0 - j1 + G4;
+            float z1 = z0 - k1 + G4;
+            float w1 = w0 - l1 + G4;
+            float x2 = x0 - i2 + 2 * G4;
+            float y2 = y0 - j2 + 2 * G4;
+            float z2 = z0 - k2 + 2 * G4;
+            float w2 = w0 - l2 + 2 * G4;
+            float x3 = x0 - i3 + 3 * G4;
+            float y3 = y0 - j3 + 3 * G4;
+            float z3 = z0 - k3 + 3 * G4;
+            float w3 = w0 - l3 + 3 * G4;
+            float x4 = x0 - 1 + 4 * G4;
+            float y4 = y0 - 1 + 4 * G4;
+            float z4 = z0 - 1 + 4 * G4;
+            float w4 = w0 - 1 + 4 * G4;
 
             t = (FN_DECIMAL)0.6 - x0 * x0 - y0 * y0 - z0 * z0 - w0 * w0;
             if (t < 0) n0 = 0;
@@ -1611,10 +1611,10 @@ namespace SharpCraft.util
 
         private FN_DECIMAL SingleCubicFractalFBM(FN_DECIMAL x, FN_DECIMAL y, FN_DECIMAL z)
         {
-            var seed = m_seed;
-            var sum = SingleCubic(seed, x, y, z);
+            int seed = m_seed;
+            float sum = SingleCubic(seed, x, y, z);
             FN_DECIMAL amp = 1;
-            var i = 0;
+            int i = 0;
 
             while (++i < m_octaves)
             {
@@ -1631,10 +1631,10 @@ namespace SharpCraft.util
 
         private FN_DECIMAL SingleCubicFractalBillow(FN_DECIMAL x, FN_DECIMAL y, FN_DECIMAL z)
         {
-            var seed = m_seed;
-            var sum = Math.Abs(SingleCubic(seed, x, y, z)) * 2 - 1;
+            int seed = m_seed;
+            float sum = Math.Abs(SingleCubic(seed, x, y, z)) * 2 - 1;
             FN_DECIMAL amp = 1;
-            var i = 0;
+            int i = 0;
 
             while (++i < m_octaves)
             {
@@ -1651,10 +1651,10 @@ namespace SharpCraft.util
 
         private FN_DECIMAL SingleCubicFractalRigidMulti(FN_DECIMAL x, FN_DECIMAL y, FN_DECIMAL z)
         {
-            var seed = m_seed;
-            var sum = 1 - Math.Abs(SingleCubic(seed, x, y, z));
+            int seed = m_seed;
+            float sum = 1 - Math.Abs(SingleCubic(seed, x, y, z));
             FN_DECIMAL amp = 1;
-            var i = 0;
+            int i = 0;
 
             while (++i < m_octaves)
             {
@@ -1678,23 +1678,23 @@ namespace SharpCraft.util
 
         private FN_DECIMAL SingleCubic(int seed, FN_DECIMAL x, FN_DECIMAL y, FN_DECIMAL z)
         {
-            var x1 = FastFloor(x);
-            var y1 = FastFloor(y);
-            var z1 = FastFloor(z);
+            int x1 = FastFloor(x);
+            int y1 = FastFloor(y);
+            int z1 = FastFloor(z);
 
-            var x0 = x1 - 1;
-            var y0 = y1 - 1;
-            var z0 = z1 - 1;
-            var x2 = x1 + 1;
-            var y2 = y1 + 1;
-            var z2 = z1 + 1;
-            var x3 = x1 + 2;
-            var y3 = y1 + 2;
-            var z3 = z1 + 2;
+            int x0 = x1 - 1;
+            int y0 = y1 - 1;
+            int z0 = z1 - 1;
+            int x2 = x1 + 1;
+            int y2 = y1 + 1;
+            int z2 = z1 + 1;
+            int x3 = x1 + 2;
+            int y3 = y1 + 2;
+            int z3 = z1 + 2;
 
-            var xs = x - (FN_DECIMAL)x1;
-            var ys = y - (FN_DECIMAL)y1;
-            var zs = z - (FN_DECIMAL)z1;
+            float xs = x - (FN_DECIMAL)x1;
+            float ys = y - (FN_DECIMAL)y1;
+            float zs = z - (FN_DECIMAL)z1;
 
             return CubicLerp(
                 CubicLerp(
@@ -1747,10 +1747,10 @@ namespace SharpCraft.util
 
         private FN_DECIMAL SingleCubicFractalFBM(FN_DECIMAL x, FN_DECIMAL y)
         {
-            var seed = m_seed;
-            var sum = SingleCubic(seed, x, y);
+            int seed = m_seed;
+            float sum = SingleCubic(seed, x, y);
             FN_DECIMAL amp = 1;
-            var i = 0;
+            int i = 0;
 
             while (++i < m_octaves)
             {
@@ -1766,10 +1766,10 @@ namespace SharpCraft.util
 
         private FN_DECIMAL SingleCubicFractalBillow(FN_DECIMAL x, FN_DECIMAL y)
         {
-            var seed = m_seed;
-            var sum = Math.Abs(SingleCubic(seed, x, y)) * 2 - 1;
+            int seed = m_seed;
+            float sum = Math.Abs(SingleCubic(seed, x, y)) * 2 - 1;
             FN_DECIMAL amp = 1;
-            var i = 0;
+            int i = 0;
 
             while (++i < m_octaves)
             {
@@ -1785,10 +1785,10 @@ namespace SharpCraft.util
 
         private FN_DECIMAL SingleCubicFractalRigidMulti(FN_DECIMAL x, FN_DECIMAL y)
         {
-            var seed = m_seed;
-            var sum = 1 - Math.Abs(SingleCubic(seed, x, y));
+            int seed = m_seed;
+            float sum = 1 - Math.Abs(SingleCubic(seed, x, y));
             FN_DECIMAL amp = 1;
-            var i = 0;
+            int i = 0;
 
             while (++i < m_octaves)
             {
@@ -1814,18 +1814,18 @@ namespace SharpCraft.util
 
         private FN_DECIMAL SingleCubic(int seed, FN_DECIMAL x, FN_DECIMAL y)
         {
-            var x1 = FastFloor(x);
-            var y1 = FastFloor(y);
+            int x1 = FastFloor(x);
+            int y1 = FastFloor(y);
 
-            var x0 = x1 - 1;
-            var y0 = y1 - 1;
-            var x2 = x1 + 1;
-            var y2 = y1 + 1;
-            var x3 = x1 + 2;
-            var y3 = y1 + 2;
+            int x0 = x1 - 1;
+            int y0 = y1 - 1;
+            int x2 = x1 + 1;
+            int y2 = y1 + 1;
+            int x3 = x1 + 2;
+            int y3 = y1 + 2;
 
-            var xs = x - (FN_DECIMAL)x1;
-            var ys = y - (FN_DECIMAL)y1;
+            float xs = x - (FN_DECIMAL)x1;
+            float ys = y - (FN_DECIMAL)y1;
 
             return CubicLerp(
                        CubicLerp(ValCoord2D(seed, x0, y0), ValCoord2D(seed, x1, y0), ValCoord2D(seed, x2, y0), ValCoord2D(seed, x3, y0),
@@ -1860,9 +1860,9 @@ namespace SharpCraft.util
 
         private FN_DECIMAL SingleCellular(FN_DECIMAL x, FN_DECIMAL y, FN_DECIMAL z)
         {
-            var xr = FastRound(x);
-            var yr = FastRound(y);
-            var zr = FastRound(z);
+            int xr = FastRound(x);
+            int yr = FastRound(y);
+            int zr = FastRound(z);
 
             FN_DECIMAL distance = 999999;
             int xc = 0, yc = 0, zc = 0;
@@ -1870,19 +1870,19 @@ namespace SharpCraft.util
             switch (m_cellularDistanceFunction)
             {
                 case CellularDistanceFunction.Euclidean:
-                    for (var xi = xr - 1; xi <= xr + 1; xi++)
+                    for (int xi = xr - 1; xi <= xr + 1; xi++)
                     {
-                        for (var yi = yr - 1; yi <= yr + 1; yi++)
+                        for (int yi = yr - 1; yi <= yr + 1; yi++)
                         {
-                            for (var zi = zr - 1; zi <= zr + 1; zi++)
+                            for (int zi = zr - 1; zi <= zr + 1; zi++)
                             {
-                                var vec = CELL_3D[Hash3D(m_seed, xi, yi, zi) & 255];
+                                Float3 vec = CELL_3D[Hash3D(m_seed, xi, yi, zi) & 255];
 
-                                var vecX = xi - x + vec.x * m_cellularJitter;
-                                var vecY = yi - y + vec.y * m_cellularJitter;
-                                var vecZ = zi - z + vec.z * m_cellularJitter;
+                                float vecX = xi - x + vec.x * m_cellularJitter;
+                                float vecY = yi - y + vec.y * m_cellularJitter;
+                                float vecZ = zi - z + vec.z * m_cellularJitter;
 
-                                var newDistance = vecX * vecX + vecY * vecY + vecZ * vecZ;
+                                float newDistance = vecX * vecX + vecY * vecY + vecZ * vecZ;
 
                                 if (newDistance < distance)
                                 {
@@ -1897,19 +1897,19 @@ namespace SharpCraft.util
                     break;
 
                 case CellularDistanceFunction.Manhattan:
-                    for (var xi = xr - 1; xi <= xr + 1; xi++)
+                    for (int xi = xr - 1; xi <= xr + 1; xi++)
                     {
-                        for (var yi = yr - 1; yi <= yr + 1; yi++)
+                        for (int yi = yr - 1; yi <= yr + 1; yi++)
                         {
-                            for (var zi = zr - 1; zi <= zr + 1; zi++)
+                            for (int zi = zr - 1; zi <= zr + 1; zi++)
                             {
-                                var vec = CELL_3D[Hash3D(m_seed, xi, yi, zi) & 255];
+                                Float3 vec = CELL_3D[Hash3D(m_seed, xi, yi, zi) & 255];
 
-                                var vecX = xi - x + vec.x * m_cellularJitter;
-                                var vecY = yi - y + vec.y * m_cellularJitter;
-                                var vecZ = zi - z + vec.z * m_cellularJitter;
+                                float vecX = xi - x + vec.x * m_cellularJitter;
+                                float vecY = yi - y + vec.y * m_cellularJitter;
+                                float vecZ = zi - z + vec.z * m_cellularJitter;
 
-                                var newDistance = Math.Abs(vecX) + Math.Abs(vecY) + Math.Abs(vecZ);
+                                float newDistance = Math.Abs(vecX) + Math.Abs(vecY) + Math.Abs(vecZ);
 
                                 if (newDistance < distance)
                                 {
@@ -1924,19 +1924,19 @@ namespace SharpCraft.util
                     break;
 
                 case CellularDistanceFunction.Natural:
-                    for (var xi = xr - 1; xi <= xr + 1; xi++)
+                    for (int xi = xr - 1; xi <= xr + 1; xi++)
                     {
-                        for (var yi = yr - 1; yi <= yr + 1; yi++)
+                        for (int yi = yr - 1; yi <= yr + 1; yi++)
                         {
-                            for (var zi = zr - 1; zi <= zr + 1; zi++)
+                            for (int zi = zr - 1; zi <= zr + 1; zi++)
                             {
-                                var vec = CELL_3D[Hash3D(m_seed, xi, yi, zi) & 255];
+                                Float3 vec = CELL_3D[Hash3D(m_seed, xi, yi, zi) & 255];
 
-                                var vecX = xi - x + vec.x * m_cellularJitter;
-                                var vecY = yi - y + vec.y * m_cellularJitter;
-                                var vecZ = zi - z + vec.z * m_cellularJitter;
+                                float vecX = xi - x + vec.x * m_cellularJitter;
+                                float vecY = yi - y + vec.y * m_cellularJitter;
+                                float vecZ = zi - z + vec.z * m_cellularJitter;
 
-                                var newDistance = Math.Abs(vecX) + Math.Abs(vecY) + Math.Abs(vecZ) + (vecX * vecX + vecY * vecY + vecZ * vecZ);
+                                float newDistance = Math.Abs(vecX) + Math.Abs(vecY) + Math.Abs(vecZ) + (vecX * vecX + vecY * vecY + vecZ * vecZ);
 
                                 if (newDistance < distance)
                                 {
@@ -1957,7 +1957,7 @@ namespace SharpCraft.util
                     return ValCoord3D(m_seed, xc, yc, zc);
 
                 case CellularReturnType.NoiseLookup:
-                    var vec = CELL_3D[Hash3D(m_seed, xc, yc, zc) & 255];
+                    Float3 vec = CELL_3D[Hash3D(m_seed, xc, yc, zc) & 255];
                     return _mCellularNoiseUtilLookup.GetNoise(xc + vec.x * m_cellularJitter, yc + vec.y * m_cellularJitter, zc + vec.z * m_cellularJitter);
 
                 case CellularReturnType.Distance:
@@ -1970,30 +1970,30 @@ namespace SharpCraft.util
 
         private FN_DECIMAL SingleCellular2Edge(FN_DECIMAL x, FN_DECIMAL y, FN_DECIMAL z)
         {
-            var xr = FastRound(x);
-            var yr = FastRound(y);
-            var zr = FastRound(z);
+            int xr = FastRound(x);
+            int yr = FastRound(y);
+            int zr = FastRound(z);
 
             FN_DECIMAL[] distance = { 999999, 999999, 999999, 999999 };
 
             switch (m_cellularDistanceFunction)
             {
                 case CellularDistanceFunction.Euclidean:
-                    for (var xi = xr - 1; xi <= xr + 1; xi++)
+                    for (int xi = xr - 1; xi <= xr + 1; xi++)
                     {
-                        for (var yi = yr - 1; yi <= yr + 1; yi++)
+                        for (int yi = yr - 1; yi <= yr + 1; yi++)
                         {
-                            for (var zi = zr - 1; zi <= zr + 1; zi++)
+                            for (int zi = zr - 1; zi <= zr + 1; zi++)
                             {
-                                var vec = CELL_3D[Hash3D(m_seed, xi, yi, zi) & 255];
+                                Float3 vec = CELL_3D[Hash3D(m_seed, xi, yi, zi) & 255];
 
-                                var vecX = xi - x + vec.x * m_cellularJitter;
-                                var vecY = yi - y + vec.y * m_cellularJitter;
-                                var vecZ = zi - z + vec.z * m_cellularJitter;
+                                float vecX = xi - x + vec.x * m_cellularJitter;
+                                float vecY = yi - y + vec.y * m_cellularJitter;
+                                float vecZ = zi - z + vec.z * m_cellularJitter;
 
-                                var newDistance = vecX * vecX + vecY * vecY + vecZ * vecZ;
+                                float newDistance = vecX * vecX + vecY * vecY + vecZ * vecZ;
 
-                                for (var i = m_cellularDistanceIndex1; i > 0; i--)
+                                for (int i = m_cellularDistanceIndex1; i > 0; i--)
                                     distance[i] = Math.Max(Math.Min(distance[i], newDistance), distance[i - 1]);
                                 distance[0] = Math.Min(distance[0], newDistance);
                             }
@@ -2002,21 +2002,21 @@ namespace SharpCraft.util
                     break;
 
                 case CellularDistanceFunction.Manhattan:
-                    for (var xi = xr - 1; xi <= xr + 1; xi++)
+                    for (int xi = xr - 1; xi <= xr + 1; xi++)
                     {
-                        for (var yi = yr - 1; yi <= yr + 1; yi++)
+                        for (int yi = yr - 1; yi <= yr + 1; yi++)
                         {
-                            for (var zi = zr - 1; zi <= zr + 1; zi++)
+                            for (int zi = zr - 1; zi <= zr + 1; zi++)
                             {
-                                var vec = CELL_3D[Hash3D(m_seed, xi, yi, zi) & 255];
+                                Float3 vec = CELL_3D[Hash3D(m_seed, xi, yi, zi) & 255];
 
-                                var vecX = xi - x + vec.x * m_cellularJitter;
-                                var vecY = yi - y + vec.y * m_cellularJitter;
-                                var vecZ = zi - z + vec.z * m_cellularJitter;
+                                float vecX = xi - x + vec.x * m_cellularJitter;
+                                float vecY = yi - y + vec.y * m_cellularJitter;
+                                float vecZ = zi - z + vec.z * m_cellularJitter;
 
-                                var newDistance = Math.Abs(vecX) + Math.Abs(vecY) + Math.Abs(vecZ);
+                                float newDistance = Math.Abs(vecX) + Math.Abs(vecY) + Math.Abs(vecZ);
 
-                                for (var i = m_cellularDistanceIndex1; i > 0; i--)
+                                for (int i = m_cellularDistanceIndex1; i > 0; i--)
                                     distance[i] = Math.Max(Math.Min(distance[i], newDistance), distance[i - 1]);
                                 distance[0] = Math.Min(distance[0], newDistance);
                             }
@@ -2025,21 +2025,21 @@ namespace SharpCraft.util
                     break;
 
                 case CellularDistanceFunction.Natural:
-                    for (var xi = xr - 1; xi <= xr + 1; xi++)
+                    for (int xi = xr - 1; xi <= xr + 1; xi++)
                     {
-                        for (var yi = yr - 1; yi <= yr + 1; yi++)
+                        for (int yi = yr - 1; yi <= yr + 1; yi++)
                         {
-                            for (var zi = zr - 1; zi <= zr + 1; zi++)
+                            for (int zi = zr - 1; zi <= zr + 1; zi++)
                             {
-                                var vec = CELL_3D[Hash3D(m_seed, xi, yi, zi) & 255];
+                                Float3 vec = CELL_3D[Hash3D(m_seed, xi, yi, zi) & 255];
 
-                                var vecX = xi - x + vec.x * m_cellularJitter;
-                                var vecY = yi - y + vec.y * m_cellularJitter;
-                                var vecZ = zi - z + vec.z * m_cellularJitter;
+                                float vecX = xi - x + vec.x * m_cellularJitter;
+                                float vecY = yi - y + vec.y * m_cellularJitter;
+                                float vecZ = zi - z + vec.z * m_cellularJitter;
 
-                                var newDistance = Math.Abs(vecX) + Math.Abs(vecY) + Math.Abs(vecZ) + (vecX * vecX + vecY * vecY + vecZ * vecZ);
+                                float newDistance = Math.Abs(vecX) + Math.Abs(vecY) + Math.Abs(vecZ) + (vecX * vecX + vecY * vecY + vecZ * vecZ);
 
-                                for (var i = m_cellularDistanceIndex1; i > 0; i--)
+                                for (int i = m_cellularDistanceIndex1; i > 0; i--)
                                     distance[i] = Math.Max(Math.Min(distance[i], newDistance), distance[i - 1]);
                                 distance[0] = Math.Min(distance[0], newDistance);
                             }
@@ -2092,8 +2092,8 @@ namespace SharpCraft.util
 
         private FN_DECIMAL SingleCellular(FN_DECIMAL x, FN_DECIMAL y)
         {
-            var xr = FastRound(x);
-            var yr = FastRound(y);
+            int xr = FastRound(x);
+            int yr = FastRound(y);
 
             FN_DECIMAL distance = 999999;
             int xc = 0, yc = 0;
@@ -2102,16 +2102,16 @@ namespace SharpCraft.util
             {
                 default:
                 case CellularDistanceFunction.Euclidean:
-                    for (var xi = xr - 1; xi <= xr + 1; xi++)
+                    for (int xi = xr - 1; xi <= xr + 1; xi++)
                     {
-                        for (var yi = yr - 1; yi <= yr + 1; yi++)
+                        for (int yi = yr - 1; yi <= yr + 1; yi++)
                         {
-                            var vec = CELL_2D[Hash2D(m_seed, xi, yi) & 255];
+                            Float2 vec = CELL_2D[Hash2D(m_seed, xi, yi) & 255];
 
-                            var vecX = xi - x + vec.x * m_cellularJitter;
-                            var vecY = yi - y + vec.y * m_cellularJitter;
+                            float vecX = xi - x + vec.x * m_cellularJitter;
+                            float vecY = yi - y + vec.y * m_cellularJitter;
 
-                            var newDistance = vecX * vecX + vecY * vecY;
+                            float newDistance = vecX * vecX + vecY * vecY;
 
                             if (newDistance < distance)
                             {
@@ -2124,16 +2124,16 @@ namespace SharpCraft.util
                     break;
 
                 case CellularDistanceFunction.Manhattan:
-                    for (var xi = xr - 1; xi <= xr + 1; xi++)
+                    for (int xi = xr - 1; xi <= xr + 1; xi++)
                     {
-                        for (var yi = yr - 1; yi <= yr + 1; yi++)
+                        for (int yi = yr - 1; yi <= yr + 1; yi++)
                         {
-                            var vec = CELL_2D[Hash2D(m_seed, xi, yi) & 255];
+                            Float2 vec = CELL_2D[Hash2D(m_seed, xi, yi) & 255];
 
-                            var vecX = xi - x + vec.x * m_cellularJitter;
-                            var vecY = yi - y + vec.y * m_cellularJitter;
+                            float vecX = xi - x + vec.x * m_cellularJitter;
+                            float vecY = yi - y + vec.y * m_cellularJitter;
 
-                            var newDistance = Math.Abs(vecX) + Math.Abs(vecY);
+                            float newDistance = Math.Abs(vecX) + Math.Abs(vecY);
 
                             if (newDistance < distance)
                             {
@@ -2146,16 +2146,16 @@ namespace SharpCraft.util
                     break;
 
                 case CellularDistanceFunction.Natural:
-                    for (var xi = xr - 1; xi <= xr + 1; xi++)
+                    for (int xi = xr - 1; xi <= xr + 1; xi++)
                     {
-                        for (var yi = yr - 1; yi <= yr + 1; yi++)
+                        for (int yi = yr - 1; yi <= yr + 1; yi++)
                         {
-                            var vec = CELL_2D[Hash2D(m_seed, xi, yi) & 255];
+                            Float2 vec = CELL_2D[Hash2D(m_seed, xi, yi) & 255];
 
-                            var vecX = xi - x + vec.x * m_cellularJitter;
-                            var vecY = yi - y + vec.y * m_cellularJitter;
+                            float vecX = xi - x + vec.x * m_cellularJitter;
+                            float vecY = yi - y + vec.y * m_cellularJitter;
 
-                            var newDistance = Math.Abs(vecX) + Math.Abs(vecY) + (vecX * vecX + vecY * vecY);
+                            float newDistance = Math.Abs(vecX) + Math.Abs(vecY) + (vecX * vecX + vecY * vecY);
 
                             if (newDistance < distance)
                             {
@@ -2174,7 +2174,7 @@ namespace SharpCraft.util
                     return ValCoord2D(m_seed, xc, yc);
 
                 case CellularReturnType.NoiseLookup:
-                    var vec = CELL_2D[Hash2D(m_seed, xc, yc) & 255];
+                    Float2 vec = CELL_2D[Hash2D(m_seed, xc, yc) & 255];
                     return _mCellularNoiseUtilLookup.GetNoise(xc + vec.x * m_cellularJitter, yc + vec.y * m_cellularJitter);
 
                 case CellularReturnType.Distance:
@@ -2187,8 +2187,8 @@ namespace SharpCraft.util
 
         private FN_DECIMAL SingleCellular2Edge(FN_DECIMAL x, FN_DECIMAL y)
         {
-            var xr = FastRound(x);
-            var yr = FastRound(y);
+            int xr = FastRound(x);
+            int yr = FastRound(y);
 
             FN_DECIMAL[] distance = { 999999, 999999, 999999, 999999 };
 
@@ -2196,18 +2196,18 @@ namespace SharpCraft.util
             {
                 default:
                 case CellularDistanceFunction.Euclidean:
-                    for (var xi = xr - 1; xi <= xr + 1; xi++)
+                    for (int xi = xr - 1; xi <= xr + 1; xi++)
                     {
-                        for (var yi = yr - 1; yi <= yr + 1; yi++)
+                        for (int yi = yr - 1; yi <= yr + 1; yi++)
                         {
-                            var vec = CELL_2D[Hash2D(m_seed, xi, yi) & 255];
+                            Float2 vec = CELL_2D[Hash2D(m_seed, xi, yi) & 255];
 
-                            var vecX = xi - x + vec.x * m_cellularJitter;
-                            var vecY = yi - y + vec.y * m_cellularJitter;
+                            float vecX = xi - x + vec.x * m_cellularJitter;
+                            float vecY = yi - y + vec.y * m_cellularJitter;
 
-                            var newDistance = vecX * vecX + vecY * vecY;
+                            float newDistance = vecX * vecX + vecY * vecY;
 
-                            for (var i = m_cellularDistanceIndex1; i > 0; i--)
+                            for (int i = m_cellularDistanceIndex1; i > 0; i--)
                                 distance[i] = Math.Max(Math.Min(distance[i], newDistance), distance[i - 1]);
                             distance[0] = Math.Min(distance[0], newDistance);
                         }
@@ -2215,18 +2215,18 @@ namespace SharpCraft.util
                     break;
 
                 case CellularDistanceFunction.Manhattan:
-                    for (var xi = xr - 1; xi <= xr + 1; xi++)
+                    for (int xi = xr - 1; xi <= xr + 1; xi++)
                     {
-                        for (var yi = yr - 1; yi <= yr + 1; yi++)
+                        for (int yi = yr - 1; yi <= yr + 1; yi++)
                         {
-                            var vec = CELL_2D[Hash2D(m_seed, xi, yi) & 255];
+                            Float2 vec = CELL_2D[Hash2D(m_seed, xi, yi) & 255];
 
-                            var vecX = xi - x + vec.x * m_cellularJitter;
-                            var vecY = yi - y + vec.y * m_cellularJitter;
+                            float vecX = xi - x + vec.x * m_cellularJitter;
+                            float vecY = yi - y + vec.y * m_cellularJitter;
 
-                            var newDistance = Math.Abs(vecX) + Math.Abs(vecY);
+                            float newDistance = Math.Abs(vecX) + Math.Abs(vecY);
 
-                            for (var i = m_cellularDistanceIndex1; i > 0; i--)
+                            for (int i = m_cellularDistanceIndex1; i > 0; i--)
                                 distance[i] = Math.Max(Math.Min(distance[i], newDistance), distance[i - 1]);
                             distance[0] = Math.Min(distance[0], newDistance);
                         }
@@ -2234,18 +2234,18 @@ namespace SharpCraft.util
                     break;
 
                 case CellularDistanceFunction.Natural:
-                    for (var xi = xr - 1; xi <= xr + 1; xi++)
+                    for (int xi = xr - 1; xi <= xr + 1; xi++)
                     {
-                        for (var yi = yr - 1; yi <= yr + 1; yi++)
+                        for (int yi = yr - 1; yi <= yr + 1; yi++)
                         {
-                            var vec = CELL_2D[Hash2D(m_seed, xi, yi) & 255];
+                            Float2 vec = CELL_2D[Hash2D(m_seed, xi, yi) & 255];
 
-                            var vecX = xi - x + vec.x * m_cellularJitter;
-                            var vecY = yi - y + vec.y * m_cellularJitter;
+                            float vecX = xi - x + vec.x * m_cellularJitter;
+                            float vecY = yi - y + vec.y * m_cellularJitter;
 
-                            var newDistance = Math.Abs(vecX) + Math.Abs(vecY) + (vecX * vecX + vecY * vecY);
+                            float newDistance = Math.Abs(vecX) + Math.Abs(vecY) + (vecX * vecX + vecY * vecY);
 
-                            for (var i = m_cellularDistanceIndex1; i > 0; i--)
+                            for (int i = m_cellularDistanceIndex1; i > 0; i--)
                                 distance[i] = Math.Max(Math.Min(distance[i], newDistance), distance[i - 1]);
                             distance[0] = Math.Min(distance[0], newDistance);
                         }
@@ -2282,13 +2282,13 @@ namespace SharpCraft.util
 
         public void GradientPerturbFractal(ref FN_DECIMAL x, ref FN_DECIMAL y, ref FN_DECIMAL z)
         {
-            var seed = m_seed;
-            var amp = m_gradientPerturbAmp * m_fractalBounding;
-            var freq = m_frequency;
+            int seed = m_seed;
+            float amp = m_gradientPerturbAmp * m_fractalBounding;
+            float freq = m_frequency;
 
             SingleGradientPerturb(seed, amp, m_frequency, ref x, ref y, ref z);
 
-            for (var i = 1; i < m_octaves; i++)
+            for (int i = 1; i < m_octaves; i++)
             {
                 freq *= m_lacunarity;
                 amp *= m_gain;
@@ -2298,16 +2298,16 @@ namespace SharpCraft.util
 
         private void SingleGradientPerturb(int seed, FN_DECIMAL perturbAmp, FN_DECIMAL frequency, ref FN_DECIMAL x, ref FN_DECIMAL y, ref FN_DECIMAL z)
         {
-            var xf = x * frequency;
-            var yf = y * frequency;
-            var zf = z * frequency;
+            float xf = x * frequency;
+            float yf = y * frequency;
+            float zf = z * frequency;
 
-            var x0 = FastFloor(xf);
-            var y0 = FastFloor(yf);
-            var z0 = FastFloor(zf);
-            var x1 = x0 + 1;
-            var y1 = y0 + 1;
-            var z1 = z0 + 1;
+            int x0 = FastFloor(xf);
+            int y0 = FastFloor(yf);
+            int z0 = FastFloor(zf);
+            int x1 = x0 + 1;
+            int y1 = y0 + 1;
+            int z1 = z0 + 1;
 
             FN_DECIMAL xs, ys, zs;
             switch (m_interp)
@@ -2332,23 +2332,23 @@ namespace SharpCraft.util
                     break;
             }
 
-            var vec0 = CELL_3D[Hash3D(seed, x0, y0, z0) & 255];
-            var vec1 = CELL_3D[Hash3D(seed, x1, y0, z0) & 255];
+            Float3 vec0 = CELL_3D[Hash3D(seed, x0, y0, z0) & 255];
+            Float3 vec1 = CELL_3D[Hash3D(seed, x1, y0, z0) & 255];
 
-            var lx0x = Lerp(vec0.x, vec1.x, xs);
-            var ly0x = Lerp(vec0.y, vec1.y, xs);
-            var lz0x = Lerp(vec0.z, vec1.z, xs);
+            float lx0x = Lerp(vec0.x, vec1.x, xs);
+            float ly0x = Lerp(vec0.y, vec1.y, xs);
+            float lz0x = Lerp(vec0.z, vec1.z, xs);
 
             vec0 = CELL_3D[Hash3D(seed, x0, y1, z0) & 255];
             vec1 = CELL_3D[Hash3D(seed, x1, y1, z0) & 255];
 
-            var lx1x = Lerp(vec0.x, vec1.x, xs);
-            var ly1x = Lerp(vec0.y, vec1.y, xs);
-            var lz1x = Lerp(vec0.z, vec1.z, xs);
+            float lx1x = Lerp(vec0.x, vec1.x, xs);
+            float ly1x = Lerp(vec0.y, vec1.y, xs);
+            float lz1x = Lerp(vec0.z, vec1.z, xs);
 
-            var lx0y = Lerp(lx0x, lx1x, ys);
-            var ly0y = Lerp(ly0x, ly1x, ys);
-            var lz0y = Lerp(lz0x, lz1x, ys);
+            float lx0y = Lerp(lx0x, lx1x, ys);
+            float ly0y = Lerp(ly0x, ly1x, ys);
+            float lz0y = Lerp(lz0x, lz1x, ys);
 
             vec0 = CELL_3D[Hash3D(seed, x0, y0, z1) & 255];
             vec1 = CELL_3D[Hash3D(seed, x1, y0, z1) & 255];
@@ -2376,13 +2376,13 @@ namespace SharpCraft.util
 
         public void GradientPerturbFractal(ref FN_DECIMAL x, ref FN_DECIMAL y)
         {
-            var seed = m_seed;
-            var amp = m_gradientPerturbAmp * m_fractalBounding;
-            var freq = m_frequency;
+            int seed = m_seed;
+            float amp = m_gradientPerturbAmp * m_fractalBounding;
+            float freq = m_frequency;
 
             SingleGradientPerturb(seed, amp, m_frequency, ref x, ref y);
 
-            for (var i = 1; i < m_octaves; i++)
+            for (int i = 1; i < m_octaves; i++)
             {
                 freq *= m_lacunarity;
                 amp *= m_gain;
@@ -2392,13 +2392,13 @@ namespace SharpCraft.util
 
         private void SingleGradientPerturb(int seed, FN_DECIMAL perturbAmp, FN_DECIMAL frequency, ref FN_DECIMAL x, ref FN_DECIMAL y)
         {
-            var xf = x * frequency;
-            var yf = y * frequency;
+            float xf = x * frequency;
+            float yf = y * frequency;
 
-            var x0 = FastFloor(xf);
-            var y0 = FastFloor(yf);
-            var x1 = x0 + 1;
-            var y1 = y0 + 1;
+            int x0 = FastFloor(xf);
+            int y0 = FastFloor(yf);
+            int x1 = x0 + 1;
+            int y1 = y0 + 1;
 
             FN_DECIMAL xs, ys;
             switch (m_interp)
@@ -2420,17 +2420,17 @@ namespace SharpCraft.util
                     break;
             }
 
-            var vec0 = CELL_2D[Hash2D(seed, x0, y0) & 255];
-            var vec1 = CELL_2D[Hash2D(seed, x1, y0) & 255];
+            Float2 vec0 = CELL_2D[Hash2D(seed, x0, y0) & 255];
+            Float2 vec1 = CELL_2D[Hash2D(seed, x1, y0) & 255];
 
-            var lx0x = Lerp(vec0.x, vec1.x, xs);
-            var ly0x = Lerp(vec0.y, vec1.y, xs);
+            float lx0x = Lerp(vec0.x, vec1.x, xs);
+            float ly0x = Lerp(vec0.y, vec1.y, xs);
 
             vec0 = CELL_2D[Hash2D(seed, x0, y1) & 255];
             vec1 = CELL_2D[Hash2D(seed, x1, y1) & 255];
 
-            var lx1x = Lerp(vec0.x, vec1.x, xs);
-            var ly1x = Lerp(vec0.y, vec1.y, xs);
+            float lx1x = Lerp(vec0.x, vec1.x, xs);
+            float ly1x = Lerp(vec0.y, vec1.y, xs);
 
             x += Lerp(lx0x, lx1x, ys) * perturbAmp;
             y += Lerp(ly0x, ly1x, ys) * perturbAmp;

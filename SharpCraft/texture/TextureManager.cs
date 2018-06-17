@@ -12,6 +12,7 @@ using System.Linq;
 using Bitmap = System.Drawing.Bitmap;
 using Image = System.Drawing.Image;
 using Rectangle = System.Drawing.Rectangle;
+using Size = System.Drawing.Size;
 
 namespace SharpCraft.texture
 {
@@ -41,8 +42,8 @@ namespace SharpCraft.texture
 
         private static void StitchTextures()
         {
-            var bmp = CreateTextureMap("blocks");
-            var id = LoadTexture(bmp);
+            Bitmap bmp = CreateTextureMap("blocks");
+            int id = LoadTexture(bmp);
 
             TEXTURE_BLOCKS = new Texture(id, bmp.Size);
 
@@ -53,11 +54,11 @@ namespace SharpCraft.texture
         {
             Bitmap map = new Bitmap(256, 256);
 
-            var blocks = Enum.GetValues(typeof(EnumBlock));
+            Array blocks = Enum.GetValues(typeof(EnumBlock));
 
-            var dir = $"SharpCraft_Data/assets/textures/{folder}";
+            string dir = $"SharpCraft_Data/assets/textures/{folder}";
 
-            var files = new string[0];
+            string[] files = new string[0];
             if (Directory.Exists(dir))
                 files = Directory.GetFiles(dir, "*.png");
 
@@ -69,19 +70,19 @@ namespace SharpCraft.texture
             int countX = 0;
             int countY = 0;
 
-            var size = new Vector2(16f / map.Size.Width, 16f / map.Size.Height);
+            Vector2 size = new Vector2(16f / map.Size.Width, 16f / map.Size.Height);
 
             using (map)
             {
                 foreach (EnumBlock block in blocks)
                 {
-                    var texName = block.ToString().ToLower();
-                    var uvs = new TextureBlockUV();
+                    string texName = block.ToString().ToLower();
+                    TextureBlockUV uvs = new TextureBlockUV();
 
                     if (block == EnumBlock.MISSING)
                     {
-                        var pos = new Vector2(countX * size.X, countY * size.Y);
-                        var end = pos + size;
+                        Vector2 pos = new Vector2(countX * size.X, countY * size.Y);
+                        Vector2 end = pos + size;
 
                         uvs.fill(pos, end);
 
@@ -103,8 +104,8 @@ namespace SharpCraft.texture
                         //found texture for all 6 sides
                         if (files.Contains(texName))
                         {
-                            var pos = new Vector2(countX * size.X, countY * size.Y);
-                            var end = pos + size;
+                            Vector2 pos = new Vector2(countX * size.X, countY * size.Y);
+                            Vector2 end = pos + size;
 
                             uvs.fill(pos, end);
 
@@ -123,8 +124,8 @@ namespace SharpCraft.texture
                         //found texture for the 4 sides
                         if (files.Contains($"{texName}_side"))
                         {
-                            var pos = new Vector2(countX * size.X, countY * size.Y);
-                            var end = pos + size;
+                            Vector2 pos = new Vector2(countX * size.X, countY * size.Y);
+                            Vector2 end = pos + size;
 
                             uvs.setUVForSide(FaceSides.North, pos, end);
                             uvs.setUVForSide(FaceSides.East, pos, end);
@@ -143,14 +144,14 @@ namespace SharpCraft.texture
                             }
                         }
 
-                        foreach (var face in FaceSides.AllSides)
+                        foreach (FaceSides face in FaceSides.AllSides)
                         {
-                            var faceName = face.ToString().ToLower();
+                            string faceName = face.ToString().ToLower();
 
                             if (files.Contains($"{texName}_{faceName}"))
                             {
-                                var pos = new Vector2(countX * size.X, countY * size.Y);
-                                var end = pos + size;
+                                Vector2 pos = new Vector2(countX * size.X, countY * size.Y);
+                                Vector2 end = pos + size;
 
                                 uvs.setUVForSide(face, pos, end);
 
@@ -171,9 +172,9 @@ namespace SharpCraft.texture
                     _blockUVs.Add(block, uvs);
                 }
 
-                var missingUVs = GetUVsFromBlock(EnumBlock.MISSING);
+                TextureBlockUV missingUVs = GetUVsFromBlock(EnumBlock.MISSING);
 
-                foreach (var uv in _blockUVs)
+                foreach (KeyValuePair<EnumBlock, TextureBlockUV> uv in _blockUVs)
                 {
                     if (uv.Key != EnumBlock.AIR)
                         uv.Value.fillEmptySides(missingUVs.getUVForSide(FaceSides.Down));
@@ -181,7 +182,7 @@ namespace SharpCraft.texture
 
                 map.Save("terrain_debug.png");
 
-                var clone = (Bitmap)map.Clone();
+                Bitmap clone = (Bitmap)map.Clone();
 
                 map.Dispose();
 
@@ -191,11 +192,11 @@ namespace SharpCraft.texture
 
         private static Bitmap CreateMissingTexture()
         {
-            var bmp = new Bitmap(16, 16);
+            Bitmap bmp = new Bitmap(16, 16);
 
-            var pink = new SolidBrush(System.Drawing.Color.FromArgb(228, 0, 228));
+            SolidBrush pink = new SolidBrush(System.Drawing.Color.FromArgb(228, 0, 228));
 
-            using (var g = Graphics.FromImage(bmp))
+            using (Graphics g = Graphics.FromImage(bmp))
             {
                 g.FillRectangle(pink, 0, 0, 8, 8);
                 g.FillRectangle(pink, 8, 8, 8, 8);
@@ -233,7 +234,7 @@ namespace SharpCraft.texture
         {
             try
             {
-                var bmp = (Bitmap)Image.FromFile($"SharpCraft_Data/assets/textures/{textureName}.png");
+                Bitmap bmp = (Bitmap)Image.FromFile($"SharpCraft_Data/assets/textures/{textureName}.png");
 
                 int id = LoadTexture(bmp, smooth);
 
@@ -253,7 +254,7 @@ namespace SharpCraft.texture
 
             string[] files = new string[0];
 
-            var dir = "SharpCraft_Data/assets/textures/skybox";
+            string dir = "SharpCraft_Data/assets/textures/skybox";
 
             if (Directory.Exists(dir))
                 files = Directory.GetFiles(dir, "*.png");
@@ -263,13 +264,13 @@ namespace SharpCraft.texture
                 files[i] = Path.GetFileNameWithoutExtension(files[i])?.ToLower();
             }
 
-            foreach (var side in FaceSides.AllSides)
+            foreach (FaceSides side in FaceSides.AllSides)
             {
-                var sideName = side.ToString().ToLower();
+                string sideName = side.ToString().ToLower();
 
                 if (files.Contains($"sky_{sideName}"))
                 {
-                    var file = $"{dir}/sky_{sideName}.png";
+                    string file = $"{dir}/sky_{sideName}.png";
 
                     bitmaps.Add(side, (Bitmap)Image.FromFile(file));
                 }
@@ -291,11 +292,11 @@ namespace SharpCraft.texture
             GL.ActiveTexture(TextureUnit.Texture0);
             GL.BindTexture(TextureTarget.TextureCubeMap, texID);
 
-            var cubeMapTextures = LoadSkyboxTextures();
+            Dictionary<FaceSides, Bitmap> cubeMapTextures = LoadSkyboxTextures();
 
-            foreach (var dictValues in cubeMapTextures)
+            foreach (KeyValuePair<FaceSides, Bitmap> dictValues in cubeMapTextures)
             {
-                var target = TextureTarget.Texture2D;
+                TextureTarget target = TextureTarget.Texture2D;
 
                 if (dictValues.Key.z == 1) target = TextureTarget.TextureCubeMapPositiveZ;
                 else if (dictValues.Key.z == -1) target = TextureTarget.TextureCubeMapNegativeZ;
@@ -304,8 +305,8 @@ namespace SharpCraft.texture
                 else if (dictValues.Key.y == 1) target = TextureTarget.TextureCubeMapPositiveY;
                 else if (dictValues.Key.y == -1) target = TextureTarget.TextureCubeMapNegativeY;
 
-                var bmp = (Bitmap)dictValues.Value.Clone();
-                var size = bmp.Size;
+                Bitmap bmp = (Bitmap)dictValues.Value.Clone();
+                Size size = bmp.Size;
 
                 BitmapData data = bmp.LockBits(new Rectangle(0, 0, size.Width, size.Height),
                     ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
@@ -337,7 +338,7 @@ namespace SharpCraft.texture
 
         private static void DrawToBitmap(Bitmap to, int x, int y, string file)
         {
-            using (var bmp = (Bitmap)Image.FromFile(file))
+            using (Bitmap bmp = (Bitmap)Image.FromFile(file))
             {
                 DrawToBitmap(to, x, y, bmp);
             }
@@ -345,7 +346,7 @@ namespace SharpCraft.texture
 
         private static void DrawToBitmap(Bitmap to, int x, int y, Bitmap bmp)
         {
-            using (var g = Graphics.FromImage(to))
+            using (Graphics g = Graphics.FromImage(to))
             {
                 g.DrawImage(bmp, x, y, 16, 16);
             }

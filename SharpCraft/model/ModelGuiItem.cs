@@ -7,7 +7,7 @@ namespace SharpCraft.model
     {
         public ModelGuiItem(Shader<object> shader) : base(null, shader)
         {
-            var rawQuad = new RawQuad(new float[] {
+            RawQuad rawQuad = new RawQuad(new float[] {
                 -1,  1,
                 -1, -1,
                 1, -1,

@@ -36,13 +36,13 @@ namespace SharpCraft.world.chunk.region
 
         public void WriteChunkData(TCord coordinate, byte[] data)
         {
-            CalcCord(coordinate, out var regionCoord, out var regionLocalCoord);
+            CalcCord(coordinate, out TCord regionCoord, out TCord regionLocalCoord);
             GetRegion(Info.CoordHash(regionCoord), regionCoord).WriteChunkData(Info.CoordHash(regionLocalCoord), data);
         }
 
         public byte[] GetChunkData(TCord coordinate)
         {
-            CalcCord(coordinate, out var regionCoord, out var regionLocalCoord);
+            CalcCord(coordinate, out TCord regionCoord, out TCord regionLocalCoord);
             return GetRegion(Info.CoordHash(regionCoord), regionCoord).ReadChunkData(Info.CoordHash(regionLocalCoord));
         }
 
@@ -56,9 +56,9 @@ namespace SharpCraft.world.chunk.region
                 _regionCoordI = new int[coordinate.Length];
             }
 
-            for (var i = 0; i < coordinate.Length; i++)
+            for (int i = 0; i < coordinate.Length; i++)
             {
-                MathUtil.ToLocal(coordinate[i], Info.DimSize(i), out var localPos, out var partPos);
+                MathUtil.ToLocal(coordinate[i], Info.DimSize(i), out int localPos, out int partPos);
                 _regionLocalCoordI[i] = localPos;
                 _regionCoordI[i] = partPos;
             }
@@ -69,12 +69,12 @@ namespace SharpCraft.world.chunk.region
 
         private TReg GetRegion(int hash, TCord regionCoord)
         {
-            var pos = _regions.BinarySearch(default(TReg), Comparer<TReg>.Create((x, y) => x.GetHashCode().CompareTo(hash)));
+            int pos = _regions.BinarySearch(default(TReg), Comparer<TReg>.Create((x, y) => x.GetHashCode().CompareTo(hash)));
             if (pos <= -1 || _regions[pos].GetHashCode() != hash)
             {
                 if (_regions.Count == _regions.Capacity) RunGc();//try to prevent array grow
 
-                var r = _regionConstructor(Info, regionCoord, _dataRoot);
+                TReg r = _regionConstructor(Info, regionCoord, _dataRoot);
                 _regions.Add(r);
                 _regions.Sort((x, y) => x.GetHashCode().CompareTo(y.GetHashCode()));
                 return r;
@@ -98,7 +98,7 @@ namespace SharpCraft.world.chunk.region
             ChunkByteSize = chunkByteSize;
 
             ChunkCount = 1;
-            for (var i = 0; i < dimensionSizes.Length; i++)
+            for (int i = 0; i < dimensionSizes.Length; i++)
             {
                 ChunkCount *= DimSize(i);
             }
@@ -109,11 +109,11 @@ namespace SharpCraft.world.chunk.region
             //dimensionSizes is size of a region (16x16 chunks for example)
             if (_dimensionSizes.Length != coordinate.Length) throw new Exception();
 
-            var hash = 0;
-            for (var i = 0; i < coordinate.Length; i++)
+            int hash = 0;
+            for (int i = 0; i < coordinate.Length; i++)
             {
                 int dimensionVal = coordinate[i];
-                for (var j = 0; j < i; j++)
+                for (int j = 0; j < i; j++)
                 {
                     dimensionVal *= _dimensionSizes[j];
                 }

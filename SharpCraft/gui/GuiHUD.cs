@@ -1,16 +1,19 @@
 ﻿using OpenTK;
+using SharpCraft.block;
 using SharpCraft.item;
 using SharpCraft.texture;
+using System;
 
 namespace SharpCraft.gui
 {
     internal class GuiHUD : Gui
     {
+        private float _hotbarX;
+        private float _hotbarY;
+
         public override void Render(int mouseX, int mouseY)
         {
-           
-
-            var size = SharpCraft.Instance.ClientSize;
+            Size size = SharpCraft.Instance.ClientSize;
 
             int space = 5;
 
@@ -19,39 +22,39 @@ namespace SharpCraft.gui
 
             int totalHotbarWidth = 9 * scaledWidth + 8 * space;
 
-            int startPos = size.Width / 2 - totalHotbarWidth / 2;
-            var hotbarY = size.Height - 20 - scaledHeight;
+            _hotbarX = size.Width / 2 - totalHotbarWidth / 2;
+            _hotbarY = size.Height - 20 - scaledHeight;
 
             // Render lives first so text overlays
             DrawLives();
 
-            var selectedStack = SharpCraft.Instance.Player.GetEquippedItemStack();
+            ItemStack selectedStack = SharpCraft.Instance.Player.GetEquippedItemStack();
             if (!selectedStack?.IsEmpty == true)
-                RenderText(selectedStack.ToString(), size.Width / 2f, hotbarY - 14, 1, true, true);
+                RenderText(selectedStack.ToString(), size.Width / 2f, _hotbarY - 14, 1, true, true);
 
             for (int i = 0; i < 9; i++)
             {
-                var b = i == SharpCraft.Instance.Player.HotbarIndex;
+                bool b = i == SharpCraft.Instance.Player.HotbarIndex;
 
-                var x = startPos + i * (scaledWidth + space);
-                var y = hotbarY;
+                float x = _hotbarX + i * (scaledWidth + space);
+                float y = _hotbarY;
 
-                var u = 224;
-                var v = 0;
+                int u = 224;
+                int v = 0;
 
                 if (b)
                     v += 32;
 
-                RenderTexture(TextureManager.TEXTURE_GUI_WIDGETS, x, hotbarY, u, v, 32, 32, 2);
+                RenderTexture(TextureManager.TEXTURE_GUI_WIDGETS, x, y, u, v, 32, 32, 2);
 
-                var stack = SharpCraft.Instance.Player.Hotbar[i];
+                ItemStack stack = SharpCraft.Instance.Player.Hotbar[i];
 
                 if (stack == null || stack.IsEmpty)
                     continue;
 
                 if (stack.Item is ItemBlock itemBlock)
                 {
-                    var block = itemBlock.GetBlock();
+                    EnumBlock block = itemBlock.GetBlock();
 
                     x += 14;
                     y += 14;
@@ -60,7 +63,7 @@ namespace SharpCraft.gui
                 }
 
                 if (stack.Count > 1)
-                    RenderText(stack.Count.ToString(), x + scaledWidth / 2f - 14, hotbarY + scaledHeight / 2f + 14, 1, true, true);
+                    RenderText(stack.Count.ToString(), x + scaledWidth / 2f - 14, _hotbarY + scaledHeight / 2f + 14, 1, true, true);
             }
 
             RenderText(SharpCraft.Instance.GetFPS() + " FPS", 5, 6, 1, Vector3.UnitY, false, true);
@@ -71,62 +74,30 @@ namespace SharpCraft.gui
 
         private void DrawLives()
         {
-            float currentHealthPercentage = SharpCraft.Instance.Player.healthPercentage;
+            float health = SharpCraft.Instance.Player.Health;
 
-            int numberOfFullHearts = (int)(currentHealthPercentage / 10);
+            int fullHearts = (int)(health / 10);
 
-            float remainder = (currentHealthPercentage % 10.0f) / 10.0f;
-            int numberOfHalfHearts = (remainder >= 0.5f) ? 1 : 0; 
+            float remainder = health % 10.0f / 10.0f;
+            double halves = Math.Round(remainder);
 
-            int numberOfEmptyHearts = 10 - numberOfFullHearts; 
-
-            int space = 5;
-            const int spaceBetweenElements = 1;
-
-            const float elementSizeScale = 0.75f;
-            const float elementSizeXY = 32 * elementSizeScale;
-            int scaledWidth = 32 * 2;
-            int scaledHeight = 32 * 2;
-
-            int totalHotbarWidth = 9 * scaledWidth + 8 * space;
-
-            Size size = SharpCraft.Instance.ClientSize;
-            int startPos = size.Width / 2 - totalHotbarWidth / 2;
-
-            // debug info
-            //RenderText(currentHealthPercentage + " %", 5, 26, 1, Vector3.UnitY, false, true);
+            int gap = 3;
 
             // Lives
-            int livesY = size.Height - 55 - scaledHeight;
+            float y = _hotbarY - 20;
 
             for (int i = 0; i < 10; i++)
             {
-                var x = startPos + i * (elementSizeXY + spaceBetweenElements);
-                var y = livesY;
-
-                var v = 40;
+                int u = 0;
 
                 // Full hearts
-                if (i + 1 <= numberOfFullHearts)
-                {
-                    var u = 64;
-
-                    RenderTexture(TextureManager.TEXTURE_GUI_WIDGETS, x, livesY, u, v, 32, 32, elementSizeScale);
-                }
+                if (i + 1 <= fullHearts)
+                    u = 32;
                 // Half hearts
-                else if(i + 1 <= numberOfFullHearts + numberOfHalfHearts)
-                {
-                    var u = 32;
+                else if (i + 1 <= fullHearts + halves)
+                    u = 16;
 
-                    RenderTexture(TextureManager.TEXTURE_GUI_WIDGETS, x, livesY, u, v, 32, 32, elementSizeScale);
-                }
-                // Empty hearts
-                else if(i + 1 <= numberOfFullHearts + numberOfHalfHearts + numberOfEmptyHearts)
-                {
-                    var u = 0;
-
-                    RenderTexture(TextureManager.TEXTURE_GUI_WIDGETS, x, livesY, u, v, 32, 32, elementSizeScale);
-                }
+                RenderTexture(TextureManager.TEXTURE_GUI_WIDGETS, _hotbarX + i * (16 + gap), y, u, 40, 16, 16);
             }
         }
     }

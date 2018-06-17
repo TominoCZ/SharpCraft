@@ -1,6 +1,7 @@
 ﻿using OpenTK;
 using OpenTK.Graphics.OpenGL;
 using SharpCraft.entity;
+using SharpCraft.model;
 using SharpCraft.render;
 using SharpCraft.util;
 using SharpCraft.world;
@@ -65,10 +66,10 @@ namespace SharpCraft.particle
 
         public override void Render(float partialTicks)
         {
-            var partialPos = Vector3.Lerp(lastPos, pos, partialTicks);
-            var partialScale = lastParticleScale + (particleScale - lastParticleScale) * partialTicks;
+            Vector3 partialPos = Vector3.Lerp(lastPos, pos, partialTicks);
+            float partialScale = lastParticleScale + (particleScale - lastParticleScale) * partialTicks;
 
-            var model = ParticleRenderer.ParticleModel;
+            ModelBaked<Particle> model = ParticleRenderer.ParticleModel;
 
             model.Shader.UpdateGlobalUniforms();
             model.Shader.UpdateModelUniforms();

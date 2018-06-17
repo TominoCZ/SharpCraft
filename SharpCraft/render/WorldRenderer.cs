@@ -1,14 +1,18 @@
 ﻿using OpenTK;
 using OpenTK.Graphics.OpenGL;
 using SharpCraft.block;
+using SharpCraft.entity;
 using SharpCraft.item;
 using SharpCraft.model;
+using SharpCraft.render.shader;
 using SharpCraft.render.shader.shaders;
 using SharpCraft.texture;
 using SharpCraft.util;
 using SharpCraft.world;
 using SharpCraft.world.chunk;
 using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
 using GL = OpenTK.Graphics.OpenGL.GL;
 using TextureTarget = OpenTK.Graphics.OpenGL.TextureTarget;
 using TextureUnit = OpenTK.Graphics.OpenGL.TextureUnit;
@@ -48,7 +52,7 @@ namespace SharpCraft.render
             _selectionOutline = new ModelCubeOutline();
             _shaderTexturedCube = new ShaderTexturedCube();
 
-            var cube = ModelHelper.createCubeModel();
+            List<RawQuad> cube = ModelHelper.createCubeModel();
 
             _destroyProgressModel = ModelManager.loadModelToVAO(cube, 3);
 
@@ -85,7 +89,7 @@ namespace SharpCraft.render
             GL.ActiveTexture(TextureUnit.Texture0);
             GL.BindTexture(TextureTarget.Texture2D, TextureManager.TEXTURE_BLOCKS.ID);
 
-            var hit = SharpCraft.Instance.MouseOverObject;
+            MouseOverObject hit = SharpCraft.Instance.MouseOverObject;
 
             if (hit.hit != null)
             {
@@ -98,8 +102,8 @@ namespace SharpCraft.render
             RenderWorldWaypoints(world);
             RenderDestroyProgress(world);
 
-            var partialFov = lastFov + (fov - lastFov) * partialTicks;
-            var partialMotion = lastMotion + (motion - lastMotion) * partialTicks;
+            float partialFov = lastFov + (fov - lastFov) * partialTicks;
+            Vector3 partialMotion = lastMotion + (motion - lastMotion) * partialTicks;
 
             SharpCraft.Instance.Camera.pitchOffset = partialMotion.Y * 0.025f;
             SharpCraft.Instance.Camera.SetFOV(partialFov);
@@ -107,7 +111,7 @@ namespace SharpCraft.render
 
         private void RenderChunks(World world)
         {
-            foreach (var chunk in world.Chunks.Values)
+            foreach (Chunk chunk in world.Chunks.Values)
             {
                 if (!chunk.ShouldRender(RenderDistance))
                     continue;
@@ -121,13 +125,13 @@ namespace SharpCraft.render
 
         private void RenderWorldWaypoints(World world)
         {
-            var wps = world.GetWaypoints();
+            Dictionary<BlockPos, Waypoint>.ValueCollection wps = world.GetWaypoints();
 
-            foreach (var wp in wps)
+            foreach (Waypoint wp in wps)
             {
-                var model = ModelRegistry.GetModelForBlock(EnumBlock.RARE, 0);
+                ModelBlock model = ModelRegistry.GetModelForBlock(EnumBlock.RARE, 0);
 
-                var size = 0.25f;
+                float size = 0.25f;
 
                 GL.DepthRange(0, 0.1f);
 
@@ -147,7 +151,7 @@ namespace SharpCraft.render
 
         private void RenderDestroyProgress(World world)
         {
-            var progresses = SharpCraft.Instance.DestroyProgresses;
+            ConcurrentDictionary<BlockPos, DestroyProgress> progresses = SharpCraft.Instance.DestroyProgresses;
             if (progresses.Count == 0)
                 return;
 
@@ -163,22 +167,22 @@ namespace SharpCraft.render
             GL.BindVertexArray(_destroyProgressModel.vaoID);
             GL.EnableVertexAttribArray(0);
 
-            foreach (var pair in progresses)
+            foreach (KeyValuePair<BlockPos, DestroyProgress> pair in progresses)
             {
-                var block = world.GetBlock(pair.Key);
+                EnumBlock block = world.GetBlock(pair.Key);
 
                 if (block == EnumBlock.AIR)
                     continue;
 
-                var meta = world.GetMetadata(pair.Key);
+                int meta = world.GetMetadata(pair.Key);
 
-                var model = ModelRegistry.GetModelForBlock(block, meta);
+                ModelBlock model = ModelRegistry.GetModelForBlock(block, meta);
 
-                var v = 32 * (int)(pair.Value.PartialProgress * 8);
+                int v = 32 * (int)(pair.Value.PartialProgress * 8);
 
-                var size_o = Vector3.One * 0.0045f;
+                Vector3 size_o = Vector3.One * 0.0045f;
 
-                var mat = MatrixHelper.CreateTransformationMatrix(pair.Key.ToVec() - size_o / 2, model.boundingBox.size + size_o);
+                Matrix4 mat = MatrixHelper.CreateTransformationMatrix(pair.Key.ToVec() - size_o / 2, model.boundingBox.size + size_o);
 
                 _shaderTexturedCube.UpdateInstanceUniforms(mat);
                 _shaderTexturedCube.UpdateUVs(TextureManager.TEXTURE_DESTROY_PROGRESS, 0, v, 32);
@@ -195,9 +199,9 @@ namespace SharpCraft.render
 
         private void RenderChunkOutline(Chunk ch)
         {
-            var shader = _selectionOutline.Shader;
+            Shader<ModelCubeOutline> shader = _selectionOutline.Shader;
 
-            var size = new Vector3(Chunk.ChunkSize, Chunk.ChunkHeight, Chunk.ChunkSize);
+            Vector3 size = new Vector3(Chunk.ChunkSize, Chunk.ChunkHeight, Chunk.ChunkSize);
 
             _selectionOutline.Bind();
             _selectionOutline.SetColor(Vector4.One);
@@ -219,13 +223,13 @@ namespace SharpCraft.render
 
         private void RenderBlockSelectionOutline(World world, EnumBlock block, BlockPos pos)
         {
-            var shader = _selectionOutline.Shader;
-            var bb = ModelRegistry.GetModelForBlock(block, world.GetMetadata(pos))?.boundingBox;
+            Shader<ModelCubeOutline> shader = _selectionOutline.Shader;
+            AxisAlignedBB bb = ModelRegistry.GetModelForBlock(block, world.GetMetadata(pos))?.boundingBox;
 
             if (bb == null)
                 return;
 
-            var size = Vector3.One * 0.005f;
+            Vector3 size = Vector3.One * 0.005f;
 
             _selectionOutline.Bind();
             _selectionOutline.SetColor(_selectionOutlineColor);
@@ -249,31 +253,31 @@ namespace SharpCraft.render
             if (SharpCraft.Instance.Player == null)
                 return;
 
-            var stack = SharpCraft.Instance.Player.GetEquippedItemStack();
+            ItemStack stack = SharpCraft.Instance.Player.GetEquippedItemStack();
 
             if (stack == null || stack.IsEmpty)
                 return;
 
             if (stack.Item is ItemBlock itemBlock)
             {
-                var model = ModelRegistry.GetModelForBlock(itemBlock.GetBlock(), stack.Meta);
+                ModelBlock model = ModelRegistry.GetModelForBlock(itemBlock.GetBlock(), stack.Meta);
 
-                var partialLookVec = lastLookVec + (lookVec - lastLookVec) * partialTicks;
-                var partialMotion = lastMotion + (motion - lastMotion) * partialTicks;
+                Vector3 partialLookVec = lastLookVec + (lookVec - lastLookVec) * partialTicks;
+                Vector3 partialMotion = lastMotion + (motion - lastMotion) * partialTicks;
 
-                var rotVec = new Vector2(-SharpCraft.Instance.Camera.pitch, -SharpCraft.Instance.Camera.yaw);
+                Vector2 rotVec = new Vector2(-SharpCraft.Instance.Camera.pitch, -SharpCraft.Instance.Camera.yaw);
 
-                var offset = new Vector3(1.3f, -1.25f, 0.3f) - partialMotion * Vector3.UnitY * 0.1f;
+                Vector3 offset = new Vector3(1.3f, -1.25f, 0.3f) - partialMotion * Vector3.UnitY * 0.1f;
 
-                var r1 = Matrix4.CreateRotationY(MathHelper.DegreesToRadians(45));
-                var r2 = Matrix4.CreateRotationX(rotVec.X - SharpCraft.Instance.Camera.pitchOffset) * Matrix4.CreateRotationY(rotVec.Y);
+                Matrix4 r1 = Matrix4.CreateRotationY(MathHelper.DegreesToRadians(45));
+                Matrix4 r2 = Matrix4.CreateRotationX(rotVec.X - SharpCraft.Instance.Camera.pitchOffset) * Matrix4.CreateRotationY(rotVec.Y);
 
-                var s = Matrix4.CreateScale(0.5525f);
-                var t0 = Matrix4.CreateTranslation(Vector3.One * -0.5f);
-                var t1 = Matrix4.CreateTranslation(SharpCraft.Instance.Camera.pos + SharpCraft.Instance.Camera.GetLookVec() + partialLookVec * 0.1f);
-                var t_final = Matrix4.CreateTranslation(offset);
+                Matrix4 s = Matrix4.CreateScale(0.5525f);
+                Matrix4 t0 = Matrix4.CreateTranslation(Vector3.One * -0.5f);
+                Matrix4 t1 = Matrix4.CreateTranslation(SharpCraft.Instance.Camera.pos + SharpCraft.Instance.Camera.GetLookVec() + partialLookVec * 0.1f);
+                Matrix4 t_final = Matrix4.CreateTranslation(offset);
 
-                var mat = t0 * r1 * Matrix4.CreateScale(model.boundingBox.size) * t_final * r2 * s * t1;
+                Matrix4 mat = t0 * r1 * Matrix4.CreateScale(model.boundingBox.size) * t_final * r2 * s * t1;
 
                 GL.DepthRange(0, 0.1f);
 

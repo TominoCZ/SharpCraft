@@ -1,4 +1,5 @@
-﻿using OpenTK.Graphics.OpenGL;
+﻿using OpenTK;
+using OpenTK.Graphics.OpenGL;
 using SharpCraft.model;
 using SharpCraft.render.shader;
 using SharpCraft.texture;
@@ -64,7 +65,7 @@ namespace SharpCraft.render
 
         public SkyboxRenderer()
         {
-            var quads = new List<RawQuad>();
+            List<RawQuad> quads = new List<RawQuad>();
 
             for (int i = 0; i < VERTICES.Length; i += 18)
             {
@@ -89,9 +90,9 @@ namespace SharpCraft.render
 
         public void Render(float partialTicks)
         {
-            var partialRot = lastTick + (tick - lastTick) * partialTicks;
+            float partialRot = lastTick + (tick - lastTick) * partialTicks;
 
-            var mat = MatrixHelper.CreateTransformationMatrix(SharpCraft.Instance.Camera.pos, Vector3.UnitY * partialRot / 10, 1);
+            Matrix4 mat = MatrixHelper.CreateTransformationMatrix(SharpCraft.Instance.Camera.pos, Vector3.UnitY * partialRot / 10, 1);
 
             cube.Bind();
             cube.Shader.UpdateGlobalUniforms();

@@ -84,7 +84,7 @@ namespace SharpCraft
             Visible = true;
             OnResize(EventArgs.Empty);
 
-            var sw = Stopwatch.StartNew();
+            Stopwatch sw = Stopwatch.StartNew();
 
             while (true)
             {
