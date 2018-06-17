@@ -27,6 +27,13 @@ namespace SharpCraft.entity
         public ItemStack[] Hotbar { get; }
         public ItemStack[] Inventory { get; }
 
+        public float healthPercentage = 100.0f; // 0% is death, 100% is full health
+
+        // falling variables
+        private float fallDistance = 0;
+        private bool isFalling = false;
+        private float fallYPosition = 0.0f;
+
         public bool HasFullInventory => Hotbar.All(stack => stack != null && !stack.IsEmpty) && Inventory.All(stack => stack != null && !stack.IsEmpty);
 
         public EntityPlayerSP(World world, Vector3 pos = new Vector3()) : base(world, pos)
@@ -45,6 +52,13 @@ namespace SharpCraft.entity
             if (SharpCraft.Instance.Focused)
                 UpdateCameraMovement();
 
+            // Dont regen or test for fall damage if paused
+            if (SharpCraft.Instance.IsPaused == false)
+            {
+                FallDamage();
+                LifeRegen();
+            }
+
             base.Update();
         }
 
@@ -53,6 +67,69 @@ namespace SharpCraft.entity
             var interpolatedPos = lastPos + (pos - lastPos) * partialTicks;
 
             SharpCraft.Instance.Camera.pos = interpolatedPos + Vector3.UnitY * EyeHeight;
+        }
+
+        private void FallDamage()
+        {
+            // 1 block is 1 distance unit
+            
+            // Falling
+            if(pos.Y < lastPos.Y)
+            {
+                if (isFalling == false)
+                {
+                    // inital conditions
+                    isFalling = true;
+                    fallYPosition = pos.Y;
+                }
+            }
+            else
+            {
+                // hit the ground
+                if(isFalling == true)
+                {
+                    // final condition
+                    fallDistance = fallYPosition - pos.Y;
+
+                    // damage calculation:
+                    // do half a heart of damage for every block passed past 3 blocks
+                    const float halfHeartPercentage = 5.0f;
+                    const int lowestBlockHeight = 3;
+
+                    if (fallDistance > lowestBlockHeight) 
+                        TakeDamage((fallDistance - lowestBlockHeight) * halfHeartPercentage);
+                }
+                
+                // Not falling
+                isFalling = false;
+                fallYPosition = 0.0f;
+            }
+        }
+
+        private void TakeDamage(float percentage)
+        {
+            // healthPercentage[0, 100]
+            if(healthPercentage - percentage < 0)
+            {
+                healthPercentage = 0.0f;
+                return;
+            }
+
+            // reduce health
+            healthPercentage -= percentage;
+        }
+
+        private void LifeRegen()
+        {
+            // healthPercentage[0, 100]
+            if (healthPercentage > 100.0f)
+                healthPercentage = 100.0f;
+
+            if (healthPercentage == 100.0f)
+                return;
+
+            // increase health
+            healthPercentage += 0.06f; // 0.5 heart in 4 seconds
         }
 
         private void UpdateCameraMovement()

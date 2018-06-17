@@ -8,6 +8,8 @@ namespace SharpCraft.gui
     {
         public override void Render(int mouseX, int mouseY)
         {
+           
+
             var size = SharpCraft.Instance.ClientSize;
 
             int space = 5;
@@ -19,6 +21,9 @@ namespace SharpCraft.gui
 
             int startPos = size.Width / 2 - totalHotbarWidth / 2;
             var hotbarY = size.Height - 20 - scaledHeight;
+
+            // Render lives first so text overlays
+            DrawLives();
 
             var selectedStack = SharpCraft.Instance.Player.GetEquippedItemStack();
             if (!selectedStack?.IsEmpty == true)
@@ -59,6 +64,70 @@ namespace SharpCraft.gui
             }
 
             RenderText(SharpCraft.Instance.GetFPS() + " FPS", 5, 6, 1, Vector3.UnitY, false, true);
+
+            // debug info
+            // RenderText("Falling: " + SharpCraft.Instance.Player.isFalling + "(" + SharpCraft.Instance.Player.fallDistance + ")", 5, 47, 1, Vector3.UnitY, false, true);
+        }
+
+        private void DrawLives()
+        {
+            float currentHealthPercentage = SharpCraft.Instance.Player.healthPercentage;
+
+            int numberOfFullHearts = (int)(currentHealthPercentage / 10);
+
+            float remainder = (currentHealthPercentage % 10.0f) / 10.0f;
+            int numberOfHalfHearts = (remainder >= 0.5f) ? 1 : 0; 
+
+            int numberOfEmptyHearts = 10 - numberOfFullHearts; 
+
+            int space = 5;
+            const int spaceBetweenElements = 1;
+
+            const float elementSizeScale = 0.75f;
+            const float elementSizeXY = 32 * elementSizeScale;
+            int scaledWidth = 32 * 2;
+            int scaledHeight = 32 * 2;
+
+            int totalHotbarWidth = 9 * scaledWidth + 8 * space;
+
+            Size size = SharpCraft.Instance.ClientSize;
+            int startPos = size.Width / 2 - totalHotbarWidth / 2;
+
+            // debug info
+            //RenderText(currentHealthPercentage + " %", 5, 26, 1, Vector3.UnitY, false, true);
+
+            // Lives
+            int livesY = size.Height - 55 - scaledHeight;
+
+            for (int i = 0; i < 10; i++)
+            {
+                var x = startPos + i * (elementSizeXY + spaceBetweenElements);
+                var y = livesY;
+
+                var v = 40;
+
+                // Full hearts
+                if (i + 1 <= numberOfFullHearts)
+                {
+                    var u = 64;
+
+                    RenderTexture(TextureManager.TEXTURE_GUI_WIDGETS, x, livesY, u, v, 32, 32, elementSizeScale);
+                }
+                // Half hearts
+                else if(i + 1 <= numberOfFullHearts + numberOfHalfHearts)
+                {
+                    var u = 32;
+
+                    RenderTexture(TextureManager.TEXTURE_GUI_WIDGETS, x, livesY, u, v, 32, 32, elementSizeScale);
+                }
+                // Empty hearts
+                else if(i + 1 <= numberOfFullHearts + numberOfHalfHearts + numberOfEmptyHearts)
+                {
+                    var u = 0;
+
+                    RenderTexture(TextureManager.TEXTURE_GUI_WIDGETS, x, livesY, u, v, 32, 32, elementSizeScale);
+                }
+            }
         }
     }
 }

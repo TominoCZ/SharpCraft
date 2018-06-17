@@ -16,6 +16,8 @@ namespace SharpCraft.world
         private ItemStack[] hotbar;
         private ItemStack[] inventory;
 
+        private float healthPercentage;
+
         public WorldPlayerNode(EntityPlayerSP player)
         {
             pitch = SharpCraft.Instance.Camera.pitch;
@@ -23,6 +25,7 @@ namespace SharpCraft.world
             pos = player.pos;
             hotbar = player.Hotbar;
             inventory = player.Inventory;
+            healthPercentage = player.healthPercentage;
         }
 
         public EntityPlayerSP GetPlayer(World world)
@@ -40,6 +43,8 @@ namespace SharpCraft.world
             {
                 player.Inventory[i] = inventory[i];
             }
+
+            player.healthPercentage = healthPercentage;
 
             return player;
         }
