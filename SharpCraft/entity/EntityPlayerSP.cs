@@ -35,6 +35,13 @@ namespace SharpCraft.entity
         private bool isFalling;
         private float fallYPosition;
 
+        public float hitAnimationAngle = 75.0f;
+        public float currentHandAngle;
+        public const float initialHandAngle = 0.0f;
+        public bool isHitting = false;
+        public bool hittingBlock = false;
+        public bool animateBackwards = false;
+
         public bool HasFullInventory => Hotbar.All(stack => stack != null && !stack.IsEmpty) && Inventory.All(stack => stack != null && !stack.IsEmpty);
 
         public EntityPlayerSP(World world, Vector3 pos = new Vector3()) : base(world, pos)
@@ -46,6 +53,8 @@ namespace SharpCraft.entity
 
             Hotbar = new ItemStack[9];
             Inventory = new ItemStack[27];
+
+            currentHandAngle = initialHandAngle;
         }
 
         public override void Update()
@@ -58,6 +67,31 @@ namespace SharpCraft.entity
             {
                 FallDamage();
                 LifeRegen();
+
+                if (isHitting == true)
+                {
+                    if (animateBackwards == false)
+                    {
+                        currentHandAngle += 30.0f;
+                        if (currentHandAngle > hitAnimationAngle)
+                        {
+                           // currentHandAngle = initialHandAngle;
+                            animateBackwards = true;
+                           // isHitting = false;
+                           // hittingBlock = false;
+                        }
+                    }
+                    else
+                    {
+                        currentHandAngle -= 30.0f;
+                        if(currentHandAngle < initialHandAngle)
+                        {
+                            currentHandAngle = initialHandAngle;
+                            isHitting = false;
+                            hittingBlock = false;
+                        }
+                    }
+                }
             }
 
             base.Update();
@@ -345,8 +379,15 @@ namespace SharpCraft.entity
         {
             MouseOverObject moo = SharpCraft.Instance.MouseOverObject;
 
+            // Looking at something
             if (moo.hit is EnumBlock)
             {
+                // reset hit animation
+                isHitting = true;
+                hittingBlock = true;
+                animateBackwards = false;
+                currentHandAngle = initialHandAngle;
+
                 if (btn == MouseButton.Right)
                 {
                     EnumBlock block = World.GetBlock(moo.blockPos);
@@ -368,6 +409,18 @@ namespace SharpCraft.entity
                 else if (btn == MouseButton.Left)
                 {
                     //BreakBlock(); TODO - start breaking
+                }
+            }
+            // not looking at anything
+            else
+            {
+                // Only reset if 0
+                if (isHitting == false && currentHandAngle == initialHandAngle)
+                {
+                    isHitting = true;
+                    hittingBlock = false;
+                    animateBackwards = false;
+                   // currentHandAngle = initialHandAngle;
                 }
             }
         }

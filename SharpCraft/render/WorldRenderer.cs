@@ -248,6 +248,8 @@ namespace SharpCraft.render
             _selectionOutline.Unbind();
         }
 
+   
+
         private void RenderSelectedItemBlock(float partialTicks)
         {
             if (SharpCraft.Instance.Player == null)
@@ -269,15 +271,32 @@ namespace SharpCraft.render
 
                 Vector3 offset = new Vector3(1.3f, -1.25f, 0.3f) - partialMotion * Vector3.UnitY * 0.1f;
 
-                Matrix4 r1 = Matrix4.CreateRotationY(MathHelper.DegreesToRadians(45));
+                Matrix4 r1 = Matrix4.CreateRotationY(MathHelper.DegreesToRadians(-45));
                 Matrix4 r2 = Matrix4.CreateRotationX(rotVec.X - SharpCraft.Instance.Camera.pitchOffset) * Matrix4.CreateRotationY(rotVec.Y);
+
+                // hit animation
+               // Matrix4 rZAxis = Matrix4.CreateRotationZ(MathHelper.DegreesToRadians(SharpCraft.Instance.Player.currentHandAngle));
 
                 Matrix4 s = Matrix4.CreateScale(0.5525f);
                 Matrix4 t0 = Matrix4.CreateTranslation(Vector3.One * -0.5f);
-                Matrix4 t1 = Matrix4.CreateTranslation(SharpCraft.Instance.Camera.pos + SharpCraft.Instance.Camera.GetLookVec() + partialLookVec * 0.1f);
+
+                Vector3 t1Vector = SharpCraft.Instance.Camera.pos + SharpCraft.Instance.Camera.GetLookVec() + partialLookVec * 0.1f;
+                /*if(SharpCraft.Instance.Player.isHitting)
+                {
+                    if (SharpCraft.Instance.Player.hittingBlock == false)
+                    {
+                        t1Vector.Y -= 0.5f;
+                    }
+                    else
+                    {
+                        t1Vector += SharpCraft.Instance.Camera.GetLookVec() * 0.25f;
+                        t1Vector.Y -= 0.25f;
+                    }
+                }*/
+                Matrix4 t1 = Matrix4.CreateTranslation(t1Vector);
                 Matrix4 t_final = Matrix4.CreateTranslation(offset);
 
-                Matrix4 mat = t0 * r1 * Matrix4.CreateScale(model.boundingBox.size) * t_final * r2 * s * t1;
+                Matrix4 mat = /*rZAxis**/ t0 * r1 * Matrix4.CreateScale(model.boundingBox.size) * t_final * r2 * s * t1;
 
                 GL.DepthRange(0, 0.1f);
 
