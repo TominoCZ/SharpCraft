@@ -305,7 +305,7 @@ namespace SharpCraft
 
             if (loadedWorld == null)
             {
-                Console.WriteLine("DEBUG: generating world");
+                Console.WriteLine("DEBUG: generating World");
 
                 BlockPos playerPos = new BlockPos(MathUtil.NextFloat(-100, 100), 10, MathUtil.NextFloat(-100, 100));
 
@@ -331,7 +331,7 @@ namespace SharpCraft
 
             MouseState state = OpenTK.Input.Mouse.GetState();
             _mouseLast = new Point(state.X, state.Y);
-            //world.setBlock(new BlockPos(player.pos), EnumBlock.RARE, 1, true); //test of block metadata, works perfectly
+            //World.setBlock(new BlockPos(player.Pos), EnumBlock.RARE, 1, true); //test of block metadata, works perfectly
         }
 
         private void GameLoop()
@@ -350,8 +350,8 @@ namespace SharpCraft
                     else if (wheelValue > _mouseWheelLast)
                         Player.SelectPreviousItem();
 
-                    if (World?.GetChunk(new BlockPos(Player.pos).ChunkPos()) == null)
-                        Player.motion = Vector3.Zero;
+                    if (World?.GetChunk(new BlockPos(Player.Pos).ChunkPos()) == null)
+                        Player.Motion = Vector3.Zero;
 
                     bool lmb = _mouseButtonsDown.Contains(MouseButton.Left);
                     bool rmb = _mouseButtonsDown.Contains(MouseButton.Right);
@@ -552,7 +552,7 @@ namespace SharpCraft
                 if (KeyboardState.IsKeyDown(Key.Space) && !_wasSpaceDown && Player.onGround)
                 {
                     _wasSpaceDown = true;
-                    Player.motion.Y = 0.475F;
+                    Player.Motion.Y = 0.475F;
                 }
                 else if ((!KeyboardState.IsKeyDown(Key.Space) || Player.onGround) && _wasSpaceDown)
                     _wasSpaceDown = false;
@@ -764,7 +764,7 @@ namespace SharpCraft
             switch (e.Key)
             {
                 case Key.P:
-                    Player?.world?.AddWaypoint(new BlockPos(Player.pos).Offset(FaceSides.Up), new OpenTK.Color(255, 0, 0, 127), "TEST");
+                    Player?.World?.AddWaypoint(new BlockPos(Player.Pos).Offset(FaceSides.Up), new OpenTK.Color(255, 0, 0, 127), "TEST");
                     break;
 
                 case Key.Escape:

@@ -42,7 +42,7 @@ namespace SharpCraft.particle
             }
 
             if (side == FaceSides.Up)
-                this.motion.Xz = SharpCraft.Instance.Camera.GetLookVec().Xz * 0.15f;
+                this.Motion.Xz = SharpCraft.Instance.Camera.GetLookVec().Xz * 0.15f;
 
             Vector3 vec = new Vector3(MathUtil.NextFloat(-1), MathUtil.NextFloat(-1), MathUtil.NextFloat(-1));
 
@@ -54,7 +54,7 @@ namespace SharpCraft.particle
             lastParticleScale = particleScale;
             lastParticleAlpha = particleAlpha;
 
-            lastPos = pos;
+            LastPos = Pos;
             lastRot = rot;
 
             if (!isAlive) return;
@@ -70,28 +70,28 @@ namespace SharpCraft.particle
                     SetDead();
             }
 
-            motion.Y -= 0.04f * gravity;
+            Motion.Y -= 0.04f * gravity;
 
             Move();
 
-            motion.Xz *= 0.8864021f;
+            Motion.Xz *= 0.8864021f;
 
             if (onGround)
             {
-                motion.Xz *= 0.6676801f;
+                Motion.Xz *= 0.6676801f;
 
                 rot.X = (float)Math.Round(rot.X / 90) * 90;
                 rot.Z = (float)Math.Round(rot.Z / 90) * 90;
             }
             else
             {
-                rot += rotStep * Math.Clamp((motion.Xz * 5).LengthFast, onGround ? 0 : 0.2f, 0.3f);
+                rot += rotStep * Math.Clamp((Motion.Xz * 5).LengthFast, onGround ? 0 : 0.2f, 0.3f);
             }
         }
 
         public override void Render(float partialTicks)
         {
-            Vector3 partialPos = Vector3.Lerp(lastPos, pos, partialTicks);
+            Vector3 partialPos = Vector3.Lerp(LastPos, Pos, partialTicks);
             Vector3 partialRot = Vector3.Lerp(lastRot, rot, partialTicks);
 
             float partialScale = lastParticleScale + (particleScale - lastParticleScale) * partialTicks;

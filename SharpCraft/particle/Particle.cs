@@ -66,7 +66,7 @@ namespace SharpCraft.particle
 
         public override void Render(float partialTicks)
         {
-            Vector3 partialPos = Vector3.Lerp(lastPos, pos, partialTicks);
+            Vector3 partialPos = Vector3.Lerp(LastPos, Pos, partialTicks);
             float partialScale = lastParticleScale + (particleScale - lastParticleScale) * partialTicks;
 
             ModelBaked<Particle> model = ParticleRenderer.ParticleModel;

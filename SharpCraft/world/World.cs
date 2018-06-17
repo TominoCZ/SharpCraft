@@ -58,7 +58,7 @@ namespace SharpCraft.world
         {
             Entities.RemoveAll(e =>
             {
-                if (!IsChunkLoaded(ChunkPos.FromWorldSpace(e.pos))) return false;
+                if (!IsChunkLoaded(ChunkPos.FromWorldSpace(e.Pos))) return false;
                 if (e.isAlive)
                 {
                     e.Update();
@@ -75,7 +75,7 @@ namespace SharpCraft.world
 
         public List<AxisAlignedBB> GetIntersectingEntitiesBBs(AxisAlignedBB with)
         {
-            return (from entity in Entities where !(entity is EntityItem) select entity.getEntityBoundingBox() into bb where bb.IntersectsWith(with) select bb).ToList();
+            return (from entity in Entities where !(entity is EntityItem) select entity.GetEntityBoundingBox() into bb where bb.IntersectsWith(with) select bb).ToList();
         }
 
         public List<AxisAlignedBB> GetBlockCollisionBoxes(AxisAlignedBB box)
@@ -310,14 +310,14 @@ namespace SharpCraft.world
             {
                 foreach (Entity entity in Entities)
                 {
-                    BlockPos pos = new BlockPos(entity.pos);
+                    BlockPos pos = new BlockPos(entity.Pos);
 
                     if (chunk.Pos == pos.ChunkPos())
                     {
                         int height = chunk.GetHeightAtPos(MathUtil.ToLocal(pos.X, Chunk.ChunkSize), MathUtil.ToLocal(pos.Z, Chunk.ChunkSize));
 
-                        if (entity.pos.Y < height)
-                            entity.TeleportTo(new Vector3(entity.pos.X, entity.lastPos.Y = height, entity.pos.Z));
+                        if (entity.Pos.Y < height)
+                            entity.TeleportTo(new Vector3(entity.Pos.X, entity.LastPos.Y = height, entity.Pos.Z));
                     }
                 }
             }
@@ -340,7 +340,7 @@ namespace SharpCraft.world
             {
                 chunk.Update();
 
-                if (chunk.Pos.DistanceTo(player.pos.Xz) > renderDistance * Chunk.ChunkSize + 50) UnloadChunk(chunk.Pos);
+                if (chunk.Pos.DistanceTo(player.Pos.Xz) > renderDistance * Chunk.ChunkSize + 50) UnloadChunk(chunk.Pos);
             }
 
             UpdateEntities();

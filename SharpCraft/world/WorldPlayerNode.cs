@@ -22,7 +22,7 @@ namespace SharpCraft.world
         {
             pitch = SharpCraft.Instance.Camera.pitch;
             yaw = SharpCraft.Instance.Camera.yaw;
-            pos = player.pos;
+            pos = player.Pos;
             hotbar = player.Hotbar;
             inventory = player.Inventory;
             healthPercentage = player.Health;

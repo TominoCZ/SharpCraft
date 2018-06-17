@@ -67,9 +67,9 @@ namespace SharpCraft.render
 
             if (SharpCraft.Instance.Player != null)
             {
-                motion = SharpCraft.Instance.Player.motion;
+                motion = SharpCraft.Instance.Player.Motion;
 
-                fov = SharpCraft.Instance.Player.motion.Xz.LengthFast > 0.15f && SharpCraft.Instance.Player.IsRunning
+                fov = SharpCraft.Instance.Player.Motion.Xz.LengthFast > 0.15f && SharpCraft.Instance.Player.IsRunning
                     ? Math.Clamp(fov * 1.065f, 0, SharpCraft.Instance.Camera.TargetFov + 6)
                     : Math.Clamp(fov * 0.965f, SharpCraft.Instance.Camera.TargetFov,
                         SharpCraft.Instance.Camera.TargetFov + 6);

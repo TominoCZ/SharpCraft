@@ -20,6 +20,8 @@ namespace SharpCraft.entity
 
         private Vector2 moveSpeed;
 
+        public float Health = 100.0f; // 0% is death, 100% is full health
+
         public bool IsRunning { get; private set; }
 
         public int HotbarIndex { get; private set; }
@@ -27,13 +29,11 @@ namespace SharpCraft.entity
         public ItemStack[] Hotbar { get; }
         public ItemStack[] Inventory { get; }
 
-        public float Health = 100.0f; // 0% is death, 100% is full health
-
         // falling variables
-        private float fallDistance = 0;
+        private float fallDistance;
 
-        private bool isFalling = false;
-        private float fallYPosition = 0.0f;
+        private bool isFalling;
+        private float fallYPosition;
 
         public bool HasFullInventory => Hotbar.All(stack => stack != null && !stack.IsEmpty) && Inventory.All(stack => stack != null && !stack.IsEmpty);
 
@@ -65,7 +65,7 @@ namespace SharpCraft.entity
 
         public override void Render(float partialTicks)
         {
-            Vector3 interpolatedPos = lastPos + (pos - lastPos) * partialTicks;
+            Vector3 interpolatedPos = LastPos + (Pos - LastPos) * partialTicks;
 
             SharpCraft.Instance.Camera.pos = interpolatedPos + Vector3.UnitY * EyeHeight;
         }
@@ -75,13 +75,13 @@ namespace SharpCraft.entity
             // 1 block is 1 distance unit
 
             // Falling
-            if (pos.Y < lastPos.Y)
+            if (Pos.Y < LastPos.Y)
             {
                 if (isFalling == false)
                 {
                     // inital conditions
                     isFalling = true;
-                    fallYPosition = pos.Y;
+                    fallYPosition = Pos.Y;
                 }
             }
             else
@@ -90,7 +90,7 @@ namespace SharpCraft.entity
                 if (isFalling == true)
                 {
                     // final condition
-                    fallDistance = fallYPosition - pos.Y;
+                    fallDistance = fallYPosition - Pos.Y;
 
                     // damage calculation:
                     // do half a heart of damage for every block passed past 3 blocks
@@ -163,7 +163,7 @@ namespace SharpCraft.entity
 
                 moveSpeed = MathUtil.Clamp(moveSpeed + dirVec.Normalized() * 0.1f * moveSpeedMult, 0, maxMoveSpeed);
 
-                motion.Xz = moveSpeed * mult;
+                Motion.Xz = moveSpeed * mult;
             }
             else
             {
@@ -349,8 +349,8 @@ namespace SharpCraft.entity
             {
                 if (btn == MouseButton.Right)
                 {
-                    EnumBlock block = world.GetBlock(moo.blockPos);
-                    ModelBlock model = ModelRegistry.GetModelForBlock(block, world.GetMetadata(moo.blockPos));
+                    EnumBlock block = World.GetBlock(moo.blockPos);
+                    ModelBlock model = ModelRegistry.GetModelForBlock(block, World.GetMetadata(moo.blockPos));
 
                     if (model != null && model.canBeInteractedWith)
                     {
@@ -378,22 +378,22 @@ namespace SharpCraft.entity
             if (!(moo.hit is EnumBlock))
                 return;
 
-            EnumBlock block = world.GetBlock(moo.blockPos);
+            EnumBlock block = World.GetBlock(moo.blockPos);
 
             if (block == EnumBlock.AIR)
                 return;
 
-            int meta = world.GetMetadata(moo.blockPos);
+            int meta = World.GetMetadata(moo.blockPos);
 
             SharpCraft.Instance.ParticleRenderer.SpawnDestroyParticles(moo.blockPos, block, meta);
 
-            world.SetBlock(moo.blockPos, EnumBlock.AIR, 0);
+            World.SetBlock(moo.blockPos, EnumBlock.AIR, 0);
 
-            Vector3 motion = new Vector3(MathUtil.NextFloat(-0.15f, 0.15f), 0.25f, MathUtil.NextFloat(-0.15f, 0.15f));
+            Vector3 motion = new Vector3(MathUtil.NextFloat(-0.15f, 0.15f), 0.3f, MathUtil.NextFloat(-0.15f, 0.15f));
 
-            EntityItem entityDrop = new EntityItem(world, moo.blockPos.ToVec() + Vector3.One * 0.5f, motion, new ItemStack(new ItemBlock(block), 1, meta));
+            EntityItem entityDrop = new EntityItem(World, moo.blockPos.ToVec() + Vector3.One * 0.5f, motion, new ItemStack(new ItemBlock(block), 1, meta));
 
-            world.AddEntity(entityDrop);
+            World.AddEntity(entityDrop);
 
             SharpCraft.Instance.GetMouseOverObject();
         }
@@ -410,27 +410,27 @@ namespace SharpCraft.entity
                 return;
 
             BlockPos pos = moo.blockPos.Offset(moo.sideHit);
-            EnumBlock blockAtPos = world.GetBlock(pos);
+            EnumBlock blockAtPos = World.GetBlock(pos);
 
             EnumBlock heldBlock = itemBlock.GetBlock();
-            AxisAlignedBB blockBb = ModelRegistry.GetModelForBlock(heldBlock, world.GetMetadata(pos))
+            AxisAlignedBB blockBb = ModelRegistry.GetModelForBlock(heldBlock, World.GetMetadata(pos))
                 .boundingBox.offset(pos.ToVec());
 
-            if (blockAtPos != EnumBlock.AIR || world.GetIntersectingEntitiesBBs(blockBb).Count > 0)
+            if (blockAtPos != EnumBlock.AIR || World.GetIntersectingEntitiesBBs(blockBb).Count > 0)
                 return;
 
             BlockPos posUnder = pos.Offset(FaceSides.Down);
 
-            EnumBlock blockUnder = world.GetBlock(posUnder);
-            EnumBlock blockAbove = world.GetBlock(pos.Offset(FaceSides.Up));
+            EnumBlock blockUnder = World.GetBlock(posUnder);
+            EnumBlock blockAbove = World.GetBlock(pos.Offset(FaceSides.Up));
 
             if (blockUnder == EnumBlock.GRASS && heldBlock != EnumBlock.GLASS)
-                world.SetBlock(posUnder, EnumBlock.DIRT, 0);
+                World.SetBlock(posUnder, EnumBlock.DIRT, 0);
             if (blockAbove != EnumBlock.AIR && blockAbove != EnumBlock.GLASS &&
                 heldBlock == EnumBlock.GRASS)
-                world.SetBlock(pos, EnumBlock.DIRT, 0);
+                World.SetBlock(pos, EnumBlock.DIRT, 0);
             else
-                world.SetBlock(pos, heldBlock, stack.Meta);
+                World.SetBlock(pos, heldBlock, stack.Meta);
 
             stack.Count--;
 
@@ -443,7 +443,7 @@ namespace SharpCraft.entity
 
             if (moo.hit is EnumBlock clickedBlock)
             {
-                int clickedMeta = world.GetMetadata(moo.blockPos);
+                int clickedMeta = World.GetMetadata(moo.blockPos);
 
                 if (clickedBlock != EnumBlock.AIR)
                 {
@@ -460,7 +460,7 @@ namespace SharpCraft.entity
                         if (stack?.IsEmpty == true)
                         {
                             ItemBlock itemBlock = new ItemBlock(clickedBlock);
-                            ItemStack itemStack = new ItemStack(itemBlock, 1, world.GetMetadata(moo.blockPos));
+                            ItemStack itemStack = new ItemStack(itemBlock, 1, World.GetMetadata(moo.blockPos));
 
                             SetItemStackInHotbar(i, itemStack);
                             SetSelectedSlot(i);
@@ -469,7 +469,7 @@ namespace SharpCraft.entity
                     }
 
                     SetItemStackInSelectedSlot(new ItemStack(new ItemBlock(clickedBlock), 1,
-                        world.GetMetadata(moo.blockPos)));
+                        World.GetMetadata(moo.blockPos)));
                 }
             }
         }
@@ -502,7 +502,7 @@ namespace SharpCraft.entity
             ItemStack toThrow = stack.Copy(1);
             toThrow.Count = ammountToThrow;
 
-            world?.AddEntity(new EntityItem(world, SharpCraft.Instance.Camera.pos - Vector3.UnitY * 0.35f,
+            World?.AddEntity(new EntityItem(World, SharpCraft.Instance.Camera.pos - Vector3.UnitY * 0.35f,
                 SharpCraft.Instance.Camera.GetLookVec() * 0.75f + Vector3.UnitY * 0.1f, toThrow));
 
             stack.Count -= ammountToThrow;

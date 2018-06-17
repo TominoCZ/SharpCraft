@@ -17,7 +17,7 @@ namespace SharpCraft.world.chunk
 
         private SwapList<Chunk> _chunkBuilds = new SwapList<Chunk>(
             c => c.BuildChunkModelNow(),
-            (l, r) => l.Pos.DistanceTo(SharpCraft.Instance.Player.pos).CompareTo(r.Pos.DistanceTo(SharpCraft.Instance.Player.pos)));
+            (l, r) => l.Pos.DistanceTo(SharpCraft.Instance.Player.Pos).CompareTo(r.Pos.DistanceTo(SharpCraft.Instance.Player.Pos)));
 
         private SwapList<ChunkPos> _chunkLoads = new SwapList<ChunkPos>(
             c =>
@@ -34,7 +34,7 @@ namespace SharpCraft.world.chunk
                     //Console.WriteLine($"chunk generated @ {c.x} x {c.z}");
                 }
             },
-            (l, r) => l.DistanceTo(SharpCraft.Instance.Player.pos).CompareTo(r.DistanceTo(SharpCraft.Instance.Player.pos)));
+            (l, r) => l.DistanceTo(SharpCraft.Instance.Player.Pos).CompareTo(r.DistanceTo(SharpCraft.Instance.Player.Pos)));
 
         public void BuildChunks()
         {
@@ -125,14 +125,14 @@ namespace SharpCraft.world.chunk
         {
             World world = SharpCraft.Instance.World;
 
-            ChunkPos playerChunkPos = ChunkPos.FromWorldSpace(SharpCraft.Instance.Player.pos);
+            ChunkPos playerChunkPos = ChunkPos.FromWorldSpace(SharpCraft.Instance.Player.Pos);
 
             for (int z = -renderDistance; z <= renderDistance; z++)
             {
                 for (int x = -renderDistance; x <= renderDistance; x++)
                 {
                     ChunkPos pos = playerChunkPos + new ChunkPos(x, z);
-                    if (pos.DistanceTo(player.pos.Xz) < renderDistance * Chunk.ChunkSize)
+                    if (pos.DistanceTo(player.Pos.Xz) < renderDistance * Chunk.ChunkSize)
                     {
                         if (world.GetChunk(pos) == null)
                         {

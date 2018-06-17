@@ -16,18 +16,18 @@ namespace SharpCraft.gui
         {
             _dictionary.Clear();
 
-            string file = $"SharpCraft_Data/assets/textures/{fntFileName}.fnt";
+            var file = $"SharpCraft_Data/assets/textures/{fntFileName}.fnt";
 
-            string[] lines = File.ReadAllLines(file);
+            var lines = File.ReadAllLines(file);
 
-            foreach (string line in lines)
+            foreach (var line in lines)
             {
-                FontMapCharacterNode parsed = ParseFntCharLine(line);
+                var parsed = ParseFntCharLine(line);
 
                 if (parsed == null)
                     continue;
 
-                TextureUVNode uv = GetUV(tex.TextureSize.Width, tex.TextureSize.Height, parsed.X, parsed.Y, parsed.W, parsed.H);
+                var uv = GetUV(tex.TextureSize.Width, tex.TextureSize.Height, parsed.X, parsed.Y, parsed.W, parsed.H);
 
                 _dictionary.Add(parsed.Char, new FontMapCharacter(parsed, uv));
             }
@@ -35,7 +35,7 @@ namespace SharpCraft.gui
 
         public static FontMapCharacter GetCharacter(char c)
         {
-            if (!_dictionary.TryGetValue(c, out FontMapCharacter node))
+            if (!_dictionary.TryGetValue(c, out var node))
                 _dictionary.TryGetValue(' ', out node);
 
             return node;
@@ -48,35 +48,35 @@ namespace SharpCraft.gui
             if (!line.Contains("char id="))
                 return null;
 
-            int startIndex = line.IndexOf("id=", StringComparison.Ordinal);
+            var startIndex = line.IndexOf("id=", StringComparison.Ordinal);
 
             line = line.Substring(startIndex, line.Length - startIndex);
 
-            string[] data = line.Split(' ');
+            var data = line.Split(' ');
             //x=250   y=33    width=3     height=32
-            char character = (char)int.Parse(data[0].Replace("id=", ""));
-            int x = int.Parse(data[1].Replace("x=", ""));
-            int y = int.Parse(data[2].Replace("y=", ""));
+            var character = (char)int.Parse(data[0].Replace("id=", ""));
+            var x = int.Parse(data[1].Replace("x=", ""));
+            var y = int.Parse(data[2].Replace("y=", ""));
 
-            int w = int.Parse(data[3].Replace("width=", ""));
-            int h = int.Parse(data[4].Replace("height=", ""));
+            var w = int.Parse(data[3].Replace("width=", ""));
+            var h = int.Parse(data[4].Replace("height=", ""));
 
-            int ox = int.Parse(data[5].Replace("xoffset=", ""));
-            int oy = int.Parse(data[6].Replace("yoffset=", ""));
+            var ox = int.Parse(data[5].Replace("xoffset=", ""));
+            var oy = int.Parse(data[6].Replace("yoffset=", ""));
 
             return new FontMapCharacterNode(character, x, y, w, h, ox, oy);
         }
 
         private static TextureUVNode GetUV(int textureSizeX, int textureSizeY, int x, int y, int sizeX, int sizeY) //TODO i might move this to TextureManager or TextureHelper
         {
-            Vector2 mapSize = new Vector2(textureSizeX, textureSizeY);
-            Vector2 sampleSize = new Vector2(sizeX, sizeY);
+            var mapSize = new Vector2(textureSizeX, textureSizeY);
+            var sampleSize = new Vector2(sizeX, sizeY);
 
-            Vector2 pos_start = new Vector2(x, y);
-            Vector2 pos_end = pos_start + sampleSize;
+            var pos_start = new Vector2(x, y);
+            var pos_end = pos_start + sampleSize;
 
-            Vector2 start = Vector2.Divide(pos_start, mapSize);
-            Vector2 end = Vector2.Divide(pos_end, mapSize);
+            var start = Vector2.Divide(pos_start, mapSize);
+            var end = Vector2.Divide(pos_end, mapSize);
 
             return new TextureUVNode(start, end);
         }

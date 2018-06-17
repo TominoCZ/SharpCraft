@@ -36,40 +36,42 @@ namespace SharpCraft.entity
             collisionBoundingBox = new AxisAlignedBB(0.25f);
             boundingBox = collisionBoundingBox.offset(pos - Vector3.One * collisionBoundingBox.size / 2);
 
+            gravity = 1.25f;
+
             isAlive = stack != null && !stack.IsEmpty;
         }
 
         public override void Update()
         {
             lastTick = tick++;
-            lastPos = pos;
+            LastPos = Pos;
 
-            motion.Y -= 0.04f * gravity;
+            Motion.Y -= 0.04f * gravity;
 
             Move();
 
-            motion.Xz *= 0.8664021f;
+            Motion.Xz *= 0.8664021f;
 
             List<AxisAlignedBB> bbs = SharpCraft.Instance.World.GetBlockCollisionBoxes(boundingBox);
 
             if (bbs.Count > 0)
             {
-                BlockPos bp = new BlockPos(pos);
+                BlockPos bp = new BlockPos(Pos);
 
                 FaceSides lastFace = FaceSides.Up;
-                bool blocksAround = FaceSides.YPlane.All(face => world.GetBlock(bp.Offset(lastFace = face)) != EnumBlock.AIR)
-                                   && world.GetBlock(bp.Offset(lastFace = FaceSides.Up)) != EnumBlock.AIR
-                                   && world.GetBlock(bp.Offset(lastFace = FaceSides.Down)) != EnumBlock.AIR; //has to be in this order
+                bool blocksAround = FaceSides.YPlane.All(face => World.GetBlock(bp.Offset(lastFace = face)) != EnumBlock.AIR)
+                                   && World.GetBlock(bp.Offset(lastFace = FaceSides.Up)) != EnumBlock.AIR
+                                   && World.GetBlock(bp.Offset(lastFace = FaceSides.Down)) != EnumBlock.AIR; //has to be in this order
 
                 if (!blocksAround)
                 {
-                    motion += lastFace.ToVec() * 0.1f;
+                    Motion += lastFace.ToVec() * 0.1f;
                 }
             }
 
             if (onGround)
             {
-                motion.Xz *= 0.6676801f;
+                Motion.Xz *= 0.6676801f;
             }
 
             if (++entityAge >= 20 * 50 * 60 + 10) //stay on ground for a minute, 20 ticks as a pick up delay
@@ -81,7 +83,7 @@ namespace SharpCraft.entity
             if (entityAge < 5)
                 return;
 
-            List<EntityItem> inAttractionArea = world.Entities.OfType<EntityItem>().Where(e => e != this && e.isAlive && e.stack.ItemSame(stack)).OrderByDescending(e => e.stack.Count).ToList();
+            List<EntityItem> inAttractionArea = World.Entities.OfType<EntityItem>().Where(e => e != this && e.isAlive && e.stack.ItemSame(stack)).OrderByDescending(e => e.stack.Count).ToList();
             float attractionRange = 1.8F;
             float mergeRange = 0.15F;
 
@@ -90,7 +92,7 @@ namespace SharpCraft.entity
                 if (stack.IsEmpty || entity.stack.IsEmpty || entity.stack.Count == entity.stack.Item.MaxStackSize())
                     continue;
 
-                Vector3 distanceVector = entity.pos - pos;
+                Vector3 distanceVector = entity.Pos - Pos;
                 float distance = distanceVector.Length;
                 if (distance >= attractionRange) continue;
 
@@ -99,8 +101,8 @@ namespace SharpCraft.entity
 
                 if (distance <= mergeRange)
                 {
-                    //motion -= entity.motion * MathUtil.Remap(entity.stack.Count / (float)stack.Count, 1, 64, 1, 3);
-                    //entity.motion -= motion * MathUtil.Remap(stack.Count / (float)entity.stack.Count, 1, 64, 1, 3);
+                    //Motion -= entity.Motion * MathUtil.Remap(entity.stack.Count / (float)stack.Count, 1, 64, 1, 3);
+                    //entity.Motion -= Motion * MathUtil.Remap(stack.Count / (float)entity.stack.Count, 1, 64, 1, 3);
 
                     entity.stack.Count -= ammountToTake;
                     if (entity.stack.IsEmpty) entity.SetDead();
@@ -117,44 +119,44 @@ namespace SharpCraft.entity
                 if (distanceMul > 0.8) distanceMul = ((1 - distanceMul) / 0.2F) * 0.6F + 0.2F;
                 Vector3 baseForce = distanceVector * 0.02f * distanceMul * MathUtil.Remap(stack.Count / (float)entity.stack.Count, 1, entity.stack.Item.MaxStackSize(), 2, 5);
 
-                motion += baseForce * entity.stack.Count / Math.Max(entity.stack.Count, stack.Count);
-                entity.motion -= baseForce * stack.Count / Math.Max(entity.stack.Count, stack.Count);
+                Motion += baseForce * entity.stack.Count / Math.Max(entity.stack.Count, stack.Count);
+                entity.Motion -= baseForce * stack.Count / Math.Max(entity.stack.Count, stack.Count);
             }
 
             if (entityAge < 15 || !isAlive)
                 return;
 
             //TODO change this for multiplayer
-            IEnumerable<EntityPlayerSP> players = world.Entities.OfType<EntityPlayerSP>()
-                               .OrderBy(entity => MathUtil.Distance(entity.pos, pos))
-                               .Where(e => MathUtil.Distance(e.pos, pos) <= attractionRange);
+            IEnumerable<EntityPlayerSP> players = World.Entities.OfType<EntityPlayerSP>()
+                               .OrderBy(entity => MathUtil.Distance(entity.Pos, Pos))
+                               .Where(e => MathUtil.Distance(e.Pos, Pos) <= attractionRange);
 
             foreach (EntityPlayerSP player in players)
             {
                 if (!player.CanPickUpStack(stack))
                     continue;
 
-                Vector3 attrTarget = player.pos;
-                attrTarget.Y += player.getCollisionBoundingBox().size.Y / 2;
+                Vector3 attrTarget = player.Pos;
+                attrTarget.Y += player.GetCollisionBoundingBox().size.Y / 2;
 
-                Vector3 distanceVector = attrTarget - pos;
+                Vector3 distanceVector = attrTarget - Pos;
 
                 if (distanceVector.Length <= 0.35f)
                 {
                     if (player.OnPickup(stack))
                         SetDead();
 
-                    motion *= -1f;
+                    Motion *= -1f;
                 }
 
-                motion = distanceVector.Normalized() * 0.45f;
+                Motion = distanceVector.Normalized() * 0.45f;
             }
             if (stack.IsEmpty) SetDead();
         }
 
         public override void Render(float partialTicks)
         {
-            Vector3 partialPos = lastPos + (pos - lastPos) * partialTicks;
+            Vector3 partialPos = LastPos + (Pos - LastPos) * partialTicks;
             float partialTime = lastTick + (tick - lastTick) * partialTicks;
 
             if (stack?.Item?.InnerItem is EnumBlock block)
