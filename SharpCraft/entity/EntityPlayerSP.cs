@@ -94,27 +94,85 @@ namespace SharpCraft.entity
             }
         }
 
+
         public void FastMoveStack(int index)
         {
-            //TODO - finish :D dont forget, that there is a possibility that the item in the stacks are the same, so they merge
-            int i = 0;
+            ItemStack stack = GetItemStackInInventory(index);
 
-            for (; i < Inventory.Length; i++)
+            // return if there is no item to move
+            if (stack == null || stack.Item == null)
+                return;
+
+            int maxStackSize = stack.Item.MaxStackSize();
+
+            ItemStack[] tempHotbar = Hotbar;
+            ItemStack[] tempInventory = Inventory;
+
+            // Hotbar to Inventory
+            if (index < Hotbar.Length)
+                FastMoveStackHelper(ref tempHotbar, ref tempInventory, SetItemStackInHotbar, index, index);
+            // Inventory to Hotbar
+            else
+                FastMoveStackHelper(ref tempInventory, ref tempHotbar, SetItemStackInInventory, index, index - Hotbar.Length);
+
+            tempHotbar.CopyTo(Hotbar, 0);
+            tempInventory.CopyTo(Inventory, 0);
+        }
+
+        private void FastMoveStackHelper(ref ItemStack[] from, ref ItemStack[] to, Action<int, ItemStack> setItemFunction, int slotIndex, int localSlotIndex)
+        {
+            int maxStackSize = GetItemStackInInventory(slotIndex).Item.MaxStackSize();
+
+            // 1. find same object in inventory to stack
+            for (int inventoryIdx = 0; inventoryIdx < to.Length; inventoryIdx++)
             {
-                if (Inventory[i] == null || Inventory[i].IsEmpty)
-                    break;
+                if (to[inventoryIdx] == null || to[inventoryIdx].Item == null
+                   || from[localSlotIndex] == null || from[localSlotIndex].Item == null
+                   // Continue if:
+                   || to[inventoryIdx].Item != from[localSlotIndex].Item // different item
+                   || to[inventoryIdx].IsEmpty  // empty
+                   || to[inventoryIdx].Count >= maxStackSize) // full   
+                {
+                    continue;
+                }
+
+                // Combine stacks, storing any remainder
+                ItemStack remainingStack = to[inventoryIdx].Combine(from[localSlotIndex]);
+                // Assign remainder as new value
+                setItemFunction(slotIndex, remainingStack);
+
+                // finished
+                if (remainingStack == null || remainingStack.Count <= 0)
+                    return;
             }
 
-            if (i >= index)
-                return;
+            // 2. find first free inventory spot
+            for (int inventoryIdx = 0; inventoryIdx < to.Length; inventoryIdx++)
+            {
+                if (to[inventoryIdx] != null && to[inventoryIdx].Item != null
+                    || from[localSlotIndex] == null)
+                {
+                    continue;
+                }
+
+                // Initialise inventory slot without an item
+                if (to[inventoryIdx] == null)
+                    to[inventoryIdx] = new ItemStack(null);
+
+                // Combine stacks, storing any remainder
+                ItemStack remainingStack = to[inventoryIdx].Combine(from[localSlotIndex]);
+                // Assign remainder as new value
+                setItemFunction(slotIndex, remainingStack);
+            }
         }
+
 
         public void SetItemStackInInventory(int index, ItemStack stack)
         {
             if (index < Hotbar.Length)
                 SetItemStackInHotbar(index, stack);
             else
-                Inventory[index % Inventory.Length] = stack;
+                Inventory[index - Hotbar.Length] = stack;
         }
 
         private void SetItemStackInHotbar(int index, ItemStack stack)
@@ -127,7 +185,7 @@ namespace SharpCraft.entity
             if (index < Hotbar.Length)
                 return GetItemStackInHotbar(index);
 
-            return Inventory[index % Inventory.Length];
+            return Inventory[index - Hotbar.Length];
         }
 
         private ItemStack GetItemStackInHotbar(int index)
@@ -152,6 +210,26 @@ namespace SharpCraft.entity
 
             var lastKnownEmpty = -1;
 
+            // Check Hotbar first
+            for(int i = 0; i < Hotbar.Length; i++)
+            {
+                ItemStack stack = GetItemStackInInventory(i);
+                if (stack == null || stack.IsEmpty || stack.Item != dropped.Item)
+                    continue;
+
+                if (dropped.Item == stack.Item && stack.Count <= stack.Item.MaxStackSize())
+                {
+                    int toPickUp = Math.Min(stack.Item.MaxStackSize() - stack.Count, dropped.Count);
+
+                    stack.Count += toPickUp;
+                    dropped.Count -= toPickUp;
+                }
+
+                // return if fully combined
+                if (dropped.IsEmpty)
+                    return true;
+            }
+
             for (var i = inventorySize - 1; i >= 0; i--)
             {
                 var stack = GetItemStackInInventory(i);
@@ -162,6 +240,10 @@ namespace SharpCraft.entity
                     continue;
                 }
 
+                // Continue as already looked at Hotbar 
+                if (i < Hotbar.Length)
+                    continue;
+                
                 if (dropped.Item == stack.Item && stack.Count <= stack.Item.MaxStackSize())
                 {
                     var toPickUp = Math.Min(stack.Item.MaxStackSize() - stack.Count, dropped.Count);

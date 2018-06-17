@@ -57,5 +57,38 @@ namespace SharpCraft.item
         }
 
         public override string ToString() => Item != null ? Item.ToString() : "";
+
+        public ItemStack Combine(ItemStack other)
+        {
+            ItemStack remainingStack = null;
+
+            // Copy item if an item isn't present here
+            if(this.Item == null)
+            {
+                if(other.Item == null)
+                    return remainingStack; // error
+                else
+                    this.Item = other.Item;
+            }
+
+            // Combine stacks if enough space
+            if (this.Count + other.Count <= this.Item.MaxStackSize())
+            {
+                this.Count += other.Count;
+                remainingStack = null;
+            }
+            // otherwise, combine as much as possible
+            else
+            {
+                int difference = this.Item.MaxStackSize() - this.Count;
+                this.Count += difference;
+
+                remainingStack = other.Copy();
+                remainingStack.Count -= difference;
+            }           
+
+            return remainingStack;
+        }
+
     }
 }
