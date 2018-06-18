@@ -216,24 +216,16 @@ namespace SharpCraft.entity
 
             int maxStackSize = stack.Item.MaxStackSize();
 
-            ItemStack[] tempHotbar = Hotbar;
-            ItemStack[] tempInventory = Inventory;
-
             // Hotbar to Inventory
             if (index < Hotbar.Length)
-                FastMoveStackHelper(ref tempHotbar, ref tempInventory, SetItemStackInHotbar, index, index);
+                TryMoveStack(Hotbar, Inventory, SetItemStackInHotbar, index, index, maxStackSize);
             // Inventory to Hotbar
             else
-                FastMoveStackHelper(ref tempInventory, ref tempHotbar, SetItemStackInInventory, index, index - Hotbar.Length);
-
-            tempHotbar.CopyTo(Hotbar, 0);
-            tempInventory.CopyTo(Inventory, 0);
+                TryMoveStack(Inventory, Hotbar, SetItemStackInInventory, index, index - Hotbar.Length, maxStackSize);
         }
 
-        private void FastMoveStackHelper(ref ItemStack[] from, ref ItemStack[] to, Action<int, ItemStack> setItemFunction, int slotIndex, int localSlotIndex)
+        private void TryMoveStack(ItemStack[] from, ItemStack[] to, Action<int, ItemStack> setItemFunction, int slotIndex, int localSlotIndex, int maxStackSize)
         {
-            int maxStackSize = GetItemStackInInventory(slotIndex).Item.MaxStackSize();
-
             // 1. find same object in inventory to stack
             for (int inventoryIdx = 0; inventoryIdx < to.Length; inventoryIdx++)
             {
