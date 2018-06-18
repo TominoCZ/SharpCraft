@@ -32,7 +32,7 @@ namespace SharpCraft.render
 
             Shader.Bind();
 
-            GL.BindVertexArray(GuiRenderer.GuiQuad.vaoID);
+            GL.BindVertexArray(GuiRenderer.GuiQuad.VaoID);
             GL.EnableVertexAttribArray(0);
             
             GL.BindTexture(TextureTarget.Texture2D, tex.ID);

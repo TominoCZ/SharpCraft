@@ -21,7 +21,7 @@ namespace SharpCraft.model
 
             Shader.Bind();
 
-            GL.BindVertexArray(RawModel.vaoID);
+            GL.BindVertexArray(RawModel.VaoID);
 
             GL.EnableVertexAttribArray(0);
             GL.EnableVertexAttribArray(1);
@@ -46,9 +46,9 @@ namespace SharpCraft.model
         {
             Shader.Unbind();
 
-            for (int index = 0; index < RawModel.bufferIDs.Length; index++)
+            for (int index = 0; index < RawModel.BufferIDs.Length; index++)
             {
-                int bufferId = RawModel.bufferIDs[index];
+                int bufferId = RawModel.BufferIDs[index];
 
                 GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
                 GL.DisableVertexAttribArray(index);
@@ -57,7 +57,7 @@ namespace SharpCraft.model
             }
 
             GL.BindVertexArray(0);
-            GL.DeleteVertexArray(RawModel.vaoID);
+            GL.DeleteVertexArray(RawModel.VaoID);
         }
     }
 }

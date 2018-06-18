@@ -54,7 +54,7 @@ namespace SharpCraft.render
 
             List<RawQuad> cube = ModelHelper.createCubeModel();
 
-            _destroyProgressModel = ModelManager.loadModelToVAO(cube, 3);
+            _destroyProgressModel = ModelManager.LoadModelToVAO(cube, 3);
 
             RenderDistance = 8;
         }
@@ -163,7 +163,7 @@ namespace SharpCraft.render
             _shaderTexturedCube.UpdateGlobalUniforms();
             _shaderTexturedCube.UpdateModelUniforms(_destroyProgressModel);
 
-            GL.BindVertexArray(_destroyProgressModel.vaoID);
+            GL.BindVertexArray(_destroyProgressModel.VaoID);
             GL.EnableVertexAttribArray(0);
 
             foreach (KeyValuePair<BlockPos, DestroyProgress> pair in progresses)

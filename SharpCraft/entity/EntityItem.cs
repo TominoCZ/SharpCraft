@@ -170,7 +170,7 @@ namespace SharpCraft.entity
 
                 _shader.Bind();
 
-                GL.BindVertexArray(model.RawModel.vaoID);
+                GL.BindVertexArray(model.RawModel.VaoID);
 
                 GL.EnableVertexAttribArray(0);
                 GL.EnableVertexAttribArray(1);

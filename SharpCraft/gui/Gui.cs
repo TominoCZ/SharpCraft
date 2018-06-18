@@ -65,7 +65,7 @@ namespace SharpCraft.gui
 
             Shader.Bind();
 
-            GL.BindVertexArray(GuiRenderer.GuiQuad.vaoID);
+            GL.BindVertexArray(GuiRenderer.GuiQuad.VaoID);
 
             Shader.UpdateGlobalUniforms();
             Shader.UpdateModelUniforms();
@@ -85,7 +85,7 @@ namespace SharpCraft.gui
         protected virtual void RenderBlock(EnumBlock block, float x, float y, float scale)
         {
             TextureBlockUV UVs = TextureManager.GetUVsFromBlock(block);
-            ModelManager.overrideModelUVsInVAO(_item.RawModel.bufferIDs[1], UVs.getUVForSide(FaceSides.South).ToArray());
+            ModelManager.OverrideModelUVsInVAO(_item.RawModel.BufferIDs[1], UVs.getUVForSide(FaceSides.South).ToArray());
 
             Vector2 unit = new Vector2(1f / SharpCraft.Instance.ClientSize.Width, 1f / SharpCraft.Instance.ClientSize.Height);
 

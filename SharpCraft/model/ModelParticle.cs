@@ -12,7 +12,7 @@ namespace SharpCraft.model
         {
             Dictionary<FaceSides, RawQuad> cube = ModelHelper.createTexturedCubeModel(EnumBlock.MISSING);
 
-            RawModel = ModelManager.loadBlockModelToVAO(cube);
+            RawModel = ModelManager.LoadBlockModelToVAO(cube);
         }
     }
 }

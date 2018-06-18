@@ -79,7 +79,7 @@ namespace SharpCraft.render
                 quads.Add(new RawQuad(vertices, 3));
             }
 
-            cube = new ModelBaked<object>(ModelManager.loadModelToVAO(quads, 3), new Shader<object>("skybox"));
+            cube = new ModelBaked<object>(ModelManager.LoadModelToVAO(quads, 3), new Shader<object>("skybox"));
             texture = TextureManager.LoadCubeMap();
         }
 

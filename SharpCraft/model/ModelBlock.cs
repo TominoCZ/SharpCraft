@@ -24,7 +24,7 @@ namespace SharpCraft.model
 
             Dictionary<FaceSides, RawQuad> cube = ModelHelper.createTexturedCubeModel(block);
 
-            RawModel = ModelManager.loadBlockModelToVAO(cube);
+            RawModel = ModelManager.LoadBlockModelToVAO(cube);
 
             boundingBox = AxisAlignedBB.BLOCK_FULL;
         }

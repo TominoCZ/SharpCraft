@@ -10,9 +10,30 @@ namespace SharpCraft.model
     {
         private Dictionary<FaceSides, RawQuad> _quads;
 
-        public ModelBlockRaw(int vaoID, Dictionary<FaceSides, RawQuad> _quads, params int[] bufferIDs) : base(vaoID, 3, _quads.Values.ToList(), bufferIDs)
+        private float[] _vertexes; 
+        private float[] _normals; 
+        private float[] _uvs;
+
+        public ModelBlockRaw(int vaoID, float[] vertexes, float[] normals, float[] uvs, params int[] bufferIDs) : base(vaoID, vertexes.Length / 3, bufferIDs)
         {
-            this._quads = _quads;
+            _vertexes = vertexes;
+            _normals = normals;
+            _uvs = uvs;
+        }
+
+        public ModelBlockRaw(int vaoID, Dictionary<FaceSides, RawQuad> quads, params int[] bufferIDs) : base(vaoID, 3, quads.Values.ToList(), bufferIDs)
+        {
+            _quads = quads;
+        }
+
+        public float[] GetVertexesForSide(FaceSides sides)
+        {
+            return null; //TODO
+        }
+
+        public float[] GetUVsForSide(FaceSides sides)
+        {
+            return null; //TODO
         }
 
         public RawQuad GetQuadForSide(FaceSides side)

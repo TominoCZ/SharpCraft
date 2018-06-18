@@ -24,6 +24,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading;
+using System.Xml;
 using Newtonsoft.Json;
 using Bitmap = System.Drawing.Bitmap;
 using Image = OpenTK.Image;
@@ -899,7 +900,7 @@ namespace SharpCraft
         protected override void OnClosing(CancelEventArgs e)
         {
             Shader.DestroyAll();
-            ModelManager.cleanup();
+            ModelManager.Cleanup();
             TextureManager.Destroy();
 
             if (World != null)
@@ -998,11 +999,146 @@ namespace SharpCraft
         [STAThread]
         private static void Main(string[] args)
         {
+            var text = File.ReadAllText("test.json");
+
+            var obj = JsonConvert.DeserializeObject<BlockJSONModel>(text);
+
             ThreadPool.SetMaxThreads(1000, 1000);
 
             using (SharpCraft game = new SharpCraft())
             {
                 game.Run(20);
+            }
+        }
+    }
+
+    static class CubeModelBuilder
+    {
+        private static Dictionary<FaceSides, float[]> _cube = new Dictionary<FaceSides, float[]>();
+
+        static CubeModelBuilder()
+        {
+            _cube.Add(FaceSides.North, new float[]
+            {
+                1, 1, 0,
+                1, 0, 0,
+                0, 0, 0,
+                0, 1, 0
+            });
+            _cube.Add(FaceSides.South, new float[]
+            {
+                0, 1, 1,
+                0, 0, 1,
+                1, 0, 1,
+                1, 1, 1
+            });
+            _cube.Add(FaceSides.East, new float[]
+            {
+                1, 1, 1,
+                1, 0, 1,
+                1, 0, 0,
+                1, 1, 0
+            });
+            _cube.Add(FaceSides.West, new float[]
+            {
+                0, 1, 0,
+                0, 0, 0,
+                0, 0, 1,
+                0, 1, 1
+            });
+            _cube.Add(FaceSides.Up, new float[]
+            {
+                0, 1, 0,
+                0, 1, 1,
+                1, 1, 1,
+                1, 1, 0
+            });
+            _cube.Add(FaceSides.Down, new float[]
+            {
+                0, 0, 1,
+                0, 0, 0,
+                1, 0, 0,
+                1, 0, 1
+            });
+        }
+
+        public static void AppendCubeModel(JsonCube cube, Dictionary<TextureType, string> modelTextures, Dictionary<string, TextureMapElement> textureMap, ref float[] vertexes, ref float[] normals, ref float[] uvs, int n)
+        {
+            int startIndex2 = n * 48;
+            int startIndex3 = n * 72;
+
+            int faceIndex = 0;
+
+            foreach (var pair in cube.Faces)
+            {
+                int uvIndex = 8 * faceIndex;
+
+                TextureType side = pair.Key;
+                JsonCubeFaceUv textureNode = pair.Value;
+
+                //textureNode.Texture isn't the name of the texture file! it is '#side', '#block', '#bottom', ... TODO - if '#' is not present, use the texture from the texture map
+                if (textureNode.Texture[0] == '#')
+                {
+                    string sideName = textureNode.Texture.Substring(1).ToLower();
+
+                    if (Enum.TryParse(sideName, out TextureType sideParsed))
+                    {
+                        string textureNameForFace = modelTextures[sideParsed];
+
+                        if (textureMap.TryGetValue(textureNameForFace, out var tme))
+                        {
+                            var minU = tme.UVMin.X + textureNode.UV[0] / 16f;
+                            var minV = tme.UVMin.Y + textureNode.UV[1] / 16f;
+                            var maxU = tme.UVMax.X + textureNode.UV[2] / 16f;
+                            var maxV = tme.UVMax.Y + textureNode.UV[3] / 16f;
+
+                            uvs[startIndex2 + uvIndex] = minU;
+                            uvs[startIndex2 + uvIndex + 1] = minV;
+
+                            uvs[startIndex2 + uvIndex + 2] = minU;
+                            uvs[startIndex2 + uvIndex + 3] = maxV;
+
+                            uvs[startIndex2 + uvIndex + 4] = maxU;
+                            uvs[startIndex2 + uvIndex + 5] = maxV;
+
+                            uvs[startIndex2 + uvIndex + 6] = maxU;
+                            uvs[startIndex2 + uvIndex + 7] = minV;
+                        }
+                    }
+                }
+
+                AppendFace(side, cube.From, cube.To, ref vertexes, ref normals, startIndex3 + 12 * faceIndex);
+
+                faceIndex++;
+            }
+        }
+
+        public static void AppendFace(TextureType side, int[] from, int[] to, ref float[] vertexes, ref float[] normals, int startIndex)
+        {
+            FaceSides normal = FaceSides.Parse(side); //TextureType parsed to FaceSides, also a normal of this face
+            float[] unitFace = _cube[normal]; //one side of the cube in unit size
+
+            int x = from[0];
+            int y = from[1];
+            int z = from[2];
+
+            float sx = (to[0] - x) / 16f; //the size of the cube part
+            float sy = (to[1] - y) / 16f;
+            float sz = (to[2] - z) / 16f;
+
+            for (var i = 0; i < unitFace.Length; i += 3)
+            {
+                float vx = unitFace[i] * sx;
+                float vy = unitFace[i + 1] * sy;
+                float vz = unitFace[i + 2] * sz;
+
+                vertexes[startIndex + i] = x + vx;
+                vertexes[startIndex + i + 1] = y + vy;
+                vertexes[startIndex + i + 2] = z + vz;
+
+                normals[startIndex + i] = normal.x;
+                normals[startIndex + i + 1] = normal.y;
+                normals[startIndex + i + 2] = normal.z;
             }
         }
     }
@@ -1013,21 +1149,21 @@ namespace SharpCraft
 
         private static Dictionary<string, BlockModel> _blockModels = new Dictionary<string, BlockModel>();
 
-        private static Dictionary<string, BlockModelForRender> _modelsForRender = new Dictionary<string, BlockModelForRender>();
+        private static Dictionary<string, ModelBlockRaw> _modelsForRender = new Dictionary<string, ModelBlockRaw>();
 
         public BlockJSONLoader(Shader<ModelBlock> blockShader)
         {
             TEXTURE_BLOCKS = StitchBlocks();
             //here we have the block models already loaded
 
-            foreach (var model in _blockModels)
-            {
-                var texturedModel = CreateTexturedCubeModel(model.Value.Sprites);
+            //foreach (var model in _blockModels)
+            //{
+                //var texturedModel = CreateTexturedCubeModel(model.Value.Sprites);
 
-                BlockModelForRender mfr = new BlockModelForRender(texturedModel, blockShader);
+                //BlockModelForRender mfr = new BlockModelForRender(texturedModel, blockShader);
 
-                _modelsForRender.Add(model.Key, mfr);
-            }
+                //_modelsForRender.Add(model.Key, mfr);
+            //}
         }
 
         private int StitchBlocks()
@@ -1039,61 +1175,89 @@ namespace SharpCraft
 
             string[] files = Directory.GetFiles(dir); //TODO - ONLY LOAD JSONS FOR REGISTERED BLOCKS!
 
-            List<BlockJSONModel> models = new List<BlockJSONModel>();
-
             List<string> nonDuplicateTextures = new List<string>();
 
-            var textures = new ConcurrentDictionary<string, BlockJSONModel>();
+            var blockModels = new ConcurrentDictionary<string, BlockJSONModel>();
 
             foreach (var file in files)
             {
-                string json = File.ReadAllText(file);
-                BlockJSONModel bjm = JsonConvert.DeserializeObject<BlockJSONModel>(json);
+                BlockJSONModel bjm = JsonConvert.DeserializeObject<BlockJSONModel>(File.ReadAllText(file));
 
                 string blockName = Path.GetFileNameWithoutExtension(file);
 
-                textures.TryAdd(blockName, bjm);
+                blockModels.TryAdd(blockName, bjm); //save what block is using what model
 
-                foreach (var pair in bjm.Textures)
+                foreach (var pair in bjm.Textures) //iterating over the textureMap in the Json model
                 {
                     if (!nonDuplicateTextures.Contains(pair.Value))
                     {
-                        nonDuplicateTextures.Add(pair.Value);
+                        nonDuplicateTextures.Add(pair.Value); //add the current texture name to a list of all textureMap if isn't already there
                     }
                 }
-
-                models.Add(bjm);
             }
 
-            var sprites = new Dictionary<string, TextureSprite>();
+            var textureMapElements = new Dictionary<string, TextureMapElement>(); //each texture name has it's UV values TODO - maybe make a TextureMap class where this could be used
 
-            var id = Stitch(nonDuplicateTextures.ToArray(), 16, sprites);
+            var id = Stitch(nonDuplicateTextures.ToArray(), 16, textureMapElements); // stitch all textureMap, return the texture ID of the registered texture in VRAM
 
-            foreach (var pair in textures)
+            //TODO - if json doesn't contain cube model, assume it's a full cube
+            foreach (var pair in blockModels) //one model per registered block
+            {
+                string name = pair.Key;
+                BlockJSONModel model = pair.Value;
+
+                float[] vertexes = new float[72 * model.Cubes.Length];
+                float[] normals = new float[72 * model.Cubes.Length];
+                float[] uvs = new float[48 * model.Cubes.Length];
+
+                for (var index = 0; index < model.Cubes.Length; index++)
+                {
+                    var cube = model.Cubes[index];
+                    CubeModelBuilder.AppendCubeModel(cube, model.Textures, textureMapElements, ref vertexes, ref normals, ref uvs, index);
+                }
+
+
+                _modelsForRender.Add(name, ModelManager.LoadBlockModelToVAO(vertexes,normals,uvs));
+                //TODO -register model in VAO
+            }
+
+            #region OLD
+            /*
+            foreach (var pair in textureMap) //iterate over every block name and it's textureMap
             {
                 var blockName = pair.Key;
                 var model = pair.Value;
 
-                BlockModel blockModel = new BlockModel();
+                BlockModel blockModel = new BlockModel(); //create a model for the block
 
-                if (model.Textures.TryGetValue(TextureType.Side, out string tex) && sprites.TryGetValue(tex, out TextureSprite tp))
+                if (model.Textures.TryGetValue(TextureType.Block, out string tex1)
+                    && textureMap.TryGetValue(tex1, out TextureMapElement tp1)) // if json contains a 'block' texture, set that texture for all 6 sides first
                 {
-                    blockModel.SetSpriteForSides(tp);
+                    blockModel.SetSpriteForAllSides(tp1);
                 }
 
-                foreach (var texture in model.Textures)
+                if (model.Textures.TryGetValue(TextureType.Side, out string tex2)
+                    && textureMap.TryGetValue(tex2, out TextureMapElement tp2)) // if json contains a 'side' texture, set that texture for all 4 sides
                 {
-                    if (texture.Key != TextureType.Side && sprites.TryGetValue(texture.Value, out TextureSprite sprite))
+                    blockModel.SetSpriteForSides(tp2);
+                }
+
+                foreach (var texture in model.Textures) //lastly, load all textureMap like north, south,... and override if are set by 'side' or 'block'
+                {
+                    if (texture.Key != TextureType.Side
+                        && textureMap.TryGetValue(texture.Value, out TextureMapElement sprite))
                         blockModel.AddSpriteForSide(texture.Key, sprite);
                 }
 
-                _blockModels.Add(blockName, blockModel);
-            }
+                _blockModels.Add(blockName, blockModel); //register block model for name
+            }*/
+
+            #endregion
 
             return id;
         }
 
-        private int Stitch(string[] textures, int textureSize, Dictionary<string, TextureSprite> sprites)
+        private int Stitch(string[] textures, int textureSize, Dictionary<string, TextureMapElement> sprites)
         {
             Bitmap map = new Bitmap(256, 256);
 
@@ -1108,12 +1272,12 @@ namespace SharpCraft
                 {
                     Vector2 start = new Vector2((float)countX / map.Width, (float)countY / map.Height);
                     Vector2 end = start + new Vector2((float)textureSize / map.Width, (float)textureSize / map.Height);
-                    
-                    TextureSprite sprite = new TextureSprite(texName, start, end);
+
+                    TextureMapElement mapElement = new TextureMapElement(start, end);
 
                     WriteBitmap(map, texName, textureSize, ref countX, ref countY);
 
-                    sprites.Add(texName, sprite);
+                    sprites.Add(texName, mapElement);
                 }
 
                 map.Save("debug.png");
@@ -1142,13 +1306,13 @@ namespace SharpCraft
             }
         }
 
-        public static BlockModelForRender GetModelForBlock(string blockName)
+        public static ModelBlockRaw GetModelForBlock(string blockName)
         {
             _modelsForRender.TryGetValue(blockName, out var model);
             return model;
         }
 
-        private Dictionary<FaceSides, RawQuad> CreateTexturedCubeModel(Dictionary<TextureType, TextureSprite> sprites)
+        private Dictionary<FaceSides, RawQuad> CreateTexturedCubeModel(Dictionary<TextureType, TextureMapElement> sprites)
         {
             Dictionary<FaceSides, RawQuad> quads = new Dictionary<FaceSides, RawQuad>();
 
@@ -1171,47 +1335,51 @@ namespace SharpCraft
         }
     }
 
-    class BlockModelForRender : ModelBaked<ModelBlock>
+    class BlockModelForRender : ModelBaked<ModelBlock> //TODO change
     {
         public BlockModelForRender(Dictionary<FaceSides, RawQuad> data, Shader<ModelBlock> shader) : base(null, shader)
         {
-            RawModel = ModelManager.loadBlockModelToVAO(data);
+            RawModel = ModelManager.LoadBlockModelToVAO(data);
         }
     }
 
     class BlockModel
     {
-        public Dictionary<TextureType, TextureSprite> Sprites = new Dictionary<TextureType, TextureSprite>();
+        public Dictionary<TextureType, TextureMapElement> Sprites = new Dictionary<TextureType, TextureMapElement>();
 
-        public void AddSpriteForSide(TextureType type, TextureSprite sprite) //TODO sides, not type -> cuz what about the particle texture??
+        public void AddSpriteForSide(TextureType type, TextureMapElement mapElement) //TODO sides, not type -> cuz what about the particle texture??
         {
-            if (type != TextureType.Side)
+            if (type != TextureType.side && type != TextureType.block)
             {
                 Sprites.Remove(type);
-                Sprites.Add(type, sprite);
+                Sprites.Add(type, mapElement);
             }
         }
 
-        public void SetSpriteForSides(TextureSprite sprite)
+        public void SetSpriteForAllSides(TextureMapElement mapElement)
         {
-            Sprites.TryAdd(TextureType.North, sprite);
-            Sprites.TryAdd(TextureType.South, sprite);
-            Sprites.TryAdd(TextureType.West, sprite);
-            Sprites.TryAdd(TextureType.East, sprite);
+            Sprites.TryAdd(TextureType.top, mapElement);
+            Sprites.TryAdd(TextureType.bottom, mapElement);
+
+            SetSpriteForSides(mapElement);
+        }
+
+        public void SetSpriteForSides(TextureMapElement mapElement)
+        {
+            Sprites.TryAdd(TextureType.north, mapElement);
+            Sprites.TryAdd(TextureType.south, mapElement);
+            Sprites.TryAdd(TextureType.west, mapElement);
+            Sprites.TryAdd(TextureType.east, mapElement);
         }
     }
 
-    class TextureSprite
+    class TextureMapElement
     {
-        public string Name { get; }
-
         public Vector2 UVMin { get; }
         public Vector2 UVMax { get; }
 
-        public TextureSprite(string name, Vector2 uvMin, Vector2 uvMax)
+        public TextureMapElement(Vector2 uvMin, Vector2 uvMax)
         {
-            Name = name;
-
             UVMin = uvMin;
             UVMax = uvMax;
         }
@@ -1219,12 +1387,13 @@ namespace SharpCraft
 
     public enum TextureType
     {
-        Top,
-        Bottom,
-        North,
-        South,
-        West,
-        East,
-        Side
+        top,
+        bottom,
+        north,
+        south,
+        west,
+        east,
+        block,
+        side
     }
 }
