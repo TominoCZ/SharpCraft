@@ -1,6 +1,7 @@
 ﻿using OpenTK;
 using SharpCraft.world.chunk;
 using System.Collections.Generic;
+using System.Web.UI.Design;
 
 namespace SharpCraft.block
 {
@@ -85,5 +86,19 @@ namespace SharpCraft.block
         public static Vector3 operator +(Vector3 l, FaceSides r) => new Vector3(l.X + r.x, l.Y + r.y, l.Z + r.z);
 
         public static Vector3 operator *(FaceSides l, float r) => new Vector3(l.x + r, l.y + r, l.z + r);
+
+        public static FaceSides Parse(TextureType t)
+        {
+            switch (t)
+            {
+                case TextureType.Top: return Up;
+                case TextureType.Bottom: return Down;
+                case TextureType.North: return North;
+                case TextureType.South: return South;
+                case TextureType.West: return West;
+                case TextureType.East: return East;
+                default: return Null;
+            }
+        }
     }
 }
