@@ -20,7 +20,11 @@ namespace SharpCraft.entity
 
         private Vector2 moveSpeed;
 
+        // Health Variables
         public float Health = 100.0f; // 0% is death, 100% is full health
+        public int fullHearts = 10;
+        public double halfHearts = 0.0;
+        public double totalOccupiedHearts = 0.0f;
 
         public bool IsRunning { get; private set; }
 
@@ -152,6 +156,8 @@ namespace SharpCraft.entity
 
             // reduce health
             Health -= percentage;
+
+            UpdateHealthUIVariables();
         }
 
         private void LifeRegen()
@@ -165,6 +171,18 @@ namespace SharpCraft.entity
 
             // increase health
             Health += 0.06f; // 0.5 heart in 4 seconds
+
+            UpdateHealthUIVariables();
+        }
+
+        private void UpdateHealthUIVariables()
+        {
+            fullHearts = (int) (Health / 10);
+
+            float remainder = Health % 10.0f / 10.0f;
+            halfHearts = Math.Round(remainder);
+
+            totalOccupiedHearts = fullHearts + halfHearts;
         }
 
         private void UpdateCameraMovement()

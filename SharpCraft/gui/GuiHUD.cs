@@ -11,6 +11,8 @@ namespace SharpCraft.gui
         private float _hotbarX;
         private float _hotbarY;
 
+        private const int HEARTS_GAP = 19;
+
         public override void Render(int mouseX, int mouseY)
         {
             Size size = SharpCraft.Instance.ClientSize;
@@ -67,22 +69,10 @@ namespace SharpCraft.gui
             }
 
             RenderText(SharpCraft.Instance.GetFPS() + " FPS", 5, 6, 1, Vector3.UnitY, false, true);
-
-            // debug info
-            // RenderText("Falling: " + SharpCraft.Instance.Player.isFalling + "(" + SharpCraft.Instance.Player.fallDistance + ")", 5, 47, 1, Vector3.UnitY, false, true);
         }
 
         private void DrawLives()
         {
-            float health = SharpCraft.Instance.Player.Health;
-
-            int fullHearts = (int)(health / 10);
-
-            float remainder = health % 10.0f / 10.0f;
-            double halves = Math.Round(remainder);
-
-            int gap = 3;
-
             // Lives
             float y = _hotbarY - 20;
 
@@ -91,13 +81,13 @@ namespace SharpCraft.gui
                 int u = 0;
 
                 // Full hearts
-                if (i + 1 <= fullHearts)
+                if (i < SharpCraft.Instance.Player.fullHearts)
                     u = 32;
                 // Half hearts
-                else if (i + 1 <= fullHearts + halves)
+                else if (i < SharpCraft.Instance.Player.totalOccupiedHearts)
                     u = 16;
 
-                RenderTexture(TextureManager.TEXTURE_GUI_WIDGETS, _hotbarX + i * (16 + gap), y, u, 40, 16, 16);
+                RenderTexture(TextureManager.TEXTURE_GUI_WIDGETS, _hotbarX + (i * HEARTS_GAP), y, u, 40, 16, 16);
             }
         }
     }
