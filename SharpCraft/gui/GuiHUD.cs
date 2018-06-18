@@ -12,6 +12,19 @@ namespace SharpCraft.gui
         private float _hotbarY;
 
         private const int HEARTS_GAP = 19;
+        private static int fullHearts = 10;
+        private static double halfHearts = 0.0;
+        private static double totalOccupiedHearts = 0.0f;
+
+        public static void UpdateLivesUI(float health)
+        {
+            fullHearts = (int)(health / 10);
+
+            float remainder = health % 10.0f / 10.0f;
+            halfHearts = Math.Round(remainder);
+
+            totalOccupiedHearts = fullHearts + halfHearts;
+        }
 
         public override void Render(int mouseX, int mouseY)
         {
@@ -81,10 +94,10 @@ namespace SharpCraft.gui
                 int u = 0;
 
                 // Full hearts
-                if (i < SharpCraft.Instance.Player.fullHearts)
+                if (i < fullHearts)
                     u = 32;
                 // Half hearts
-                else if (i < SharpCraft.Instance.Player.totalOccupiedHearts)
+                else if (i < totalOccupiedHearts)
                     u = 16;
 
                 RenderTexture(TextureManager.TEXTURE_GUI_WIDGETS, _hotbarX + (i * HEARTS_GAP), y, u, 40, 16, 16);
