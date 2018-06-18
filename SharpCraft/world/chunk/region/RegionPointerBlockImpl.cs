@@ -8,7 +8,7 @@ namespace SharpCraft.world.chunk.region
     {
         /*
 		 File format:
-		 Note: all pointers are absolute position of file from UVMin
+		 Note: all pointers are absolute position of file from start
 
 		 -- C++ view:
 

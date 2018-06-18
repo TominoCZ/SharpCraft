@@ -408,7 +408,7 @@ namespace SharpCraft.entity
                 }
                 else if (btn == MouseButton.Left)
                 {
-                    //BreakBlock(); TODO - UVMin breaking
+                    //BreakBlock(); TODO - start breaking
                 }
             }
             // not looking at anything

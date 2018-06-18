@@ -34,7 +34,8 @@ namespace SharpCraft.render
 
             GL.BindVertexArray(GuiRenderer.GuiQuad.vaoID);
             GL.EnableVertexAttribArray(0);
-            
+
+            GL.ActiveTexture(TextureUnit.Texture0);
             GL.BindTexture(TextureTarget.Texture2D, tex.ID);
 
             Shader.UpdateGlobalUniforms();

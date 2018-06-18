@@ -22,6 +22,7 @@ namespace SharpCraft.entity
         private int entityAge;
 
         private long tick;
+        private long lastTick;
 
         static EntityItem()
         {
@@ -42,8 +43,7 @@ namespace SharpCraft.entity
 
         public override void Update()
         {
-            tick++;
-
+            lastTick = tick++;
             LastPos = Pos;
 
             Motion.Y -= 0.04f * gravity;
@@ -157,7 +157,7 @@ namespace SharpCraft.entity
         public override void Render(float partialTicks)
         {
             Vector3 partialPos = LastPos + (Pos - LastPos) * partialTicks;
-            float partialTime = tick + partialTicks;
+            float partialTime = lastTick + (tick - lastTick) * partialTicks;
 
             if (stack?.Item?.InnerItem is EnumBlock block)
             {
@@ -175,7 +175,8 @@ namespace SharpCraft.entity
                 GL.EnableVertexAttribArray(0);
                 GL.EnableVertexAttribArray(1);
                 GL.EnableVertexAttribArray(2);
-                
+
+                GL.ActiveTexture(TextureUnit.Texture0);
                 GL.BindTexture(TextureTarget.Texture2D, TextureManager.TEXTURE_BLOCKS.ID);
 
                 int itemsToRender = 1;

@@ -234,7 +234,7 @@ namespace SharpCraft.world
                 return chunkData[x, y, z] >> 4 == (int)EnumBlock.AIR;
             }
 
-            for (int z = 0; z < Chunk.ChunkSize; z++)
+            Enumerable.Range(0, Chunk.ChunkSize).AsParallel().ForAll(z =>
             {
                 for (int x = 0; x < Chunk.ChunkSize; x++)
                 {
@@ -302,7 +302,7 @@ namespace SharpCraft.world
                         }
                     }
                 }
-            }
+            });
 
             chunk.GeneratedData(chunkData);
 

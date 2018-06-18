@@ -86,8 +86,8 @@ namespace SharpCraft.render
             world.LoadManager.LoadImportantChunks();
             world.LoadManager.BuildImportantChunks();
 
-            //TODO - TEST!!!!!!!!!!!!!!!!!!!!!!
-            GL.BindTexture(TextureTarget.Texture2D, BlockJSONLoader.TEXTURE_BLOCKS);
+            GL.ActiveTexture(TextureUnit.Texture0);
+            GL.BindTexture(TextureTarget.Texture2D, TextureManager.TEXTURE_BLOCKS.ID);
 
             MouseOverObject hit = SharpCraft.Instance.MouseOverObject;
 
@@ -154,7 +154,8 @@ namespace SharpCraft.render
             ConcurrentDictionary<BlockPos, DestroyProgress> progresses = SharpCraft.Instance.DestroyProgresses;
             if (progresses.Count == 0)
                 return;
-            
+
+            GL.ActiveTexture(TextureUnit.Texture0);
             GL.BindTexture(TextureTarget.Texture2D, TextureManager.TEXTURE_DESTROY_PROGRESS.ID);
 
             GL.BlendFunc(BlendingFactorSrc.DstColor, BlendingFactorDest.Zero);
