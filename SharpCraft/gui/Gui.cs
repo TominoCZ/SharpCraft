@@ -107,8 +107,7 @@ namespace SharpCraft.gui
             _item.Shader.UpdateGlobalUniforms();
             _item.Shader.UpdateModelUniforms();
             _item.Shader.UpdateInstanceUniforms(mat, null);
-
-            GL.ActiveTexture(TextureUnit.Texture0);
+        
             GL.BindTexture(TextureTarget.Texture2D, TextureManager.TEXTURE_BLOCKS.ID);
             GL.DrawArrays(PrimitiveType.Quads, 0, 4);
 

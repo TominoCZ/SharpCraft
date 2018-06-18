@@ -100,8 +100,7 @@ namespace SharpCraft.particle
             model.Shader.UpdateGlobalUniforms();
             model.Shader.UpdateModelUniforms();
             model.Shader.UpdateInstanceUniforms(MatrixHelper.CreateTransformationMatrix(partialPos - (Vector3.UnitX + Vector3.UnitZ) * partialScale / 2, partialRot, partialScale), this);
-
-            GL.ActiveTexture(TextureUnit.Texture0);
+            
             GL.BindTexture(TextureTarget.Texture2D, textureID);
             model.RawModel.Render(PrimitiveType.Quads);
         }

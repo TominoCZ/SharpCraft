@@ -1,0 +1,7 @@
+{
+  "textures": {
+    "top": "bedrock",
+	"bottom": "bedrock",
+	"side": "bedrock"
+  }
+}

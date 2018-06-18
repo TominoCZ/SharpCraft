@@ -16,6 +16,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
@@ -23,7 +24,9 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading;
+using Newtonsoft.Json;
 using Bitmap = System.Drawing.Bitmap;
+using Image = OpenTK.Image;
 using Point = OpenTK.Point;
 using Rectangle = System.Drawing.Rectangle;
 using Size = OpenTK.Size;
@@ -134,11 +137,12 @@ namespace SharpCraft
 
         public World World;
 
-        public ConcurrentDictionary<BlockPos, DestroyProgress> DestroyProgresses = new ConcurrentDictionary<BlockPos, DestroyProgress>();
+        public ConcurrentDictionary<BlockPos, DestroyProgress> DestroyProgresses =
+            new ConcurrentDictionary<BlockPos, DestroyProgress>();
 
         private List<MouseButton> _mouseButtonsDown = new List<MouseButton>();
         private ConcurrentQueue<Action> _glContextQueue = new ConcurrentQueue<Action>();
-        private DateTime _updateTimer = DateTime.Now;
+        private Stopwatch _updateTimer = Stopwatch.StartNew();
         private DateTime _lastFpsDate = DateTime.Now;
         private WindowState _lastWindowState;
         private Thread _renderThread = Thread.CurrentThread;
@@ -166,7 +170,8 @@ namespace SharpCraft
 
         //private GameTimer timer = new GameTimer(60, 20);
 
-        public SharpCraft() : base(680, 480, new GraphicsMode(32, 32, 0, 0), _title, GameWindowFlags.Default, DisplayDevice.Default, 3, 3, GraphicsContextFlags.ForwardCompatible)
+        public SharpCraft() : base(680, 480, new GraphicsMode(32, 32, 0, 0), _title, GameWindowFlags.Default,
+            DisplayDevice.Default, 3, 3, GraphicsContextFlags.ForwardCompatible)
         {
             Instance = this;
             Camera = new Camera();
@@ -179,7 +184,7 @@ namespace SharpCraft
 
             //TargetRenderFrequency = 60;
 
-            Console.WriteLine("DEBUG: stitching textures");
+            Console.WriteLine("DEBUG: stitching Textures");
             TextureManager.LoadTextures();
 
             Init();
@@ -199,6 +204,8 @@ namespace SharpCraft
             //TODO - merge shaders and use strings as block IDs like sharpcraft:dirt
             Shader<ModelBlock> shader = new Shader<ModelBlock>("block");
             Shader<ModelBlock> shaderUnlit = new Shader<ModelBlock>("block_unlit");
+
+            BlockJSONLoader loader = new BlockJSONLoader(shader);
 
             ModelBlock missingModel = new ModelBlock(EnumBlock.MISSING, shader);
             ModelBlock stoneModel = new ModelBlock(EnumBlock.STONE, shader);
@@ -266,7 +273,8 @@ namespace SharpCraft
 
                 foreach (string modFile in modFiles)
                 {
-                    IEnumerable<Type> modClassType = Assembly.LoadFile(modFile).GetModules().SelectMany(t => t.GetTypes())
+                    IEnumerable<Type> modClassType = Assembly.LoadFile(modFile).GetModules()
+                        .SelectMany(t => t.GetTypes())
                         .Where(t => t.IsSubclassOf(typeof(ModMain)));
 
                     if (modClassType.FirstOrDefault() is Type type && Activator.CreateInstance(type) is ModMain mm)
@@ -309,18 +317,20 @@ namespace SharpCraft
 
                 BlockPos playerPos = new BlockPos(MathUtil.NextFloat(-100, 100), 10, MathUtil.NextFloat(-100, 100));
 
-                World = new World("MyWorld", "Tomlow's Fuckaround", SettingsManager.GetValue("worldseed").GetHashCode());
+                World = new World("MyWorld", "Tomlow's Fuckaround",
+                    SettingsManager.GetValue("worldseed").GetHashCode());
 
-                Player = new EntityPlayerSP(World, new Vector3(playerPos.X, World.GetHeightAtPos(playerPos.X, playerPos.Z), playerPos.Z));
+                Player = new EntityPlayerSP(World,
+                    new Vector3(playerPos.X, World.GetHeightAtPos(playerPos.X, playerPos.Z), playerPos.Z));
 
                 World.AddEntity(Player);
 
-                //Player.SetItemStackInInventory(0, new ItemStack(new ItemBlock(EnumBlock.CRAFTING_TABLE)));
-                //Player.SetItemStackInInventory(1, new ItemStack(new ItemBlock(EnumBlock.FURNACE)));
-                //Player.SetItemStackInInventory(2, new ItemStack(new ItemBlock(EnumBlock.COBBLESTONE)));
-                //Player.SetItemStackInInventory(3, new ItemStack(new ItemBlock(EnumBlock.PLANKS)));
-                //Player.SetItemStackInInventory(4, new ItemStack(new ItemBlock(EnumBlock.GLASS)));
-                //Player.SetItemStackInInventory(5, new ItemStack(new ItemBlock(EnumBlock.XRAY)));
+                Player.SetItemStackInInventory(0, new ItemStack(new ItemBlock(EnumBlock.CRAFTING_TABLE)));
+                Player.SetItemStackInInventory(1, new ItemStack(new ItemBlock(EnumBlock.FURNACE)));
+                Player.SetItemStackInInventory(2, new ItemStack(new ItemBlock(EnumBlock.COBBLESTONE)));
+                Player.SetItemStackInInventory(3, new ItemStack(new ItemBlock(EnumBlock.PLANKS)));
+                Player.SetItemStackInInventory(4, new ItemStack(new ItemBlock(EnumBlock.GLASS)));
+                Player.SetItemStackInInventory(5, new ItemStack(new ItemBlock(EnumBlock.XRAY)));
             }
             else
             {
@@ -418,6 +428,8 @@ namespace SharpCraft
             GL.Enable(EnableCap.Blend);
             GL.CullFace(CullFaceMode.Back);
             GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
+
+            GL.ActiveTexture(TextureUnit.Texture0);
         }
 
         public void GetMouseOverObject()
@@ -476,7 +488,8 @@ namespace SharpCraft
                                     else if (normal.Z > 0)
                                         sideHit = FaceSides.South;
 
-                                    BlockPos p = new BlockPos(hitPos - normal * 0.5f); ;
+                                    BlockPos p = new BlockPos(hitPos - normal * 0.5f);
+                                    ;
 
                                     if (sideHit == FaceSides.Null)
                                         continue;
@@ -626,12 +639,14 @@ namespace SharpCraft
                 DateTime time = DateTime.UtcNow;
 
                 string dir = $"{GameFolderDir}/screenshots";
-                string file = $"{dir}/{time.Year}-{time.Month}-{time.Day}_{time.TimeOfDay.Hours}.{time.TimeOfDay.Minutes}.{time.TimeOfDay.Seconds}.png";
+                string file =
+                    $"{dir}/{time.Year}-{time.Month}-{time.Day}_{time.TimeOfDay.Hours}.{time.TimeOfDay.Minutes}.{time.TimeOfDay.Seconds}.png";
 
                 if (!Directory.Exists(dir))
                     Directory.CreateDirectory(dir);
 
-                using (FileStream fs = new FileStream(file, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite))
+                using (FileStream fs = new FileStream(file, FileMode.OpenOrCreate, FileAccess.ReadWrite,
+                    FileShare.ReadWrite))
                 {
                     bmp.Save(fs, ImageFormat.Png);
                 }
@@ -654,7 +669,7 @@ namespace SharpCraft
 
             DateTime now = DateTime.Now;
 
-            _partialTicks = (float)(now - _updateTimer).TotalMilliseconds / 50;
+            _partialTicks = (float)(_updateTimer.Elapsed.TotalMilliseconds / 50.0);
 
             if ((now - _lastFpsDate).TotalMilliseconds >= 1000)
             {
@@ -705,12 +720,12 @@ namespace SharpCraft
 
         protected override void OnUpdateFrame(FrameEventArgs e)
         {
+            _updateTimer.Restart();
+
             if (!IsDisposed && Visible)
                 GetMouseOverObject();
 
             GameLoop();
-
-            _updateTimer = DateTime.Now;
         }
 
         protected override void OnMouseDown(MouseButtonEventArgs e)
@@ -764,7 +779,8 @@ namespace SharpCraft
             switch (e.Key)
             {
                 case Key.P:
-                    Player?.World?.AddWaypoint(new BlockPos(Player.Pos).Offset(FaceSides.Up), new OpenTK.Color(255, 0, 0, 127), "TEST");
+                    Player?.World?.AddWaypoint(new BlockPos(Player.Pos).Offset(FaceSides.Up),
+                        new OpenTK.Color(255, 0, 0, 127), "TEST");
                     break;
 
                 case Key.Escape:
@@ -803,6 +819,7 @@ namespace SharpCraft
                     }
                     else
                         WindowState = _lastWindowState;
+
                     break;
             }
 
@@ -981,12 +998,233 @@ namespace SharpCraft
         [STAThread]
         private static void Main(string[] args)
         {
-            ThreadPool.SetMaxThreads(1000, 0);
+            ThreadPool.SetMaxThreads(1000, 1000);
 
             using (SharpCraft game = new SharpCraft())
             {
                 game.Run(20);
             }
         }
+    }
+
+    class BlockJSONLoader
+    {
+        public static int TEXTURE_BLOCKS;
+
+        private static Dictionary<string, BlockModel> _blockModels = new Dictionary<string, BlockModel>();
+
+        private static Dictionary<string, BlockModelForRender> _modelsForRender = new Dictionary<string, BlockModelForRender>();
+
+        public BlockJSONLoader(Shader<ModelBlock> blockShader)
+        {
+            TEXTURE_BLOCKS = StitchBlocks();
+            //here we have the block models already loaded
+
+            foreach (var model in _blockModels)
+            {
+                var texturedModel = CreateTexturedCubeModel(model.Value.Sprites);
+
+                BlockModelForRender mfr = new BlockModelForRender(texturedModel, blockShader);
+
+                _modelsForRender.Add(model.Key, mfr);
+            }
+        }
+
+        private int StitchBlocks()
+        {
+            string dir = $"{SharpCraft.Instance.GameFolderDir}\\SharpCraft_Data\\assets\\models\\block";
+
+            if (!Directory.Exists(dir))
+                return 0;
+
+            string[] files = Directory.GetFiles(dir); //TODO - ONLY LOAD JSONS FOR REGISTERED BLOCKS!
+
+            List<BlockJSONModel> models = new List<BlockJSONModel>();
+
+            List<string> nonDuplicateTextures = new List<string>();
+
+            var textures = new ConcurrentDictionary<string, BlockJSONModel>();
+
+            foreach (var file in files)
+            {
+                string json = File.ReadAllText(file);
+                BlockJSONModel bjm = JsonConvert.DeserializeObject<BlockJSONModel>(json);
+
+                string blockName = Path.GetFileNameWithoutExtension(file);
+
+                textures.TryAdd(blockName, bjm);
+
+                foreach (var pair in bjm.Textures)
+                {
+                    if (!nonDuplicateTextures.Contains(pair.Value))
+                    {
+                        nonDuplicateTextures.Add(pair.Value);
+                    }
+                }
+
+                models.Add(bjm);
+            }
+
+            var sprites = new Dictionary<string, TextureSprite>();
+
+            var id = Stitch(nonDuplicateTextures.ToArray(), 16, sprites);
+
+            foreach (var pair in textures)
+            {
+                var blockName = pair.Key;
+                var model = pair.Value;
+
+                BlockModel blockModel = new BlockModel();
+
+                if (model.Textures.TryGetValue(TextureType.Side, out string tex) && sprites.TryGetValue(tex, out TextureSprite tp))
+                {
+                    blockModel.SetSpriteForSides(tp);
+                }
+
+                foreach (var texture in model.Textures)
+                {
+                    if (texture.Key != TextureType.Side && sprites.TryGetValue(texture.Value, out TextureSprite sprite))
+                        blockModel.AddSpriteForSide(texture.Key, sprite);
+                }
+
+                _blockModels.Add(blockName, blockModel);
+            }
+
+            return id;
+        }
+
+        private int Stitch(string[] textures, int textureSize, Dictionary<string, TextureSprite> sprites)
+        {
+            Bitmap map = new Bitmap(256, 256);
+
+            int id;
+
+            using (map)
+            {
+                int countX = 0;
+                int countY = 0;
+
+                foreach (var texName in textures)
+                {
+                    Vector2 start = new Vector2((float)countX / map.Width, (float)countY / map.Height);
+                    Vector2 end = start + new Vector2((float)textureSize / map.Width, (float)textureSize / map.Height);
+                    
+                    TextureSprite sprite = new TextureSprite(texName, start, end);
+
+                    WriteBitmap(map, texName, textureSize, ref countX, ref countY);
+
+                    sprites.Add(texName, sprite);
+                }
+
+                map.Save("debug.png");
+
+                id = TextureManager.LoadTexture(map);
+            }
+
+            return id;
+        }
+
+        private void WriteBitmap(Bitmap textureMap, string texName, int textureSize, ref int countX, ref int countY)
+        {
+            Bitmap tex = new Bitmap(Bitmap.FromFile($"{SharpCraft.Instance.GameFolderDir}\\SharpCraft_Data\\assets\\Textures\\blocks\\{texName}.png"), textureSize, textureSize);
+
+            using (Graphics g = Graphics.FromImage(textureMap))
+            {
+                g.DrawImage(tex, countX, countY);
+
+                countX += textureSize;
+
+                if (countX + textureSize > textureMap.Width)
+                {
+                    countX = 0;
+                    countY += textureSize;
+                }
+            }
+        }
+
+        public static BlockModelForRender GetModelForBlock(string blockName)
+        {
+            _modelsForRender.TryGetValue(blockName, out var model);
+            return model;
+        }
+
+        private Dictionary<FaceSides, RawQuad> CreateTexturedCubeModel(Dictionary<TextureType, TextureSprite> sprites)
+        {
+            Dictionary<FaceSides, RawQuad> quads = new Dictionary<FaceSides, RawQuad>();
+
+            foreach (var pair in sprites)
+            {
+                var data = ModelHelper.GetCubeSideVertexes(pair.Key);
+
+                var uvNode = new TextureUVNode(pair.Value.UVMin, pair.Value.UVMax);
+
+                RawQuad quad = new RawQuad(
+                    data,
+                    uvNode.ToArray(),
+                    ModelHelper.CalculateNormals(data),
+                    3);
+
+                quads.Add(FaceSides.Parse(pair.Key), quad);
+            }
+
+            return quads;
+        }
+    }
+
+    class BlockModelForRender : ModelBaked<ModelBlock>
+    {
+        public BlockModelForRender(Dictionary<FaceSides, RawQuad> data, Shader<ModelBlock> shader) : base(null, shader)
+        {
+            RawModel = ModelManager.loadBlockModelToVAO(data);
+        }
+    }
+
+    class BlockModel
+    {
+        public Dictionary<TextureType, TextureSprite> Sprites = new Dictionary<TextureType, TextureSprite>();
+
+        public void AddSpriteForSide(TextureType type, TextureSprite sprite) //TODO sides, not type -> cuz what about the particle texture??
+        {
+            if (type != TextureType.Side)
+            {
+                Sprites.Remove(type);
+                Sprites.Add(type, sprite);
+            }
+        }
+
+        public void SetSpriteForSides(TextureSprite sprite)
+        {
+            Sprites.TryAdd(TextureType.North, sprite);
+            Sprites.TryAdd(TextureType.South, sprite);
+            Sprites.TryAdd(TextureType.West, sprite);
+            Sprites.TryAdd(TextureType.East, sprite);
+        }
+    }
+
+    class TextureSprite
+    {
+        public string Name { get; }
+
+        public Vector2 UVMin { get; }
+        public Vector2 UVMax { get; }
+
+        public TextureSprite(string name, Vector2 uvMin, Vector2 uvMax)
+        {
+            Name = name;
+
+            UVMin = uvMin;
+            UVMax = uvMax;
+        }
+    }
+
+    public enum TextureType
+    {
+        Top,
+        Bottom,
+        North,
+        South,
+        West,
+        East,
+        Side
     }
 }
