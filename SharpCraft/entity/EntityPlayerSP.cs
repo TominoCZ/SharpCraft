@@ -33,8 +33,6 @@ namespace SharpCraft.entity
             }
         }
         
-
-        
         public bool IsRunning { get; private set; }
 
         public int HotbarIndex { get; private set; }
