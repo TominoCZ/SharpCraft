@@ -1,4 +1,5 @@
-﻿using OpenTK;
+﻿using System;
+using OpenTK;
 using SharpCraft.block;
 using SharpCraft.model;
 using SharpCraft.texture;
@@ -58,7 +59,7 @@ namespace SharpCraft.util
             });
         }
 
-        public static float[] calculateNormals(float[] vertices)
+        public static float[] CalculateNormals(float[] vertices)
         {
             float[] normals = new float[vertices.Length];
 
@@ -106,7 +107,7 @@ namespace SharpCraft.util
                         RawQuad quad = new RawQuad(
                             data,
                             uvNode.ToArray(),
-                            calculateNormals(data),
+                            CalculateNormals(data),
                             3);
 
                         quads.Add(face, quad);
@@ -115,6 +116,21 @@ namespace SharpCraft.util
             }
 
             return quads;
+        }
+
+        public static float[] GetCubeSideVertexes(TextureType side)
+        {
+            switch (side)
+            {
+                case TextureType.Top: return CUBE[FaceSides.Up];
+                case TextureType.Bottom:return CUBE[FaceSides.Down];
+                case TextureType.North:return CUBE[FaceSides.North];
+                case TextureType.South:return CUBE[FaceSides.South];
+                case TextureType.West:return CUBE[FaceSides.West];
+                case TextureType.East:return CUBE[FaceSides.East];
+                default:
+                    return new float[]{};
+            }
         }
 
         private static float[] toFloats(Vector3 vec)

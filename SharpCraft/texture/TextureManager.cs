@@ -56,7 +56,7 @@ namespace SharpCraft.texture
 
             Array blocks = Enum.GetValues(typeof(EnumBlock));
 
-            string dir = $"SharpCraft_Data/assets/textures/{folder}";
+            string dir = $"SharpCraft_Data/assets/Textures/{folder}";
 
             string[] files = new string[0];
             if (Directory.Exists(dir))
@@ -234,7 +234,7 @@ namespace SharpCraft.texture
         {
             try
             {
-                Bitmap bmp = (Bitmap)Image.FromFile($"SharpCraft_Data/assets/textures/{textureName}.png");
+                Bitmap bmp = (Bitmap)Image.FromFile($"SharpCraft_Data/assets/Textures/{textureName}.png");
 
                 int id = LoadTexture(bmp, smooth);
 
@@ -254,7 +254,7 @@ namespace SharpCraft.texture
 
             string[] files = new string[0];
 
-            string dir = "SharpCraft_Data/assets/textures/skybox";
+            string dir = "SharpCraft_Data/assets/Textures/skybox";
 
             if (Directory.Exists(dir))
                 files = Directory.GetFiles(dir, "*.png");
@@ -288,8 +288,7 @@ namespace SharpCraft.texture
             int texID = GL.GenTexture();
 
             _allTextures.Add(texID);
-
-            GL.ActiveTexture(TextureUnit.Texture0);
+            
             GL.BindTexture(TextureTarget.TextureCubeMap, texID);
 
             Dictionary<FaceSides, Bitmap> cubeMapTextures = LoadSkyboxTextures();
