@@ -6,7 +6,7 @@ namespace SharpCraft.gui
     {
         public override void Render(int mouseX, int mouseY)
         {
-            DrawBackground();
+            DrawBackroundStretch();
 
             Size size = SharpCraft.Instance.ClientSize;
 
