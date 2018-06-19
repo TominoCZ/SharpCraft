@@ -1,7 +1,6 @@
 ﻿using OpenTK;
 using SharpCraft.world.chunk;
 using System.Collections.Generic;
-using System.Web.UI.Design;
 
 namespace SharpCraft.block
 {
@@ -91,14 +90,26 @@ namespace SharpCraft.block
         {
             switch (t)
             {
-                case TextureType.Top: return Up;
-                case TextureType.Bottom: return Down;
-                case TextureType.North: return North;
-                case TextureType.South: return South;
-                case TextureType.West: return West;
-                case TextureType.East: return East;
+                case TextureType.top: return Up;
+                case TextureType.bottom: return Down;
+                case TextureType.north: return North;
+                case TextureType.south: return South;
+                case TextureType.west: return West;
+                case TextureType.east: return East;
                 default: return Null;
             }
+        }
+
+        public static TextureType Parse(FaceSides fs)
+        {
+            if (fs == Up) return TextureType.top;
+            if (fs == Down) return TextureType.bottom;
+            if (fs == North) return TextureType.north;
+            if (fs == South) return TextureType.south;
+            if (fs == East) return TextureType.east;
+            if (fs == West) return TextureType.west;
+
+            return TextureType.block;
         }
     }
 }

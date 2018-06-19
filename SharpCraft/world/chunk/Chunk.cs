@@ -3,10 +3,8 @@ using OpenTK.Graphics.OpenGL;
 using SharpCraft.block;
 using SharpCraft.entity;
 using SharpCraft.model;
-using SharpCraft.render.shader;
 using SharpCraft.util;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -71,14 +69,17 @@ namespace SharpCraft.world.chunk
             if (localPos.Z >= ChunkSize) throw new IndexOutOfRangeException($"Block Pos z({localPos.Z}) is bigger or equal to ChunkSize");
         }
 
-        public void SetBlock(BlockPos localPos, EnumBlock blockType, int meta = 0)
+        public void SetBlockState(BlockPos localPos, BlockState state)
         {
             CheckPos(localPos);
-            short id = (short)((short)blockType << 4 | meta);
+            World.AddBlockToLUT(state.Block.UnlocalizedName);
+            short id = World.GetLocalBlockId(state.Block.UnlocalizedName);
+            short meta = state.Block.GetMetaFromState(state);
+            short value = (short)(id << 4 | meta);
 
-            if (_chunkBlocks[localPos.X, localPos.Y, localPos.Z] != id)
+            if (_chunkBlocks[localPos.X, localPos.Y, localPos.Z] != value)
             {
-                _chunkBlocks[localPos.X, localPos.Y, localPos.Z] = id;
+                _chunkBlocks[localPos.X, localPos.Y, localPos.Z] = value;
 
                 if (ModelBuilding || !QueuedForModelBuild) //this is so that we prevent double chunk build calls and invisible placed blocks(if the model is already generating, there is a chance that the block on this position was already processed, so the rebuild is queued again)
                 {
@@ -88,19 +89,33 @@ namespace SharpCraft.world.chunk
             }
         }
 
-        public EnumBlock GetBlock(BlockPos localPos)
+        public bool IsAir(BlockPos pos)
         {
-            if (localPos.Y < 0 || localPos.Y >= ChunkHeight) return EnumBlock.AIR;
-            CheckPosXZ(localPos);
-
-            return (EnumBlock)(_chunkBlocks[localPos.X, localPos.Y, localPos.Z] >> 4);
+            return GetBlockState(pos).Block == BlockRegistry.GetBlock("air");
         }
 
-        public int GetMetadata(BlockPos localPos)
+        public BlockState GetBlockState(BlockPos localPos)
+        {
+            if (localPos.Y < 0 || localPos.Y >= ChunkHeight)
+                return BlockRegistry.GetBlock("air").GetState();
+
+            CheckPosXZ(localPos);
+
+            short value = _chunkBlocks[localPos.X, localPos.Y, localPos.Z];
+            short id = (short)(value >> 4);
+            short meta = (short)(value & 15);
+
+            string blockName = World.GetLocalBlockName(id);
+
+            return BlockRegistry.GetBlock(blockName).GetState(meta);
+        }
+
+        /*
+        private int GetMetadata(BlockPos localPos)
         {
             CheckPos(localPos);
             return _chunkBlocks[localPos.X, localPos.Y, localPos.Z] & 15;
-        }
+        }*/
 
         public void SetMetadata(BlockPos localPos, int meta)
         {
@@ -134,9 +149,7 @@ namespace SharpCraft.world.chunk
 
             for (int y = ChunkHeight - 1; y >= 0; y--)
             {
-                EnumBlock block = GetBlock(pos = pos.Offset(FaceSides.Down));
-
-                if (block != EnumBlock.AIR)
+                if (IsAir(pos = pos.Offset(FaceSides.Down)))
                     return y + 1;
             }
 
@@ -151,20 +164,22 @@ namespace SharpCraft.world.chunk
                 return;
             }
 
-            foreach (Shader<ModelBlock> shader in _model.fragmentPerShader.Keys)
-            {
-                ModelChunkFragment chunkFragmentModel = _model.getFragmentModelWithShader(shader);
-                if (chunkFragmentModel == null) continue;
+            //foreach (Shader<ModelBlock> shader in _model.fragmentPerShader.Keys)
+            //{
+            //ModelChunkFragment chunkFragmentModel = _model.getFragmentModelWithShader(shader);
 
-                chunkFragmentModel.Bind();
-                shader.UpdateGlobalUniforms();
-                shader.UpdateModelUniforms();
-                shader.UpdateInstanceUniforms(MatrixHelper.CreateTransformationMatrix(Pos), null);
+            var shader = Block.DefaultShader;
 
-                chunkFragmentModel.RawModel.Render(PrimitiveType.Quads);
+            _model.Bind();
+            shader.UpdateGlobalUniforms();
+            shader.UpdateModelUniforms();
+            shader.UpdateInstanceUniforms(MatrixHelper.CreateTransformationMatrix(Pos), null);
 
-                chunkFragmentModel.Unbind();
-            }
+            _model.RawModel.Render(PrimitiveType.Quads);
+
+
+            _model.Unbind();
+            //}
         }
 
         private void BuildChunkModel()
@@ -188,11 +203,19 @@ namespace SharpCraft.world.chunk
 
             ModelBuilding = true;
 
-            ConcurrentDictionary<Shader<ModelBlock>, List<RawQuad>> modelRaw = new ConcurrentDictionary<Shader<ModelBlock>, List<RawQuad>>();
+            //ConcurrentDictionary<Shader<ModelBlock>, List<RawQuad>> modelRaw = new ConcurrentDictionary<Shader<ModelBlock>, List<RawQuad>>();
 
-            List<RawQuad> quads;
+            //List<RawQuad> quads;
 
-            Stopwatch sw = Stopwatch.StartNew();
+            Stopwatch sw = Stopwatch.StartNew(); //this is just a debug thing....
+
+            var air = BlockRegistry.GetBlock("air");
+
+            List<float> vertexes = new List<float>();
+            List<float> normals = new List<float>();
+            List<float> uvs = new List<float>();
+
+            object locker = new object();
 
             //generate the model - fill MODEL_RAW
             Enumerable.Range(0, ChunkHeight).AsParallel().ForAll(y =>
@@ -203,42 +226,30 @@ namespace SharpCraft.world.chunk
                     {
                         BlockPos worldPos = new BlockPos(x + Pos.WorldSpaceX(), y, z + Pos.WorldSpaceZ());
 
-                        EnumBlock block = World.GetBlock(worldPos);
-                        if (block == EnumBlock.AIR)
+                        BlockState state = World.GetBlockState(worldPos);
+                        if (state.Block == air)
                             continue;
 
                         BlockPos localPos = new BlockPos(x, y, z);
-
-                        ModelBlock blockModel = ModelRegistry.GetModelForBlock(block, World.GetMetadata(worldPos));
-
-                        quads = modelRaw.GetOrAdd(blockModel.Shader, new List<RawQuad>());
+                        
+                        var model = JsonModelLoader.GetModelForBlock(state.Block.UnlocalizedName);
 
                         foreach (FaceSides dir in FaceSides.AllSides)
                         {
                             BlockPos worldPosO = worldPos.Offset(dir);
-                            EnumBlock blockO = World.GetBlock(worldPosO);
-                            ModelBlock blockModelO = ModelRegistry.GetModelForBlock(blockO, World.GetMetadata(worldPosO));
+                            BlockState stateO = World.GetBlockState(worldPosO);
 
-                            if (!(blockO == EnumBlock.AIR ||
-                                  blockModelO.hasTransparency && !blockModel.hasTransparency))
+                            if (!(stateO.Block == air || stateO.Block.HasTransparency && !state.Block.HasTransparency))
                                 continue;
 
-                            RawQuad quad = ((ModelBlockRaw)blockModel.RawModel).GetQuadForSide(dir).Offset(localPos);
+                            ModelBlockRaw mbr = (ModelBlockRaw)model?.RawModel;
 
-                            //TODO - TEST!!!!!!!!!!!!!!!
-                            var bmfr = BlockJSONLoader.GetModelForBlock(block.ToString().ToLower());
-
-                            if (bmfr != null)
+                            lock (locker)
                             {
-                                var rawModel = (ModelBlockRaw)bmfr.RawModel;
-
-                                quad = rawModel.GetQuadForSide(dir).Offset(localPos);
+                                mbr?.AppendVertexesForSide(dir, ref vertexes, localPos);
+                                mbr?.AppendNormalsForSide(dir, ref normals);
+                                mbr?.AppendUvsForSide(dir, ref uvs);
                             }
-                            //TODO - TEST!!!!!!!!!!!!!!!
-
-                            if (quad.Loaded)
-                                lock (quads)
-                                    quads.Add(quad);
                         }
                     }
                 }
@@ -249,32 +260,10 @@ namespace SharpCraft.world.chunk
 
             SharpCraft.Instance.RunGlContext(() =>
             {
-                if (_model != null)
-                {
-                    foreach (Shader<ModelBlock> oldShader in _model.fragmentPerShader.Keys)
-                    {
-                        if (modelRaw.Keys.Contains<object>(oldShader))
-                            continue;
-
-                        _model.destroyFragmentModelWithShader(oldShader);
-                    }
-                }
-                else _model = new ModelChunk();
-
-                foreach (KeyValuePair<Shader<ModelBlock>, List<RawQuad>> value in modelRaw)
-                {
-                    Shader<ModelBlock> newShader = value.Key;
-                    List<RawQuad> newData = value.Value;
-
-                    if (!_model.fragmentPerShader.Keys.Contains<object>(newShader))
-                    {
-                        ModelChunkFragment newFragment = new ModelChunkFragment(newShader, newData);
-                        _model.setFragmentModelWithShader(newShader, newFragment);
-                        continue;
-                    }
-
-                    _model.getFragmentModelWithShader(newShader)?.OverrideData(newData);
-                }
+                if (_model == null)
+                    _model = new ModelChunk(vertexes, normals, uvs, Block.DefaultShader);
+                else
+                    _model.OverrideData(vertexes, normals, uvs);
 
                 ModelBuilding = false;
             });
@@ -290,7 +279,7 @@ namespace SharpCraft.world.chunk
         public void DestroyModel()
         {
             if (_model == null) return;
-            SharpCraft.Instance.RunGlContext(_model.destroy);
+            SharpCraft.Instance.RunGlContext(_model.Destroy);
             _model = null;
         }
 

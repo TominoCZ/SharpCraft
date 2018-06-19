@@ -1,59 +1,22 @@
 ﻿using SharpCraft.render.shader;
-using System.Collections.Concurrent;
+using System.Collections.Generic;
 
 namespace SharpCraft.model
 {
-    internal class ModelChunk
+    internal class ModelChunk : ModelBaked<ModelBlock>
     {
-        public ConcurrentDictionary<Shader<ModelBlock>, ModelChunkFragment> fragmentPerShader { get; }
+        public bool IsGenerated { get; private set; }
 
-        public bool isGenerated => fragmentPerShader.Keys.Count > 0;
-
-        public ModelChunk()
+        public ModelChunk(List<float> vertexes, List<float> normals, List<float> uvs, Shader<ModelBlock> shader) : base(null, shader)
         {
-            fragmentPerShader = new ConcurrentDictionary<Shader<ModelBlock>, ModelChunkFragment>();
-            //_shaders = new List<Shader>();
+            IsGenerated = vertexes.Count > 0;
+            RawModel = ModelManager.LoadModelToVAO(vertexes.ToArray(), normals.ToArray(), uvs.ToArray());
         }
 
-        public void setFragmentModelWithShader(Shader<ModelBlock> shader, ModelChunkFragment model)
+        public void OverrideData(List<float> vertexes, List<float> normals, List<float> uvs)
         {
-            fragmentPerShader.TryRemove(shader, out ModelChunkFragment removed);
-
-            //_shaders.Add(shader);
-
-            fragmentPerShader.TryAdd(shader, model);
-        }
-
-        public ModelChunkFragment getFragmentModelWithShader(Shader<ModelBlock> shader)
-        {
-            return fragmentPerShader.TryGetValue(shader, out ModelChunkFragment model) ? model : null;
-        }
-
-        public void destroyFragmentModelWithShader(Shader<ModelBlock> shader)
-        {
-            if (fragmentPerShader.TryRemove(shader, out ModelChunkFragment removed))
-            {
-                removed.Destroy();
-                //_shaders.Remove(shader);
-            }
-        }
-
-        //public List<Shader> getShadersPresent()
-        //{
-        //return _shaders;
-        //}
-
-        public void destroy()
-        {
-            foreach (Shader<ModelBlock> shader in fragmentPerShader.Keys)
-            {
-                destroyFragmentModelWithShader(shader);
-            }
-            /*
-            while (_shaders.Count > 0)
-            {
-                destroyFragmentModelWithShader(_shaders[0]);
-            }*/
+            IsGenerated = vertexes.Count > 0;
+            RawModel = ModelManager.OverrideModel3InVAO(RawModel.VaoID, RawModel.BufferIDs, vertexes, normals, uvs);
         }
     }
 }

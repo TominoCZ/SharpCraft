@@ -5,14 +5,14 @@ using SharpCraft.util;
 using System.Collections.Generic;
 
 namespace SharpCraft.model
-{
+{/*
     internal class ModelParticle : ModelBaked<Particle>
     {
         public ModelParticle(ShaderParticle shader) : base(null, shader)
         {
-            Dictionary<FaceSides, RawQuad> cube = ModelHelper.createTexturedCubeModel(EnumBlock.MISSING);
+            //Dictionary<FaceSides, RawQuad> cube = ModelHelper.CreateTexturedCubeModel
 
-            RawModel = ModelManager.loadBlockModelToVAO(cube);
+            //RawModel = ModelManager.LoadBlockModelToVAO(cube);
         }
-    }
+    }*/
 }

@@ -109,14 +109,13 @@ namespace SharpCraft.gui
                        
             // Draw slots
             base.Render(mouseX, mouseY);
-    
-            // Draw held item
-            if (draggedStack != null && !draggedStack.IsEmpty && draggedStack.Item?.InnerItem is EnumBlock block)
+
+            if (draggedStack != null && !draggedStack.IsEmpty && draggedStack.Item is ItemBlock itemBlock)
             {
                 float x = mouseX - 16 * guiScale / 2;
                 float y = mouseY - 16 * guiScale / 2;
 
-                RenderBlock(block, x, y, guiScale); //TODO - make this render Items too once they're implemented
+                RenderBlock(itemBlock.Block, x, y, guiScale); //TODO - make this render Items too once they're implemented
 
                 if (draggedStack.Count > 1)
                     RenderText(draggedStack.Count.ToString(), x + 16 * guiScale / 2f, y + 16 * guiScale / 2f + 14, 1,
@@ -176,7 +175,7 @@ namespace SharpCraft.gui
                     }
                     else if (draggedStack != null && slot.Stack.ItemSame(draggedStack))
                     {
-                        int ammountToMove = button == MouseButton.Right ? 1 : Math.Min(slot.Stack.Item.MaxStackSize() - slot.Stack.Count, draggedStack.Count);
+                        int ammountToMove = button == MouseButton.Right ? 1 : Math.Min(slot.Stack.Item.GetMaxStackSize() - slot.Stack.Count, draggedStack.Count);
 
                         slot.Stack.Count += ammountToMove;
                         draggedStack.Count -= ammountToMove;

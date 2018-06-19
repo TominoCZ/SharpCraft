@@ -177,7 +177,7 @@ namespace SharpCraft.world.chunk.region
 
         protected class WriteC : FileStream
         {
-            private RegionStaticImpl<TCord> r;
+            private readonly RegionStaticImpl<TCord> r;
 
             public WriteC(RegionStaticImpl<TCord> r) : base(r._filePath, FileMode.Open, FileAccess.Write, FileShare.Write)
             {
@@ -193,7 +193,7 @@ namespace SharpCraft.world.chunk.region
 
         protected class ReadC : FileStream
         {
-            private RegionStaticImpl<TCord> r;
+            private readonly RegionStaticImpl<TCord> r;
 
             public ReadC(RegionStaticImpl<TCord> r) : base(r._filePath, FileMode.Open, FileAccess.Read, FileShare.Read)
             {

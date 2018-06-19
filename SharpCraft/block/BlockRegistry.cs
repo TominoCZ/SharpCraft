@@ -1,35 +1,50 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using SharpCraft.model;
+using SharpCraft.render.shader;
 
 namespace SharpCraft.block
 {
     internal class BlockRegistry
     {
-        private static Dictionary<string, Block> _registry = new Dictionary<string, Block>();
-        private static Dictionary<Type, Block> _typeRegistry = new Dictionary<Type, Block>();
+        private static readonly Dictionary<string, Block> _registry = new Dictionary<string, Block>();
+        private static readonly Dictionary<Type, string> _typeRegistry = new Dictionary<Type, string>();
 
         public void Put(Block b)
         {
-            _registry.Add(b.UnlocalizedName, b);
-            _typeRegistry.Add(b.GetType(), b);
+            var s = b.UnlocalizedName;
+
+            _registry.Add(s, b);
+            _typeRegistry.Add(b.GetType(), s);
         }
 
-        public void RegisterBlocksPost()
+        public void RegisterBlocksPost(JsonModelLoader loader)
         {
-            foreach (Block value in _registry.Values)
+            Block.SetDefaultShader(new Shader<ModelBlock>("block"));
+
+            foreach (var pair in _registry)
             {
-                value.OnRegisterStates();
+                pair.Value.RegisterState(loader, new BlockState(pair.Value, JsonModelLoader.GetModelForBlock(pair.Key)));
             }
+        }
+
+        public static List<Block> AllBlocks()
+        {
+            return _registry.Values.ToList();
         }
 
         public static Block GetBlock<TBlock>() where TBlock : Block
         {
-            return _typeRegistry[typeof(TBlock)];
+            return _registry[_typeRegistry[typeof(TBlock)]];
         }
 
         public static Block GetBlock(string unlocalizedName)
         {
-            return _registry[unlocalizedName];
+            if (_registry.TryGetValue(unlocalizedName, out var block))
+                return block;
+
+            return GetBlock<BlockAir>();
         }
     }
 }

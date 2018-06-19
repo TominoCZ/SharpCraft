@@ -1,15 +1,17 @@
 ﻿using SharpCraft.model;
 using SharpCraft.render.shader;
 using System.Collections.Generic;
+using SharpCraft.entity;
 
 namespace SharpCraft.block
 {
-    internal abstract class Block
+    public abstract class Block
     {
-        private static readonly Shader<ModelBlock> DefaultShader = new Shader<ModelBlock>("block");
-        public Shader<ModelBlock> Shader { get; protected set; }
+        public static Shader<ModelBlock> DefaultShader { get; private set; } = new Shader<ModelBlock>("block");
 
-        private List<BlockState> _states = new List<BlockState>();
+        private readonly List<BlockState> _states = new List<BlockState>();
+
+        public AxisAlignedBB BoundingBox { get; protected set; } = AxisAlignedBB.BLOCK_FULL;
 
         public string UnlocalizedName { get; protected set; }
 
@@ -17,6 +19,7 @@ namespace SharpCraft.block
 
         public int Hardness { get; protected set; } = 8;
 
+        public bool CanBeInteractedWith { get; protected set; } = false;
         public bool IsOpaque { get; protected set; } = true;
         public bool HasTransparency { get; protected set; }
         public bool IsSolid { get; protected set; } = true;
@@ -24,30 +27,36 @@ namespace SharpCraft.block
         protected Block(string unlocalizedName)
         {
             UnlocalizedName = unlocalizedName;
-            Shader = DefaultShader;
         }
 
-        /// <summary>
-        /// Used to register the states of this block. Including the default one. Is called after all blocks are registered
-        /// </summary>
-        public abstract void OnRegisterStates();
-
-        protected void RegisterState(string modelJson)
+        public void RegisterState(JsonModelLoader loader, BlockState state)
         {
-            BlockState state = new BlockState(this, new ModelBlock(EnumBlock.MISSING, Shader));
-
-            //TODO LOAD MODEL AND TEXTURE INFO FROM JSON
-
             _states.Add(state);
         }
 
-        public BlockState GetState(short meta)
+        public BlockState GetState(short meta = 0)
         {
             return _states[meta > 0 ? meta : 0];
         }
+
+        public short GetMetaFromState(BlockState state)
+        {
+            return (short)_states.IndexOf(state);
+        }
+
+        public static void SetDefaultShader(Shader<ModelBlock> shader)
+        {
+            DefaultShader = shader;
+        }
+
+        public override string ToString()
+        {
+            //TODO - localization
+            return UnlocalizedName;
+        }
     }
 
-    internal class BlockState
+    public struct BlockState
     {
         public Block Block { get; }
         public ModelBlock Model { get; }

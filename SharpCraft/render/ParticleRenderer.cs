@@ -13,13 +13,13 @@ namespace SharpCraft.render
 {
     internal class ParticleRenderer
     {
-        private List<Particle> _particles;
+        private readonly List<Particle> _particles;
 
-        public static ModelBaked<Particle> ParticleModel;
+        //public static ModelBaked<Particle> ParticleModel;
 
         static ParticleRenderer()
         {
-            ParticleModel = new ModelParticle(new ShaderParticle());
+            //ParticleModel = new ModelParticle(new ShaderParticle());
         }
 
         public ParticleRenderer()
@@ -35,12 +35,12 @@ namespace SharpCraft.render
 
         public void Render(float partialTicks)
         {
-            ParticleModel.Bind();
+            //ParticleModel.Bind();
 
             for (int i = 0; i < _particles.Count; i++)
                 _particles[i].Render(partialTicks);
 
-            ParticleModel.Unbind();
+            //ParticleModel.Unbind();
         }
 
         public void TickParticles()
@@ -58,8 +58,13 @@ namespace SharpCraft.render
 
         public void SpawnDiggingParticle(MouseOverObject moo)
         {
-            if (moo.hit is EnumBlock block)
+            if (moo.hit == HitType.Block)
             {
+                var state = SharpCraft.Instance.World.GetBlockState(moo.blockPos);
+
+                if (JsonModelLoader.GetModelForBlock(state.Block.UnlocalizedName) == null)
+                    return;
+
                 float f0 = moo.hitVec.X
                      + MathUtil.NextFloat(-0.21f, 0.21f) * Math.Abs(moo.boundingBox.max.X - moo.boundingBox.min.X);
                 float f1 = moo.hitVec.Y
@@ -95,13 +100,12 @@ namespace SharpCraft.render
                     pos,
                     motion,
                     0.35f + (ok ? progress.PartialProgress * 0.5f : 0),
-                    block,
-                    moo.sideHit,
-                    SharpCraft.Instance.World.GetMetadata(moo.blockPos)));
+                    state,
+                    moo.sideHit));
             }
         }
 
-        public void SpawnDestroyParticles(BlockPos pos, EnumBlock block, int meta)
+        public void SpawnDestroyParticles(BlockPos pos, BlockState state)
         {
             Vector3 posVec = pos.ToVec();
 
@@ -126,7 +130,7 @@ namespace SharpCraft.render
                         motion.Y += MathUtil.NextFloat(-0.05f, 0.05f);
                         motion.Z += MathUtil.NextFloat(-0.05f, 0.05f);
 
-                        ParticleDigging particle = new ParticleDigging(SharpCraft.Instance.World, posVec + worldPos, motion, MathUtil.NextFloat(1, 1.5f), block, meta);
+                        ParticleDigging particle = new ParticleDigging(SharpCraft.Instance.World, posVec + worldPos, motion, MathUtil.NextFloat(1, 1.5f), state);
 
                         AddParticle(particle);
                     }

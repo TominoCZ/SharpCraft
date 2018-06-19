@@ -6,7 +6,7 @@ namespace SharpCraft.texture
 {
     internal class TextureBlockUV
     {
-        private Dictionary<FaceSides, TextureUVNode> UVs;
+        private readonly Dictionary<FaceSides, TextureUVNode> UVs;
 
         public TextureBlockUV()
         {

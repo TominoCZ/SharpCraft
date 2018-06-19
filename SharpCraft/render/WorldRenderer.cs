@@ -21,10 +21,10 @@ namespace SharpCraft.render
 {
     internal class WorldRenderer
     {
-        private ModelCubeOutline _selectionOutline;
+        private readonly ModelCubeOutline _selectionOutline;
 
-        private ShaderTexturedCube _shaderTexturedCube;
-        private ModelRaw _destroyProgressModel;
+        private readonly ShaderTexturedCube _shaderTexturedCube;
+        private readonly ModelRaw _destroyProgressModel;
 
         private Vector4 _selectionOutlineColor = MathUtil.Hue(0);
 
@@ -52,11 +52,12 @@ namespace SharpCraft.render
             _selectionOutline = new ModelCubeOutline();
             _shaderTexturedCube = new ShaderTexturedCube();
 
-            List<RawQuad> cube = ModelHelper.createCubeModel();
+            List<RawQuad> cube = ModelHelper.CreateCubeModel();
 
-            _destroyProgressModel = ModelManager.loadModelToVAO(cube, 3);
+            _destroyProgressModel = ModelManager.LoadModelToVAO(cube, 3);
 
             RenderDistance = 8;
+            lastFov = fov = SharpCraft.Instance.Camera.PartialFov;
         }
 
         public void Update()
@@ -86,15 +87,15 @@ namespace SharpCraft.render
             world.LoadManager.LoadImportantChunks();
             world.LoadManager.BuildImportantChunks();
 
-            //TODO - TEST!!!!!!!!!!!!!!!!!!!!!!
-            GL.BindTexture(TextureTarget.Texture2D, BlockJSONLoader.TEXTURE_BLOCKS);
+            GL.BindTexture(TextureTarget.Texture2D, JsonModelLoader.TEXTURE_BLOCKS);
 
             MouseOverObject hit = SharpCraft.Instance.MouseOverObject;
 
-            if (hit.hit != null)
+            if (hit.hit == HitType.Block)
             {
-                if (hit.hit is EnumBlock block && block != EnumBlock.AIR)
-                    RenderBlockSelectionOutline(world, block, hit.blockPos);
+                var state = world.GetBlockState(hit.blockPos);
+                if (!Equals(state, BlockRegistry.GetBlock("air").GetState()))
+                    RenderBlockSelectionOutline(world, state, hit.blockPos);
             }
 
             RenderChunks(world);
@@ -129,7 +130,7 @@ namespace SharpCraft.render
 
             foreach (Waypoint wp in wps)
             {
-                ModelBlock model = ModelRegistry.GetModelForBlock(EnumBlock.RARE, 0);
+                ModelBlock model = JsonModelLoader.GetModelForBlock(BlockRegistry.GetBlock("rare").UnlocalizedName);
 
                 float size = 0.25f;
 
@@ -154,7 +155,7 @@ namespace SharpCraft.render
             ConcurrentDictionary<BlockPos, DestroyProgress> progresses = SharpCraft.Instance.DestroyProgresses;
             if (progresses.Count == 0)
                 return;
-            
+
             GL.BindTexture(TextureTarget.Texture2D, TextureManager.TEXTURE_DESTROY_PROGRESS.ID);
 
             GL.BlendFunc(BlendingFactorSrc.DstColor, BlendingFactorDest.Zero);
@@ -163,25 +164,21 @@ namespace SharpCraft.render
             _shaderTexturedCube.UpdateGlobalUniforms();
             _shaderTexturedCube.UpdateModelUniforms(_destroyProgressModel);
 
-            GL.BindVertexArray(_destroyProgressModel.vaoID);
+            GL.BindVertexArray(_destroyProgressModel.VaoID);
             GL.EnableVertexAttribArray(0);
 
             foreach (KeyValuePair<BlockPos, DestroyProgress> pair in progresses)
             {
-                EnumBlock block = world.GetBlock(pair.Key);
+                BlockState state = world.GetBlockState(pair.Key);
 
-                if (block == EnumBlock.AIR)
+                if (state.Block == BlockRegistry.GetBlock("air"))
                     continue;
-
-                int meta = world.GetMetadata(pair.Key);
-
-                ModelBlock model = ModelRegistry.GetModelForBlock(block, meta);
 
                 int v = 32 * (int)(pair.Value.PartialProgress * 8);
 
                 Vector3 size_o = Vector3.One * 0.0045f;
 
-                Matrix4 mat = MatrixHelper.CreateTransformationMatrix(pair.Key.ToVec() - size_o / 2, model.boundingBox.size + size_o);
+                Matrix4 mat = MatrixHelper.CreateTransformationMatrix(pair.Key.ToVec() - size_o / 2, state.Block.BoundingBox.size + size_o);
 
                 _shaderTexturedCube.UpdateInstanceUniforms(mat);
                 _shaderTexturedCube.UpdateUVs(TextureManager.TEXTURE_DESTROY_PROGRESS, 0, v, 32);
@@ -220,10 +217,10 @@ namespace SharpCraft.render
             _selectionOutline.Unbind();
         }
 
-        private void RenderBlockSelectionOutline(World world, EnumBlock block, BlockPos pos)
+        private void RenderBlockSelectionOutline(World world, BlockState state, BlockPos pos)
         {
             Shader<ModelCubeOutline> shader = _selectionOutline.Shader;
-            AxisAlignedBB bb = ModelRegistry.GetModelForBlock(block, world.GetMetadata(pos))?.boundingBox;
+            AxisAlignedBB bb = state.Block.BoundingBox;
 
             if (bb == null)
                 return;
@@ -259,8 +256,6 @@ namespace SharpCraft.render
 
             if (stack.Item is ItemBlock itemBlock)
             {
-                ModelBlock model = ModelRegistry.GetModelForBlock(itemBlock.GetBlock(), stack.Meta);
-
                 Vector3 partialLookVec = lastLookVec + (lookVec - lastLookVec) * partialTicks;
                 Vector3 partialMotion = lastMotion + (motion - lastMotion) * partialTicks;
 
@@ -276,9 +271,14 @@ namespace SharpCraft.render
                 Matrix4 t1 = Matrix4.CreateTranslation(SharpCraft.Instance.Camera.pos + SharpCraft.Instance.Camera.GetLookVec() + partialLookVec * 0.1f);
                 Matrix4 t_final = Matrix4.CreateTranslation(offset);
 
-                Matrix4 mat = t0 * r1 * Matrix4.CreateScale(model.boundingBox.size) * t_final * r2 * s * t1;
+                Matrix4 mat = t0 * r1 * Matrix4.CreateScale(itemBlock.Block.BoundingBox.size) * t_final * r2 * s * t1;
 
                 GL.DepthRange(0, 0.1f);
+                
+                ModelBlock model = JsonModelLoader.GetModelForBlock(itemBlock.Block.UnlocalizedName);
+
+                if (model == null)
+                    return;
 
                 model.Bind();
 

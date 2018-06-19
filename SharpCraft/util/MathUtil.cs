@@ -6,7 +6,7 @@ namespace SharpCraft.util
 {
     internal static class MathUtil
     {
-        private static RandomNumberGenerator _rand = RandomNumberGenerator.Create();
+        private static readonly RandomNumberGenerator _rand = RandomNumberGenerator.Create();
 
         public static float GetNext()
         {

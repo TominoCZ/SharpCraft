@@ -15,11 +15,11 @@ namespace SharpCraft.world.chunk
         private readonly ConcurrentQueue<ChunkPos> _importantChunkLoads = new ConcurrentQueue<ChunkPos>();
         private readonly object _loadLock = new object();
 
-        private SwapList<Chunk> _chunkBuilds = new SwapList<Chunk>(
+        private readonly SwapList<Chunk> _chunkBuilds = new SwapList<Chunk>(
             c => c.BuildChunkModelNow(),
             (l, r) => l.Pos.DistanceTo(SharpCraft.Instance.Player.Pos).CompareTo(r.Pos.DistanceTo(SharpCraft.Instance.Player.Pos)));
 
-        private SwapList<ChunkPos> _chunkLoads = new SwapList<ChunkPos>(
+        private readonly SwapList<ChunkPos> _chunkLoads = new SwapList<ChunkPos>(
             c =>
             {
                 World w = SharpCraft.Instance.World;

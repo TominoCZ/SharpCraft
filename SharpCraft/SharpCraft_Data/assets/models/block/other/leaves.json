@@ -1,0 +1,7 @@
+{
+  "textures": {
+    "top": "leaves",
+	"bottom": "leaves",
+	"side": "leaves"
+  }
+}

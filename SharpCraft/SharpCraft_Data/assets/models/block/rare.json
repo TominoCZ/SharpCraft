@@ -1,7 +1,37 @@
 {
   "textures": {
-    "top": "rare",
-	"bottom": "rare",
-	"side": "rare"
-  }
+    "block": "rare"
+  },
+  "cubes": [
+  {
+    "from": [0,0,0],
+    "to": [16,16,16],
+    "faces": {
+      "top": {
+        "uv": [0,0,16,16],
+          "texture": "#block"
+      },
+	  "bottom": {
+        "uv": [0,0,16,16],
+          "texture": "#block"
+      },
+	  "north": {
+        "uv": [0,0,16,16],
+          "texture": "#block"
+      },
+	  "south": {
+        "uv": [0,0,16,16],
+          "texture": "#block"
+      },
+	  "east": {
+        "uv": [0,0,16,16],
+          "texture": "#block"
+      },
+	  "west": {
+        "uv": [0,0,16,16],
+          "texture": "#block"
+      },
+    }
+  }]
 }
+

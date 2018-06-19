@@ -12,7 +12,7 @@ namespace SharpCraft.gui
 {
     internal class Gui
     {
-        private static ModelGuiItem _item;
+        private static readonly ModelGuiItem _item;
 
         public static ShaderGui Shader { get; }
 
@@ -65,7 +65,7 @@ namespace SharpCraft.gui
 
             Shader.Bind();
 
-            GL.BindVertexArray(GuiRenderer.GuiQuad.vaoID);
+            GL.BindVertexArray(GuiRenderer.GuiQuad.VaoID);
 
             Shader.UpdateGlobalUniforms();
             Shader.UpdateModelUniforms();
@@ -81,7 +81,7 @@ namespace SharpCraft.gui
 
             Shader.Unbind();
         }
-
+      
         protected virtual void RenderTextureStretchToScreen(GuiTexture tex)
         {
             if (tex == null)
@@ -106,10 +106,10 @@ namespace SharpCraft.gui
             Shader.Unbind();
         }
 
-        protected virtual void RenderBlock(EnumBlock block, float x, float y, float scale)
+        protected virtual void RenderBlock(Block state, float x, float y, float scale)
         {
-            TextureBlockUV UVs = TextureManager.GetUVsFromBlock(block);
-            ModelManager.overrideModelUVsInVAO(_item.RawModel.bufferIDs[1], UVs.getUVForSide(FaceSides.South).ToArray());
+            //TextureBlockUV UVs = TextureManager.GetUVsFromBlock(block); //TODO - change
+            //ModelManager.OverrideModelUVsInVAO(_item.RawModel.BufferIDs[1], UVs.getUVForSide(FaceSides.South).ToArray());
 
             Vector2 unit = new Vector2(1f / SharpCraft.Instance.ClientSize.Width, 1f / SharpCraft.Instance.ClientSize.Height);
 
@@ -132,7 +132,7 @@ namespace SharpCraft.gui
             _item.Shader.UpdateModelUniforms();
             _item.Shader.UpdateInstanceUniforms(mat, null);
         
-            GL.BindTexture(TextureTarget.Texture2D, TextureManager.TEXTURE_BLOCKS.ID);
+            GL.BindTexture(TextureTarget.Texture2D, JsonModelLoader.TEXTURE_BLOCKS);
             GL.DrawArrays(PrimitiveType.Quads, 0, 4);
 
             _item.Unbind();

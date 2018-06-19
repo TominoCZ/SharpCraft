@@ -18,20 +18,20 @@ namespace SharpCraft.texture
 {
     internal class TextureManager
     {
-        private static Dictionary<EnumBlock, TextureBlockUV> _blockUVs = new Dictionary<EnumBlock, TextureBlockUV>();
+        // private static Dictionary<EnumBlock, TextureBlockUV> _blockUVs = new Dictionary<EnumBlock, TextureBlockUV>();
 
-        private static List<int> _allTextures = new List<int>();
+        private static readonly List<int> _allTextures = new List<int>();
 
         private static readonly Bitmap TEXTURE_MISSING = CreateMissingTexture();
 
         public static Texture TEXTURE_DESTROY_PROGRESS;
-        public static Texture TEXTURE_BLOCKS;
+        //public static Texture TEXTURE_BLOCKS;
         public static Texture TEXTURE_GUI_WIDGETS;
         public static Texture TEXTURE_TEXT;
 
         public static void LoadTextures()
         {
-            StitchTextures();
+            //StitchTextures();
 
             TEXTURE_GUI_WIDGETS = LoadTexture("gui/widgets");
             TEXTURE_DESTROY_PROGRESS = LoadTexture("blocks/destroy_progress");
@@ -39,7 +39,7 @@ namespace SharpCraft.texture
 
             FontManager.LoadCharacters(TEXTURE_TEXT, "font/default");
         }
-
+        /*
         private static void StitchTextures()
         {
             Bitmap bmp = CreateTextureMap("blocks");
@@ -188,9 +188,9 @@ namespace SharpCraft.texture
 
                 return clone;
             }
-        }
+        }*/
 
-        private static Bitmap CreateMissingTexture()
+        public static Bitmap CreateMissingTexture()
         {
             Bitmap bmp = new Bitmap(16, 16);
 
@@ -248,6 +248,20 @@ namespace SharpCraft.texture
             return new Texture(LoadTexture(TEXTURE_MISSING, smooth), TEXTURE_MISSING.Size);
         }
 
+        public static TextureUVNode GetUV(int textureSizeX, int textureSizeY, int x, int y, int sizeX, int sizeY) //TODO i might move this to TextureManager or TextureHelper
+        {
+            var mapSize = new Vector2(textureSizeX, textureSizeY);
+            var sampleSize = new Vector2(sizeX, sizeY);
+
+            var pos_start = new Vector2(x, y);
+            var pos_end = pos_start + sampleSize;
+
+            var start = Vector2.Divide(pos_start, mapSize);
+            var end = Vector2.Divide(pos_end, mapSize);
+
+            return new TextureUVNode(start, end);
+        }
+
         private static Dictionary<FaceSides, Bitmap> LoadSkyboxTextures()
         {
             Dictionary<FaceSides, Bitmap> bitmaps = new Dictionary<FaceSides, Bitmap>();
@@ -288,7 +302,7 @@ namespace SharpCraft.texture
             int texID = GL.GenTexture();
 
             _allTextures.Add(texID);
-            
+
             GL.BindTexture(TextureTarget.TextureCubeMap, texID);
 
             Dictionary<FaceSides, Bitmap> cubeMapTextures = LoadSkyboxTextures();
@@ -324,7 +338,7 @@ namespace SharpCraft.texture
 
             return texID;
         }
-
+        /*
         public static TextureBlockUV GetUVsFromBlock(EnumBlock block)
         {
             _blockUVs.TryGetValue(block, out TextureBlockUV uv);
@@ -333,7 +347,7 @@ namespace SharpCraft.texture
                 _blockUVs.TryGetValue(EnumBlock.MISSING, out uv);
 
             return uv;
-        }
+        }*/
 
         private static void DrawToBitmap(Bitmap to, int x, int y, string file)
         {
@@ -371,16 +385,16 @@ namespace SharpCraft.texture
 
         public static void Reload()
         {
-            DestroyTexture(TEXTURE_BLOCKS.ID);
+            //DestroyTexture(TEXTURE_BLOCKS.ID);
 
-            _blockUVs.Clear();
+            //_blockUVs.Clear();
 
             LoadTextures();
         }
 
         public static void Destroy()
         {
-            DestroyTexture(TEXTURE_BLOCKS.ID);
+            //DestroyTexture(TEXTURE_BLOCKS.ID);
 
             for (int i = 0; i < _allTextures.Count; i++)
             {

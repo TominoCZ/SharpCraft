@@ -3,24 +3,33 @@ using System.Collections.Generic;
 
 namespace SharpCraft.model
 {
-    internal class ModelRaw : IModelRaw
+    public class ModelRaw : IModelRaw
     {
-        public int vaoID { get; }
-        public int[] bufferIDs { get; }
+        public int VaoID { get; }
+        public int[] BufferIDs { get; }
 
-        public int vertexCount { get; protected set; }
+        public int VertexCount { get; protected set; }
 
+        /*
         public ModelRaw(int vaoID, int valuesPerVertice, List<RawQuad> quads, params int[] bufferIDs)
         {
-            this.vaoID = vaoID;
-            this.bufferIDs = bufferIDs;
+            VaoID = vaoID;
+            BufferIDs = bufferIDs;
 
             foreach (RawQuad quad in quads)
-                vertexCount += quad.vertices.Length / valuesPerVertice;
+                VertexCount += quad.vertices.Length / valuesPerVertice;
+        }*/
+
+        public ModelRaw(int vaoID, int vertexCount, params int[] bufferIDs)
+        {
+            VaoID = vaoID;
+            BufferIDs = bufferIDs;
+
+            VertexCount = vertexCount;
         }
 
         public bool hasLocalData() => true;
 
-        public void Render(PrimitiveType primitiveType) => GL.DrawArrays(primitiveType, 0, vertexCount);
+        public void Render(PrimitiveType primitiveType) => GL.DrawArrays(primitiveType, 0, VertexCount);
     }
 }

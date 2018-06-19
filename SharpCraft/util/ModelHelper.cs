@@ -11,7 +11,7 @@ namespace SharpCraft.util
     {
         private static Vector3 V2, V3, V4, NORMAL;
 
-        private static Dictionary<FaceSides, float[]> CUBE = new Dictionary<FaceSides, float[]>();
+        public static Dictionary<FaceSides, float[]> CUBE = new Dictionary<FaceSides, float[]>();
 
         static ModelHelper()
         {
@@ -90,7 +90,7 @@ namespace SharpCraft.util
 
             return normals;
         }
-
+        /*
         public static Dictionary<FaceSides, RawQuad> createTexturedCubeModel(EnumBlock block)
         {
             Dictionary<FaceSides, RawQuad> quads = new Dictionary<FaceSides, RawQuad>();
@@ -117,34 +117,23 @@ namespace SharpCraft.util
 
             return quads;
         }
-
+        */
         public static float[] GetCubeSideVertexes(TextureType side)
         {
             switch (side)
             {
-                case TextureType.Top: return CUBE[FaceSides.Up];
-                case TextureType.Bottom:return CUBE[FaceSides.Down];
-                case TextureType.North:return CUBE[FaceSides.North];
-                case TextureType.South:return CUBE[FaceSides.South];
-                case TextureType.West:return CUBE[FaceSides.West];
-                case TextureType.East:return CUBE[FaceSides.East];
+                case TextureType.top: return CUBE[FaceSides.Up];
+                case TextureType.bottom:return CUBE[FaceSides.Down];
+                case TextureType.north:return CUBE[FaceSides.North];
+                case TextureType.south:return CUBE[FaceSides.South];
+                case TextureType.west:return CUBE[FaceSides.West];
+                case TextureType.east:return CUBE[FaceSides.East];
                 default:
                     return new float[]{};
             }
         }
 
-        private static float[] toFloats(Vector3 vec)
-        {
-            return new[]
-            {
-                vec.X, vec.Y, vec.Z,
-                vec.X, vec.Y, vec.Z,
-                vec.X, vec.Y, vec.Z,
-                vec.X, vec.Y, vec.Z
-            };
-        }
-
-        public static List<RawQuad> createCubeModel()
+        public static List<RawQuad> CreateCubeModel()
         {
             List<RawQuad> quads = new List<RawQuad>();
 

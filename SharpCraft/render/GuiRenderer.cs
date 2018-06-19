@@ -22,7 +22,7 @@ namespace SharpCraft.render
                 1, -1,
                 1, 1 }, 2);
 
-            GuiQuad = ModelManager.loadModelToVAO(new List<RawQuad> { rawQuad }, 2);
+            GuiQuad = ModelManager.LoadModelToVAO(new List<RawQuad> { rawQuad }, 2);
         }
 
         public GuiRenderer()
@@ -38,7 +38,7 @@ namespace SharpCraft.render
 
             GL.Disable(EnableCap.DepthTest);
 
-            GL.BindVertexArray(GuiQuad.vaoID);
+            GL.BindVertexArray(GuiQuad.VaoID);
 
             MouseState state = OpenTK.Input.Mouse.GetCursorState();
             Point mouse = SharpCraft.Instance.PointToClient(new Point(state.X, state.Y));

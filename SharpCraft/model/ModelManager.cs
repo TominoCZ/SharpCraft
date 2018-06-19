@@ -6,12 +6,13 @@ namespace SharpCraft.model
 {
     internal class ModelManager
     {
-        private static List<int> VAOs = new List<int>();
-        private static List<int> VBOs = new List<int>();
+        private static readonly List<int> VAOs = new List<int>();
+        private static readonly List<int> VBOs = new List<int>();
+        
 
-        public static ModelBlockRaw loadBlockModelToVAO(Dictionary<FaceSides, RawQuad> quads)
+        public static ModelBlockRaw LoadBlockModelToVAO(Dictionary<FaceSides, RawQuad> quads)
         {
-            int vaoID = createVAO();
+            int vaoID = CreateVAO();
 
             List<float> vertices = new List<float>();
             List<float> normals = new List<float>();
@@ -24,18 +25,31 @@ namespace SharpCraft.model
                 UVs.AddRange(q.Value.UVs);
             }
 
-            int buff0 = storeDataInAttribList(0, 3, vertices.ToArray());
-            int buff1 = storeDataInAttribList(1, 2, UVs.ToArray());
-            int buff2 = storeDataInAttribList(2, 3, normals.ToArray());
+            int buff0 = StoreDataInAttribList(0, 3, vertices.ToArray());
+            int buff1 = StoreDataInAttribList(1, 2, UVs.ToArray());
+            int buff2 = StoreDataInAttribList(2, 3, normals.ToArray());
 
-            unbindVAO();
+            UnbindVAO();
 
-            return new ModelBlockRaw(vaoID, quads, buff0, buff1, buff2);
+            return new ModelBlockRaw(vaoID, vertices.ToArray(), normals.ToArray(), UVs.ToArray(), buff0, buff1, buff2);
         }
 
-        public static ModelRaw loadModelToVAO(List<RawQuad> quads, int coordSize)
+        public static ModelBlockRaw LoadBlockModelToVAO(float[] vertexes, float[] normals, float[] UVs)
         {
-            int vaoID = createVAO();
+            int vaoID = CreateVAO();
+
+            int buff0 = StoreDataInAttribList(0, 3, vertexes);
+            int buff1 = StoreDataInAttribList(1, 2, UVs);
+            int buff2 = StoreDataInAttribList(2, 3, normals);
+
+            UnbindVAO();
+
+            return new ModelBlockRaw(vaoID, vertexes, normals, UVs, buff0, buff1, buff2);
+        }
+        
+        public static ModelRaw LoadModelToVAO(List<RawQuad> quads, int coordSize)
+        {
+            int vaoID = CreateVAO();
 
             List<float> vertices = new List<float>();
             List<float> normals = new List<float>();
@@ -50,18 +64,31 @@ namespace SharpCraft.model
                 UVs.AddRange(quad.UVs);
             }
 
-            int buff0 = storeDataInAttribList(0, coordSize, vertices.ToArray());
-            int buff1 = storeDataInAttribList(1, 2, UVs.ToArray());
-            int buff2 = storeDataInAttribList(2, 3, normals.ToArray());
+            int buff0 = StoreDataInAttribList(0, coordSize, vertices.ToArray());
+            int buff1 = StoreDataInAttribList(1, 2, UVs.ToArray());
+            int buff2 = StoreDataInAttribList(2, 3, normals.ToArray());
 
             GL.Flush();
 
-            unbindVAO();
+            UnbindVAO();
 
-            return new ModelRaw(vaoID, coordSize, quads, buff0, buff1, buff2);
+            return new ModelRaw(vaoID, vertices.Count / 3, buff0, buff1, buff2);
         }
 
-        public static ModelRaw overrideModelInVAO(int ID, int[] buffers, List<RawQuad> quads, int coordSize)
+        public static ModelRaw LoadModelToVAO(float[] vertexes, float[] normals, float[] UVs)
+        {
+            int vaoID = CreateVAO();
+
+            int buff0 = StoreDataInAttribList(0, 3, vertexes);
+            int buff1 = StoreDataInAttribList(1, 2, UVs);
+            int buff2 = StoreDataInAttribList(2, 3, normals);
+
+            UnbindVAO();
+
+            return new ModelRaw(vaoID, vertexes.Length / 3, buff0, buff1, buff2);
+        }
+
+        public static ModelRaw OverrideModelInVAO(int ID, int[] buffers, List<RawQuad> quads, int coordSize)
         {
             List<float> vertices = new List<float>();
             List<float> normals = new List<float>();
@@ -76,20 +103,29 @@ namespace SharpCraft.model
                 UVs.AddRange(quad.UVs);
             }
 
-            overrideDataInAttributeList(buffers[0], 0, coordSize, vertices.ToArray());
-            overrideDataInAttributeList(buffers[1], 1, 2, UVs.ToArray());
-            overrideDataInAttributeList(buffers[2], 2, 3, normals.ToArray());
+            OverrideDataInAttributeList(buffers[0], 0, coordSize, vertices.ToArray());
+            OverrideDataInAttributeList(buffers[1], 1, 2, UVs.ToArray());
+            OverrideDataInAttributeList(buffers[2], 2, 3, normals.ToArray());
 
-            return new ModelRaw(ID, coordSize, quads, buffers);
+            return new ModelRaw(ID, quads.Count / 3, buffers);
         }
 
-        public static void overrideModelUVsInVAO(int bufferID, float[] UVs)
+        public static ModelRaw OverrideModel3InVAO(int ID, int[] buffers, List<float> vertexes, List<float> normals, List<float> uvs)
         {
-            overrideDataInAttributeList(bufferID, 1, 2, UVs);
+            OverrideDataInAttributeList(buffers[0], 0, 3, vertexes.ToArray());
+            OverrideDataInAttributeList(buffers[1], 1, 2, uvs.ToArray());
+            OverrideDataInAttributeList(buffers[2], 2, 3, normals.ToArray());
+
+            return new ModelRaw(ID, vertexes.Count / 3, buffers);
+        }
+
+        public static void OverrideModelUVsInVAO(int bufferID, float[] UVs)
+        {
+            OverrideDataInAttributeList(bufferID, 1, 2, UVs);
             GL.Flush();
         }
 
-        private static void overrideDataInAttributeList(int ID, int attrib, int coordSize, float[] data)
+        private static void OverrideDataInAttributeList(int ID, int attrib, int coordSize, float[] data)
         {
             GL.BindBuffer(BufferTarget.ArrayBuffer, ID);
             GL.BufferData(BufferTarget.ArrayBuffer, sizeof(float) * data.Length, data, BufferUsageHint.DynamicDraw);
@@ -97,7 +133,7 @@ namespace SharpCraft.model
             GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
         }
 
-        private static int createVAO()
+        private static int CreateVAO()
         {
             int vaoID = GL.GenVertexArray();
 
@@ -108,12 +144,12 @@ namespace SharpCraft.model
             return vaoID;
         }
 
-        private static void unbindVAO()
+        private static void UnbindVAO()
         {
             GL.BindVertexArray(0);
         }
 
-        private static int storeDataInAttribList(int attrib, int coordSize, float[] data)
+        private static int StoreDataInAttribList(int attrib, int coordSize, float[] data)
         {
             int vboID = GL.GenBuffer();
 
@@ -127,7 +163,7 @@ namespace SharpCraft.model
             return vboID;
         }
 
-        public static void cleanup()
+        public static void Cleanup()
         {
             foreach (int vao in VAOs)
                 GL.DeleteVertexArray(vao);

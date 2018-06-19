@@ -15,9 +15,9 @@ namespace SharpCraft.entity
 {
     public class EntityItem : Entity
     {
-        private static Shader<EntityItem> _shader;
+        private static readonly Shader<EntityItem> _shader;
 
-        private ItemStack stack;
+        private readonly ItemStack stack;
 
         private int entityAge;
 
@@ -59,9 +59,9 @@ namespace SharpCraft.entity
                 BlockPos bp = new BlockPos(Pos);
 
                 FaceSides lastFace = FaceSides.Up;
-                bool blocksAround = FaceSides.YPlane.All(face => World.GetBlock(bp.Offset(lastFace = face)) != EnumBlock.AIR)
-                                   && World.GetBlock(bp.Offset(lastFace = FaceSides.Up)) != EnumBlock.AIR
-                                   && World.GetBlock(bp.Offset(lastFace = FaceSides.Down)) != EnumBlock.AIR; //has to be in this order
+                bool blocksAround = FaceSides.YPlane.All(face => World.IsAir(bp.Offset(lastFace = face)))
+                                   && World.IsAir(bp.Offset(lastFace = FaceSides.Up))
+                                   && World.IsAir(bp.Offset(lastFace = FaceSides.Down)); //has to be in this order
 
                 if (!blocksAround)
                 {
@@ -89,14 +89,14 @@ namespace SharpCraft.entity
 
             foreach (EntityItem entity in inAttractionArea)
             {
-                if (stack.IsEmpty || entity.stack.IsEmpty || entity.stack.Count == entity.stack.Item.MaxStackSize())
+                if (stack.IsEmpty || entity.stack.IsEmpty || entity.stack.Count == entity.stack.Item.GetMaxStackSize())
                     continue;
 
                 Vector3 distanceVector = entity.Pos - Pos;
                 float distance = distanceVector.Length;
                 if (distance >= attractionRange) continue;
 
-                int ammountToTake = Math.Min(stack.Item.MaxStackSize() - stack.Count, entity.stack.Count);
+                int ammountToTake = Math.Min(stack.Item.GetMaxStackSize() - stack.Count, entity.stack.Count);
                 if (ammountToTake == 0) continue;
 
                 if (distance <= mergeRange)
@@ -117,7 +117,7 @@ namespace SharpCraft.entity
 
                 float distanceMul = (float)Math.Sqrt(1 - distance / attractionRange);
                 if (distanceMul > 0.8) distanceMul = ((1 - distanceMul) / 0.2F) * 0.6F + 0.2F;
-                Vector3 baseForce = distanceVector * 0.02f * distanceMul * MathUtil.Remap(stack.Count / (float)entity.stack.Count, 1, entity.stack.Item.MaxStackSize(), 2, 5);
+                Vector3 baseForce = distanceVector * 0.02f * distanceMul * MathUtil.Remap(stack.Count / (float)entity.stack.Count, 1, entity.stack.Item.GetMaxStackSize(), 2, 5);
 
                 Motion += baseForce * entity.stack.Count / Math.Max(entity.stack.Count, stack.Count);
                 entity.Motion -= baseForce * stack.Count / Math.Max(entity.stack.Count, stack.Count);
@@ -159,24 +159,24 @@ namespace SharpCraft.entity
             Vector3 partialPos = LastPos + (Pos - LastPos) * partialTicks;
             float partialTime = tick + partialTicks;
 
-            if (stack?.Item?.InnerItem is EnumBlock block)
+            if (stack?.Item is ItemBlock itemBlock)
             {
-                ModelBlock model = ModelRegistry.GetModelForBlock(block, stack.Meta);
+                ModelBlock model = JsonModelLoader.GetModelForBlock(itemBlock.Block.UnlocalizedName);
 
-                if (model.RawModel == null)
+                if (model == null || model.RawModel == null)
                     return;
 
                 float time = onGround ? (float)((Math.Sin(partialTime / 8) + 1) / 16) : 0;
 
                 _shader.Bind();
 
-                GL.BindVertexArray(model.RawModel.vaoID);
+                GL.BindVertexArray(model.RawModel.VaoID);
 
                 GL.EnableVertexAttribArray(0);
                 GL.EnableVertexAttribArray(1);
                 GL.EnableVertexAttribArray(2);
                 
-                GL.BindTexture(TextureTarget.Texture2D, TextureManager.TEXTURE_BLOCKS.ID);
+                GL.BindTexture(TextureTarget.Texture2D, JsonModelLoader.TEXTURE_BLOCKS);
 
                 int itemsToRender = 1;
 
