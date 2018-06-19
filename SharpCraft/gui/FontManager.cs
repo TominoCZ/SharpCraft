@@ -10,7 +10,7 @@ namespace SharpCraft.gui
 {
     internal class FontManager
     {
-        private static Dictionary<char, FontMapCharacter> _dictionary = new Dictionary<char, FontMapCharacter>();
+        private static readonly Dictionary<char, FontMapCharacter> _dictionary = new Dictionary<char, FontMapCharacter>();
 
         public static void LoadCharacters(Texture tex, string fntFileName)
         {
@@ -27,7 +27,7 @@ namespace SharpCraft.gui
                 if (parsed == null)
                     continue;
 
-                var uv = GetUV(tex.TextureSize.Width, tex.TextureSize.Height, parsed.X, parsed.Y, parsed.W, parsed.H);
+                var uv = TextureManager.GetUV(tex.TextureSize.Width, tex.TextureSize.Height, parsed.X, parsed.Y, parsed.W, parsed.H);
 
                 _dictionary.Add(parsed.Char, new FontMapCharacter(parsed, uv));
             }
@@ -65,22 +65,7 @@ namespace SharpCraft.gui
             var oy = int.Parse(data[6].Replace("yoffset=", ""));
 
             return new FontMapCharacterNode(character, x, y, w, h, ox, oy);
-        }
-
-        private static TextureUVNode GetUV(int textureSizeX, int textureSizeY, int x, int y, int sizeX, int sizeY) //TODO i might move this to TextureManager or TextureHelper
-        {
-            var mapSize = new Vector2(textureSizeX, textureSizeY);
-            var sampleSize = new Vector2(sizeX, sizeY);
-
-            var pos_start = new Vector2(x, y);
-            var pos_end = pos_start + sampleSize;
-
-            var start = Vector2.Divide(pos_start, mapSize);
-            var end = Vector2.Divide(pos_end, mapSize);
-
-            return new TextureUVNode(start, end);
-        }
-    }
+        }    }
 
     internal class FontMapCharacter
     {

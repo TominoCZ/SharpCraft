@@ -11,7 +11,7 @@ namespace SharpCraft.render.shader.shaders
 
         private Vector4 _selectionOutlineColor;
 
-        private Stopwatch _updateTimer;
+        private readonly Stopwatch _updateTimer;
 
         private int _hue;
 

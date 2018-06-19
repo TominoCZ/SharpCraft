@@ -12,7 +12,7 @@ namespace SharpCraft.gui
 {
     internal class Gui
     {
-        private static ModelGuiItem _item;
+        private static readonly ModelGuiItem _item;
 
         public static ShaderGui Shader { get; }
 
@@ -108,7 +108,7 @@ namespace SharpCraft.gui
             _item.Shader.UpdateModelUniforms();
             _item.Shader.UpdateInstanceUniforms(mat, null);
         
-            GL.BindTexture(TextureTarget.Texture2D, TextureManager.TEXTURE_BLOCKS.ID);
+            GL.BindTexture(TextureTarget.Texture2D, JsonModelLoader.TEXTURE_BLOCKS);
             GL.DrawArrays(PrimitiveType.Quads, 0, 4);
 
             _item.Unbind();

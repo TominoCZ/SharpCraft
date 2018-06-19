@@ -1,8 +1,5 @@
-﻿using OpenTK;
+﻿using System.Collections.Generic;
 using SharpCraft.block;
-using SharpCraft.texture;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace SharpCraft.model
 {
@@ -10,9 +7,9 @@ namespace SharpCraft.model
     {
         //private Dictionary<FaceSides, RawQuad> _quads;
 
-        private float[] _vertexes;
-        private float[] _normals;
-        private float[] _uvs;
+        private readonly float[] _vertexes;
+        private readonly float[] _normals;
+        private readonly float[] _uvs;
 
         public ModelBlockRaw(int vaoID, float[] vertexes, float[] normals, float[] uvs, params int[] bufferIDs) : base(vaoID, vertexes.Length / 3, bufferIDs)
         {
@@ -27,36 +24,52 @@ namespace SharpCraft.model
             _quads = quads;
         }*/
 
-        public void AppendVertexesForSide(FaceSides side, ref float[] vertexes, int startIndex)
+        //TODO - only use these when the block model is one 1x1x1 big cube
+        public void AppendVertexesForSide(FaceSides side, ref List<float> vertexes, BlockPos offset)
         {
             /*
-               top,
-               bottom,
-               north,
-               south,
-               west,
-               east,
+               top = 0
+               bottom = 1
+               north = 2
+               south = 3
+               west = 4
+               east = 5
+
+               --> these are used as indexes of the faces, since the model vertex data is added in the same exact order of the TextureType enum values
             */
+            TextureType parsed = FaceSides.Parse(side);//FaceSides is a struct containing Vector2 values (normals)
+            int faceIndex = (int)parsed * 12;
+
+            for (int i = 0; i < 12; i += 3)
+            {
+                vertexes.Add(_vertexes[faceIndex + i] + offset.X);
+                vertexes.Add(_vertexes[faceIndex + i + 1] + offset.Y);
+                vertexes.Add(_vertexes[faceIndex + i + 2] + offset.Z);
+            }
+        }
+
+        public void AppendNormalsForSide(FaceSides side, ref List<float> normals)
+        {
             TextureType parsed = FaceSides.Parse(side);
             int faceIndex = (int)parsed * 12;
 
             for (int i = 0; i < 12; i += 3)
             {
-                vertexes[startIndex + faceIndex + i] = _vertexes[faceIndex + i];
-                vertexes[startIndex + faceIndex + i + 1] = _vertexes[faceIndex + i + 1];
-                vertexes[startIndex + faceIndex + i + 2] = _vertexes[faceIndex + i + 2];
+                normals.Add(_normals[faceIndex + i]);
+                normals.Add(_normals[faceIndex + i + 1]);
+                normals.Add(_normals[faceIndex + i + 2]);
             }
         }
 
-        public void AppendNormalsForSide(FaceSides side, ref float[] normals, int startIndex)
+        public void AppendUvsForSide(FaceSides side, ref List<float> uvs)
         {
             TextureType parsed = FaceSides.Parse(side);
             int faceIndex = (int)parsed * 12;
 
             for (int i = 0; i < 8; i += 2)
             {
-                normals[startIndex + faceIndex + i] = _normals[faceIndex + i];
-                normals[startIndex + faceIndex + i + 1] = _normals[faceIndex + i + 1];
+                uvs.Add(_uvs[faceIndex + i]);
+                uvs.Add(_uvs[faceIndex + i + 1]);
             }
         }
         /*

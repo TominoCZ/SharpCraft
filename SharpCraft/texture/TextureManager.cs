@@ -20,12 +20,12 @@ namespace SharpCraft.texture
     {
         // private static Dictionary<EnumBlock, TextureBlockUV> _blockUVs = new Dictionary<EnumBlock, TextureBlockUV>();
 
-        private static List<int> _allTextures = new List<int>();
+        private static readonly List<int> _allTextures = new List<int>();
 
         private static readonly Bitmap TEXTURE_MISSING = CreateMissingTexture();
 
         public static Texture TEXTURE_DESTROY_PROGRESS;
-        public static Texture TEXTURE_BLOCKS;
+        //public static Texture TEXTURE_BLOCKS;
         public static Texture TEXTURE_GUI_WIDGETS;
         public static Texture TEXTURE_TEXT;
 
@@ -246,6 +246,20 @@ namespace SharpCraft.texture
             }
 
             return new Texture(LoadTexture(TEXTURE_MISSING, smooth), TEXTURE_MISSING.Size);
+        }
+
+        public static TextureUVNode GetUV(int textureSizeX, int textureSizeY, int x, int y, int sizeX, int sizeY) //TODO i might move this to TextureManager or TextureHelper
+        {
+            var mapSize = new Vector2(textureSizeX, textureSizeY);
+            var sampleSize = new Vector2(sizeX, sizeY);
+
+            var pos_start = new Vector2(x, y);
+            var pos_end = pos_start + sampleSize;
+
+            var start = Vector2.Divide(pos_start, mapSize);
+            var end = Vector2.Divide(pos_end, mapSize);
+
+            return new TextureUVNode(start, end);
         }
 
         private static Dictionary<FaceSides, Bitmap> LoadSkyboxTextures()

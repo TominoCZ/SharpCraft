@@ -21,10 +21,10 @@ namespace SharpCraft.render
 {
     internal class WorldRenderer
     {
-        private ModelCubeOutline _selectionOutline;
+        private readonly ModelCubeOutline _selectionOutline;
 
-        private ShaderTexturedCube _shaderTexturedCube;
-        private ModelRaw _destroyProgressModel;
+        private readonly ShaderTexturedCube _shaderTexturedCube;
+        private readonly ModelRaw _destroyProgressModel;
 
         private Vector4 _selectionOutlineColor = MathUtil.Hue(0);
 
@@ -57,6 +57,7 @@ namespace SharpCraft.render
             _destroyProgressModel = ModelManager.LoadModelToVAO(cube, 3);
 
             RenderDistance = 8;
+            lastFov = fov = SharpCraft.Instance.Camera.PartialFov;
         }
 
         public void Update()
@@ -85,8 +86,7 @@ namespace SharpCraft.render
             if (world == null) return;
             world.LoadManager.LoadImportantChunks();
             world.LoadManager.BuildImportantChunks();
-
-            //TODO - TEST!!!!!!!!!!!!!!!!!!!!!!
+            
             GL.BindTexture(TextureTarget.Texture2D, JsonModelLoader.TEXTURE_BLOCKS);
 
             MouseOverObject hit = SharpCraft.Instance.MouseOverObject;
@@ -94,7 +94,7 @@ namespace SharpCraft.render
             if (hit.hit == HitType.Block)
             {
                 var state = world.GetBlockState(hit.blockPos);
-                if (state != BlockRegistry.GetBlock("air").GetState(0))
+                if (!Equals(state, BlockRegistry.GetBlock("air").GetState()))
                     RenderBlockSelectionOutline(world, state, hit.blockPos);
             }
 

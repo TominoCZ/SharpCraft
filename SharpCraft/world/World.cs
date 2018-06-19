@@ -1,7 +1,6 @@
 ﻿using OpenTK;
 using SharpCraft.block;
 using SharpCraft.entity;
-using SharpCraft.model;
 using SharpCraft.util;
 using SharpCraft.world.chunk;
 using SharpCraft.world.chunk.region;
@@ -9,9 +8,47 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Metadata.Ecma335;
 
 namespace SharpCraft.world
 {
+    [Serializable]
+    public class WorldLut
+    {
+        private readonly ConcurrentDictionary<short, string> _forward;
+        private readonly ConcurrentDictionary<string, short> _backward;
+
+        public WorldLut()
+        {
+            _forward = new ConcurrentDictionary<short, string>();
+            _backward = new ConcurrentDictionary<string, short>();
+        }
+
+        public void Put(string unlocalizedName)
+        {
+            short id = (short)_forward.Count;
+
+            if (_forward.Keys.Contains(id))
+                return;
+
+            _forward.TryAdd(id, unlocalizedName);
+            _backward.TryAdd(unlocalizedName, id);
+        }
+
+        public short Translate(string unlocalizedName)
+        {
+            return _backward[unlocalizedName];
+        }
+
+        public string Translate(short id)
+        {
+            if (_forward.TryGetValue(id, out var name))
+                return name;
+
+            return BlockRegistry.GetBlock<BlockAir>().UnlocalizedName;
+        }
+    }
+
     public class World
     {
         public ConcurrentDictionary<ChunkPos, Chunk> Chunks { get; } = new ConcurrentDictionary<ChunkPos, Chunk>();
@@ -21,18 +58,20 @@ namespace SharpCraft.world
         public readonly int Seed;
         public readonly string LevelName;
 
-        private NoiseUtil _noiseUtil;
+        private readonly NoiseUtil _noiseUtil;
         private readonly int _dimension = 0;
         public readonly String SaveRoot;
 
-        internal readonly ChunkDataManager<RegionStaticImpl<ChunkPos>, ChunkPos> ChunkData;
+        public readonly ChunkDataManager<RegionStaticImpl<ChunkPos>, ChunkPos> ChunkData;
 
-        private bool initalLoad = true; //just dirty hack needs to be removed soon
+        private bool _initalLoad = true; //just dirty hack needs to be removed soon
 
         public ChunkLoadManager LoadManager { get; } = new ChunkLoadManager();
 
         //TODO - clientside only
-        private Dictionary<BlockPos, Waypoint> _waypoints = new Dictionary<BlockPos, Waypoint>();
+        private readonly Dictionary<BlockPos, Waypoint> _waypoints = new Dictionary<BlockPos, Waypoint>();
+
+        private WorldLut _worldLut;
 
         public World(string saveName, string levelName, int seed)
         {
@@ -46,6 +85,36 @@ namespace SharpCraft.world
                 new RegionInfo<ChunkPos>(new[] { 12, 12 }, 2 * Chunk.ChunkSize * Chunk.ChunkHeight * Chunk.ChunkSize),
                 RegionStaticImpl<ChunkPos>.Ctor,
                 ChunkPos.Ctor);
+
+            LoadBlockTable(new WorldLut());
+
+            foreach (var block in BlockRegistry.AllBlocks())
+            {
+                _worldLut.Put(block.UnlocalizedName);
+            }
+        }
+
+        public void LoadBlockTable(WorldLut lut)
+        {
+            if (_worldLut != null)
+                throw new Exception("The LUT is already initialized!");
+
+            _worldLut = lut;
+        }
+
+        public short GetLocalBlockId(string unlocalizedName)
+        {
+            return _worldLut.Translate(unlocalizedName);
+        } 
+        
+        public string GetLocalBlockName(short localId)
+        {
+            return _worldLut.Translate(localId);
+        }
+        
+        public void AddBlockToLUT(string unlocalizedName)
+        {
+            _worldLut.Put(unlocalizedName);
         }
 
         public void AddEntity(Entity e)
@@ -116,11 +185,11 @@ namespace SharpCraft.world
         public BlockState GetBlockState(BlockPos pos)
         {
             if (pos.Y < 0 || pos.Y >= Chunk.ChunkHeight)
-                return BlockRegistry.GetBlock("air").GetState(0);
+                return BlockRegistry.GetBlock<BlockAir>().GetState();
 
             Chunk chunk = GetChunk(ChunkPos.FromWorldSpace(pos));
             if (chunk == null || !chunk.HasData)
-                return BlockRegistry.GetBlock("air").GetState(0);
+                return BlockRegistry.GetBlock<BlockAir>().GetState();
 
             return chunk.GetBlockState(ChunkPos.ToChunkLocal(pos));
         }
@@ -180,6 +249,7 @@ namespace SharpCraft.world
             return chunk.GetMetadata(ChunkPos.ToChunkLocal(pos));
         }*/
 
+        /*
         public void SetMetadata(BlockPos pos, int meta)
         {
             Chunk chunk = GetChunk(ChunkPos.FromWorldSpace(pos));
@@ -187,7 +257,7 @@ namespace SharpCraft.world
                 return;
 
             chunk.SetMetadata(ChunkPos.ToChunkLocal(pos), meta);
-        }
+        }*/
 
         public int GetHeightAtPos(float x, float z)
         {
@@ -220,7 +290,7 @@ namespace SharpCraft.world
             }
         }
 
-        public void GenerateChunk(ChunkPos chunkPos, bool updateContainingEntities)
+        public void GenerateChunk(ChunkPos chunkPos, bool updateContainingEntities) //TODO - something is causing this to be extremely slow and ran many times simultaneously for one chunk
         {
             Chunk chunk = CreateChunk(chunkPos, null);
             if (chunk == null)
@@ -230,30 +300,31 @@ namespace SharpCraft.world
 
             void SetBlock(int x, int y, int z, BlockState s)
             {
-                //todo - translate block state to local ID
-                short value = 0;
+                _worldLut.Put(s.Block.UnlocalizedName);
+                short value = GetLocalBlockId(s.Block.UnlocalizedName);
+                short meta = s.Block.GetMetaFromState(s);
 
-                short id = (short)(value << 4 | s.Block.GetMetaFromState(s));
+                short id = (short)(value << 4 | meta);
                 chunkData[x, y, z] = id;
             }
 
             bool IsAir(int x, int y, int z)
             {
-                //todo - translate block state to local ID
-                short airId = 0;
+                short airId = GetLocalBlockId(BlockRegistry.GetBlock<BlockAir>().UnlocalizedName);
                 return chunkData[x, y, z] >> 4 == airId;
             }
 
-            var leaves = BlockRegistry.GetBlock("leaves").GetState(0);
-            var log = BlockRegistry.GetBlock("log").GetState(0);
-            var grass = BlockRegistry.GetBlock<BlockGrass>().GetState(0);
-            var dirt = BlockRegistry.GetBlock("dirt").GetState(0);
-            var stone = BlockRegistry.GetBlock("stone").GetState(0);
-            var rare = BlockRegistry.GetBlock("rare").GetState(0);
-            var bedrock = BlockRegistry.GetBlock("bedrock").GetState(0);
+            var leaves = BlockRegistry.GetBlock("leaves").GetState();
+            var log = BlockRegistry.GetBlock("log").GetState();
+            var grass = BlockRegistry.GetBlock<BlockGrass>().GetState();
+            var dirt = BlockRegistry.GetBlock("dirt").GetState();
+            var stone = BlockRegistry.GetBlock("stone").GetState();
+            var rare = BlockRegistry.GetBlock("rare").GetState();
+            var bedrock = BlockRegistry.GetBlock("bedrock").GetState();
 
             for (int z = 0; z < Chunk.ChunkSize; z++)
             {
+                Console.WriteLine(z);
                 for (int x = 0; x < Chunk.ChunkSize; x++)
                 {
                     float wsX = chunk.Pos.WorldSpaceX();
@@ -351,8 +422,8 @@ namespace SharpCraft.world
             if (player == null) return;
 
             LoadManager.LoadImportantChunks();
-            LoadManager.UpdateLoad(player, renderDistance, initalLoad);
-            initalLoad = false;
+            LoadManager.UpdateLoad(player, renderDistance, _initalLoad);
+            _initalLoad = false;
 
             foreach (Chunk chunk in Chunks.Values)
             {

@@ -3,10 +3,8 @@ using OpenTK.Graphics.OpenGL;
 using SharpCraft.block;
 using SharpCraft.entity;
 using SharpCraft.model;
-using SharpCraft.render.shader;
 using SharpCraft.util;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -74,8 +72,9 @@ namespace SharpCraft.world.chunk
         public void SetBlockState(BlockPos localPos, BlockState state)
         {
             CheckPos(localPos);
-            short id = 0;//TODO - translate from local id table
-            short meta = state.Block.GetMetaFromState(state);//TODO
+            World.AddBlockToLUT(state.Block.UnlocalizedName);
+            short id = World.GetLocalBlockId(state.Block.UnlocalizedName);
+            short meta = state.Block.GetMetaFromState(state);
             short value = (short)(id << 4 | meta);
 
             if (_chunkBlocks[localPos.X, localPos.Y, localPos.Z] != value)
@@ -98,25 +97,25 @@ namespace SharpCraft.world.chunk
         public BlockState GetBlockState(BlockPos localPos)
         {
             if (localPos.Y < 0 || localPos.Y >= ChunkHeight)
-                return BlockRegistry.GetBlock("air").GetState(0);
+                return BlockRegistry.GetBlock("air").GetState();
 
             CheckPosXZ(localPos);
 
             short value = _chunkBlocks[localPos.X, localPos.Y, localPos.Z];
-            short block = (short)(value >> 4);
+            short id = (short)(value >> 4);
             short meta = (short)(value & 15);
 
-            //TODO - translate local block id to block unlocalized name
-            string blockName = "air";
+            string blockName = World.GetLocalBlockName(id);
 
             return BlockRegistry.GetBlock(blockName).GetState(meta);
         }
-        
+
+        /*
         private int GetMetadata(BlockPos localPos)
         {
             CheckPos(localPos);
             return _chunkBlocks[localPos.X, localPos.Y, localPos.Z] & 15;
-        }
+        }*/
 
         public void SetMetadata(BlockPos localPos, int meta)
         {
@@ -165,20 +164,22 @@ namespace SharpCraft.world.chunk
                 return;
             }
 
-            foreach (Shader<ModelBlock> shader in _model.fragmentPerShader.Keys)
-            {
-                ModelChunkFragment chunkFragmentModel = _model.getFragmentModelWithShader(shader);
-                if (chunkFragmentModel == null) continue;
+            //foreach (Shader<ModelBlock> shader in _model.fragmentPerShader.Keys)
+            //{
+            //ModelChunkFragment chunkFragmentModel = _model.getFragmentModelWithShader(shader);
 
-                chunkFragmentModel.Bind();
-                shader.UpdateGlobalUniforms();
-                shader.UpdateModelUniforms();
-                shader.UpdateInstanceUniforms(MatrixHelper.CreateTransformationMatrix(Pos), null);
+            var shader = Block.DefaultShader;
 
-                chunkFragmentModel.RawModel.Render(PrimitiveType.Quads);
+            _model.Bind();
+            shader.UpdateGlobalUniforms();
+            shader.UpdateModelUniforms();
+            shader.UpdateInstanceUniforms(MatrixHelper.CreateTransformationMatrix(Pos), null);
 
-                chunkFragmentModel.Unbind();
-            }
+            _model.RawModel.Render(PrimitiveType.Quads);
+
+
+            _model.Unbind();
+            //}
         }
 
         private void BuildChunkModel()
@@ -202,13 +203,19 @@ namespace SharpCraft.world.chunk
 
             ModelBuilding = true;
 
-            ConcurrentDictionary<Shader<ModelBlock>, List<RawQuad>> modelRaw = new ConcurrentDictionary<Shader<ModelBlock>, List<RawQuad>>();
+            //ConcurrentDictionary<Shader<ModelBlock>, List<RawQuad>> modelRaw = new ConcurrentDictionary<Shader<ModelBlock>, List<RawQuad>>();
 
-            List<RawQuad> quads;
+            //List<RawQuad> quads;
 
-            Stopwatch sw = Stopwatch.StartNew();
+            Stopwatch sw = Stopwatch.StartNew(); //this is just a debug thing....
 
             var air = BlockRegistry.GetBlock("air");
+
+            List<float> vertexes = new List<float>();
+            List<float> normals = new List<float>();
+            List<float> uvs = new List<float>();
+
+            object locker = new object();
 
             //generate the model - fill MODEL_RAW
             Enumerable.Range(0, ChunkHeight).AsParallel().ForAll(y =>
@@ -220,14 +227,12 @@ namespace SharpCraft.world.chunk
                         BlockPos worldPos = new BlockPos(x + Pos.WorldSpaceX(), y, z + Pos.WorldSpaceZ());
 
                         BlockState state = World.GetBlockState(worldPos);
-                        if (state.Block == BlockRegistry.GetBlock("air"))
+                        if (state.Block == air)
                             continue;
 
                         BlockPos localPos = new BlockPos(x, y, z);
 
                         ModelBlock blockModel = JsonModelLoader.GetModelForBlock(state.Block.UnlocalizedName);
-
-                        quads = modelRaw.GetOrAdd(blockModel.Shader, new List<RawQuad>());
 
                         foreach (FaceSides dir in FaceSides.AllSides)
                         {
@@ -237,26 +242,16 @@ namespace SharpCraft.world.chunk
 
                             if (!(stateO.Block == air || blockModelO.hasTransparency && !blockModel.hasTransparency))
                                 continue;
-
-                            //RawQuad quad = ((ModelBlockRaw)blockModel.RawModel).GetQuadForSide(dir).Offset(localPos); TODO - change
-
-                            //TODO - TEST!!!!!!!!!!!!!!!
+                            
                             var model = JsonModelLoader.GetModelForBlock(state.Block.UnlocalizedName);
+                            ModelBlockRaw mbr = (ModelBlockRaw)model?.RawModel;
 
-                            if (model != null)
+                            lock (locker)
                             {
-                               // quad = model.GetQuadForSide(dir).Offset(localPos); TODO - change
+                                mbr?.AppendVertexesForSide(dir, ref vertexes, localPos);
+                                mbr?.AppendNormalsForSide(dir, ref normals);
+                                mbr?.AppendUvsForSide(dir, ref uvs);
                             }
-                            //TODO - TEST!!!!!!!!!!!!!!!
-
-                            /*
-                            if (quad.Loaded)
-                            {
-                                lock (quads)
-                                {
-                                    quads.Add(quad);
-                                }
-                            }*/
                         }
                     }
                 }
@@ -267,32 +262,10 @@ namespace SharpCraft.world.chunk
 
             SharpCraft.Instance.RunGlContext(() =>
             {
-                if (_model != null)
-                {
-                    foreach (Shader<ModelBlock> oldShader in _model.fragmentPerShader.Keys)
-                    {
-                        if (modelRaw.Keys.Contains<object>(oldShader))
-                            continue;
-
-                        _model.destroyFragmentModelWithShader(oldShader);
-                    }
-                }
-                else _model = new ModelChunk();
-
-                foreach (KeyValuePair<Shader<ModelBlock>, List<RawQuad>> value in modelRaw)
-                {
-                    Shader<ModelBlock> newShader = value.Key;
-                    List<RawQuad> newData = value.Value;
-
-                    if (!_model.fragmentPerShader.Keys.Contains<object>(newShader))
-                    {
-                        ModelChunkFragment newFragment = new ModelChunkFragment(newShader, newData);
-                        _model.setFragmentModelWithShader(newShader, newFragment);
-                        continue;
-                    }
-
-                    _model.getFragmentModelWithShader(newShader)?.OverrideData(newData);
-                }
+                if (_model == null)
+                    _model = new ModelChunk(vertexes, normals, uvs, Block.DefaultShader);
+                else
+                    _model.OverrideData(vertexes, normals, uvs);
 
                 ModelBuilding = false;
             });
@@ -308,7 +281,7 @@ namespace SharpCraft.world.chunk
         public void DestroyModel()
         {
             if (_model == null) return;
-            SharpCraft.Instance.RunGlContext(_model.destroy);
+            SharpCraft.Instance.RunGlContext(_model.Destroy);
             _model = null;
         }
 

@@ -11,9 +11,9 @@ namespace SharpCraft.render
 {
     internal class SkyboxRenderer
     {
-        private static float SIZE = 500f;
+        private static readonly float SIZE = 500f;
 
-        private static float[] VERTICES = {
+        private static readonly float[] VERTICES = {
             -SIZE,  SIZE, -SIZE,
             -SIZE, -SIZE, -SIZE,
             SIZE, -SIZE, -SIZE,
@@ -57,7 +57,7 @@ namespace SharpCraft.render
             SIZE, -SIZE,  SIZE
         };
 
-        private ModelBaked<object> cube;
+        private readonly ModelBaked<object> cube;
         private readonly int texture;
 
         private long tick;

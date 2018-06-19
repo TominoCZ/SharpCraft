@@ -112,7 +112,7 @@ namespace SharpCraft
             }
         }
 
-        private List<ModMain> installedMods = new List<ModMain>();
+        private readonly List<ModMain> installedMods = new List<ModMain>();
 
         private ItemRegistry itemRegistry;
         private BlockRegistry blockRegistry;
@@ -139,12 +139,12 @@ namespace SharpCraft
         public ConcurrentDictionary<BlockPos, DestroyProgress> DestroyProgresses =
             new ConcurrentDictionary<BlockPos, DestroyProgress>();
 
-        private List<MouseButton> _mouseButtonsDown = new List<MouseButton>();
-        private ConcurrentQueue<Action> _glContextQueue = new ConcurrentQueue<Action>();
-        private Stopwatch _updateTimer = Stopwatch.StartNew();
+        private readonly List<MouseButton> _mouseButtonsDown = new List<MouseButton>();
+        private readonly ConcurrentQueue<Action> _glContextQueue = new ConcurrentQueue<Action>();
+        private readonly Stopwatch _updateTimer = Stopwatch.StartNew();
         private DateTime _lastFpsDate = DateTime.Now;
         private WindowState _lastWindowState;
-        private Thread _renderThread = Thread.CurrentThread;
+        private readonly Thread _renderThread = Thread.CurrentThread;
 
         public static SharpCraft Instance { get; private set; }
 
@@ -166,8 +166,6 @@ namespace SharpCraft
         private readonly string _glVersion;
 
         private static string _title;
-
-        //private GameTimer timer = new GameTimer(60, 20);
 
         public SharpCraft() : base(680, 480, new GraphicsMode(32, 32, 0, 0), _title, GameWindowFlags.Default,
             DisplayDevice.Default, 3, 3, GraphicsContextFlags.ForwardCompatible)
@@ -198,10 +196,7 @@ namespace SharpCraft
 
             #region model loading
 
-            Console.WriteLine("DEBUG: loading models");
-
-            //TODO - merge shaders and use strings as block IDs like sharpcraft:dirt
-
+            //Console.WriteLine("DEBUG: loading models");
 
             /*
             ModelBlock missingModel = new ModelBlock(EnumBlock.MISSING, shader);
@@ -295,6 +290,7 @@ namespace SharpCraft
         private void RegisterItemsAndBlocks()
         {
             blockRegistry.Put(new BlockGrass());
+            blockRegistry.Put(new BlockAir());
 
             //POST - MOD Blocks and Items
             foreach (ModMain mod in installedMods)
@@ -323,11 +319,11 @@ namespace SharpCraft
 
                 World.AddEntity(Player);
 
-                Player.SetItemStackInInventory(0, new ItemStack(new ItemBlock(BlockRegistry.GetBlock("crafting_table"))));
-                Player.SetItemStackInInventory(1, new ItemStack(new ItemBlock(BlockRegistry.GetBlock("furnace"))));
-                Player.SetItemStackInInventory(2, new ItemStack(new ItemBlock(BlockRegistry.GetBlock("cobblestone"))));
-                Player.SetItemStackInInventory(3, new ItemStack(new ItemBlock(BlockRegistry.GetBlock("planks"))));
-                Player.SetItemStackInInventory(4, new ItemStack(new ItemBlock(BlockRegistry.GetBlock("glass"))));
+                //Player.SetItemStackInInventory(0, new ItemStack(new ItemBlock(BlockRegistry.GetBlock("crafting_table"))));
+                //Player.SetItemStackInInventory(1, new ItemStack(new ItemBlock(BlockRegistry.GetBlock("furnace"))));
+                //Player.SetItemStackInInventory(2, new ItemStack(new ItemBlock(BlockRegistry.GetBlock("cobblestone"))));
+                //Player.SetItemStackInInventory(3, new ItemStack(new ItemBlock(BlockRegistry.GetBlock("planks"))));
+                //Player.SetItemStackInInventory(4, new ItemStack(new ItemBlock(BlockRegistry.GetBlock("glass"))));
                 //Player.SetItemStackInInventory(5, new ItemStack(new ItemBlock(BlockRegistry.GetBlock("crafting_table"))));
             }
             else
@@ -441,7 +437,7 @@ namespace SharpCraft
 
             Vector3 camPos = Vector3.One * 0.5f + Camera.pos;
 
-            var air = BlockRegistry.GetBlock("air");
+            var air = BlockRegistry.GetBlock<BlockAir>();
 
             for (float z = -radius; z <= radius; z++)
             {
@@ -464,6 +460,7 @@ namespace SharpCraft
                             if (state.Block != air)
                             {
                                 ModelBlock model = JsonModelLoader.GetModelForBlock(state.Block.UnlocalizedName);
+
                                 AxisAlignedBB bb = model.boundingBox.offset(pos.ToVec());
 
                                 bool hitSomething = RayHelper.rayIntersectsBB(Camera.pos,
@@ -908,12 +905,12 @@ namespace SharpCraft
 
     internal class SettingsManager
     {
-        private static Dictionary<string, string> _settings = new Dictionary<string, string>();
+        private static readonly Dictionary<string, string> _settings = new Dictionary<string, string>();
 
         static SettingsManager()
         {
             _settings.Add("sensitivity", "1");
-            _settings.Add("renderdistance", "8");
+            _settings.Add("renderdistance", "1");
             _settings.Add("worldseed", "yeet");
         }
 
@@ -1006,7 +1003,7 @@ namespace SharpCraft
 
     static class CubeModelBuilder
     {
-        private static Dictionary<FaceSides, float[]> _cube = new Dictionary<FaceSides, float[]>();
+        private static readonly Dictionary<FaceSides, float[]> _cube = new Dictionary<FaceSides, float[]>();
 
         static CubeModelBuilder()
         {
@@ -1135,16 +1132,22 @@ namespace SharpCraft
         }
     }
 
-    class JsonModelLoader
+    public class JsonModelLoader
     {
         public static int TEXTURE_BLOCKS;
 
         private static Dictionary<string, BlockModel> _blockModels = new Dictionary<string, BlockModel>();
 
-        private static Dictionary<string, ModelBlock> _modelsForRender = new Dictionary<string, ModelBlock>();
+        private static readonly Dictionary<string, ModelBlock> _modelsForRender = new Dictionary<string, ModelBlock>();
+
+        private static JsonModelLoader _instance;
 
         public JsonModelLoader(Shader<ModelBlock> blockShader)
         {
+            if (_instance != null)
+                throw new Exception("There can only be one instance of the JsonModelLoader class!");
+
+            _instance = this;
             TEXTURE_BLOCKS = StitchBlocks(blockShader);
             //here we have the block models already loaded
 
@@ -1175,7 +1178,10 @@ namespace SharpCraft
 
             foreach (var block in listOfBlocks)
             {
-                string file = $"{dir}\\{block.UnlocalizedName}";
+                string file = $"{dir}\\{block.UnlocalizedName}.json";
+
+                if (!File.Exists(file))
+                    continue;
 
                 BlockJSONModel bjm = JsonConvert.DeserializeObject<BlockJSONModel>(File.ReadAllText(file));
 
@@ -1195,7 +1201,7 @@ namespace SharpCraft
             var textureMapElements = new Dictionary<string, TextureMapElement>(); //each texture name has it's UV values TODO - maybe make a TextureMap class where this could be used
 
             var id = Stitch(nonDuplicateTextures.ToArray(), 16, textureMapElements); // stitch all textureMap, return the texture ID of the registered texture in VRAM
-            
+
             //TODO - if json doesn't contain cube model, assume it's a full cube
             foreach (var pair in blockModels) //one model per registered block
             {
@@ -1396,8 +1402,8 @@ namespace SharpCraft
 
     public enum HitType
     {
+        Nothing,
         Block,
-        Enum,
-        Air
+        Entity
     }
 }

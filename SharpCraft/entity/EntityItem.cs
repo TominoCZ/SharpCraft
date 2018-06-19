@@ -15,9 +15,9 @@ namespace SharpCraft.entity
 {
     public class EntityItem : Entity
     {
-        private static Shader<EntityItem> _shader;
+        private static readonly Shader<EntityItem> _shader;
 
-        private ItemStack stack;
+        private readonly ItemStack stack;
 
         private int entityAge;
 
@@ -176,7 +176,7 @@ namespace SharpCraft.entity
                 GL.EnableVertexAttribArray(1);
                 GL.EnableVertexAttribArray(2);
                 
-                GL.BindTexture(TextureTarget.Texture2D, TextureManager.TEXTURE_BLOCKS.ID);
+                GL.BindTexture(TextureTarget.Texture2D, JsonModelLoader.TEXTURE_BLOCKS);
 
                 int itemsToRender = 1;
 

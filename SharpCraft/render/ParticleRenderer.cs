@@ -13,7 +13,7 @@ namespace SharpCraft.render
 {
     internal class ParticleRenderer
     {
-        private List<Particle> _particles;
+        private readonly List<Particle> _particles;
 
         //public static ModelBaked<Particle> ParticleModel;
 

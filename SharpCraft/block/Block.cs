@@ -7,10 +7,9 @@ namespace SharpCraft.block
 {
     public abstract class Block
     {
-        private static readonly Shader<ModelBlock> DefaultShader = new Shader<ModelBlock>("block");
-        public Shader<ModelBlock> Shader { get; protected set; }
+        public static Shader<ModelBlock> DefaultShader { get; private set; } = new Shader<ModelBlock>("block");
 
-        private List<BlockState> _states = new List<BlockState>();
+        private readonly List<BlockState> _states = new List<BlockState>();
 
         public AxisAlignedBB BoundingBox { get; protected set; } = AxisAlignedBB.BLOCK_FULL;
 
@@ -28,10 +27,14 @@ namespace SharpCraft.block
         protected Block(string unlocalizedName)
         {
             UnlocalizedName = unlocalizedName;
-            Shader = DefaultShader;
         }
 
-        public BlockState GetState(short meta)
+        public void RegisterState(JsonModelLoader loader, BlockState state)
+        {
+            _states.Add(state);
+        }
+
+        public BlockState GetState(short meta = 0)
         {
             return _states[meta > 0 ? meta : 0];
         }
@@ -40,9 +43,14 @@ namespace SharpCraft.block
         {
             return (short)_states.IndexOf(state);
         }
+
+        public static void SetDefaultShader(Shader<ModelBlock> shader)
+        {
+            DefaultShader = shader;
+        }
     }
 
-    public class BlockState
+    public struct BlockState
     {
         public Block Block { get; }
         public ModelBlock Model { get; }

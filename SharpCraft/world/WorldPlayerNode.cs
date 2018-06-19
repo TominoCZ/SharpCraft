@@ -11,12 +11,12 @@ namespace SharpCraft.world
         private readonly float pitch;
         private readonly float yaw;
 
-        private Vector3 pos;
+        private readonly Vector3 pos;
 
-        private ItemStack[] hotbar;
-        private ItemStack[] inventory;
+        private readonly ItemStack[] hotbar;
+        private readonly ItemStack[] inventory;
 
-        private float healthPercentage;
+        private readonly float healthPercentage;
 
         public WorldPlayerNode(EntityPlayerSP player)
         {

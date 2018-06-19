@@ -5,8 +5,8 @@ namespace SharpCraft.item
 {
     internal class ItemRegistry //TODO
     {
-        private static Dictionary<string, Item> _registry = new Dictionary<string, Item>();
-        private static Dictionary<Type, Item> _typeRegistry = new Dictionary<Type, Item>();
+        private static readonly Dictionary<string, Item> _registry = new Dictionary<string, Item>();
+        private static readonly Dictionary<Type, Item> _typeRegistry = new Dictionary<Type, Item>();
 
         public void Put(Item i)
         {

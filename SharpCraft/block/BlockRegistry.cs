@@ -8,8 +8,8 @@ namespace SharpCraft.block
 {
     internal class BlockRegistry
     {
-        private static Dictionary<string, Block> _registry = new Dictionary<string, Block>();
-        private static Dictionary<Type, string> _typeRegistry = new Dictionary<Type, string>();
+        private static readonly Dictionary<string, Block> _registry = new Dictionary<string, Block>();
+        private static readonly Dictionary<Type, string> _typeRegistry = new Dictionary<Type, string>();
 
         public void Put(Block b)
         {
@@ -19,8 +19,13 @@ namespace SharpCraft.block
 
         public void RegisterBlocksPost()
         {
-            Shader<ModelBlock> shader = new Shader<ModelBlock>("block");
-            JsonModelLoader modelLoader = new JsonModelLoader(shader);
+            Block.SetDefaultShader(new Shader<ModelBlock>("block"));
+            JsonModelLoader modelLoader = new JsonModelLoader(Block.DefaultShader);
+
+            foreach (var pair in _registry)
+            {
+                pair.Value.RegisterState(modelLoader, new BlockState(pair.Value, JsonModelLoader.GetModelForBlock(pair.Key)));
+            }
         }
 
         public static List<Block> AllBlocks()
@@ -35,7 +40,10 @@ namespace SharpCraft.block
 
         public static Block GetBlock(string unlocalizedName)
         {
-            return _registry[unlocalizedName];
+            if (_registry.TryGetValue(unlocalizedName, out var block))
+                return block;
+
+            return GetBlock<BlockAir>();
         }
     }
 }

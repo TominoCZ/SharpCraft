@@ -7,6 +7,7 @@ using SharpCraft.texture;
 using SharpCraft.util;
 using SharpCraft.world;
 using System;
+using System.Collections.Generic;
 
 namespace SharpCraft.particle
 {
@@ -23,7 +24,7 @@ namespace SharpCraft.particle
         {
         }
 
-        public ParticleDigging(World world, Vector3 pos, Vector3 motion, float particleScale, BlockState state, FaceSides side) : base(world, pos, motion, particleScale, TextureManager.TEXTURE_BLOCKS.ID)
+        public ParticleDigging(World world, Vector3 pos, Vector3 motion, float particleScale, BlockState state, FaceSides side) : base(world, pos, motion, particleScale, JsonModelLoader.TEXTURE_BLOCKS)
         {
             this.state = state;
 
@@ -31,7 +32,8 @@ namespace SharpCraft.particle
 
             if (model.RawModel is ModelBlockRaw mbr)
             {
-                float[] uvs = mbr.AppendNormalsForSide(side);
+                List<float> uvs = new List<float>(8);
+                mbr.AppendUvsForSide(side, ref uvs);
 
                 Vector2 start = new Vector2(uvs[0], uvs[1]);
                 Vector2 end = new Vector2(uvs[4], uvs[5]); //4,5 because that's the 3. vertex and the local UV there is 1,1

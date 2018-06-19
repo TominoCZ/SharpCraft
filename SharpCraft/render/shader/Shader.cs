@@ -10,7 +10,7 @@ namespace SharpCraft.render.shader
 {
     public class Shader
     {
-        private static List<dynamic> _shaders = new List<dynamic>();
+        private static readonly List<dynamic> _shaders = new List<dynamic>();
 
         public static void Register(dynamic shader)
         {
@@ -23,7 +23,7 @@ namespace SharpCraft.render.shader
             {
                 dynamic shader = _shaders[index];
 
-                shader.Reload(); //TODO WARNING: keep this name of the function the same
+                shader.Reload(); //WARNING: keep this name of the function the same
             }
         }
 
@@ -33,14 +33,14 @@ namespace SharpCraft.render.shader
             {
                 dynamic shader = _shaders[index];
 
-                shader.Destroy(); //TODO WARNING: keep this name of the function the same
+                shader.Destroy(); //keep this name of the function the same
             }
         }
     }
 
     public class Shader<TRenderable>
     {
-        private List<ShaderModule<TRenderable>> _modules = new List<ShaderModule<TRenderable>>();
+        private readonly List<ShaderModule<TRenderable>> _modules = new List<ShaderModule<TRenderable>>();
 
         private int program;
 
