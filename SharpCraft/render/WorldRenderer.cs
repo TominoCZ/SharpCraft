@@ -87,7 +87,7 @@ namespace SharpCraft.render
             world.LoadManager.BuildImportantChunks();
 
             //TODO - TEST!!!!!!!!!!!!!!!!!!!!!!
-            GL.BindTexture(TextureTarget.Texture2D, BlockJSONLoader.TEXTURE_BLOCKS);
+            GL.BindTexture(TextureTarget.Texture2D, JsonModelLoader.TEXTURE_BLOCKS);
 
             MouseOverObject hit = SharpCraft.Instance.MouseOverObject;
 

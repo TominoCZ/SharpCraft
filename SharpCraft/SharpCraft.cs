@@ -203,11 +203,9 @@ namespace SharpCraft
             Console.WriteLine("DEBUG: loading models");
 
             //TODO - merge shaders and use strings as block IDs like sharpcraft:dirt
-            Shader<ModelBlock> shader = new Shader<ModelBlock>("block");
-            Shader<ModelBlock> shaderUnlit = new Shader<ModelBlock>("block_unlit");
+           
 
-            BlockJSONLoader loader = new BlockJSONLoader(shader);
-
+            /*
             ModelBlock missingModel = new ModelBlock(EnumBlock.MISSING, shader);
             ModelBlock stoneModel = new ModelBlock(EnumBlock.STONE, shader);
             ModelBlock grassModel = new ModelBlock(EnumBlock.GRASS, shader);
@@ -223,6 +221,7 @@ namespace SharpCraft
             ModelBlock leavesModel = new ModelBlock(EnumBlock.LEAVES, shader, false, true);
 
             ModelBlock xrayModel = new ModelBlock(EnumBlock.XRAY, shader);
+            
 
             ModelRegistry.RegisterBlockModel(missingModel, 0);
 
@@ -241,7 +240,7 @@ namespace SharpCraft
             ModelRegistry.RegisterBlockModel(leavesModel, 0);
 
             ModelRegistry.RegisterBlockModel(xrayModel, 0);
-
+            */
             #endregion model loading
 
             SettingsManager.Load();
@@ -326,12 +325,12 @@ namespace SharpCraft
 
                 World.AddEntity(Player);
 
-                Player.SetItemStackInInventory(0, new ItemStack(new ItemBlock(EnumBlock.CRAFTING_TABLE)));
-                Player.SetItemStackInInventory(1, new ItemStack(new ItemBlock(EnumBlock.FURNACE)));
-                Player.SetItemStackInInventory(2, new ItemStack(new ItemBlock(EnumBlock.COBBLESTONE)));
-                Player.SetItemStackInInventory(3, new ItemStack(new ItemBlock(EnumBlock.PLANKS)));
-                Player.SetItemStackInInventory(4, new ItemStack(new ItemBlock(EnumBlock.GLASS)));
-                Player.SetItemStackInInventory(5, new ItemStack(new ItemBlock(EnumBlock.XRAY)));
+                Player.SetItemStackInInventory(0, new ItemStack(new ItemBlock(BlockRegistry.GetBlock("crafting_table"))));
+                Player.SetItemStackInInventory(1, new ItemStack(new ItemBlock(BlockRegistry.GetBlock("furnace"))));
+                Player.SetItemStackInInventory(2, new ItemStack(new ItemBlock(BlockRegistry.GetBlock("cobblestone"))));
+                Player.SetItemStackInInventory(3, new ItemStack(new ItemBlock(BlockRegistry.GetBlock("planks"))));
+                Player.SetItemStackInInventory(4, new ItemStack(new ItemBlock(BlockRegistry.GetBlock("glass"))));
+                //Player.SetItemStackInInventory(5, new ItemStack(new ItemBlock(BlockRegistry.GetBlock("crafting_table"))));
             }
             else
             {
@@ -1143,7 +1142,7 @@ namespace SharpCraft
         }
     }
 
-    class BlockJSONLoader
+    class JsonModelLoader
     {
         public static int TEXTURE_BLOCKS;
 
@@ -1151,7 +1150,7 @@ namespace SharpCraft
 
         private static Dictionary<string, ModelBlockRaw> _modelsForRender = new Dictionary<string, ModelBlockRaw>();
 
-        public BlockJSONLoader(Shader<ModelBlock> blockShader)
+        public JsonModelLoader(Shader<ModelBlock> blockShader)
         {
             TEXTURE_BLOCKS = StitchBlocks();
             //here we have the block models already loaded
@@ -1173,14 +1172,18 @@ namespace SharpCraft
             if (!Directory.Exists(dir))
                 return 0;
 
-            string[] files = Directory.GetFiles(dir); //TODO - ONLY LOAD JSONS FOR REGISTERED BLOCKS!
+           // string[] files = Directory.GetFiles(dir); //TODO - ONLY LOAD JSONS FOR REGISTERED BLOCKS!
+
+            var listOfBlocks = BlockRegistry.AllBlocks();
 
             List<string> nonDuplicateTextures = new List<string>();
 
             var blockModels = new ConcurrentDictionary<string, BlockJSONModel>();
 
-            foreach (var file in files)
+            foreach (var block in listOfBlocks)
             {
+                string file = $"{dir}\\{block.UnlocalizedName}";
+
                 BlockJSONModel bjm = JsonConvert.DeserializeObject<BlockJSONModel>(File.ReadAllText(file));
 
                 string blockName = Path.GetFileNameWithoutExtension(file);
@@ -1216,9 +1219,7 @@ namespace SharpCraft
                     CubeModelBuilder.AppendCubeModel(cube, model.Textures, textureMapElements, ref vertexes, ref normals, ref uvs, index);
                 }
 
-
                 _modelsForRender.Add(name, ModelManager.LoadBlockModelToVAO(vertexes,normals,uvs));
-                //TODO -register model in VAO
             }
 
             #region OLD

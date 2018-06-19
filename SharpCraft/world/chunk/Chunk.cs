@@ -226,7 +226,7 @@ namespace SharpCraft.world.chunk
                             RawQuad quad = ((ModelBlockRaw)blockModel.RawModel).GetQuadForSide(dir).Offset(localPos);
 
                             //TODO - TEST!!!!!!!!!!!!!!!
-                            var model = BlockJSONLoader.GetModelForBlock(block.ToString().ToLower());
+                            var model = JsonModelLoader.GetModelForBlock(block.ToString().ToLower());
 
                             if (model != null)
                             {

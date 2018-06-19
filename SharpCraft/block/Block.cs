@@ -27,20 +27,6 @@ namespace SharpCraft.block
             Shader = DefaultShader;
         }
 
-        /// <summary>
-        /// Used to register the states of this block. Including the default one. Is called after all blocks are registered
-        /// </summary>
-        public abstract void OnRegisterStates();
-
-        protected void RegisterState(string modelJson)
-        {
-            BlockState state = new BlockState(this, new ModelBlock(EnumBlock.MISSING, Shader));
-
-            //TODO LOAD MODEL AND TEXTURE INFO FROM JSON
-
-            _states.Add(state);
-        }
-
         public BlockState GetState(short meta)
         {
             return _states[meta > 0 ? meta : 0];

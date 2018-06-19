@@ -6,13 +6,13 @@ namespace SharpCraft.item
     [Serializable]
     internal class ItemBlock : Item
     {
-        public ItemBlock(EnumBlock block) : base(block.ToString(), block)
+        public ItemBlock(Block block) : base(block.ToString(), block)
         {
         }
 
-        public EnumBlock GetBlock()
+        public Block GetBlock()
         {
-            return (EnumBlock)InnerItem;
+            return (Block)InnerItem;
         }
     }
 }

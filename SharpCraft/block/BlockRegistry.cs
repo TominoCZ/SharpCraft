@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using SharpCraft.model;
+using SharpCraft.render.shader;
 
 namespace SharpCraft.block
 {
@@ -16,10 +19,13 @@ namespace SharpCraft.block
 
         public void RegisterBlocksPost()
         {
-            foreach (Block value in _registry.Values)
-            {
-                value.OnRegisterStates();
-            }
+            Shader<ModelBlock> shader = new Shader<ModelBlock>("block");
+            JsonModelLoader modelLoader = new JsonModelLoader(shader);
+        }
+
+        public static List<Block> AllBlocks()
+        {
+            return _registry.Values.ToList();
         }
 
         public static Block GetBlock<TBlock>() where TBlock : Block
