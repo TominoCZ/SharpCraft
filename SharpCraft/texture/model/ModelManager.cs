@@ -8,7 +8,6 @@ namespace SharpCraft.model
     {
         private static readonly List<int> VAOs = new List<int>();
         private static readonly List<int> VBOs = new List<int>();
-        
 
         public static ModelBlockRaw LoadBlockModelToVAO(Dictionary<FaceSides, RawQuad> quads)
         {
@@ -46,7 +45,7 @@ namespace SharpCraft.model
 
             return new ModelBlockRaw(vaoID, vertexes, normals, UVs, buff0, buff1, buff2);
         }
-        
+
         public static ModelRaw LoadModelToVAO(List<RawQuad> quads, int coordSize)
         {
             int vaoID = CreateVAO();
@@ -75,12 +74,12 @@ namespace SharpCraft.model
             return new ModelRaw(vaoID, vertices.Count / 3, buff0, buff1, buff2);
         }
 
-        public static ModelRaw LoadModelToVAO(float[] vertexes, float[] normals, float[] UVs)
+        public static ModelRaw LoadModelToVAO(float[] vertexes, float[] normals, float[] uvs)
         {
             int vaoID = CreateVAO();
 
             int buff0 = StoreDataInAttribList(0, 3, vertexes);
-            int buff1 = StoreDataInAttribList(1, 2, UVs);
+            int buff1 = StoreDataInAttribList(1, 2, uvs);
             int buff2 = StoreDataInAttribList(2, 3, normals);
 
             UnbindVAO();
@@ -110,13 +109,13 @@ namespace SharpCraft.model
             return new ModelRaw(ID, quads.Count / 3, buffers);
         }
 
-        public static ModelRaw OverrideModel3InVAO(int ID, int[] buffers, List<float> vertexes, List<float> normals, List<float> uvs)
+        public static ModelRaw OverrideModel3InVAO(int ID, int[] buffers, float[] vertexes, float[] normals, float[] uvs)
         {
-            OverrideDataInAttributeList(buffers[0], 0, 3, vertexes.ToArray());
-            OverrideDataInAttributeList(buffers[1], 1, 2, uvs.ToArray());
-            OverrideDataInAttributeList(buffers[2], 2, 3, normals.ToArray());
+            OverrideDataInAttributeList(buffers[0], 0, 3, vertexes);
+            OverrideDataInAttributeList(buffers[1], 1, 2, uvs);
+            OverrideDataInAttributeList(buffers[2], 2, 3, normals);
 
-            return new ModelRaw(ID, vertexes.Count / 3, buffers);
+            return new ModelRaw(ID, vertexes.Length / 3, buffers);
         }
 
         public static void OverrideModelUVsInVAO(int bufferID, float[] UVs)

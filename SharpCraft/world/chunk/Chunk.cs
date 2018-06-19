@@ -177,7 +177,6 @@ namespace SharpCraft.world.chunk
 
             _model.RawModel.Render(PrimitiveType.Quads);
 
-
             _model.Unbind();
             //}
         }
@@ -231,7 +230,7 @@ namespace SharpCraft.world.chunk
                             continue;
 
                         BlockPos localPos = new BlockPos(x, y, z);
-                        
+
                         var model = JsonModelLoader.GetModelForBlock(state.Block.UnlocalizedName);
 
                         foreach (FaceSides dir in FaceSides.AllSides)
@@ -239,16 +238,23 @@ namespace SharpCraft.world.chunk
                             BlockPos worldPosO = worldPos.Offset(dir);
                             BlockState stateO = World.GetBlockState(worldPosO);
 
-                            if (!(stateO.Block == air || stateO.Block.HasTransparency && !state.Block.HasTransparency))
+                            if (!(stateO.Block == air || stateO.Block.HasTransparency && !state.Block.HasTransparency) && stateO.Block.IsFullCube)
                                 continue;
 
                             ModelBlockRaw mbr = (ModelBlockRaw)model?.RawModel;
 
                             lock (locker)
                             {
-                                mbr?.AppendVertexesForSide(dir, ref vertexes, localPos);
-                                mbr?.AppendNormalsForSide(dir, ref normals);
-                                mbr?.AppendUvsForSide(dir, ref uvs);
+                                if (!state.Block.IsFullCube)
+                                {
+                                    mbr?.AppendAllVertexData(ref vertexes, ref normals, ref uvs, localPos);
+                                }
+                                else
+                                {
+                                    mbr?.AppendVertexesForSide(dir, ref vertexes, localPos);
+                                    mbr?.AppendNormalsForSide(dir, ref normals);
+                                    mbr?.AppendUvsForSide(dir, ref uvs);
+                                }
                             }
                         }
                     }
@@ -258,12 +264,16 @@ namespace SharpCraft.world.chunk
             sw.Stop();
             Console.WriteLine($"DEBUG: built chunk model [{sw.Elapsed.TotalMilliseconds:F}ms]");
 
+            float[] vtx = vertexes.ToArray(); //this is here because this takes time and I don't want it to slow down the main thread by running it in GlContext
+            float[] nrm = normals.ToArray();
+            float[] uv = uvs.ToArray();
+
             SharpCraft.Instance.RunGlContext(() =>
             {
                 if (_model == null)
-                    _model = new ModelChunk(vertexes, normals, uvs, Block.DefaultShader);
+                    _model = new ModelChunk(vtx, nrm, uv, Block.DefaultShader);
                 else
-                    _model.OverrideData(vertexes, normals, uvs);
+                    _model.OverrideData(vtx, nrm, uv);
 
                 ModelBuilding = false;
             });

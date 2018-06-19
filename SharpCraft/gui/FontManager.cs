@@ -1,5 +1,4 @@
-﻿using OpenTK;
-using SharpCraft.texture;
+﻿using SharpCraft.texture;
 using SharpCraft.util;
 using System;
 using System.Collections.Generic;
@@ -65,42 +64,6 @@ namespace SharpCraft.gui
             var oy = int.Parse(data[6].Replace("yoffset=", ""));
 
             return new FontMapCharacterNode(character, x, y, w, h, ox, oy);
-        }    }
-
-    internal class FontMapCharacter
-    {
-        public readonly FontMapCharacterNode Character;
-        public readonly TextureUVNode TextureUv;
-
-        public FontMapCharacter(FontMapCharacterNode character, TextureUVNode textureUv)
-        {
-            Character = character;
-            TextureUv = textureUv;
-        }
-    }
-
-    internal class FontMapCharacterNode
-    {
-        public readonly char Char;
-        public readonly int X;
-        public readonly int Y;
-
-        public readonly int W;
-        public readonly int H;
-
-        public readonly int OffsetX;
-        public readonly int OffsetY;
-
-        public FontMapCharacterNode(char c, int x, int y, int w, int h, int oX, int oY)
-        {
-            Char = c;
-            X = x;
-            Y = y;
-            W = w;
-            H = h;
-
-            OffsetX = oX;
-            OffsetY = oY;
         }
     }
 }

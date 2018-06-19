@@ -25,8 +25,10 @@ namespace SharpCraft.texture
         private static readonly Bitmap TEXTURE_MISSING = CreateMissingTexture();
 
         public static Texture TEXTURE_DESTROY_PROGRESS;
+
         //public static Texture TEXTURE_BLOCKS;
         public static Texture TEXTURE_GUI_WIDGETS;
+
         public static Texture TEXTURE_TEXT;
 
         public static void LoadTextures()
@@ -39,6 +41,7 @@ namespace SharpCraft.texture
 
             FontManager.LoadCharacters(TEXTURE_TEXT, "font/default");
         }
+
         /*
         private static void StitchTextures()
         {
@@ -338,6 +341,7 @@ namespace SharpCraft.texture
 
             return texID;
         }
+
         /*
         public static TextureBlockUV GetUVsFromBlock(EnumBlock block)
         {

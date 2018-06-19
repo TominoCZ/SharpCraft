@@ -1,6 +1,4 @@
-﻿using SharpCraft.block;
-
-namespace SharpCraft.block
+﻿namespace SharpCraft.block
 {
     public class BlockGrass : Block
     {

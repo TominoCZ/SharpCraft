@@ -1,10 +1,4 @@
-﻿using SharpCraft.block;
-using SharpCraft.particle;
-using SharpCraft.render.shader.shaders;
-using SharpCraft.util;
-using System.Collections.Generic;
-
-namespace SharpCraft.model
+﻿namespace SharpCraft.model
 {/*
     internal class ModelParticle : ModelBaked<Particle>
     {

@@ -1,6 +1,5 @@
 ﻿using OpenTK;
 using OpenTK.Input;
-using SharpCraft.block;
 using SharpCraft.item;
 using SharpCraft.texture;
 using System;
@@ -84,7 +83,7 @@ namespace SharpCraft.gui
                     targetBtn.Scale = guiScale;
                 }
             }
-           
+
             // Inventory item slots
             for (int i = 0; i < 3; i++)
             {
@@ -106,7 +105,7 @@ namespace SharpCraft.gui
                     }
                 }
             }
-                       
+
             // Draw slots
             base.Render(mouseX, mouseY);
 

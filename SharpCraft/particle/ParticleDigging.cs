@@ -1,9 +1,6 @@
 ﻿using OpenTK;
-using OpenTK.Graphics.OpenGL;
 using SharpCraft.block;
 using SharpCraft.model;
-using SharpCraft.render;
-using SharpCraft.texture;
 using SharpCraft.util;
 using SharpCraft.world;
 using System;
@@ -38,7 +35,7 @@ namespace SharpCraft.particle
                 Vector2 start = new Vector2(uvs[0], uvs[1]);
                 Vector2 end = new Vector2(uvs[4], uvs[5]); //4,5 because that's the 3. vertex and the local UV there is 1,1
 
-                Vector2 size = end -start;
+                Vector2 size = end - start;
 
                 Vector2 pixel = size / 16;
 

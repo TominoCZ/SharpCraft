@@ -1,9 +1,7 @@
 ﻿using OpenTK;
 using SharpCraft.block;
 using SharpCraft.entity;
-using SharpCraft.model;
 using SharpCraft.particle;
-using SharpCraft.render.shader.shaders;
 using SharpCraft.util;
 using SharpCraft.world;
 using System;

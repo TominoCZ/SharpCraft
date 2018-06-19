@@ -1,0 +1,38 @@
+{
+  "textures": {
+    "top": "furnace_top",
+	"south": "furnace_south",
+	"side": "furnace_side"
+  },
+  "cubes": [
+  {
+    "from": [0,0,0],
+    "to": [16,16,16],
+    "faces": {
+      "top": {
+        "uv": [0,0,16,16],
+          "texture": "#top"
+      },
+	  "bottom": {
+        "uv": [0,0,16,16],
+          "texture": "#top"
+      },
+	  "north": {
+        "uv": [0,0,16,16],
+          "texture": "#side"
+      },
+	  "south": {
+        "uv": [0,0,16,16],
+          "texture": "#south"
+      },
+	  "east": {
+        "uv": [0,0,16,16],
+          "texture": "#side"
+      },
+	  "west": {
+        "uv": [0,0,16,16],
+          "texture": "#side"
+      },
+    }
+  }]
+}

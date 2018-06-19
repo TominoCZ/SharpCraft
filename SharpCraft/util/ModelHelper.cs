@@ -1,8 +1,6 @@
-﻿using System;
-using OpenTK;
+﻿using OpenTK;
 using SharpCraft.block;
 using SharpCraft.model;
-using SharpCraft.texture;
 using System.Collections.Generic;
 
 namespace SharpCraft.util
@@ -90,6 +88,7 @@ namespace SharpCraft.util
 
             return normals;
         }
+
         /*
         public static Dictionary<FaceSides, RawQuad> createTexturedCubeModel(EnumBlock block)
         {
@@ -118,18 +117,19 @@ namespace SharpCraft.util
             return quads;
         }
         */
+
         public static float[] GetCubeSideVertexes(TextureType side)
         {
             switch (side)
             {
                 case TextureType.top: return CUBE[FaceSides.Up];
-                case TextureType.bottom:return CUBE[FaceSides.Down];
-                case TextureType.north:return CUBE[FaceSides.North];
-                case TextureType.south:return CUBE[FaceSides.South];
-                case TextureType.west:return CUBE[FaceSides.West];
-                case TextureType.east:return CUBE[FaceSides.East];
+                case TextureType.bottom: return CUBE[FaceSides.Down];
+                case TextureType.north: return CUBE[FaceSides.North];
+                case TextureType.south: return CUBE[FaceSides.South];
+                case TextureType.west: return CUBE[FaceSides.West];
+                case TextureType.east: return CUBE[FaceSides.East];
                 default:
-                    return new float[]{};
+                    return new float[] { };
             }
         }
 

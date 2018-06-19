@@ -3,7 +3,9 @@
     public interface IItem
     {
         int GetMaxStackSize();
+
         string GetUnlocalizedName();
+
         string GetDisplayName();
     }
 }

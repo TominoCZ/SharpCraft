@@ -4,7 +4,6 @@ using SharpCraft.block;
 using SharpCraft.item;
 using SharpCraft.model;
 using SharpCraft.render.shader;
-using SharpCraft.texture;
 using SharpCraft.util;
 using SharpCraft.world;
 using System;
@@ -175,7 +174,7 @@ namespace SharpCraft.entity
                 GL.EnableVertexAttribArray(0);
                 GL.EnableVertexAttribArray(1);
                 GL.EnableVertexAttribArray(2);
-                
+
                 GL.BindTexture(TextureTarget.Texture2D, JsonModelLoader.TEXTURE_BLOCKS);
 
                 int itemsToRender = 1;

@@ -1,12 +1,10 @@
-﻿using System.Collections.Generic;
-using SharpCraft.block;
+﻿using SharpCraft.block;
+using System.Collections.Generic;
 
 namespace SharpCraft.model
 {
     public class ModelBlockRaw : ModelRaw
     {
-        //private Dictionary<FaceSides, RawQuad> _quads;
-
         private readonly float[] _vertexes;
         private readonly float[] _normals;
         private readonly float[] _uvs;
@@ -18,11 +16,18 @@ namespace SharpCraft.model
             _uvs = uvs;
         }
 
-        /*
-        public ModelBlockRaw(int vaoID, Dictionary<FaceSides, RawQuad> quads, params int[] bufferIDs) : base(vaoID, 3, quads.Values.ToList(), bufferIDs)
+        public void AppendAllVertexData(ref List<float> vertexes, ref List<float> normals, ref List<float> uvs, BlockPos offset)
         {
-            _quads = quads;
-        }*/
+            for (int i = 0; i < 72; i += 3)
+            {
+                vertexes.Add(_vertexes[i] + offset.X);
+                vertexes.Add(_vertexes[i + 1] + offset.Y);
+                vertexes.Add(_vertexes[i + 2] + offset.Z);
+            }
+
+            normals.AddRange(_normals);
+            uvs.AddRange(_uvs);
+        }
 
         //TODO - only use these when the block model is one 1x1x1 big cube
         public void AppendVertexesForSide(FaceSides side, ref List<float> vertexes, BlockPos offset)
@@ -34,7 +39,6 @@ namespace SharpCraft.model
                south = 3
                west = 4
                east = 5
-
                --> these are used as indexes of the faces, since the model vertex data is added in the same exact order of the TextureType enum values
             */
             TextureType parsed = FaceSides.Parse(side);//FaceSides is a struct containing Vector2 values (normals)
@@ -72,28 +76,5 @@ namespace SharpCraft.model
                 uvs.Add(_uvs[faceIndex + i + 1]);
             }
         }
-        /*
-        public RawQuad GetQuadForSide(FaceSides side)
-        {
-            _quads.TryGetValue(side, out RawQuad quad);
-
-            return quad;
-        }
-
-        public TextureUVNode GetUVs(FaceSides side)
-        {
-            if (_quads.TryGetValue(side, out RawQuad quad))
-            {
-                if (quad.UVs.Length == 8)
-                {
-                    Vector2 start = new Vector2(quad.UVs[0], quad.UVs[1]);
-                    Vector2 end = new Vector2(quad.UVs[4], quad.UVs[5]);
-
-                    return new TextureUVNode(start, end);
-                }
-            }
-
-            return TextureManager.GetUVsFromBlock(EnumBlock.MISSING).getUVForSide(FaceSides.South);
-        }*/
     }
 }

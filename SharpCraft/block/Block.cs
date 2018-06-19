@@ -1,7 +1,7 @@
-﻿using SharpCraft.model;
+﻿using SharpCraft.entity;
+using SharpCraft.model;
 using SharpCraft.render.shader;
 using System.Collections.Generic;
-using SharpCraft.entity;
 
 namespace SharpCraft.block
 {
@@ -23,6 +23,7 @@ namespace SharpCraft.block
         public bool IsOpaque { get; protected set; } = true;
         public bool HasTransparency { get; protected set; }
         public bool IsSolid { get; protected set; } = true;
+        public bool IsFullCube { get; protected set; } = true;
 
         protected Block(string unlocalizedName)
         {
@@ -53,31 +54,6 @@ namespace SharpCraft.block
         {
             //TODO - localization
             return UnlocalizedName;
-        }
-    }
-
-    public struct BlockState
-    {
-        public Block Block { get; }
-        public ModelBlock Model { get; }
-
-        public BlockState(Block block, ModelBlock model)
-        {
-            Block = block;
-            Model = model;
-        }
-    }
-
-    internal class BlockNode
-    {
-        public ModelBlock Model { get; }
-        public int meta { get; }
-
-        public BlockNode(ModelBlock model, int meta)
-        {
-            Model = model;
-
-            this.meta = meta;
         }
     }
 }

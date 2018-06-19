@@ -8,48 +8,9 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection.Metadata.Ecma335;
-using SharpCraft.model;
 
 namespace SharpCraft.world
 {
-    [Serializable]
-    public class WorldLut
-    {
-        private readonly ConcurrentDictionary<short, string> _forward;
-        private readonly ConcurrentDictionary<string, short> _backward;
-
-        public WorldLut()
-        {
-            _forward = new ConcurrentDictionary<short, string>();
-            _backward = new ConcurrentDictionary<string, short>();
-        }
-
-        public void Put(string unlocalizedName)
-        {
-            short id = (short)_forward.Count;
-
-            if (_forward.Keys.Contains(id))
-                return;
-
-            _forward.TryAdd(id, unlocalizedName);
-            _backward.TryAdd(unlocalizedName, id);
-        }
-
-        public short Translate(string unlocalizedName)
-        {
-            return _backward[unlocalizedName];
-        }
-
-        public string Translate(short id)
-        {
-            if (_forward.TryGetValue(id, out var name))
-                return name;
-
-            return BlockRegistry.GetBlock<BlockAir>().UnlocalizedName;
-        }
-    }
-
     public class World
     {
         public ConcurrentDictionary<ChunkPos, Chunk> Chunks { get; } = new ConcurrentDictionary<ChunkPos, Chunk>();
@@ -106,13 +67,13 @@ namespace SharpCraft.world
         public short GetLocalBlockId(string unlocalizedName)
         {
             return _worldLut.Translate(unlocalizedName);
-        } 
-        
+        }
+
         public string GetLocalBlockName(short localId)
         {
             return _worldLut.Translate(localId);
         }
-        
+
         public void AddBlockToLUT(string unlocalizedName)
         {
             _worldLut.Put(unlocalizedName);
@@ -243,6 +204,7 @@ namespace SharpCraft.world
                 data.DestroyModel();
             }
         }
+
         /*
         public int GetMetadata(BlockPos pos)
         {
@@ -308,7 +270,7 @@ namespace SharpCraft.world
             var stone = BlockRegistry.GetBlock("stone").GetState();
             var rare = BlockRegistry.GetBlock("rare").GetState();
             var bedrock = BlockRegistry.GetBlock("bedrock").GetState();
-            
+
             short airId = GetLocalBlockId(air.Block.UnlocalizedName);
 
             short[,,] chunkData = new short[Chunk.ChunkSize, Chunk.ChunkHeight, Chunk.ChunkSize];

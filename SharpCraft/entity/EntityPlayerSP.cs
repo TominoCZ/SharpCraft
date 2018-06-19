@@ -3,7 +3,6 @@ using OpenTK.Input;
 using SharpCraft.block;
 using SharpCraft.gui;
 using SharpCraft.item;
-using SharpCraft.model;
 using SharpCraft.util;
 using SharpCraft.world;
 using System;
@@ -23,6 +22,7 @@ namespace SharpCraft.entity
         // Health Variables
         // 0% is death, 100% is full health
         private float health = 100.0f;
+
         public float Health
         {
             get { return health; }

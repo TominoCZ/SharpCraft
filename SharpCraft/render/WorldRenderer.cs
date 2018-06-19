@@ -15,7 +15,6 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using GL = OpenTK.Graphics.OpenGL.GL;
 using TextureTarget = OpenTK.Graphics.OpenGL.TextureTarget;
-using TextureUnit = OpenTK.Graphics.OpenGL.TextureUnit;
 
 namespace SharpCraft.render
 {
@@ -274,7 +273,7 @@ namespace SharpCraft.render
                 Matrix4 mat = t0 * r1 * Matrix4.CreateScale(itemBlock.Block.BoundingBox.size) * t_final * r2 * s * t1;
 
                 GL.DepthRange(0, 0.1f);
-                
+
                 ModelBlock model = JsonModelLoader.GetModelForBlock(itemBlock.Block.UnlocalizedName);
 
                 if (model == null)

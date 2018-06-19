@@ -1,8 +1,5 @@
 ﻿using OpenTK;
-using OpenTK.Graphics.OpenGL;
 using SharpCraft.entity;
-using SharpCraft.model;
-using SharpCraft.render;
 using SharpCraft.util;
 using SharpCraft.world;
 
@@ -75,7 +72,7 @@ namespace SharpCraft.particle
             model.Shader.UpdateGlobalUniforms();
             model.Shader.UpdateModelUniforms();
             model.Shader.UpdateInstanceUniforms(MatrixHelper.CreateTransformationMatrix(partialPos - Vector3.One * partialScale / 20, Vector3.Zero, partialScale), this);
-            
+
             GL.BindTexture(TextureTarget.Texture2D, textureID);
             model.RawModel.Render(PrimitiveType.Quads);*/
         }

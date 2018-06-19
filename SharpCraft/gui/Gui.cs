@@ -5,7 +5,6 @@ using SharpCraft.model;
 using SharpCraft.render;
 using SharpCraft.render.shader;
 using SharpCraft.render.shader.shaders;
-using SharpCraft.texture;
 using SharpCraft.util;
 
 namespace SharpCraft.gui
@@ -81,7 +80,7 @@ namespace SharpCraft.gui
 
             Shader.Unbind();
         }
-      
+
         protected virtual void RenderTextureStretchToScreen(GuiTexture tex)
         {
             if (tex == null)
@@ -89,7 +88,7 @@ namespace SharpCraft.gui
 
             Shader.Bind();
 
-            GL.BindVertexArray(GuiRenderer.GuiQuad.vaoID);
+            GL.BindVertexArray(GuiRenderer.GuiQuad.VaoID);
 
             Shader.UpdateGlobalUniforms();
             Shader.UpdateModelUniforms();
@@ -131,7 +130,7 @@ namespace SharpCraft.gui
             _item.Shader.UpdateGlobalUniforms();
             _item.Shader.UpdateModelUniforms();
             _item.Shader.UpdateInstanceUniforms(mat, null);
-        
+
             GL.BindTexture(TextureTarget.Texture2D, JsonModelLoader.TEXTURE_BLOCKS);
             GL.DrawArrays(PrimitiveType.Quads, 0, 4);
 

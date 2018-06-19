@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace SharpCraft.block
+﻿namespace SharpCraft.block
 {
-    class BlockLeaves : Block
+    internal class BlockLeaves : Block
     {
         public BlockLeaves() : base("leaves")
         {
