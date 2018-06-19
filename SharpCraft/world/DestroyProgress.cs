@@ -45,7 +45,7 @@ namespace SharpCraft.world
         {
             Pos = pos;
 
-            EnumBlock block = player.World.GetBlock(pos);
+            EnumBlock block = player.World.GetBlockState(pos);
             int meta = player.World.GetMetadata(pos);
 
             _blockHardness = 12; //TODO

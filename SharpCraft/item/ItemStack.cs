@@ -27,11 +27,11 @@ namespace SharpCraft.item
             }
         }
 
-        public int Meta;
+        public short Meta;
 
         public bool IsEmpty => Count == 0 || Item?.InnerItem == null;
 
-        public ItemStack(Item item, int count = 1, int meta = 0)
+        public ItemStack(Item item, int count = 1, short meta = 0)
         {
             Item = item;
             Meta = meta;
@@ -63,25 +63,25 @@ namespace SharpCraft.item
             ItemStack remainingStack = null;
 
             // Copy item if an item isn't present here
-            if (this.Item == null)
+            if (Item == null)
             {
                 if (other.Item == null)
                     return remainingStack; // error
-                else
-                    this.Item = other.Item;
+
+                Item = other.Item;
             }
 
             // Combine stacks if enough space
-            if (this.Count + other.Count <= this.Item.MaxStackSize())
+            if (Count + other.Count <= this.Item.MaxStackSize())
             {
-                this.Count += other.Count;
-                remainingStack = null;
+                Count += other.Count;
+                //remainingStack = null;
             }
             // otherwise, combine as much as possible
             else
             {
                 int difference = this.Item.MaxStackSize() - this.Count;
-                this.Count += difference;
+                Count += difference;
 
                 remainingStack = other.Copy();
                 remainingStack.Count -= difference;

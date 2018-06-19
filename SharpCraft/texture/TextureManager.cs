@@ -18,7 +18,7 @@ namespace SharpCraft.texture
 {
     internal class TextureManager
     {
-        private static Dictionary<EnumBlock, TextureBlockUV> _blockUVs = new Dictionary<EnumBlock, TextureBlockUV>();
+        // private static Dictionary<EnumBlock, TextureBlockUV> _blockUVs = new Dictionary<EnumBlock, TextureBlockUV>();
 
         private static List<int> _allTextures = new List<int>();
 
@@ -31,7 +31,7 @@ namespace SharpCraft.texture
 
         public static void LoadTextures()
         {
-            StitchTextures();
+            //StitchTextures();
 
             TEXTURE_GUI_WIDGETS = LoadTexture("gui/widgets");
             TEXTURE_DESTROY_PROGRESS = LoadTexture("blocks/destroy_progress");
@@ -39,7 +39,7 @@ namespace SharpCraft.texture
 
             FontManager.LoadCharacters(TEXTURE_TEXT, "font/default");
         }
-
+        /*
         private static void StitchTextures()
         {
             Bitmap bmp = CreateTextureMap("blocks");
@@ -188,7 +188,7 @@ namespace SharpCraft.texture
 
                 return clone;
             }
-        }
+        }*/
 
         private static Bitmap CreateMissingTexture()
         {
@@ -288,7 +288,7 @@ namespace SharpCraft.texture
             int texID = GL.GenTexture();
 
             _allTextures.Add(texID);
-            
+
             GL.BindTexture(TextureTarget.TextureCubeMap, texID);
 
             Dictionary<FaceSides, Bitmap> cubeMapTextures = LoadSkyboxTextures();
@@ -324,7 +324,7 @@ namespace SharpCraft.texture
 
             return texID;
         }
-
+        /*
         public static TextureBlockUV GetUVsFromBlock(EnumBlock block)
         {
             _blockUVs.TryGetValue(block, out TextureBlockUV uv);
@@ -333,7 +333,7 @@ namespace SharpCraft.texture
                 _blockUVs.TryGetValue(EnumBlock.MISSING, out uv);
 
             return uv;
-        }
+        }*/
 
         private static void DrawToBitmap(Bitmap to, int x, int y, string file)
         {
@@ -371,16 +371,16 @@ namespace SharpCraft.texture
 
         public static void Reload()
         {
-            DestroyTexture(TEXTURE_BLOCKS.ID);
+            //DestroyTexture(TEXTURE_BLOCKS.ID);
 
-            _blockUVs.Clear();
+            //_blockUVs.Clear();
 
             LoadTextures();
         }
 
         public static void Destroy()
         {
-            DestroyTexture(TEXTURE_BLOCKS.ID);
+            //DestroyTexture(TEXTURE_BLOCKS.ID);
 
             for (int i = 0; i < _allTextures.Count; i++)
             {

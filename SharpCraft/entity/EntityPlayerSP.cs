@@ -352,7 +352,7 @@ namespace SharpCraft.entity
             {
                 if (btn == MouseButton.Right)
                 {
-                    EnumBlock block = World.GetBlock(moo.blockPos);
+                    EnumBlock block = World.GetBlockState(moo.blockPos);
                     ModelBlock model = ModelRegistry.GetModelForBlock(block, World.GetMetadata(moo.blockPos));
 
                     if (model != null && model.canBeInteractedWith)
@@ -381,7 +381,7 @@ namespace SharpCraft.entity
             if (!(moo.hit is EnumBlock))
                 return;
 
-            EnumBlock block = World.GetBlock(moo.blockPos);
+            EnumBlock block = World.GetBlockState(moo.blockPos);
 
             if (block == EnumBlock.AIR)
                 return;
@@ -390,7 +390,7 @@ namespace SharpCraft.entity
 
             SharpCraft.Instance.ParticleRenderer.SpawnDestroyParticles(moo.blockPos, block, meta);
 
-            World.SetBlock(moo.blockPos, EnumBlock.AIR, 0);
+            World.SetBlockState(moo.blockPos, EnumBlock.AIR, 0);
 
             Vector3 motion = new Vector3(MathUtil.NextFloat(-0.15f, 0.15f), 0.3f, MathUtil.NextFloat(-0.15f, 0.15f));
 
@@ -413,7 +413,7 @@ namespace SharpCraft.entity
                 return;
 
             BlockPos pos = moo.blockPos.Offset(moo.sideHit);
-            EnumBlock blockAtPos = World.GetBlock(pos);
+            EnumBlock blockAtPos = World.GetBlockState(pos);
 
             EnumBlock heldBlock = itemBlock.GetBlock();
             AxisAlignedBB blockBb = ModelRegistry.GetModelForBlock(heldBlock, World.GetMetadata(pos))
@@ -424,16 +424,16 @@ namespace SharpCraft.entity
 
             BlockPos posUnder = pos.Offset(FaceSides.Down);
 
-            EnumBlock blockUnder = World.GetBlock(posUnder);
-            EnumBlock blockAbove = World.GetBlock(pos.Offset(FaceSides.Up));
+            EnumBlock blockUnder = World.GetBlockState(posUnder);
+            EnumBlock blockAbove = World.GetBlockState(pos.Offset(FaceSides.Up));
 
             if (blockUnder == EnumBlock.GRASS && heldBlock != EnumBlock.GLASS)
-                World.SetBlock(posUnder, EnumBlock.DIRT, 0);
+                World.SetBlockState(posUnder, EnumBlock.DIRT, 0);
             if (blockAbove != EnumBlock.AIR && blockAbove != EnumBlock.GLASS &&
                 heldBlock == EnumBlock.GRASS)
-                World.SetBlock(pos, EnumBlock.DIRT, 0);
+                World.SetBlockState(pos, EnumBlock.DIRT, 0);
             else
-                World.SetBlock(pos, heldBlock, stack.Meta);
+                World.SetBlockState(pos, heldBlock, stack.Meta);
 
             stack.Count--;
 

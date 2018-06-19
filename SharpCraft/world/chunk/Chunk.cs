@@ -71,14 +71,16 @@ namespace SharpCraft.world.chunk
             if (localPos.Z >= ChunkSize) throw new IndexOutOfRangeException($"Block Pos z({localPos.Z}) is bigger or equal to ChunkSize");
         }
 
-        public void SetBlock(BlockPos localPos, EnumBlock blockType, int meta = 0)
+        public void SetBlockState(BlockPos localPos, BlockState state)
         {
             CheckPos(localPos);
-            short id = (short)((short)blockType << 4 | meta);
+            short id = 0;//TODO - translate from local id table
+            short meta = state.Block.GetMetaFromState(state);//TODO
+            short value = (short)(id << 4 | meta);
 
-            if (_chunkBlocks[localPos.X, localPos.Y, localPos.Z] != id)
+            if (_chunkBlocks[localPos.X, localPos.Y, localPos.Z] != value)
             {
-                _chunkBlocks[localPos.X, localPos.Y, localPos.Z] = id;
+                _chunkBlocks[localPos.X, localPos.Y, localPos.Z] = value;
 
                 if (ModelBuilding || !QueuedForModelBuild) //this is so that we prevent double chunk build calls and invisible placed blocks(if the model is already generating, there is a chance that the block on this position was already processed, so the rebuild is queued again)
                 {
@@ -88,15 +90,29 @@ namespace SharpCraft.world.chunk
             }
         }
 
-        public EnumBlock GetBlock(BlockPos localPos)
+        public bool IsAir(BlockPos pos)
         {
-            if (localPos.Y < 0 || localPos.Y >= ChunkHeight) return EnumBlock.AIR;
-            CheckPosXZ(localPos);
-
-            return (EnumBlock)(_chunkBlocks[localPos.X, localPos.Y, localPos.Z] >> 4);
+            return GetBlockState(pos).Block == BlockRegistry.GetBlock("air");
         }
 
-        public int GetMetadata(BlockPos localPos)
+        public BlockState GetBlockState(BlockPos localPos)
+        {
+            if (localPos.Y < 0 || localPos.Y >= ChunkHeight)
+                return BlockRegistry.GetBlock("air").GetState(0);
+
+            CheckPosXZ(localPos);
+
+            short value = _chunkBlocks[localPos.X, localPos.Y, localPos.Z];
+            short block = (short)(value >> 4);
+            short meta = (short)(value & 15);
+
+            //TODO - translate local block id to block unlocalized name
+            string blockName = "air";
+
+            return BlockRegistry.GetBlock(blockName).GetState(meta);
+        }
+        
+        private int GetMetadata(BlockPos localPos)
         {
             CheckPos(localPos);
             return _chunkBlocks[localPos.X, localPos.Y, localPos.Z] & 15;
@@ -134,9 +150,7 @@ namespace SharpCraft.world.chunk
 
             for (int y = ChunkHeight - 1; y >= 0; y--)
             {
-                EnumBlock block = GetBlock(pos = pos.Offset(FaceSides.Down));
-
-                if (block != EnumBlock.AIR)
+                if (IsAir(pos = pos.Offset(FaceSides.Down)))
                     return y + 1;
             }
 
@@ -194,6 +208,8 @@ namespace SharpCraft.world.chunk
 
             Stopwatch sw = Stopwatch.StartNew();
 
+            var air = BlockRegistry.GetBlock("air");
+
             //generate the model - fill MODEL_RAW
             Enumerable.Range(0, ChunkHeight).AsParallel().ForAll(y =>
             {
@@ -203,44 +219,44 @@ namespace SharpCraft.world.chunk
                     {
                         BlockPos worldPos = new BlockPos(x + Pos.WorldSpaceX(), y, z + Pos.WorldSpaceZ());
 
-                        EnumBlock block = World.GetBlock(worldPos);
-                        if (block == EnumBlock.AIR)
+                        BlockState state = World.GetBlockState(worldPos);
+                        if (state.Block == BlockRegistry.GetBlock("air"))
                             continue;
 
                         BlockPos localPos = new BlockPos(x, y, z);
 
-                        ModelBlock blockModel = ModelRegistry.GetModelForBlock(block, World.GetMetadata(worldPos));
+                        ModelBlock blockModel = JsonModelLoader.GetModelForBlock(state.Block.UnlocalizedName);
 
                         quads = modelRaw.GetOrAdd(blockModel.Shader, new List<RawQuad>());
 
                         foreach (FaceSides dir in FaceSides.AllSides)
                         {
                             BlockPos worldPosO = worldPos.Offset(dir);
-                            EnumBlock blockO = World.GetBlock(worldPosO);
-                            ModelBlock blockModelO = ModelRegistry.GetModelForBlock(blockO, World.GetMetadata(worldPosO));
+                            BlockState stateO = World.GetBlockState(worldPosO);
+                            ModelBlock blockModelO = JsonModelLoader.GetModelForBlock(stateO.Block.UnlocalizedName);
 
-                            if (!(blockO == EnumBlock.AIR ||
-                                  blockModelO.hasTransparency && !blockModel.hasTransparency))
+                            if (!(stateO.Block == air || blockModelO.hasTransparency && !blockModel.hasTransparency))
                                 continue;
 
-                            RawQuad quad = ((ModelBlockRaw)blockModel.RawModel).GetQuadForSide(dir).Offset(localPos);
+                            //RawQuad quad = ((ModelBlockRaw)blockModel.RawModel).GetQuadForSide(dir).Offset(localPos); TODO - change
 
                             //TODO - TEST!!!!!!!!!!!!!!!
-                            var model = JsonModelLoader.GetModelForBlock(block.ToString().ToLower());
+                            var model = JsonModelLoader.GetModelForBlock(state.Block.UnlocalizedName);
 
                             if (model != null)
                             {
-                                quad = model.GetQuadForSide(dir).Offset(localPos);
+                               // quad = model.GetQuadForSide(dir).Offset(localPos); TODO - change
                             }
                             //TODO - TEST!!!!!!!!!!!!!!!
 
+                            /*
                             if (quad.Loaded)
                             {
                                 lock (quads)
                                 {
                                     quads.Add(quad);
                                 }
-                            }
+                            }*/
                         }
                     }
                 }

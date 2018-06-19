@@ -82,10 +82,10 @@ namespace SharpCraft.gui
             Shader.Unbind();
         }
 
-        protected virtual void RenderBlock(EnumBlock block, float x, float y, float scale)
+        protected virtual void RenderBlock(BlockState state, float x, float y, float scale)
         {
-            TextureBlockUV UVs = TextureManager.GetUVsFromBlock(block);
-            ModelManager.OverrideModelUVsInVAO(_item.RawModel.BufferIDs[1], UVs.getUVForSide(FaceSides.South).ToArray());
+            //TextureBlockUV UVs = TextureManager.GetUVsFromBlock(block); //TODO - change
+            //ModelManager.OverrideModelUVsInVAO(_item.RawModel.BufferIDs[1], UVs.getUVForSide(FaceSides.South).ToArray());
 
             Vector2 unit = new Vector2(1f / SharpCraft.Instance.ClientSize.Width, 1f / SharpCraft.Instance.ClientSize.Height);
 

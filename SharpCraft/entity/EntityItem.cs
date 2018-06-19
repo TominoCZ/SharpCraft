@@ -59,9 +59,9 @@ namespace SharpCraft.entity
                 BlockPos bp = new BlockPos(Pos);
 
                 FaceSides lastFace = FaceSides.Up;
-                bool blocksAround = FaceSides.YPlane.All(face => World.GetBlock(bp.Offset(lastFace = face)) != EnumBlock.AIR)
-                                   && World.GetBlock(bp.Offset(lastFace = FaceSides.Up)) != EnumBlock.AIR
-                                   && World.GetBlock(bp.Offset(lastFace = FaceSides.Down)) != EnumBlock.AIR; //has to be in this order
+                bool blocksAround = FaceSides.YPlane.All(face => World.GetBlockState(bp.Offset(lastFace = face)) != EnumBlock.AIR)
+                                   && World.GetBlockState(bp.Offset(lastFace = FaceSides.Up)) != EnumBlock.AIR
+                                   && World.GetBlockState(bp.Offset(lastFace = FaceSides.Down)) != EnumBlock.AIR; //has to be in this order
 
                 if (!blocksAround)
                 {

@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace SharpCraft.model
 {
-    internal class ModelBlockRaw : ModelRaw
+    public class ModelBlockRaw : ModelRaw
     {
         private Dictionary<FaceSides, RawQuad> _quads;
 
@@ -21,10 +21,11 @@ namespace SharpCraft.model
             _uvs = uvs;
         }
 
+        /*
         public ModelBlockRaw(int vaoID, Dictionary<FaceSides, RawQuad> quads, params int[] bufferIDs) : base(vaoID, 3, quads.Values.ToList(), bufferIDs)
         {
             _quads = quads;
-        }
+        }*/
 
         public float[] GetVertexesForSide(FaceSides sides)
         {
@@ -35,7 +36,7 @@ namespace SharpCraft.model
         {
             return null; //TODO
         }
-
+        /*
         public RawQuad GetQuadForSide(FaceSides side)
         {
             _quads.TryGetValue(side, out RawQuad quad);
@@ -57,6 +58,6 @@ namespace SharpCraft.model
             }
 
             return TextureManager.GetUVsFromBlock(EnumBlock.MISSING).getUVForSide(FaceSides.South);
-        }
+        }*/
     }
 }

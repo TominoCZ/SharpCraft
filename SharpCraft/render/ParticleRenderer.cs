@@ -58,8 +58,10 @@ namespace SharpCraft.render
 
         public void SpawnDiggingParticle(MouseOverObject moo)
         {
-            if (moo.hit is EnumBlock block)
+            if (moo.hit == HitType.Block)
             {
+                var state = SharpCraft.Instance.World.GetBlockState(moo.blockPos);
+
                 float f0 = moo.hitVec.X
                      + MathUtil.NextFloat(-0.21f, 0.21f) * Math.Abs(moo.boundingBox.max.X - moo.boundingBox.min.X);
                 float f1 = moo.hitVec.Y
@@ -95,13 +97,12 @@ namespace SharpCraft.render
                     pos,
                     motion,
                     0.35f + (ok ? progress.PartialProgress * 0.5f : 0),
-                    block,
-                    moo.sideHit,
-                    SharpCraft.Instance.World.GetMetadata(moo.blockPos)));
+                    state,
+                    moo.sideHit));
             }
         }
 
-        public void SpawnDestroyParticles(BlockPos pos, EnumBlock block, int meta)
+        public void SpawnDestroyParticles(BlockPos pos, BlockState state)
         {
             Vector3 posVec = pos.ToVec();
 
@@ -126,7 +127,7 @@ namespace SharpCraft.render
                         motion.Y += MathUtil.NextFloat(-0.05f, 0.05f);
                         motion.Z += MathUtil.NextFloat(-0.05f, 0.05f);
 
-                        ParticleDigging particle = new ParticleDigging(SharpCraft.Instance.World, posVec + worldPos, motion, MathUtil.NextFloat(1, 1.5f), block, meta);
+                        ParticleDigging particle = new ParticleDigging(SharpCraft.Instance.World, posVec + worldPos, motion, MathUtil.NextFloat(1, 1.5f), state);
 
                         AddParticle(particle);
                     }

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace SharpCraft.model
 {
     internal class ModelRegistry
-    {
+    {/*
         private static Dictionary<EnumBlock, List<BlockNode>> models = new Dictionary<EnumBlock, List<BlockNode>>();
 
         public static void RegisterBlockModel(ModelBlock model, int meta, int hardness = 10)
@@ -50,6 +50,6 @@ namespace SharpCraft.model
             }
 
             return null;
-        }
+        }*/
     }
 }

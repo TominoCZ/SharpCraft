@@ -91,11 +91,11 @@ namespace SharpCraft.world
                     for (int z = (int)bb.min.Z, maxZ = (int)bb.max.Z; z < maxZ; z++)
                     {
                         BlockPos pos = new BlockPos(x, y, z);
-                        EnumBlock block = SharpCraft.Instance.World.GetBlock(pos);
-                        if (block == EnumBlock.AIR)
+                        BlockState state = SharpCraft.Instance.World.GetBlockState(pos);
+                        if (state.Block == BlockRegistry.GetBlock("air"))
                             continue;
 
-                        blocks.Add(ModelRegistry.GetModelForBlock(block, GetMetadata(pos)).boundingBox.offset(pos.ToVec()));
+                        blocks.Add(JsonModelLoader.GetModelForBlock(state.Block.UnlocalizedName).BoundingBox.offset(pos.ToVec())); //TODO
                     }
                 }
             }
@@ -108,25 +108,25 @@ namespace SharpCraft.world
             return Chunks.TryGetValue(pos, out Chunk chunkData) ? chunkData : null;
         }
 
-        public EnumBlock GetBlock(BlockPos pos)
+        public BlockState GetBlockState(BlockPos pos)
         {
             if (pos.Y < 0 || pos.Y >= Chunk.ChunkHeight)
-                return EnumBlock.AIR;
+                return BlockRegistry.GetBlock("air").GetState(0);
 
             Chunk chunk = GetChunk(ChunkPos.FromWorldSpace(pos));
             if (chunk == null || !chunk.HasData)
-                return EnumBlock.AIR;
+                return BlockRegistry.GetBlock("air").GetState(0);
 
-            return chunk.GetBlock(ChunkPos.ToChunkLocal(pos));
+            return chunk.GetBlockState(ChunkPos.ToChunkLocal(pos));
         }
 
-        public void SetBlock(BlockPos pos, EnumBlock blockType, int meta)
+        public void SetBlockState(BlockPos pos, BlockState state)
         {
             Chunk chunk = GetChunk(ChunkPos.FromWorldSpace(pos));
             if (chunk == null || !chunk.HasData)
                 return;
 
-            chunk.SetBlock(ChunkPos.ToChunkLocal(pos), blockType, meta);
+            chunk.SetBlockState(ChunkPos.ToChunkLocal(pos), state);
         }
 
         public void UnloadChunk(ChunkPos pos)
@@ -165,7 +165,7 @@ namespace SharpCraft.world
                 data.DestroyModel();
             }
         }
-
+        /*
         public int GetMetadata(BlockPos pos)
         {
             Chunk chunk = GetChunk(ChunkPos.FromWorldSpace(pos));
@@ -173,7 +173,7 @@ namespace SharpCraft.world
                 return -1;
 
             return chunk.GetMetadata(ChunkPos.ToChunkLocal(pos));
-        }
+        }*/
 
         public void SetMetadata(BlockPos pos, int meta)
         {
@@ -223,16 +223,29 @@ namespace SharpCraft.world
 
             short[,,] chunkData = new short[Chunk.ChunkSize, Chunk.ChunkHeight, Chunk.ChunkSize];
 
-            void SetBlock(int x, int y, int z, EnumBlock b)
+            void SetBlock(int x, int y, int z, BlockState s)
             {
-                short id = (short)((short)b << 4);
+                //todo - translate block state to local ID
+                short value = 0;
+
+                short id = (short)(value << 4 | s.Block.GetMetaFromState(s));
                 chunkData[x, y, z] = id;
             }
 
             bool IsAir(int x, int y, int z)
             {
-                return chunkData[x, y, z] >> 4 == (int)EnumBlock.AIR;
+                //todo - translate block state to local ID
+                short airId = 0;
+                return chunkData[x, y, z] >> 4 == airId;
             }
+
+            var leaves = BlockRegistry.GetBlock("leaves").GetState(0);
+            var log = BlockRegistry.GetBlock("log").GetState(0);
+            var grass = BlockRegistry.GetBlock<BlockGrass>().GetState(0);
+            var dirt = BlockRegistry.GetBlock("dirt").GetState(0);
+            var stone = BlockRegistry.GetBlock("stone").GetState(0);
+            var rare = BlockRegistry.GetBlock("rare").GetState(0);
+            var bedrock = BlockRegistry.GetBlock("bedrock").GetState(0);
 
             for (int z = 0; z < Chunk.ChunkSize; z++)
             {
@@ -249,15 +262,15 @@ namespace SharpCraft.world
 
                     for (int y = peakY; y >= 0; y--)
                     {
-                        if (y == peakY) SetBlock(x, y, z, EnumBlock.GRASS);
-                        else if (y > 0 && peakY - y > 0 && peakY - y < 3) SetBlock(x, y, z, EnumBlock.DIRT);
+                        if (y == peakY) SetBlock(x, y, z, grass);
+                        else if (y > 0 && peakY - y > 0 && peakY - y < 3) SetBlock(x, y, z, dirt);
                         else if (y == 0)
-                            SetBlock(x, y, z, EnumBlock.BEDROCK);
+                            SetBlock(x, y, z, bedrock);
                         else
                         {
                             float f = _noiseUtil.GetNoise(xCh * 32 - y * 16, zCh * 32 + x * 16);
 
-                            SetBlock(x, y, z, f >= 0.75f ? EnumBlock.RARE : EnumBlock.STONE);
+                            SetBlock(x, y, z, f >= 0.75f ? rare : stone);
                         }
                     }
 
@@ -273,7 +286,7 @@ namespace SharpCraft.world
                         for (int treeY = 0; treeY < height; treeY++)
                         {
                             treeTop = peakY + 1 + treeY;
-                            SetBlock(x, treeTop, z, EnumBlock.LOG);
+                            SetBlock(x, treeTop, z, log);
                         }
 
                         //leaves
@@ -296,7 +309,7 @@ namespace SharpCraft.world
                                     Vector3 vec = new Vector3(i, j, k);
 
                                     if (MathUtil.Distance(vec, Vector3.Zero) <= 2.5f)
-                                        SetBlock(pX, pY, pZ, EnumBlock.LEAVES);
+                                        SetBlock(pX, pY, pZ, leaves);
                                 }
                             }
                         }

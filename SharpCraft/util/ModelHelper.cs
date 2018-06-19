@@ -90,7 +90,7 @@ namespace SharpCraft.util
 
             return normals;
         }
-
+        /*
         public static Dictionary<FaceSides, RawQuad> createTexturedCubeModel(EnumBlock block)
         {
             Dictionary<FaceSides, RawQuad> quads = new Dictionary<FaceSides, RawQuad>();
@@ -117,7 +117,7 @@ namespace SharpCraft.util
 
             return quads;
         }
-
+        */
         public static float[] GetCubeSideVertexes(TextureType side)
         {
             switch (side)

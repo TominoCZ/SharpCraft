@@ -3,13 +3,14 @@ using System.Collections.Generic;
 
 namespace SharpCraft.model
 {
-    internal class ModelRaw : IModelRaw
+    public class ModelRaw : IModelRaw
     {
         public int VaoID { get; }
         public int[] BufferIDs { get; }
 
         public int VertexCount { get; protected set; }
 
+        /*
         public ModelRaw(int vaoID, int valuesPerVertice, List<RawQuad> quads, params int[] bufferIDs)
         {
             VaoID = vaoID;
@@ -17,7 +18,7 @@ namespace SharpCraft.model
 
             foreach (RawQuad quad in quads)
                 VertexCount += quad.vertices.Length / valuesPerVertice;
-        }
+        }*/
 
         public ModelRaw(int vaoID, int vertexCount, params int[] bufferIDs)
         {

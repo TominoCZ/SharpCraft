@@ -91,10 +91,11 @@ namespace SharpCraft.render
 
             MouseOverObject hit = SharpCraft.Instance.MouseOverObject;
 
-            if (hit.hit != null)
+            if (hit.hit == HitType.Block)
             {
-                if (hit.hit is EnumBlock block && block != EnumBlock.AIR)
-                    RenderBlockSelectionOutline(world, block, hit.blockPos);
+                var state = world.GetBlockState(hit.blockPos);
+                if (state != BlockRegistry.GetBlock("air").GetState(0))
+                    RenderBlockSelectionOutline(world, state, hit.blockPos);
             }
 
             RenderChunks(world);
@@ -129,7 +130,7 @@ namespace SharpCraft.render
 
             foreach (Waypoint wp in wps)
             {
-                ModelBlock model = ModelRegistry.GetModelForBlock(EnumBlock.RARE, 0);
+                ModelBlock model = JsonModelLoader.GetModelForBlock(BlockRegistry.GetBlock("rare").UnlocalizedName);
 
                 float size = 0.25f;
 
@@ -168,14 +169,12 @@ namespace SharpCraft.render
 
             foreach (KeyValuePair<BlockPos, DestroyProgress> pair in progresses)
             {
-                EnumBlock block = world.GetBlock(pair.Key);
+                BlockState state = world.GetBlockState(pair.Key);
 
-                if (block == EnumBlock.AIR)
+                if (state.Block == BlockRegistry.GetBlock("air"))
                     continue;
 
-                int meta = world.GetMetadata(pair.Key);
-
-                ModelBlock model = ModelRegistry.GetModelForBlock(block, meta);
+                ModelBlock model = JsonModelLoader.GetModelForBlock(state.Block.UnlocalizedName);
 
                 int v = 32 * (int)(pair.Value.PartialProgress * 8);
 
@@ -220,10 +219,10 @@ namespace SharpCraft.render
             _selectionOutline.Unbind();
         }
 
-        private void RenderBlockSelectionOutline(World world, EnumBlock block, BlockPos pos)
+        private void RenderBlockSelectionOutline(World world, BlockState state, BlockPos pos)
         {
             Shader<ModelCubeOutline> shader = _selectionOutline.Shader;
-            AxisAlignedBB bb = ModelRegistry.GetModelForBlock(block, world.GetMetadata(pos))?.boundingBox;
+            AxisAlignedBB bb = state.Block.BoundingBox;
 
             if (bb == null)
                 return;
@@ -259,7 +258,7 @@ namespace SharpCraft.render
 
             if (stack.Item is ItemBlock itemBlock)
             {
-                ModelBlock model = ModelRegistry.GetModelForBlock(itemBlock.GetBlock(), stack.Meta);
+                ModelBlock model = JsonModelLoader.GetModelForBlock(itemBlock.GetBlock().GetState(stack.Meta).UnlocalizedName);
 
                 Vector3 partialLookVec = lastLookVec + (lookVec - lastLookVec) * partialTicks;
                 Vector3 partialMotion = lastMotion + (motion - lastMotion) * partialTicks;

@@ -12,37 +12,40 @@ namespace SharpCraft.particle
 {
     internal class ParticleDigging : Particle
     {
-        public EnumBlock block { get; }
+        public BlockState state { get; }
 
         protected Vector3 rot;
         protected Vector3 lastRot;
 
         protected Vector3 rotStep;
 
-        public ParticleDigging(World world, Vector3 pos, Vector3 motion, float particleScale, EnumBlock block, int meta) : this(world, pos, motion, particleScale, block, FaceSides.AllSides[(int)MathUtil.NextFloat(0, 6)], meta)
+        public ParticleDigging(World world, Vector3 pos, Vector3 motion, float particleScale, BlockState state) : this(world, pos, motion, particleScale, state, FaceSides.AllSides[(int)MathUtil.NextFloat(0, 6)])
         {
         }
 
-        public ParticleDigging(World world, Vector3 pos, Vector3 motion, float particleScale, EnumBlock block, FaceSides side, int meta) : base(world, pos, motion, particleScale, TextureManager.TEXTURE_BLOCKS.ID)
+        public ParticleDigging(World world, Vector3 pos, Vector3 motion, float particleScale, BlockState state, FaceSides side) : base(world, pos, motion, particleScale, TextureManager.TEXTURE_BLOCKS.ID)
         {
-            this.block = block;
+            this.state = state;
 
-            ModelBlock model = ModelRegistry.GetModelForBlock(block, meta);
+            ModelBlock model = JsonModelLoader.GetModelForBlock(state.Block.UnlocalizedName);
 
             if (model.RawModel is ModelBlockRaw mbr)
             {
-                TextureUVNode uvs = mbr.GetUVs(side);
+                float[] uvs = mbr.GetUVsForSide(side);
 
-                Vector2 size = uvs.end - uvs.start;
+                Vector2 start = new Vector2(uvs[0], uvs[1]);
+                Vector2 end = new Vector2(uvs[4], uvs[5]); //4,5 because that's the 3. vertex and the local UV there is 1,1
+
+                Vector2 size = end -start;
 
                 Vector2 pixel = size / 16;
 
-                UVmin = uvs.start + pixel * new Vector2(MathUtil.NextFloat(0, 12), MathUtil.NextFloat(0, 12));
+                UVmin = start + pixel * new Vector2(MathUtil.NextFloat(0, 12), MathUtil.NextFloat(0, 12));
                 UVmax = UVmin + pixel * 4;
             }
 
             if (side == FaceSides.Up)
-                this.Motion.Xz = SharpCraft.Instance.Camera.GetLookVec().Xz * 0.15f;
+                Motion.Xz = SharpCraft.Instance.Camera.GetLookVec().Xz * 0.15f;
 
             Vector3 vec = new Vector3(MathUtil.NextFloat(-1), MathUtil.NextFloat(-1), MathUtil.NextFloat(-1));
 
@@ -100,7 +103,7 @@ namespace SharpCraft.particle
             model.Shader.UpdateGlobalUniforms();
             model.Shader.UpdateModelUniforms();
             model.Shader.UpdateInstanceUniforms(MatrixHelper.CreateTransformationMatrix(partialPos - (Vector3.UnitX + Vector3.UnitZ) * partialScale / 2, partialRot, partialScale), this);
-            
+
             GL.BindTexture(TextureTarget.Texture2D, textureID);
             model.RawModel.Render(PrimitiveType.Quads);
         }

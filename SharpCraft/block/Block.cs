@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace SharpCraft.block
 {
-    internal abstract class Block
+    public abstract class Block
     {
         private static readonly Shader<ModelBlock> DefaultShader = new Shader<ModelBlock>("block");
         public Shader<ModelBlock> Shader { get; protected set; }
@@ -33,7 +33,7 @@ namespace SharpCraft.block
         }
     }
 
-    internal class BlockState
+    public class BlockState
     {
         public Block Block { get; }
         public ModelBlock Model { get; }

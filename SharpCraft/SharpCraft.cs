@@ -24,10 +24,8 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading;
-using System.Xml;
 using Newtonsoft.Json;
 using Bitmap = System.Drawing.Bitmap;
-using Image = OpenTK.Image;
 using Point = OpenTK.Point;
 using Rectangle = System.Drawing.Rectangle;
 using Size = OpenTK.Size;
@@ -203,7 +201,7 @@ namespace SharpCraft
             Console.WriteLine("DEBUG: loading models");
 
             //TODO - merge shaders and use strings as block IDs like sharpcraft:dirt
-           
+
 
             /*
             ModelBlock missingModel = new ModelBlock(EnumBlock.MISSING, shader);
@@ -372,16 +370,14 @@ namespace SharpCraft
 
                         BlockPos lastPos = _lastMouseOverObject.blockPos;
 
-                        if (lmb && _lastMouseOverObject.hit is EnumBlock)
+                        if (lmb && _lastMouseOverObject.hit == HitType.Block)
                         {
                             ParticleRenderer.SpawnDiggingParticle(_lastMouseOverObject);
 
-                            if (MouseOverObject.hit != null && _lastMouseOverObject.hit == MouseOverObject.hit &&
-                                lastPos == MouseOverObject.blockPos)
+                            if (_lastMouseOverObject.hit == MouseOverObject.hit && lastPos == MouseOverObject.blockPos)
                             {
                                 if (!DestroyProgresses.TryGetValue(lastPos, out DestroyProgress progress))
-                                    DestroyProgresses.TryAdd(lastPos,
-                                        progress = new DestroyProgress(lastPos, Player));
+                                    DestroyProgresses.TryAdd(lastPos, progress = new DestroyProgress(lastPos, Player));
                                 else
                                     progress.Progress++;
 
@@ -445,6 +441,8 @@ namespace SharpCraft
 
             Vector3 camPos = Vector3.One * 0.5f + Camera.pos;
 
+            var air = BlockRegistry.GetBlock("air");
+
             for (float z = -radius; z <= radius; z++)
             {
                 for (float y = -radius; y <= radius; y++)
@@ -461,11 +459,11 @@ namespace SharpCraft
                         if (f <= radius + 0.5f)
                         {
                             BlockPos pos = new BlockPos(vec);
-                            EnumBlock block = World.GetBlock(pos);
+                            BlockState state = World.GetBlockState(pos);
 
-                            if (block != EnumBlock.AIR)
+                            if (state.Block != air)
                             {
-                                ModelBlock model = ModelRegistry.GetModelForBlock(block, World.GetMetadata(pos));
+                                ModelBlock model = JsonModelLoader.GetModelForBlock(state.Block.UnlocalizedName);
                                 AxisAlignedBB bb = model.boundingBox.offset(pos.ToVec());
 
                                 bool hitSomething = RayHelper.rayIntersectsBB(Camera.pos,
@@ -489,7 +487,6 @@ namespace SharpCraft
                                         sideHit = FaceSides.South;
 
                                     BlockPos p = new BlockPos(hitPos - normal * 0.5f);
-                                    ;
 
                                     if (sideHit == FaceSides.Null)
                                         continue;
@@ -500,7 +497,7 @@ namespace SharpCraft
                                     {
                                         dist = l;
 
-                                        final.hit = block;
+                                        final.hit = HitType.Block;
                                         final.hitVec = hitPos;
                                         final.blockPos = p;
                                         final.normal = normal;
@@ -1117,13 +1114,13 @@ namespace SharpCraft
             FaceSides normal = FaceSides.Parse(side); //TextureType parsed to FaceSides, also a normal of this face
             float[] unitFace = _cube[normal]; //one side of the cube in unit size
 
-            int x = from[0];
-            int y = from[1];
-            int z = from[2];
+            float x = from[0] / 16f;
+            float y = from[1] / 16f;
+            float z = from[2] / 16f;
 
-            float sx = (to[0] - x) / 16f; //the size of the cube part
-            float sy = (to[1] - y) / 16f;
-            float sz = (to[2] - z) / 16f;
+            float sx = to[0] / 16f - x; //the size of the cube part
+            float sy = to[1] / 16f - y;
+            float sz = to[2] / 16f - z;
 
             for (var i = 0; i < unitFace.Length; i += 3)
             {
@@ -1148,31 +1145,31 @@ namespace SharpCraft
 
         private static Dictionary<string, BlockModel> _blockModels = new Dictionary<string, BlockModel>();
 
-        private static Dictionary<string, ModelBlockRaw> _modelsForRender = new Dictionary<string, ModelBlockRaw>();
+        private static Dictionary<string, ModelBlock> _modelsForRender = new Dictionary<string, ModelBlock>();
 
         public JsonModelLoader(Shader<ModelBlock> blockShader)
         {
-            TEXTURE_BLOCKS = StitchBlocks();
+            TEXTURE_BLOCKS = StitchBlocks(blockShader);
             //here we have the block models already loaded
 
             //foreach (var model in _blockModels)
             //{
-                //var texturedModel = CreateTexturedCubeModel(model.Value.Sprites);
+            //var texturedModel = CreateTexturedCubeModel(model.Value.Sprites);
 
-                //BlockModelForRender mfr = new BlockModelForRender(texturedModel, blockShader);
+            //BlockModelForRender mfr = new BlockModelForRender(texturedModel, blockShader);
 
-                //_modelsForRender.Add(model.Key, mfr);
+            //_modelsForRender.Add(model.Key, mfr);
             //}
         }
 
-        private int StitchBlocks()
+        private int StitchBlocks(Shader<ModelBlock> blockShader)
         {
             string dir = $"{SharpCraft.Instance.GameFolderDir}\\SharpCraft_Data\\assets\\models\\block";
 
             if (!Directory.Exists(dir))
                 return 0;
 
-           // string[] files = Directory.GetFiles(dir); //TODO - ONLY LOAD JSONS FOR REGISTERED BLOCKS!
+            // string[] files = Directory.GetFiles(dir); //TODO - ONLY LOAD JSONS FOR REGISTERED BLOCKS!
 
             var listOfBlocks = BlockRegistry.AllBlocks();
 
@@ -1202,7 +1199,7 @@ namespace SharpCraft
             var textureMapElements = new Dictionary<string, TextureMapElement>(); //each texture name has it's UV values TODO - maybe make a TextureMap class where this could be used
 
             var id = Stitch(nonDuplicateTextures.ToArray(), 16, textureMapElements); // stitch all textureMap, return the texture ID of the registered texture in VRAM
-
+            
             //TODO - if json doesn't contain cube model, assume it's a full cube
             foreach (var pair in blockModels) //one model per registered block
             {
@@ -1216,10 +1213,13 @@ namespace SharpCraft
                 for (var index = 0; index < model.Cubes.Length; index++)
                 {
                     var cube = model.Cubes[index];
+
                     CubeModelBuilder.AppendCubeModel(cube, model.Textures, textureMapElements, ref vertexes, ref normals, ref uvs, index);
                 }
 
-                _modelsForRender.Add(name, ModelManager.LoadBlockModelToVAO(vertexes,normals,uvs));
+                ModelBlock mb = new ModelBlock(blockShader, ModelManager.LoadBlockModelToVAO(vertexes, normals, uvs));
+
+                _modelsForRender.Add(name, mb);
             }
 
             #region OLD
@@ -1307,7 +1307,7 @@ namespace SharpCraft
             }
         }
 
-        public static ModelBlockRaw GetModelForBlock(string blockName)
+        public static ModelBlock GetModelForBlock(string blockName)
         {
             _modelsForRender.TryGetValue(blockName, out var model);
             return model;
@@ -1396,5 +1396,12 @@ namespace SharpCraft
         east,
         block,
         side
+    }
+
+    public enum HitType
+    {
+        Block,
+        Enum,
+        Air
     }
 }
