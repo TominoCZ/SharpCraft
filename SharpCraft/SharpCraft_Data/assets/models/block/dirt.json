@@ -1,8 +1,6 @@
 {
   "textures": {
-    "top": "grass_top",
-	"bottom": "dirt",
-	"side": "grass_side"
+    "block": "dirt"
   },
   "cubes": [
   {
@@ -11,27 +9,27 @@
     "faces": {
       "top": {
         "uv": [0,0,16,16],
-          "texture": "#top"
+          "texture": "#block"
       },
 	  "bottom": {
         "uv": [0,0,16,16],
-          "texture": "#bottom"
+          "texture": "#block"
       },
 	  "north": {
         "uv": [0,0,16,16],
-          "texture": "#side"
+          "texture": "#block"
       },
 	  "south": {
         "uv": [0,0,16,16],
-          "texture": "#side"
+          "texture": "#block"
       },
 	  "east": {
         "uv": [0,0,16,16],
-          "texture": "#side"
+          "texture": "#block"
       },
 	  "west": {
         "uv": [0,0,16,16],
-          "texture": "#side"
+          "texture": "#block"
       },
     }
   }]

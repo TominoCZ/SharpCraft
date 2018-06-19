@@ -191,7 +191,7 @@ namespace SharpCraft.entity
             if (stack == null || stack.Item == null)
                 return;
 
-            int maxStackSize = stack.Item.MaxStackSize();
+            int maxStackSize = stack.Item.GetMaxStackSize();
 
             // Hotbar to Inventory
             if (index < Hotbar.Length)
@@ -279,8 +279,8 @@ namespace SharpCraft.entity
 
         public bool CanPickUpStack(ItemStack dropped)
         {
-            return Hotbar.Any(stack => stack == null || stack.IsEmpty || stack.ItemSame(dropped) && stack.Count + dropped.Count <= dropped.Item.MaxStackSize()) ||
-                   Inventory.Any(stack => stack == null || stack.IsEmpty || stack.ItemSame(dropped) && stack.Count + dropped.Count <= dropped.Item.MaxStackSize());
+            return Hotbar.Any(stack => stack == null || stack.IsEmpty || stack.ItemSame(dropped) && stack.Count + dropped.Count <= dropped.Item.GetMaxStackSize()) ||
+                   Inventory.Any(stack => stack == null || stack.IsEmpty || stack.ItemSame(dropped) && stack.Count + dropped.Count <= dropped.Item.GetMaxStackSize());
         }
 
         public bool OnPickup(ItemStack dropped)
@@ -296,9 +296,9 @@ namespace SharpCraft.entity
                 if (stack == null || stack.IsEmpty || stack.Item != dropped.Item)
                     continue;
 
-                if (dropped.Item == stack.Item && stack.Count <= stack.Item.MaxStackSize())
+                if (dropped.Item == stack.Item && stack.Count <= stack.Item.GetMaxStackSize())
                 {
-                    int toPickUp = Math.Min(stack.Item.MaxStackSize() - stack.Count, dropped.Count);
+                    int toPickUp = Math.Min(stack.Item.GetMaxStackSize() - stack.Count, dropped.Count);
 
                     stack.Count += toPickUp;
                     dropped.Count -= toPickUp;
@@ -323,9 +323,9 @@ namespace SharpCraft.entity
                 if (i < Hotbar.Length)
                     continue;
 
-                if (dropped.Item == stack.Item && stack.Count <= stack.Item.MaxStackSize())
+                if (dropped.Item == stack.Item && stack.Count <= stack.Item.GetMaxStackSize())
                 {
-                    int toPickUp = Math.Min(stack.Item.MaxStackSize() - stack.Count, dropped.Count);
+                    int toPickUp = Math.Min(stack.Item.GetMaxStackSize() - stack.Count, dropped.Count);
 
                     stack.Count += toPickUp;
                     dropped.Count -= toPickUp;
@@ -378,14 +378,11 @@ namespace SharpCraft.entity
                 return;
 
             BlockState state = World.GetBlockState(moo.blockPos);
-            Block air = BlockRegistry.GetBlock("air");
 
-            if (state.Block == air)
-                return;
+            if (JsonModelLoader.GetModelForBlock(state.Block.UnlocalizedName) != null)
+                SharpCraft.Instance.ParticleRenderer.SpawnDestroyParticles(moo.blockPos, state);
 
-            SharpCraft.Instance.ParticleRenderer.SpawnDestroyParticles(moo.blockPos, state);
-
-            World.SetBlockState(moo.blockPos, air.GetState(0));
+            World.SetBlockState(moo.blockPos, BlockRegistry.GetBlock<BlockAir>().GetState());
 
             Vector3 motion = new Vector3(MathUtil.NextFloat(-0.15f, 0.15f), 0.3f, MathUtil.NextFloat(-0.15f, 0.15f));
 
@@ -415,7 +412,7 @@ namespace SharpCraft.entity
             BlockPos pos = moo.blockPos.Offset(moo.sideHit);
             BlockState stateAtPos = World.GetBlockState(pos);
 
-            Block heldBlock = itemBlock.GetBlock();
+            Block heldBlock = itemBlock.Block;
             AxisAlignedBB blockBb = heldBlock.BoundingBox.offset(pos.ToVec());
 
             if (stateAtPos.Block != air || World.GetIntersectingEntitiesBBs(blockBb).Count > 0)
@@ -453,7 +450,7 @@ namespace SharpCraft.entity
                     {
                         ItemStack stack = Hotbar[i];
 
-                        if (stack?.Item?.InnerItem == clickedState.Block && stack.Meta == clickedState.Block.GetMetaFromState(clickedState))
+                        if (stack?.Item is ItemBlock ib && ib.Block == clickedState.Block && stack.Meta == clickedState.Block.GetMetaFromState(clickedState))
                         {
                             SetSelectedSlot(i);
                             return;

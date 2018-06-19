@@ -62,6 +62,9 @@ namespace SharpCraft.render
             {
                 var state = SharpCraft.Instance.World.GetBlockState(moo.blockPos);
 
+                if (JsonModelLoader.GetModelForBlock(state.Block.UnlocalizedName) == null)
+                    return;
+
                 float f0 = moo.hitVec.X
                      + MathUtil.NextFloat(-0.21f, 0.21f) * Math.Abs(moo.boundingBox.max.X - moo.boundingBox.min.X);
                 float f1 = moo.hitVec.Y

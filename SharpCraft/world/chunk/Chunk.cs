@@ -231,19 +231,17 @@ namespace SharpCraft.world.chunk
                             continue;
 
                         BlockPos localPos = new BlockPos(x, y, z);
-
-                        ModelBlock blockModel = JsonModelLoader.GetModelForBlock(state.Block.UnlocalizedName);
+                        
+                        var model = JsonModelLoader.GetModelForBlock(state.Block.UnlocalizedName);
 
                         foreach (FaceSides dir in FaceSides.AllSides)
                         {
                             BlockPos worldPosO = worldPos.Offset(dir);
                             BlockState stateO = World.GetBlockState(worldPosO);
-                            ModelBlock blockModelO = JsonModelLoader.GetModelForBlock(stateO.Block.UnlocalizedName);
 
-                            if (!(stateO.Block == air || blockModelO.hasTransparency && !blockModel.hasTransparency))
+                            if (!(stateO.Block == air || stateO.Block.HasTransparency && !state.Block.HasTransparency))
                                 continue;
-                            
-                            var model = JsonModelLoader.GetModelForBlock(state.Block.UnlocalizedName);
+
                             ModelBlockRaw mbr = (ModelBlockRaw)model?.RawModel;
 
                             lock (locker)

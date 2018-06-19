@@ -1,8 +1,7 @@
 {
   "textures": {
-    "top": "grass_top",
-	"bottom": "dirt",
-	"side": "grass_side"
+    "top": "log_top",
+	"side": "log_side"
   },
   "cubes": [
   {
@@ -15,7 +14,7 @@
       },
 	  "bottom": {
         "uv": [0,0,16,16],
-          "texture": "#bottom"
+          "texture": "#top"
       },
 	  "north": {
         "uv": [0,0,16,16],

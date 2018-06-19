@@ -117,8 +117,6 @@ namespace SharpCraft
         private ItemRegistry itemRegistry;
         private BlockRegistry blockRegistry;
 
-        public EventHandler<ItemsAndBlockRegistryEventArgs> OnBlockRegistryEvent;
-
         public WorldRenderer WorldRenderer;
         public EntityRenderer EntityRenderer;
         public ParticleRenderer ParticleRenderer;
@@ -194,48 +192,6 @@ namespace SharpCraft
             itemRegistry = new ItemRegistry();
             blockRegistry = new BlockRegistry();
 
-            #region model loading
-
-            //Console.WriteLine("DEBUG: loading models");
-
-            /*
-            ModelBlock missingModel = new ModelBlock(EnumBlock.MISSING, shader);
-            ModelBlock stoneModel = new ModelBlock(EnumBlock.STONE, shader);
-            ModelBlock grassModel = new ModelBlock(EnumBlock.GRASS, shader);
-            ModelBlock dirtModel = new ModelBlock(EnumBlock.DIRT, shader);
-            ModelBlock cobblestoneModel = new ModelBlock(EnumBlock.COBBLESTONE, shader);
-            ModelBlock planksModel = new ModelBlock(EnumBlock.PLANKS, shader);
-            ModelBlock craftingTableModel = new ModelBlock(EnumBlock.CRAFTING_TABLE, shader, true);
-            ModelBlock furnaceModel = new ModelBlock(EnumBlock.FURNACE, shader, true);
-            ModelBlock bedrockModel = new ModelBlock(EnumBlock.BEDROCK, shader);
-            ModelBlock rareModel = new ModelBlock(EnumBlock.RARE, shader);
-            ModelBlock glassModel = new ModelBlock(EnumBlock.GLASS, shader, false, true);
-            ModelBlock logModel = new ModelBlock(EnumBlock.LOG, shader);
-            ModelBlock leavesModel = new ModelBlock(EnumBlock.LEAVES, shader, false, true);
-
-            ModelBlock xrayModel = new ModelBlock(EnumBlock.XRAY, shader);
-            
-
-            ModelRegistry.RegisterBlockModel(missingModel, 0);
-
-            ModelRegistry.RegisterBlockModel(stoneModel, 0);
-            ModelRegistry.RegisterBlockModel(grassModel, 0);
-            ModelRegistry.RegisterBlockModel(dirtModel, 0);
-            ModelRegistry.RegisterBlockModel(cobblestoneModel, 0);
-            ModelRegistry.RegisterBlockModel(planksModel, 0);
-            ModelRegistry.RegisterBlockModel(craftingTableModel, 0);
-            ModelRegistry.RegisterBlockModel(furnaceModel, 0);
-
-            ModelRegistry.RegisterBlockModel(bedrockModel, 0);
-            ModelRegistry.RegisterBlockModel(rareModel, 0);
-            ModelRegistry.RegisterBlockModel(glassModel, 0);
-            ModelRegistry.RegisterBlockModel(logModel, 0);
-            ModelRegistry.RegisterBlockModel(leavesModel, 0);
-
-            ModelRegistry.RegisterBlockModel(xrayModel, 0);
-            */
-            #endregion model loading
-
             SettingsManager.Load();
 
             WorldRenderer = new WorldRenderer();
@@ -244,8 +200,6 @@ namespace SharpCraft
             SkyboxRenderer = new SkyboxRenderer();
             GuiRenderer = new GuiRenderer();
             FontRenderer = new FontRenderer();
-
-            //timer.InfiniteFps = true;
 
             LoadMods();
 
@@ -289,8 +243,14 @@ namespace SharpCraft
 
         private void RegisterItemsAndBlocks()
         {
-            blockRegistry.Put(new BlockGrass());
             blockRegistry.Put(new BlockAir());
+            blockRegistry.Put(new BlockGrass());
+            blockRegistry.Put(new BlockDirt());
+            blockRegistry.Put(new BlockStone());
+            blockRegistry.Put(new BlockBedrock());
+            blockRegistry.Put(new BlockLog());
+            blockRegistry.Put(new BlockLeaves());
+            blockRegistry.Put(new BlockGlass());
 
             //POST - MOD Blocks and Items
             foreach (ModMain mod in installedMods)
@@ -298,7 +258,15 @@ namespace SharpCraft
                 mod.OnItemsAndBlocksRegistry(new ItemsAndBlockRegistryEventArgs(blockRegistry, itemRegistry));
             }
 
-            blockRegistry.RegisterBlocksPost();
+            foreach (var block in BlockRegistry.AllBlocks())
+            {
+                itemRegistry.Put(new ItemBlock(block));
+            }
+            
+            JsonModelLoader loader = new JsonModelLoader(Block.DefaultShader);
+
+            blockRegistry.RegisterBlocksPost(loader);
+            itemRegistry.RegisterItemsPost(loader);
         }
 
         public void StartGame()
@@ -459,9 +427,7 @@ namespace SharpCraft
 
                             if (state.Block != air)
                             {
-                                ModelBlock model = JsonModelLoader.GetModelForBlock(state.Block.UnlocalizedName);
-
-                                AxisAlignedBB bb = model.boundingBox.offset(pos.ToVec());
+                                AxisAlignedBB bb = state.Block.BoundingBox.offset(pos.ToVec());
 
                                 bool hitSomething = RayHelper.rayIntersectsBB(Camera.pos,
                                     Camera.GetLookVec(), bb, out Vector3 hitPos, out Vector3 normal);
@@ -910,7 +876,7 @@ namespace SharpCraft
         static SettingsManager()
         {
             _settings.Add("sensitivity", "1");
-            _settings.Add("renderdistance", "1");
+            _settings.Add("renderdistance", "8");
             _settings.Add("worldseed", "yeet");
         }
 
@@ -1065,6 +1031,7 @@ namespace SharpCraft
                 TextureType side = pair.Key;
                 JsonCubeFaceUv textureNode = pair.Value;
 
+                //edit: textureNode.Texture can be anything. it is a variable defined by the modeller
                 //textureNode.Texture isn't the name of the texture file! it is '#side', '#block', '#bottom', ... TODO - if '#' is not present, use the texture from the texture map
                 if (textureNode.Texture[0] == '#')
                 {
@@ -1076,10 +1043,10 @@ namespace SharpCraft
 
                         if (textureMap.TryGetValue(textureNameForFace, out var tme))
                         {
-                            var minU = tme.UVMin.X + textureNode.UV[0] / 16f;
-                            var minV = tme.UVMin.Y + textureNode.UV[1] / 16f;
-                            var maxU = tme.UVMax.X + textureNode.UV[2] / 16f;
-                            var maxV = tme.UVMax.Y + textureNode.UV[3] / 16f;
+                            var minU = tme.UVMin.X + textureNode.UV[0] / 16f / 16f;
+                            var minV = tme.UVMin.Y + textureNode.UV[1] / 16f / 16f;
+                            var maxU = minU + textureNode.UV[2] / 16f / 16f;
+                            var maxV = minV + textureNode.UV[3] / 16f / 16f;
 
                             uvs[startIndex2 + uvIndex] = minU;
                             uvs[startIndex2 + uvIndex + 1] = minV;
@@ -1136,9 +1103,8 @@ namespace SharpCraft
     {
         public static int TEXTURE_BLOCKS;
 
-        private static Dictionary<string, BlockModel> _blockModels = new Dictionary<string, BlockModel>();
-
-        private static readonly Dictionary<string, ModelBlock> _modelsForRender = new Dictionary<string, ModelBlock>();
+        private static readonly Dictionary<string, ModelBlock> _blockModels = new Dictionary<string, ModelBlock>();
+        //private static readonly Dictionary<string, ModelItem> _itemModels = new Dictionary<string, ModelItem>(); TODO
 
         private static JsonModelLoader _instance;
 
@@ -1148,7 +1114,7 @@ namespace SharpCraft
                 throw new Exception("There can only be one instance of the JsonModelLoader class!");
 
             _instance = this;
-            TEXTURE_BLOCKS = StitchBlocks(blockShader);
+            TEXTURE_BLOCKS = LoadBlocks(blockShader);
             //here we have the block models already loaded
 
             //foreach (var model in _blockModels)
@@ -1161,7 +1127,7 @@ namespace SharpCraft
             //}
         }
 
-        private int StitchBlocks(Shader<ModelBlock> blockShader)
+        private int LoadBlocks(Shader<ModelBlock> blockShader)
         {
             string dir = $"{SharpCraft.Instance.GameFolderDir}\\SharpCraft_Data\\assets\\models\\block";
 
@@ -1221,7 +1187,7 @@ namespace SharpCraft
 
                 ModelBlock mb = new ModelBlock(blockShader, ModelManager.LoadBlockModelToVAO(vertexes, normals, uvs));
 
-                _modelsForRender.Add(name, mb);
+                _blockModels.Add(name, mb);
             }
 
             #region OLD
@@ -1260,6 +1226,86 @@ namespace SharpCraft
             return id;
         }
 
+        //TODO - finish + create model from texture if model not found
+        private int LoadItems(Shader<ModelBlock> blockShader)
+        {
+            string dirBlock = $"{SharpCraft.Instance.GameFolderDir}\\SharpCraft_Data\\assets\\models\\block";
+            string dirItem = $"{SharpCraft.Instance.GameFolderDir}\\SharpCraft_Data\\assets\\models\\item";
+
+            if (!Directory.Exists(dirBlock) || !Directory.Exists(dirItem))
+                return 0;
+
+            // string[] files = Directory.GetFiles(dir); //TODO - ONLY LOAD JSONS FOR REGISTERED BLOCKS!
+
+            var listOfItems = ItemRegistry.AllItems();
+
+            List<string> nonDuplicateTextures = new List<string>();
+
+            var itemModels = new ConcurrentDictionary<string, BlockJSONModel>();
+
+            foreach (var iitem in listOfItems)
+            {
+                string file = "";
+
+                bool isItemBlock = false;
+
+                if (iitem is ItemBlock itemBlock)
+                {
+                    isItemBlock = true;
+                    file = $"{dirBlock}\\{itemBlock.GetUnlocalizedName()}.json";
+                }
+                else if (iitem is Item item)
+                    file = $"{dirItem}\\{item.GetUnlocalizedName()}.json";
+
+                if (!File.Exists(file))
+                    continue;
+
+                BlockJSONModel bjm = JsonConvert.DeserializeObject<BlockJSONModel>(File.ReadAllText(file));
+
+                string itemName = Path.GetFileNameWithoutExtension(file);
+
+                itemModels.TryAdd(itemName, bjm); //save what block is using what model
+
+                if (isItemBlock)
+                    continue;
+
+                foreach (var pair in bjm.Textures) //iterating over the textureMap in the Json model
+                {
+                    if (!nonDuplicateTextures.Contains(pair.Value))
+                    {
+                        nonDuplicateTextures.Add(pair.Value); //add the current texture name to a list of all textureMap if isn't already there
+                    }
+                }
+            }
+
+            var textureMapElements = new Dictionary<string, TextureMapElement>(); //each texture name has it's UV values TODO - maybe make a TextureMap class where this could be used
+
+            var id = Stitch(nonDuplicateTextures.ToArray(), 16, textureMapElements); // stitch all textureMap, return the texture ID of the registered texture in VRAM
+            
+            foreach (var pair in itemModels) //one model per registered block
+            {
+                string name = pair.Key;
+                BlockJSONModel model = pair.Value;
+
+                float[] vertexes = new float[72 * model.Cubes.Length];
+                float[] normals = new float[72 * model.Cubes.Length];
+                float[] uvs = new float[48 * model.Cubes.Length];
+
+                for (var index = 0; index < model.Cubes.Length; index++)
+                {
+                    var cube = model.Cubes[index];
+
+                    CubeModelBuilder.AppendCubeModel(cube, model.Textures, textureMapElements, ref vertexes, ref normals, ref uvs, index);
+                }
+
+                ModelBlock mb = new ModelBlock(blockShader, ModelManager.LoadBlockModelToVAO(vertexes, normals, uvs));
+
+                //_itemModels.Add(name, mb);
+            }
+
+            return id;
+        }
+
         private int Stitch(string[] textures, int textureSize, Dictionary<string, TextureMapElement> sprites)
         {
             Bitmap map = new Bitmap(256, 256);
@@ -1293,86 +1339,47 @@ namespace SharpCraft
 
         private void WriteBitmap(Bitmap textureMap, string texName, int textureSize, ref int countX, ref int countY)
         {
-            Bitmap tex = new Bitmap(Bitmap.FromFile($"{SharpCraft.Instance.GameFolderDir}\\SharpCraft_Data\\assets\\Textures\\blocks\\{texName}.png"), textureSize, textureSize);
+            var file = $"{SharpCraft.Instance.GameFolderDir}\\SharpCraft_Data\\assets\\Textures\\blocks\\{texName}.png";
 
-            using (Graphics g = Graphics.FromImage(textureMap))
+            Bitmap tex = File.Exists(file)
+                ? new Bitmap(Bitmap.FromFile(file), textureSize, textureSize)
+                : null;
+
+            if (tex == null)
             {
-                g.DrawImage(tex, countX, countY);
-
-                countX += textureSize;
-
-                if (countX + textureSize > textureMap.Width)
+                using (var img = TextureManager.CreateMissingTexture())
                 {
-                    countX = 0;
-                    countY += textureSize;
+                    tex = new Bitmap(img, textureSize, textureSize);
+                }
+            }
+
+            using (tex)
+            {
+                using (Graphics g = Graphics.FromImage(textureMap))
+                {
+                    g.DrawImage(tex, countX, countY);
+
+                    countX += textureSize;
+
+                    if (countX + textureSize > textureMap.Width)
+                    {
+                        countX = 0;
+                        countY += textureSize;
+                    }
                 }
             }
         }
 
+        /// <summary>
+        /// Returns null if block is not registered
+        /// </summary>
+        /// <param name="blockName"></param>
+        /// <returns></returns>
         public static ModelBlock GetModelForBlock(string blockName)
         {
-            _modelsForRender.TryGetValue(blockName, out var model);
+            _blockModels.TryGetValue(blockName, out var model);
+
             return model;
-        }
-
-        private Dictionary<FaceSides, RawQuad> CreateTexturedCubeModel(Dictionary<TextureType, TextureMapElement> sprites)
-        {
-            Dictionary<FaceSides, RawQuad> quads = new Dictionary<FaceSides, RawQuad>();
-
-            foreach (var pair in sprites)
-            {
-                var data = ModelHelper.GetCubeSideVertexes(pair.Key);
-
-                var uvNode = new TextureUVNode(pair.Value.UVMin, pair.Value.UVMax);
-
-                RawQuad quad = new RawQuad(
-                    data,
-                    uvNode.ToArray(),
-                    ModelHelper.CalculateNormals(data),
-                    3);
-
-                quads.Add(FaceSides.Parse(pair.Key), quad);
-            }
-
-            return quads;
-        }
-    }
-
-    class BlockModelForRender : ModelBaked<ModelBlock> //TODO change
-    {
-        public BlockModelForRender(Dictionary<FaceSides, RawQuad> data, Shader<ModelBlock> shader) : base(null, shader)
-        {
-            RawModel = ModelManager.LoadBlockModelToVAO(data);
-        }
-    }
-
-    class BlockModel
-    {
-        public Dictionary<TextureType, TextureMapElement> Sprites = new Dictionary<TextureType, TextureMapElement>();
-
-        public void AddSpriteForSide(TextureType type, TextureMapElement mapElement) //TODO sides, not type -> cuz what about the particle texture??
-        {
-            if (type != TextureType.side && type != TextureType.block)
-            {
-                Sprites.Remove(type);
-                Sprites.Add(type, mapElement);
-            }
-        }
-
-        public void SetSpriteForAllSides(TextureMapElement mapElement)
-        {
-            Sprites.TryAdd(TextureType.top, mapElement);
-            Sprites.TryAdd(TextureType.bottom, mapElement);
-
-            SetSpriteForSides(mapElement);
-        }
-
-        public void SetSpriteForSides(TextureMapElement mapElement)
-        {
-            Sprites.TryAdd(TextureType.north, mapElement);
-            Sprites.TryAdd(TextureType.south, mapElement);
-            Sprites.TryAdd(TextureType.west, mapElement);
-            Sprites.TryAdd(TextureType.east, mapElement);
         }
     }
 
@@ -1394,8 +1401,8 @@ namespace SharpCraft
         bottom,
         north,
         south,
-        west,
         east,
+        west,
         block,
         side
     }

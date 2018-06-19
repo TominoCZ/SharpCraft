@@ -9,10 +9,6 @@ namespace SharpCraft.gui
     {
         public ItemStack Stack;
 
-        public GuiItemSlot(int ID, float x, float y, ItemStack stack) : this(ID, x, y, 1, stack)
-        {
-        }
-
         public GuiItemSlot(int ID, float x, float y, float scale, ItemStack stack) : base(ID, x, y, scale)
         {
             Stack = stack;
@@ -40,7 +36,7 @@ namespace SharpCraft.gui
 
             if (Stack.Item is ItemBlock itemBlock)
             {
-                Block block = itemBlock.GetBlock();
+                Block block = itemBlock.Block;
 
                 x += 14 * Scale / 2;
                 y += 14 * Scale / 2;

@@ -1,12 +1,9 @@
-﻿namespace SharpCraft.block
-{
-    public class BlockGrass : Block
-    {
-        public BlockGrass() : base("grass")
-        {
-        }
-    }
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
 
+namespace SharpCraft.block
+{
     public class BlockAir : Block
     {
         public BlockAir() : base("air")

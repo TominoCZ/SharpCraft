@@ -86,7 +86,7 @@ namespace SharpCraft.render
             if (world == null) return;
             world.LoadManager.LoadImportantChunks();
             world.LoadManager.BuildImportantChunks();
-            
+
             GL.BindTexture(TextureTarget.Texture2D, JsonModelLoader.TEXTURE_BLOCKS);
 
             MouseOverObject hit = SharpCraft.Instance.MouseOverObject;
@@ -155,7 +155,7 @@ namespace SharpCraft.render
             ConcurrentDictionary<BlockPos, DestroyProgress> progresses = SharpCraft.Instance.DestroyProgresses;
             if (progresses.Count == 0)
                 return;
-            
+
             GL.BindTexture(TextureTarget.Texture2D, TextureManager.TEXTURE_DESTROY_PROGRESS.ID);
 
             GL.BlendFunc(BlendingFactorSrc.DstColor, BlendingFactorDest.Zero);
@@ -174,13 +174,11 @@ namespace SharpCraft.render
                 if (state.Block == BlockRegistry.GetBlock("air"))
                     continue;
 
-                ModelBlock model = JsonModelLoader.GetModelForBlock(state.Block.UnlocalizedName);
-
                 int v = 32 * (int)(pair.Value.PartialProgress * 8);
 
                 Vector3 size_o = Vector3.One * 0.0045f;
 
-                Matrix4 mat = MatrixHelper.CreateTransformationMatrix(pair.Key.ToVec() - size_o / 2, model.boundingBox.size + size_o);
+                Matrix4 mat = MatrixHelper.CreateTransformationMatrix(pair.Key.ToVec() - size_o / 2, state.Block.BoundingBox.size + size_o);
 
                 _shaderTexturedCube.UpdateInstanceUniforms(mat);
                 _shaderTexturedCube.UpdateUVs(TextureManager.TEXTURE_DESTROY_PROGRESS, 0, v, 32);
@@ -258,8 +256,6 @@ namespace SharpCraft.render
 
             if (stack.Item is ItemBlock itemBlock)
             {
-                ModelBlock model = JsonModelLoader.GetModelForBlock(itemBlock.GetBlock().UnlocalizedName);
-
                 Vector3 partialLookVec = lastLookVec + (lookVec - lastLookVec) * partialTicks;
                 Vector3 partialMotion = lastMotion + (motion - lastMotion) * partialTicks;
 
@@ -275,9 +271,14 @@ namespace SharpCraft.render
                 Matrix4 t1 = Matrix4.CreateTranslation(SharpCraft.Instance.Camera.pos + SharpCraft.Instance.Camera.GetLookVec() + partialLookVec * 0.1f);
                 Matrix4 t_final = Matrix4.CreateTranslation(offset);
 
-                Matrix4 mat = t0 * r1 * Matrix4.CreateScale(model.boundingBox.size) * t_final * r2 * s * t1;
+                Matrix4 mat = t0 * r1 * Matrix4.CreateScale(itemBlock.Block.BoundingBox.size) * t_final * r2 * s * t1;
 
                 GL.DepthRange(0, 0.1f);
+                
+                ModelBlock model = JsonModelLoader.GetModelForBlock(itemBlock.Block.UnlocalizedName);
+
+                if (model == null)
+                    return;
 
                 model.Bind();
 

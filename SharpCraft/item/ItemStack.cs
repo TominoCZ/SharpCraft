@@ -5,7 +5,7 @@ namespace SharpCraft.item
     [Serializable]
     public class ItemStack
     {
-        public Item Item;
+        public IItem Item;
 
         private int _count;
 
@@ -20,7 +20,7 @@ namespace SharpCraft.item
                     return;
                 }
 
-                _count = Math.Clamp(value, 0, Item.MaxStackSize());
+                _count = Math.Clamp(value, 0, Item.GetMaxStackSize());
 
                 if (_count == 0)
                     Item = null;
@@ -29,9 +29,9 @@ namespace SharpCraft.item
 
         public short Meta;
 
-        public bool IsEmpty => Count == 0 || Item?.InnerItem == null;
+        public bool IsEmpty => Count == 0 || Item == null;
 
-        public ItemStack(Item item, int count = 1, short meta = 0)
+        public ItemStack(IItem item, int count = 1, short meta = 0)
         {
             Item = item;
             Meta = meta;
@@ -72,7 +72,7 @@ namespace SharpCraft.item
             }
 
             // Combine stacks if enough space
-            if (Count + other.Count <= this.Item.MaxStackSize())
+            if (Count + other.Count <= Item.GetMaxStackSize())
             {
                 Count += other.Count;
                 //remainingStack = null;
@@ -80,7 +80,7 @@ namespace SharpCraft.item
             // otherwise, combine as much as possible
             else
             {
-                int difference = this.Item.MaxStackSize() - this.Count;
+                int difference = Item.GetMaxStackSize() - Count;
                 Count += difference;
 
                 remainingStack = other.Copy();

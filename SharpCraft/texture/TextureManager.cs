@@ -190,7 +190,7 @@ namespace SharpCraft.texture
             }
         }*/
 
-        private static Bitmap CreateMissingTexture()
+        public static Bitmap CreateMissingTexture()
         {
             Bitmap bmp = new Bitmap(16, 16);
 

@@ -13,18 +13,19 @@ namespace SharpCraft.block
 
         public void Put(Block b)
         {
-            _registry.Add(b.UnlocalizedName, b);
-            _typeRegistry.Add(b.GetType(), b.UnlocalizedName);
+            var s = b.UnlocalizedName;
+
+            _registry.Add(s, b);
+            _typeRegistry.Add(b.GetType(), s);
         }
 
-        public void RegisterBlocksPost()
+        public void RegisterBlocksPost(JsonModelLoader loader)
         {
             Block.SetDefaultShader(new Shader<ModelBlock>("block"));
-            JsonModelLoader modelLoader = new JsonModelLoader(Block.DefaultShader);
 
             foreach (var pair in _registry)
             {
-                pair.Value.RegisterState(modelLoader, new BlockState(pair.Value, JsonModelLoader.GetModelForBlock(pair.Key)));
+                pair.Value.RegisterState(loader, new BlockState(pair.Value, JsonModelLoader.GetModelForBlock(pair.Key)));
             }
         }
 

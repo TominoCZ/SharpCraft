@@ -1,35 +1,34 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using SharpCraft.render.shader;
 
 namespace SharpCraft.item
 {
     internal class ItemRegistry //TODO
     {
-        private static readonly Dictionary<string, Item> _registry = new Dictionary<string, Item>();
-        private static readonly Dictionary<Type, Item> _typeRegistry = new Dictionary<Type, Item>();
+        private static readonly Dictionary<string, IItem> Registry = new Dictionary<string, IItem>();
 
-        public void Put(Item i)
+        public void Put(IItem i)
         {
-            _registry.Add("item_" + _typeRegistry.Count/*i.UnlocalizedName*/, i);
-            _typeRegistry.Add(i.GetType(), i);
+            var s = i.GetUnlocalizedName();
+
+            Registry.Add(s, i);
         }
 
-        public void RegisterItems()
+        public void RegisterItemsPost(JsonModelLoader loader)
         {
-            foreach (Item value in _registry.Values)
-            {
-                //value.RegisterSomeShitInItemsLaterOnBoiFunc();
-            }
+            //Item.DefaultShader = new Shader<ModelItem>("item"); TODO
         }
 
-        public static Item GetItem<TItem>() where TItem : Item
+        public static List<IItem> AllItems()
         {
-            return _typeRegistry[typeof(TItem)];
+            return Registry.Values.ToList();
         }
 
-        public static Item GetItem(string unlocalizedName)
+        public static IItem GetItem(string unlocalizedName)
         {
-            return _registry[unlocalizedName];
+            return Registry[unlocalizedName];
         }
     }
 }

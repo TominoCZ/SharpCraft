@@ -9,6 +9,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection.Metadata.Ecma335;
+using SharpCraft.model;
 
 namespace SharpCraft.world
 {
@@ -153,6 +154,8 @@ namespace SharpCraft.world
 
             AxisAlignedBB bb = box.Union(box);
 
+            var air = BlockRegistry.GetBlock<BlockAir>();
+
             for (int x = (int)bb.min.X, maxX = (int)bb.max.X; x < maxX; x++)
             {
                 for (int y = (int)bb.min.Y, maxY = (int)bb.max.Y; y < maxY; y++)
@@ -161,7 +164,7 @@ namespace SharpCraft.world
                     {
                         BlockPos pos = new BlockPos(x, y, z);
                         BlockState state = SharpCraft.Instance.World.GetBlockState(pos);
-                        if (state.Block == BlockRegistry.GetBlock("air"))
+                        if (state.Block == air)
                             continue;
 
                         blocks.Add(state.Block.BoundingBox.offset(pos.ToVec()));
@@ -228,7 +231,8 @@ namespace SharpCraft.world
         {
             foreach (Chunk data in Chunks.Values)
             {
-                data.Save();
+                if (data.HasData)
+                    data.Save();
             }
         }
 
@@ -296,24 +300,7 @@ namespace SharpCraft.world
             if (chunk == null)
                 return;
 
-            short[,,] chunkData = new short[Chunk.ChunkSize, Chunk.ChunkHeight, Chunk.ChunkSize];
-
-            void SetBlock(int x, int y, int z, BlockState s)
-            {
-                _worldLut.Put(s.Block.UnlocalizedName);
-                short value = GetLocalBlockId(s.Block.UnlocalizedName);
-                short meta = s.Block.GetMetaFromState(s);
-
-                short id = (short)(value << 4 | meta);
-                chunkData[x, y, z] = id;
-            }
-
-            bool IsAir(int x, int y, int z)
-            {
-                short airId = GetLocalBlockId(BlockRegistry.GetBlock<BlockAir>().UnlocalizedName);
-                return chunkData[x, y, z] >> 4 == airId;
-            }
-
+            var air = BlockRegistry.GetBlock<BlockAir>().GetState();
             var leaves = BlockRegistry.GetBlock("leaves").GetState();
             var log = BlockRegistry.GetBlock("log").GetState();
             var grass = BlockRegistry.GetBlock<BlockGrass>().GetState();
@@ -321,10 +308,27 @@ namespace SharpCraft.world
             var stone = BlockRegistry.GetBlock("stone").GetState();
             var rare = BlockRegistry.GetBlock("rare").GetState();
             var bedrock = BlockRegistry.GetBlock("bedrock").GetState();
+            
+            short airId = GetLocalBlockId(air.Block.UnlocalizedName);
+
+            short[,,] chunkData = new short[Chunk.ChunkSize, Chunk.ChunkHeight, Chunk.ChunkSize];
+
+            void SetBlock(int x, int y, int z, BlockState s)
+            {
+                short id = GetLocalBlockId(s.Block.UnlocalizedName);
+                short meta = s.Block.GetMetaFromState(s);
+
+                short value = (short)(id << 4 | meta);
+                chunkData[x, y, z] = value;
+            }
+
+            bool IsAir(int x, int y, int z)
+            {
+                return chunkData[x, y, z] >> 4 == airId;
+            }
 
             for (int z = 0; z < Chunk.ChunkSize; z++)
             {
-                Console.WriteLine(z);
                 for (int x = 0; x < Chunk.ChunkSize; x++)
                 {
                     float wsX = chunk.Pos.WorldSpaceX();

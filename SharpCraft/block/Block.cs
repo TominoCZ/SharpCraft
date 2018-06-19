@@ -48,6 +48,12 @@ namespace SharpCraft.block
         {
             DefaultShader = shader;
         }
+
+        public override string ToString()
+        {
+            //TODO - localization
+            return UnlocalizedName;
+        }
     }
 
     public struct BlockState

@@ -4,15 +4,28 @@ using System;
 namespace SharpCraft.item
 {
     [Serializable]
-    internal class ItemBlock : Item
+    internal class ItemBlock : IItem
     {
-        public ItemBlock(Block block) : base(block.ToString(), block)
+        public Block Block { get; }
+
+        public ItemBlock(Block block)
         {
+            Block = block;
         }
 
-        public Block GetBlock()
+        public int GetMaxStackSize()
         {
-            return (Block)InnerItem;
+            return 256;
+        }
+
+        public string GetUnlocalizedName()
+        {
+            return Block.UnlocalizedName;
+        }
+
+        public string GetDisplayName()
+        {
+            return GetUnlocalizedName();
         }
     }
 }

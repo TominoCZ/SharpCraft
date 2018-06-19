@@ -64,7 +64,7 @@ namespace SharpCraft.model
         public void AppendUvsForSide(FaceSides side, ref List<float> uvs)
         {
             TextureType parsed = FaceSides.Parse(side);
-            int faceIndex = (int)parsed * 12;
+            int faceIndex = (int)parsed * 8;
 
             for (int i = 0; i < 8; i += 2)
             {

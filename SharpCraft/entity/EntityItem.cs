@@ -89,14 +89,14 @@ namespace SharpCraft.entity
 
             foreach (EntityItem entity in inAttractionArea)
             {
-                if (stack.IsEmpty || entity.stack.IsEmpty || entity.stack.Count == entity.stack.Item.MaxStackSize())
+                if (stack.IsEmpty || entity.stack.IsEmpty || entity.stack.Count == entity.stack.Item.GetMaxStackSize())
                     continue;
 
                 Vector3 distanceVector = entity.Pos - Pos;
                 float distance = distanceVector.Length;
                 if (distance >= attractionRange) continue;
 
-                int ammountToTake = Math.Min(stack.Item.MaxStackSize() - stack.Count, entity.stack.Count);
+                int ammountToTake = Math.Min(stack.Item.GetMaxStackSize() - stack.Count, entity.stack.Count);
                 if (ammountToTake == 0) continue;
 
                 if (distance <= mergeRange)
@@ -117,7 +117,7 @@ namespace SharpCraft.entity
 
                 float distanceMul = (float)Math.Sqrt(1 - distance / attractionRange);
                 if (distanceMul > 0.8) distanceMul = ((1 - distanceMul) / 0.2F) * 0.6F + 0.2F;
-                Vector3 baseForce = distanceVector * 0.02f * distanceMul * MathUtil.Remap(stack.Count / (float)entity.stack.Count, 1, entity.stack.Item.MaxStackSize(), 2, 5);
+                Vector3 baseForce = distanceVector * 0.02f * distanceMul * MathUtil.Remap(stack.Count / (float)entity.stack.Count, 1, entity.stack.Item.GetMaxStackSize(), 2, 5);
 
                 Motion += baseForce * entity.stack.Count / Math.Max(entity.stack.Count, stack.Count);
                 entity.Motion -= baseForce * stack.Count / Math.Max(entity.stack.Count, stack.Count);
@@ -159,11 +159,11 @@ namespace SharpCraft.entity
             Vector3 partialPos = LastPos + (Pos - LastPos) * partialTicks;
             float partialTime = tick + partialTicks;
 
-            if (stack?.Item?.InnerItem is Block block)
+            if (stack?.Item is ItemBlock itemBlock)
             {
-                ModelBlock model = JsonModelLoader.GetModelForBlock(block.UnlocalizedName);
+                ModelBlock model = JsonModelLoader.GetModelForBlock(itemBlock.Block.UnlocalizedName);
 
-                if (model.RawModel == null)
+                if (model == null || model.RawModel == null)
                     return;
 
                 float time = onGround ? (float)((Math.Sin(partialTime / 8) + 1) / 16) : 0;
