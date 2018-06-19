@@ -82,6 +82,30 @@ namespace SharpCraft.gui
             Shader.Unbind();
         }
 
+        protected virtual void RenderTextureStretchToScreen(GuiTexture tex)
+        {
+            if (tex == null)
+                return;
+
+            Shader.Bind();
+
+            GL.BindVertexArray(GuiRenderer.GuiQuad.vaoID);
+
+            Shader.UpdateGlobalUniforms();
+            Shader.UpdateModelUniforms();
+            Shader.UpdateInstanceUniforms(Matrix4.Identity, tex);
+
+            GL.EnableVertexAttribArray(0);
+
+            GL.ActiveTexture(TextureUnit.Texture0);
+            GL.BindTexture(TextureTarget.Texture2D, tex.ID);
+            GL.DrawArrays(PrimitiveType.Quads, 0, 4);
+
+            GL.DisableVertexAttribArray(0);
+
+            Shader.Unbind();
+        }
+
         protected virtual void RenderBlock(EnumBlock block, float x, float y, float scale)
         {
             TextureBlockUV UVs = TextureManager.GetUVsFromBlock(block);

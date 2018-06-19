@@ -40,7 +40,8 @@ namespace SharpCraft.gui
 
         public override void Render(int mouseX, int mouseY)
         {
-            DrawBackground();
+            //DrawBackground();
+            DrawBackroundStretch();
 
             guiScale = Math.Clamp((SharpCraft.Instance.ClientSize.Width / 640f + SharpCraft.Instance.ClientSize.Width / 480f) / 2, 1.75f, 2);
 

@@ -52,6 +52,11 @@ namespace SharpCraft.gui
             }
         }
 
+        protected virtual void DrawBackroundStretch()
+        {
+            RenderTextureStretchToScreen(background);
+        }
+
         protected virtual void DrawDefaultBackground()
         {
             float sizeX = background_default.TextureSize.Width * background_default.Scale;
