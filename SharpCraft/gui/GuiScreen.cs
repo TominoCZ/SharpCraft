@@ -25,9 +25,9 @@ namespace SharpCraft.gui
         {
             for (int i = 0; i < buttons.Count; i++)
             {
-                GuiButton btn = buttons[i];
+                //GuiButton btn = buttons[i];
 
-                btn.Render(mouseX, mouseY);
+                buttons[i].Render(mouseX, mouseY);
                 //hovered? HoverColor : Vector3.One
                 //if (btn is GuiItemSlot slot && !slot.stack?.IsEmpty == true && slot.stack.Count > 1)
                 //RenderText(slot.stack.Count.ToString(), slot.PosX + 32 * slot.Scale / 2f, slot.PosY + 32 * slot.Scale / 2f + 14, 1, true);
@@ -52,6 +52,7 @@ namespace SharpCraft.gui
             }
         }
 
+        // Draws background to screen, stretching it to the screen size
         protected virtual void DrawBackroundStretch()
         {
             RenderTextureStretchToScreen(background);

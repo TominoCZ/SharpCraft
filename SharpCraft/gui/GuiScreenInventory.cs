@@ -40,7 +40,6 @@ namespace SharpCraft.gui
 
         public override void Render(int mouseX, int mouseY)
         {
-            //DrawBackground();
             DrawBackroundStretch();
 
             guiScale = Math.Clamp((SharpCraft.Instance.ClientSize.Width / 640f + SharpCraft.Instance.ClientSize.Width / 480f) / 2, 1.75f, 2);
@@ -62,8 +61,8 @@ namespace SharpCraft.gui
 
             RenderTexture(inventoryBackground, startPosX - 10 * guiScale / 2, startPosY - 10 * guiScale / 2);
 
+            // Hotbar item slots
             float hotbarY = scaledHeight + startPosY + 2 * (scaledHeight + space * 5);
-
             for (int i = 0; i < 9; i++)
             {
                 float x = startPosX + i * (scaledWidth + space);
@@ -85,7 +84,8 @@ namespace SharpCraft.gui
                     targetBtn.Scale = guiScale;
                 }
             }
-
+           
+            // Inventory item slots
             for (int i = 0; i < 3; i++)
             {
                 for (int j = 0; j < 9; j++)
@@ -106,9 +106,11 @@ namespace SharpCraft.gui
                     }
                 }
             }
-
+                       
+            // Draw slots
             base.Render(mouseX, mouseY);
-
+    
+            // Draw held item
             if (draggedStack != null && !draggedStack.IsEmpty && draggedStack.Item?.InnerItem is EnumBlock block)
             {
                 float x = mouseX - 16 * guiScale / 2;
