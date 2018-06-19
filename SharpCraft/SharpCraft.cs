@@ -995,10 +995,6 @@ namespace SharpCraft
         [STAThread]
         private static void Main(string[] args)
         {
-            var text = File.ReadAllText("test.json");
-
-            var obj = JsonConvert.DeserializeObject<BlockJSONModel>(text);
-
             ThreadPool.SetMaxThreads(1000, 1000);
 
             using (SharpCraft game = new SharpCraft())

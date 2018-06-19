@@ -82,7 +82,7 @@ namespace SharpCraft.gui
             Shader.Unbind();
         }
 
-        protected virtual void RenderBlock(BlockState state, float x, float y, float scale)
+        protected virtual void RenderBlock(Block state, float x, float y, float scale)
         {
             //TextureBlockUV UVs = TextureManager.GetUVsFromBlock(block); //TODO - change
             //ModelManager.OverrideModelUVsInVAO(_item.RawModel.BufferIDs[1], UVs.getUVForSide(FaceSides.South).ToArray());

@@ -40,7 +40,7 @@ namespace SharpCraft.gui
 
             if (Stack.Item is ItemBlock itemBlock)
             {
-                EnumBlock block = itemBlock.GetBlock();
+                Block block = itemBlock.GetBlock();
 
                 x += 14 * Scale / 2;
                 y += 14 * Scale / 2;

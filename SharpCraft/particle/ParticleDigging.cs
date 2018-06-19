@@ -31,7 +31,7 @@ namespace SharpCraft.particle
 
             if (model.RawModel is ModelBlockRaw mbr)
             {
-                float[] uvs = mbr.GetUVsForSide(side);
+                float[] uvs = mbr.AppendNormalsForSide(side);
 
                 Vector2 start = new Vector2(uvs[0], uvs[1]);
                 Vector2 end = new Vector2(uvs[4], uvs[5]); //4,5 because that's the 3. vertex and the local UV there is 1,1
@@ -98,14 +98,14 @@ namespace SharpCraft.particle
             Vector3 partialRot = Vector3.Lerp(lastRot, rot, partialTicks);
 
             float partialScale = lastParticleScale + (particleScale - lastParticleScale) * partialTicks;
-
+            /*
             ModelBaked<Particle> model = ParticleRenderer.ParticleModel;
             model.Shader.UpdateGlobalUniforms();
             model.Shader.UpdateModelUniforms();
             model.Shader.UpdateInstanceUniforms(MatrixHelper.CreateTransformationMatrix(partialPos - (Vector3.UnitX + Vector3.UnitZ) * partialScale / 2, partialRot, partialScale), this);
 
             GL.BindTexture(TextureTarget.Texture2D, textureID);
-            model.RawModel.Render(PrimitiveType.Quads);
+            model.RawModel.Render(PrimitiveType.Quads);*/
         }
     }
 }

@@ -59,9 +59,9 @@ namespace SharpCraft.entity
                 BlockPos bp = new BlockPos(Pos);
 
                 FaceSides lastFace = FaceSides.Up;
-                bool blocksAround = FaceSides.YPlane.All(face => World.GetBlockState(bp.Offset(lastFace = face)) != EnumBlock.AIR)
-                                   && World.GetBlockState(bp.Offset(lastFace = FaceSides.Up)) != EnumBlock.AIR
-                                   && World.GetBlockState(bp.Offset(lastFace = FaceSides.Down)) != EnumBlock.AIR; //has to be in this order
+                bool blocksAround = FaceSides.YPlane.All(face => World.IsAir(bp.Offset(lastFace = face)))
+                                   && World.IsAir(bp.Offset(lastFace = FaceSides.Up))
+                                   && World.IsAir(bp.Offset(lastFace = FaceSides.Down)); //has to be in this order
 
                 if (!blocksAround)
                 {
@@ -159,9 +159,9 @@ namespace SharpCraft.entity
             Vector3 partialPos = LastPos + (Pos - LastPos) * partialTicks;
             float partialTime = tick + partialTicks;
 
-            if (stack?.Item?.InnerItem is EnumBlock block)
+            if (stack?.Item?.InnerItem is Block block)
             {
-                ModelBlock model = ModelRegistry.GetModelForBlock(block, stack.Meta);
+                ModelBlock model = JsonModelLoader.GetModelForBlock(block.UnlocalizedName);
 
                 if (model.RawModel == null)
                     return;

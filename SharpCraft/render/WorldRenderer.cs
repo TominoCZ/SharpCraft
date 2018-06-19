@@ -52,7 +52,7 @@ namespace SharpCraft.render
             _selectionOutline = new ModelCubeOutline();
             _shaderTexturedCube = new ShaderTexturedCube();
 
-            List<RawQuad> cube = ModelHelper.createCubeModel();
+            List<RawQuad> cube = ModelHelper.CreateCubeModel();
 
             _destroyProgressModel = ModelManager.LoadModelToVAO(cube, 3);
 
@@ -258,7 +258,7 @@ namespace SharpCraft.render
 
             if (stack.Item is ItemBlock itemBlock)
             {
-                ModelBlock model = JsonModelLoader.GetModelForBlock(itemBlock.GetBlock().GetState(stack.Meta).UnlocalizedName);
+                ModelBlock model = JsonModelLoader.GetModelForBlock(itemBlock.GetBlock().UnlocalizedName);
 
                 Vector3 partialLookVec = lastLookVec + (lookVec - lastLookVec) * partialTicks;
                 Vector3 partialMotion = lastMotion + (motion - lastMotion) * partialTicks;

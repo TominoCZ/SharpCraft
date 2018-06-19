@@ -133,7 +133,7 @@ namespace SharpCraft.util
             }
         }
 
-        public static List<RawQuad> createCubeModel()
+        public static List<RawQuad> CreateCubeModel()
         {
             List<RawQuad> quads = new List<RawQuad>();
 

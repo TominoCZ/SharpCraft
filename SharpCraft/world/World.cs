@@ -95,7 +95,7 @@ namespace SharpCraft.world
                         if (state.Block == BlockRegistry.GetBlock("air"))
                             continue;
 
-                        blocks.Add(JsonModelLoader.GetModelForBlock(state.Block.UnlocalizedName).BoundingBox.offset(pos.ToVec())); //TODO
+                        blocks.Add(state.Block.BoundingBox.offset(pos.ToVec()));
                     }
                 }
             }
@@ -106,6 +106,11 @@ namespace SharpCraft.world
         public Chunk GetChunk(ChunkPos pos)
         {
             return Chunks.TryGetValue(pos, out Chunk chunkData) ? chunkData : null;
+        }
+
+        public bool IsAir(BlockPos pos)
+        {
+            return GetBlockState(pos).Block == BlockRegistry.GetBlock("air");
         }
 
         public BlockState GetBlockState(BlockPos pos)

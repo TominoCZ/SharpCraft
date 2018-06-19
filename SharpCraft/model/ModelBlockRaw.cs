@@ -8,10 +8,10 @@ namespace SharpCraft.model
 {
     public class ModelBlockRaw : ModelRaw
     {
-        private Dictionary<FaceSides, RawQuad> _quads;
+        //private Dictionary<FaceSides, RawQuad> _quads;
 
-        private float[] _vertexes; 
-        private float[] _normals; 
+        private float[] _vertexes;
+        private float[] _normals;
         private float[] _uvs;
 
         public ModelBlockRaw(int vaoID, float[] vertexes, float[] normals, float[] uvs, params int[] bufferIDs) : base(vaoID, vertexes.Length / 3, bufferIDs)
@@ -27,14 +27,37 @@ namespace SharpCraft.model
             _quads = quads;
         }*/
 
-        public float[] GetVertexesForSide(FaceSides sides)
+        public void AppendVertexesForSide(FaceSides side, ref float[] vertexes, int startIndex)
         {
-            return null; //TODO
+            /*
+               top,
+               bottom,
+               north,
+               south,
+               west,
+               east,
+            */
+            TextureType parsed = FaceSides.Parse(side);
+            int faceIndex = (int)parsed * 12;
+
+            for (int i = 0; i < 12; i += 3)
+            {
+                vertexes[startIndex + faceIndex + i] = _vertexes[faceIndex + i];
+                vertexes[startIndex + faceIndex + i + 1] = _vertexes[faceIndex + i + 1];
+                vertexes[startIndex + faceIndex + i + 2] = _vertexes[faceIndex + i + 2];
+            }
         }
 
-        public float[] GetUVsForSide(FaceSides sides)
+        public void AppendNormalsForSide(FaceSides side, ref float[] normals, int startIndex)
         {
-            return null; //TODO
+            TextureType parsed = FaceSides.Parse(side);
+            int faceIndex = (int)parsed * 12;
+
+            for (int i = 0; i < 8; i += 2)
+            {
+                normals[startIndex + faceIndex + i] = _normals[faceIndex + i];
+                normals[startIndex + faceIndex + i + 1] = _normals[faceIndex + i + 1];
+            }
         }
         /*
         public RawQuad GetQuadForSide(FaceSides side)

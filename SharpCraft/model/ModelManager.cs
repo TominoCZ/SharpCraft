@@ -8,6 +8,7 @@ namespace SharpCraft.model
     {
         private static List<int> VAOs = new List<int>();
         private static List<int> VBOs = new List<int>();
+        
 
         public static ModelBlockRaw LoadBlockModelToVAO(Dictionary<FaceSides, RawQuad> quads)
         {
@@ -30,7 +31,7 @@ namespace SharpCraft.model
 
             UnbindVAO();
 
-            return new ModelBlockRaw(vaoID, quads, buff0, buff1, buff2);
+            return new ModelBlockRaw(vaoID, vertices.ToArray(), normals.ToArray(), UVs.ToArray(), buff0, buff1, buff2);
         }
 
         public static ModelBlockRaw LoadBlockModelToVAO(float[] vertexes, float[] normals, float[] UVs)
@@ -71,7 +72,7 @@ namespace SharpCraft.model
 
             UnbindVAO();
 
-            return new ModelRaw(vaoID, coordSize, quads, buff0, buff1, buff2);
+            return new ModelRaw(vaoID, vertices.Count / 3, buff0, buff1, buff2);
         }
 
         public static ModelRaw OverrideModelInVAO(int ID, int[] buffers, List<RawQuad> quads, int coordSize)
@@ -93,7 +94,7 @@ namespace SharpCraft.model
             OverrideDataInAttributeList(buffers[1], 1, 2, UVs.ToArray());
             OverrideDataInAttributeList(buffers[2], 2, 3, normals.ToArray());
 
-            return new ModelRaw(ID, coordSize, quads, buffers);
+            return new ModelRaw(ID, quads.Count / 3, buffers);
         }
 
         public static void OverrideModelUVsInVAO(int bufferID, float[] UVs)

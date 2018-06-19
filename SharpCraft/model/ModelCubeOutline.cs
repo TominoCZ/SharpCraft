@@ -8,7 +8,7 @@ namespace SharpCraft.model
     {
         private Vector4 _color;
 
-        public ModelCubeOutline() : base(ModelManager.LoadModelToVAO(ModelHelper.createCubeModel(), 3), new ShaderColor())
+        public ModelCubeOutline() : base(ModelManager.LoadModelToVAO(ModelHelper.CreateCubeModel(), 3), new ShaderColor())
         {
         }
 

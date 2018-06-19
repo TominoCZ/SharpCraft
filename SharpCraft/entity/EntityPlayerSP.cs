@@ -32,7 +32,7 @@ namespace SharpCraft.entity
                 GuiHUD.UpdateLivesUI(health);
             }
         }
-        
+
         public bool IsRunning { get; private set; }
 
         public int HotbarIndex { get; private set; }
@@ -348,21 +348,17 @@ namespace SharpCraft.entity
         {
             MouseOverObject moo = SharpCraft.Instance.MouseOverObject;
 
-            if (moo.hit is EnumBlock)
+            if (moo.hit == HitType.Block)
             {
                 if (btn == MouseButton.Right)
                 {
-                    EnumBlock block = World.GetBlockState(moo.blockPos);
-                    ModelBlock model = ModelRegistry.GetModelForBlock(block, World.GetMetadata(moo.blockPos));
+                    BlockState state = World.GetBlockState(moo.blockPos);
 
-                    if (model != null && model.canBeInteractedWith)
+                    if (state.Block.CanBeInteractedWith)
                     {
-                        switch (block)
+                        if (state.Block == BlockRegistry.GetBlock("crafting_table"))
                         {
-                            case EnumBlock.FURNACE:
-                            case EnumBlock.CRAFTING_TABLE:
-                                SharpCraft.Instance.OpenGuiScreen(new GuiScreenCrafting());
-                                break;
+                            SharpCraft.Instance.OpenGuiScreen(new GuiScreenCrafting());
                         }
                     }
                     else
@@ -378,23 +374,22 @@ namespace SharpCraft.entity
         public void BreakBlock()
         {
             MouseOverObject moo = SharpCraft.Instance.MouseOverObject;
-            if (!(moo.hit is EnumBlock))
+            if (moo.hit != HitType.Block)
                 return;
 
-            EnumBlock block = World.GetBlockState(moo.blockPos);
+            BlockState state = World.GetBlockState(moo.blockPos);
+            Block air = BlockRegistry.GetBlock("air");
 
-            if (block == EnumBlock.AIR)
+            if (state.Block == air)
                 return;
 
-            int meta = World.GetMetadata(moo.blockPos);
+            SharpCraft.Instance.ParticleRenderer.SpawnDestroyParticles(moo.blockPos, state);
 
-            SharpCraft.Instance.ParticleRenderer.SpawnDestroyParticles(moo.blockPos, block, meta);
-
-            World.SetBlockState(moo.blockPos, EnumBlock.AIR, 0);
+            World.SetBlockState(moo.blockPos, air.GetState(0));
 
             Vector3 motion = new Vector3(MathUtil.NextFloat(-0.15f, 0.15f), 0.3f, MathUtil.NextFloat(-0.15f, 0.15f));
 
-            EntityItem entityDrop = new EntityItem(World, moo.blockPos.ToVec() + Vector3.One * 0.5f, motion, new ItemStack(new ItemBlock(block), 1, meta));
+            EntityItem entityDrop = new EntityItem(World, moo.blockPos.ToVec() + Vector3.One * 0.5f, motion, new ItemStack(new ItemBlock(state.Block), 1, state.Block.GetMetaFromState(state)));
 
             World.AddEntity(entityDrop);
 
@@ -404,7 +399,7 @@ namespace SharpCraft.entity
         public void PlaceBlock()
         {
             MouseOverObject moo = SharpCraft.Instance.MouseOverObject;
-            if (!(moo.hit is EnumBlock))
+            if (moo.hit != HitType.Block)
                 return;
 
             ItemStack stack = GetEquippedItemStack();
@@ -412,28 +407,32 @@ namespace SharpCraft.entity
             if (!(stack?.Item is ItemBlock itemBlock))
                 return;
 
+            Block air = BlockRegistry.GetBlock("air");
+            Block glass = BlockRegistry.GetBlock("glass");
+            Block grass = BlockRegistry.GetBlock("grass");
+            Block dirt = BlockRegistry.GetBlock("dirt");
+
             BlockPos pos = moo.blockPos.Offset(moo.sideHit);
-            EnumBlock blockAtPos = World.GetBlockState(pos);
+            BlockState stateAtPos = World.GetBlockState(pos);
 
-            EnumBlock heldBlock = itemBlock.GetBlock();
-            AxisAlignedBB blockBb = ModelRegistry.GetModelForBlock(heldBlock, World.GetMetadata(pos))
-                .boundingBox.offset(pos.ToVec());
+            Block heldBlock = itemBlock.GetBlock();
+            AxisAlignedBB blockBb = heldBlock.BoundingBox.offset(pos.ToVec());
 
-            if (blockAtPos != EnumBlock.AIR || World.GetIntersectingEntitiesBBs(blockBb).Count > 0)
+            if (stateAtPos.Block != air || World.GetIntersectingEntitiesBBs(blockBb).Count > 0)
                 return;
 
             BlockPos posUnder = pos.Offset(FaceSides.Down);
 
-            EnumBlock blockUnder = World.GetBlockState(posUnder);
-            EnumBlock blockAbove = World.GetBlockState(pos.Offset(FaceSides.Up));
+            BlockState stateUnder = World.GetBlockState(posUnder);
+            BlockState stateAbove = World.GetBlockState(pos.Offset(FaceSides.Up));
 
-            if (blockUnder == EnumBlock.GRASS && heldBlock != EnumBlock.GLASS)
-                World.SetBlockState(posUnder, EnumBlock.DIRT, 0);
-            if (blockAbove != EnumBlock.AIR && blockAbove != EnumBlock.GLASS &&
-                heldBlock == EnumBlock.GRASS)
-                World.SetBlockState(pos, EnumBlock.DIRT, 0);
+            if (stateUnder.Block == grass && heldBlock != glass)
+                World.SetBlockState(posUnder, dirt.GetState(0));
+            if (stateAbove.Block != air && stateAbove.Block != glass &&
+                heldBlock == grass)
+                World.SetBlockState(pos, dirt.GetState(0));
             else
-                World.SetBlockState(pos, heldBlock, stack.Meta);
+                World.SetBlockState(pos, heldBlock.GetState(stack.Meta));
 
             stack.Count--;
 
@@ -444,17 +443,17 @@ namespace SharpCraft.entity
         {
             MouseOverObject moo = SharpCraft.Instance.MouseOverObject;
 
-            if (moo.hit is EnumBlock clickedBlock)
+            if (moo.hit == HitType.Block)
             {
-                int clickedMeta = World.GetMetadata(moo.blockPos);
+                var clickedState = World.GetBlockState(moo.blockPos);
 
-                if (clickedBlock != EnumBlock.AIR)
+                if (clickedState.Block != BlockRegistry.GetBlock("air"))
                 {
                     for (int i = 0; i < Hotbar.Length; i++)
                     {
                         ItemStack stack = Hotbar[i];
 
-                        if (stack?.Item?.InnerItem == clickedBlock && stack.Meta == clickedMeta)
+                        if (stack?.Item?.InnerItem == clickedState.Block && stack.Meta == clickedState.Block.GetMetaFromState(clickedState))
                         {
                             SetSelectedSlot(i);
                             return;
@@ -462,8 +461,8 @@ namespace SharpCraft.entity
 
                         if (stack?.IsEmpty == true)
                         {
-                            ItemBlock itemBlock = new ItemBlock(clickedBlock);
-                            ItemStack itemStack = new ItemStack(itemBlock, 1, World.GetMetadata(moo.blockPos));
+                            ItemBlock itemBlock = new ItemBlock(clickedState.Block);
+                            ItemStack itemStack = new ItemStack(itemBlock, 1, clickedState.Block.GetMetaFromState(clickedState));
 
                             SetItemStackInHotbar(i, itemStack);
                             SetSelectedSlot(i);
@@ -471,8 +470,7 @@ namespace SharpCraft.entity
                         }
                     }
 
-                    SetItemStackInSelectedSlot(new ItemStack(new ItemBlock(clickedBlock), 1,
-                        World.GetMetadata(moo.blockPos)));
+                    SetItemStackInSelectedSlot(new ItemStack(new ItemBlock(clickedState.Block), 1, clickedState.Block.GetMetaFromState(clickedState)));
                 }
             }
         }

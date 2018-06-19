@@ -1,6 +1,7 @@
 ﻿using SharpCraft.model;
 using SharpCraft.render.shader;
 using System.Collections.Generic;
+using SharpCraft.entity;
 
 namespace SharpCraft.block
 {
@@ -11,12 +12,15 @@ namespace SharpCraft.block
 
         private List<BlockState> _states = new List<BlockState>();
 
+        public AxisAlignedBB BoundingBox { get; protected set; } = AxisAlignedBB.BLOCK_FULL;
+
         public string UnlocalizedName { get; protected set; }
 
         public int StateCount => _states.Count;
 
         public int Hardness { get; protected set; } = 8;
 
+        public bool CanBeInteractedWith { get; protected set; } = false;
         public bool IsOpaque { get; protected set; } = true;
         public bool HasTransparency { get; protected set; }
         public bool IsSolid { get; protected set; } = true;
@@ -30,6 +34,11 @@ namespace SharpCraft.block
         public BlockState GetState(short meta)
         {
             return _states[meta > 0 ? meta : 0];
+        }
+
+        public short GetMetaFromState(BlockState state)
+        {
+            return (short)_states.IndexOf(state);
         }
     }
 

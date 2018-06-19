@@ -108,7 +108,7 @@ namespace SharpCraft.gui
 
             base.Render(mouseX, mouseY);
 
-            if (draggedStack != null && !draggedStack.IsEmpty && draggedStack.Item?.InnerItem is EnumBlock block)
+            if (draggedStack != null && !draggedStack.IsEmpty && draggedStack.Item?.InnerItem is Block block)
             {
                 float x = mouseX - 16 * guiScale / 2;
                 float y = mouseY - 16 * guiScale / 2;
