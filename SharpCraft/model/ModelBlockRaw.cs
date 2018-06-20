@@ -1,4 +1,5 @@
-﻿using SharpCraft.block;
+﻿using System;
+using SharpCraft.block;
 using System.Collections.Generic;
 
 namespace SharpCraft.model
@@ -18,7 +19,7 @@ namespace SharpCraft.model
 
         public void AppendAllVertexData(ref List<float> vertexes, ref List<float> normals, ref List<float> uvs, BlockPos offset)
         {
-            for (int i = 0; i < 72; i += 3)
+            for (int i = 0; i < _vertexes.Length; i += 3)
             {
                 vertexes.Add(_vertexes[i] + offset.X);
                 vertexes.Add(_vertexes[i + 1] + offset.Y);

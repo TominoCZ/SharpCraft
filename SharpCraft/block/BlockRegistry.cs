@@ -25,7 +25,8 @@ namespace SharpCraft.block
 
             foreach (var pair in _registry)
             {
-                pair.Value.RegisterState(loader, new BlockState(pair.Value, JsonModelLoader.GetModelForBlock(pair.Key)));
+                pair.Value.RegisterState(loader,
+                    new BlockState(pair.Value, JsonModelLoader.GetModelForBlock(pair.Key)));
             }
         }
 
@@ -39,6 +40,7 @@ namespace SharpCraft.block
             return _registry[_typeRegistry[typeof(TBlock)]];
         }
 
+        [Obsolete("Please use GetBlock<T:Block>")]
         public static Block GetBlock(string unlocalizedName)
         {
             if (_registry.TryGetValue(unlocalizedName, out var block))

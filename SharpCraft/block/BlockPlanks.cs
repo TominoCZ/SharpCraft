@@ -8,6 +8,7 @@ namespace SharpCraft.block
     {
         public BlockPlanks() : base("planks")
         {
+            IsFullCube = false;
         }
     }
 }

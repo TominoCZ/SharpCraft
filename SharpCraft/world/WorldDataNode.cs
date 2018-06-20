@@ -1,22 +1,23 @@
 using System;
+using System.Collections.Generic;
 
 namespace SharpCraft.world
 {
     [Serializable]
     internal class WorldDataNode
     {
-        public int seed { get; }
-        public string levelName { get; }
+        public int Seed { get; }
+        public string LevelName { get; }
 
         public WorldDataNode(World w)
         {
-            levelName = w.LevelName;
-            seed = w.Seed;
+            LevelName = w.LevelName;
+            Seed = w.Seed;
         }
 
         public World GetWorld(string saveName)
         {
-            return new World(saveName, levelName, seed);
+            return new World(saveName, LevelName, Seed);
         }
     }
 }

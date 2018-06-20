@@ -78,6 +78,8 @@ namespace SharpCraft
         public ConcurrentDictionary<BlockPos, DestroyProgress> DestroyProgresses =
             new ConcurrentDictionary<BlockPos, DestroyProgress>();
 
+        public Random Random = new Random();
+
         private readonly List<MouseButton> _mouseButtonsDown = new List<MouseButton>();
         private readonly ConcurrentQueue<Action> _glContextQueue = new ConcurrentQueue<Action>();
         private readonly Stopwatch _updateTimer = Stopwatch.StartNew();
@@ -181,7 +183,7 @@ namespace SharpCraft
                 }
             }
         }
-        
+
         private void RegisterItemsAndBlocks()
         {
             blockRegistry.Put(new BlockAir());
@@ -198,6 +200,7 @@ namespace SharpCraft
             blockRegistry.Put(new BlockFurnace());
             blockRegistry.Put(new BlockSlab());
             blockRegistry.Put(new BlockRare());
+            blockRegistry.Put(new BlockLadder());
 
             //POST - MOD Blocks and Items
             foreach (ModMain mod in installedMods)
@@ -234,13 +237,14 @@ namespace SharpCraft
 
                 World.AddEntity(Player);
 
-                Player.SetItemStackInInventory(0, new ItemStack(new ItemBlock(BlockRegistry.GetBlock("crafting_table"))));
-                Player.SetItemStackInInventory(1, new ItemStack(new ItemBlock(BlockRegistry.GetBlock("furnace"))));
-                Player.SetItemStackInInventory(2, new ItemStack(new ItemBlock(BlockRegistry.GetBlock("cobblestone"))));
-                Player.SetItemStackInInventory(3, new ItemStack(new ItemBlock(BlockRegistry.GetBlock("planks"))));
-                Player.SetItemStackInInventory(4, new ItemStack(new ItemBlock(BlockRegistry.GetBlock("glass"))));
-                Player.SetItemStackInInventory(5, new ItemStack(new ItemBlock(BlockRegistry.GetBlock("crafting_table"))));
-                Player.SetItemStackInInventory(6, new ItemStack(new ItemBlock(BlockRegistry.GetBlock("slab"))));
+                Player.SetItemStackInInventory(0, new ItemStack(new ItemBlock(BlockRegistry.GetBlock<BlockCraftingTable>())));
+                Player.SetItemStackInInventory(1, new ItemStack(new ItemBlock(BlockRegistry.GetBlock<BlockFurnace>())));
+                Player.SetItemStackInInventory(2, new ItemStack(new ItemBlock(BlockRegistry.GetBlock<BlockCobbleStone>())));
+                Player.SetItemStackInInventory(3, new ItemStack(new ItemBlock(BlockRegistry.GetBlock<BlockPlanks>())));
+                Player.SetItemStackInInventory(4, new ItemStack(new ItemBlock(BlockRegistry.GetBlock<BlockGlass>())));
+                Player.SetItemStackInInventory(5, new ItemStack(new ItemBlock(BlockRegistry.GetBlock<BlockCraftingTable>())));
+                Player.SetItemStackInInventory(6, new ItemStack(new ItemBlock(BlockRegistry.GetBlock<BlockSlab>())));
+                Player.SetItemStackInInventory(7, new ItemStack(new ItemBlock(BlockRegistry.GetBlock<BlockLadder>())));
             }
             else
             {
@@ -574,10 +578,10 @@ namespace SharpCraft
         protected override void OnRenderFrame(FrameEventArgs e)
         {
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+            
+            _partialTicks = (float)(_updateTimer.Elapsed.TotalMilliseconds / 50.0D);
 
             DateTime now = DateTime.Now;
-
-            _partialTicks = (float)(_updateTimer.Elapsed.TotalMilliseconds / 50.0);
 
             if ((now - _lastFpsDate).TotalMilliseconds >= 1000)
             {
@@ -628,12 +632,12 @@ namespace SharpCraft
 
         protected override void OnUpdateFrame(FrameEventArgs e)
         {
-            _updateTimer.Restart();
-
             if (!IsDisposed && Visible)
                 GetMouseOverObject();
 
             GameLoop();
+
+            _updateTimer.Restart();
         }
 
         protected override void OnMouseDown(MouseButtonEventArgs e)

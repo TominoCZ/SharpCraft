@@ -51,9 +51,9 @@ namespace SharpCraft.render
             _selectionOutline = new ModelCubeOutline();
             _shaderTexturedCube = new ShaderTexturedCube();
 
-            List<RawQuad> cube = ModelHelper.CreateCubeModel();
+            var cube = CubeModelBuilder.CreateCubeVertexes();
 
-            _destroyProgressModel = ModelManager.LoadModelToVAO(cube, 3);
+            _destroyProgressModel = ModelManager.LoadModel3ToVao(cube);
 
             RenderDistance = 8;
             lastFov = fov = SharpCraft.Instance.Camera.PartialFov;
@@ -93,7 +93,7 @@ namespace SharpCraft.render
             if (hit.hit == HitType.Block)
             {
                 var state = world.GetBlockState(hit.blockPos);
-                if (!Equals(state, BlockRegistry.GetBlock("air").GetState()))
+                if (!Equals(state, BlockRegistry.GetBlock<BlockAir>().GetState()))
                     RenderBlockSelectionOutline(world, state, hit.blockPos);
             }
 
@@ -129,7 +129,7 @@ namespace SharpCraft.render
 
             foreach (Waypoint wp in wps)
             {
-                ModelBlock model = JsonModelLoader.GetModelForBlock(BlockRegistry.GetBlock("rare").UnlocalizedName);
+                ModelBlock model = JsonModelLoader.GetModelForBlock(BlockRegistry.GetBlock<BlockRare>().UnlocalizedName);
 
                 float size = 0.25f;
 
@@ -170,7 +170,7 @@ namespace SharpCraft.render
             {
                 BlockState state = world.GetBlockState(pair.Key);
 
-                if (state.Block == BlockRegistry.GetBlock("air"))
+                if (state.Block == BlockRegistry.GetBlock<BlockAir>())
                     continue;
 
                 int v = 32 * (int)(pair.Value.PartialProgress * 8);

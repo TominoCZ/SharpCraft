@@ -1,4 +1,5 @@
-﻿using OpenTK;
+﻿using System.Collections.Generic;
+using OpenTK;
 using OpenTK.Graphics.OpenGL;
 using SharpCraft.block;
 using SharpCraft.model;
@@ -105,10 +106,19 @@ namespace SharpCraft.gui
             Shader.Unbind();
         }
 
-        protected virtual void RenderBlock(Block state, float x, float y, float scale)
+        protected virtual void RenderBlock(Block block, float x, float y, float scale)
         {
-            //TextureBlockUV UVs = TextureManager.GetUVsFromBlock(block); //TODO - change
-            //ModelManager.OverrideModelUVsInVAO(_item.RawModel.BufferIDs[1], UVs.getUVForSide(FaceSides.South).ToArray());
+            var model = JsonModelLoader.GetModelForBlock(block.UnlocalizedName);
+
+            if (model == null)
+                return;
+
+            ModelBlockRaw mbr = (ModelBlockRaw)model.RawModel;
+            List<float> uvs = new List<float>(8);
+            mbr.AppendUvsForSide(FaceSides.South, ref uvs);
+
+            Vector2 UVmin = new Vector2(uvs[0], uvs[1]);
+            Vector2 UVmax = new Vector2(uvs[4], uvs[5]);
 
             Vector2 unit = new Vector2(1f / SharpCraft.Instance.ClientSize.Width, 1f / SharpCraft.Instance.ClientSize.Height);
 
@@ -124,15 +134,16 @@ namespace SharpCraft.gui
             Vector2 pos = new Vector2(posX, posY).Ceiling() * unit;
 
             Matrix4 mat = MatrixHelper.CreateTransformationMatrix(pos * 2 - Vector2.UnitX + Vector2.UnitY, scale * new Vector2(width, height) * unit);
-
+            
             _item.Bind();
 
-            _item.Shader.UpdateGlobalUniforms();
-            _item.Shader.UpdateModelUniforms();
-            _item.Shader.UpdateInstanceUniforms(mat, null);
+            Shader.Bind();
+            Shader.UpdateGlobalUniforms();
+            Shader.UpdateModelUniforms();
+            Shader.UpdateInstanceUniforms(mat, UVmin, UVmax);
 
             GL.BindTexture(TextureTarget.Texture2D, JsonModelLoader.TEXTURE_BLOCKS);
-            GL.DrawArrays(PrimitiveType.Quads, 0, 4);
+            _item.RawModel.Render(PrimitiveType.Quads);
 
             _item.Unbind();
         }

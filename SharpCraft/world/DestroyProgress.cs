@@ -11,8 +11,6 @@ namespace SharpCraft.world
 
         public bool Destroyed { get; private set; }
 
-        //public float Percentage => (float) _progress / _blockHardness;
-
         public float PartialProgress
         {
             get

@@ -6,6 +6,8 @@ using SharpCraft.util;
 using SharpCraft.world;
 using System;
 using System.Collections.Generic;
+using SharpCraft.model;
+using SharpCraft.render.shader.shaders;
 
 namespace SharpCraft.render
 {
@@ -13,11 +15,11 @@ namespace SharpCraft.render
     {
         private readonly List<Particle> _particles;
 
-        //public static ModelBaked<Particle> ParticleModel;
+        public static ModelBaked<Particle> ParticleModel;
 
         static ParticleRenderer()
         {
-            //ParticleModel = new ModelParticle(new ShaderParticle());
+            ParticleModel = new ModelParticle(new ShaderParticle());
         }
 
         public ParticleRenderer()
@@ -33,12 +35,12 @@ namespace SharpCraft.render
 
         public void Render(float partialTicks)
         {
-            //ParticleModel.Bind();
+            ParticleModel.Bind();
 
             for (int i = 0; i < _particles.Count; i++)
                 _particles[i].Render(partialTicks);
 
-            //ParticleModel.Unbind();
+            ParticleModel.Unbind();
         }
 
         public void TickParticles()

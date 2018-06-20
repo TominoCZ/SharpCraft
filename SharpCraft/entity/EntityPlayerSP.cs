@@ -293,10 +293,10 @@ namespace SharpCraft.entity
             for (int i = 0; i < Hotbar.Length; i++)
             {
                 ItemStack stack = GetItemStackInInventory(i);
-                if (stack == null || stack.IsEmpty || stack.Item != dropped.Item)
+                if (stack == null || stack.IsEmpty || !stack.ItemSame(dropped))
                     continue;
 
-                if (dropped.Item == stack.Item && stack.Count <= stack.Item.GetMaxStackSize())
+                if (dropped.ItemSame(stack) && stack.Count <= stack.Item.GetMaxStackSize())
                 {
                     int toPickUp = Math.Min(stack.Item.GetMaxStackSize() - stack.Count, dropped.Count);
 
@@ -323,7 +323,7 @@ namespace SharpCraft.entity
                 if (i < Hotbar.Length)
                     continue;
 
-                if (dropped.Item == stack.Item && stack.Count <= stack.Item.GetMaxStackSize())
+                if (dropped.ItemSame(stack) && stack.Count <= stack.Item.GetMaxStackSize())
                 {
                     int toPickUp = Math.Min(stack.Item.GetMaxStackSize() - stack.Count, dropped.Count);
 
@@ -356,7 +356,7 @@ namespace SharpCraft.entity
 
                     if (state.Block.CanBeInteractedWith)
                     {
-                        if (state.Block == BlockRegistry.GetBlock("crafting_table"))
+                        if (state.Block == BlockRegistry.GetBlock<BlockCraftingTable>())
                         {
                             SharpCraft.Instance.OpenGuiScreen(new GuiScreenCrafting());
                         }
@@ -404,10 +404,10 @@ namespace SharpCraft.entity
             if (!(stack?.Item is ItemBlock itemBlock))
                 return;
 
-            Block air = BlockRegistry.GetBlock("air");
-            Block glass = BlockRegistry.GetBlock("glass");
-            Block grass = BlockRegistry.GetBlock("grass");
-            Block dirt = BlockRegistry.GetBlock("dirt");
+            Block air = BlockRegistry.GetBlock<BlockAir>();
+            Block glass = BlockRegistry.GetBlock<BlockGlass>();
+            Block grass = BlockRegistry.GetBlock<BlockGrass>();
+            Block dirt = BlockRegistry.GetBlock<BlockDirt>();
 
             BlockPos pos = moo.blockPos.Offset(moo.sideHit);
             BlockState stateAtPos = World.GetBlockState(pos);
@@ -444,7 +444,7 @@ namespace SharpCraft.entity
             {
                 var clickedState = World.GetBlockState(moo.blockPos);
 
-                if (clickedState.Block != BlockRegistry.GetBlock("air"))
+                if (clickedState.Block != BlockRegistry.GetBlock<BlockAir>())
                 {
                     for (int i = 0; i < Hotbar.Length; i++)
                     {

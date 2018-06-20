@@ -2,6 +2,7 @@
 using SharpCraft.entity;
 using SharpCraft.item;
 using System;
+using SharpCraft.block;
 
 namespace SharpCraft.world
 {
@@ -13,8 +14,8 @@ namespace SharpCraft.world
 
         private readonly Vector3 pos;
 
-        private readonly ItemStack[] hotbar;
-        private readonly ItemStack[] inventory;
+        private readonly ItemStackNode[] hotbar;
+        private readonly ItemStackNode[] inventory;
 
         private readonly float healthPercentage;
 
@@ -23,9 +24,69 @@ namespace SharpCraft.world
             pitch = SharpCraft.Instance.Camera.pitch;
             yaw = SharpCraft.Instance.Camera.yaw;
             pos = player.Pos;
-            hotbar = player.Hotbar;
-            inventory = player.Inventory;
+
+            hotbar = new ItemStackNode[player.Hotbar.Length];
+            inventory = new ItemStackNode[player.Inventory.Length];
+
+            for (var i = 0; i < player.Hotbar.Length; i++)
+            {
+                ItemStack stack = player.Hotbar[i];
+
+                if (TryParseStack(player, stack, out var node))
+                    hotbar[i] = node;
+            }
+            for (var i = 0; i < player.Inventory.Length; i++)
+            {
+                ItemStack stack = player.Inventory[i];
+
+                if (TryParseStack(player, stack, out var node))
+                    inventory[i] = node;
+            }
+
             healthPercentage = player.Health;
+        }
+
+        private bool TryParseStack(EntityPlayerSP player, ItemStack stack, out ItemStackNode node)
+        {
+            if (stack == null || stack.IsEmpty)
+            {
+                node = null;
+                return false;
+            }
+
+            node = new ItemStackNode();
+
+            if (stack.Item is ItemBlock itemBlock) //TODO - IMPORTANT! at this moment this is always true, will need to add another function for the items or something
+            {
+                node.IsBlock = true;
+                node.LocalItemID = player.World.GetLocalBlockId(itemBlock.Block.UnlocalizedName);
+                node.Count = stack.Count;
+                node.Meta = stack.Meta;
+            }
+            else
+            {
+                //TODO
+            }
+
+            return true;
+        }
+
+        private bool TryParseStack(World world, ItemStackNode node, out ItemStack stack)
+        {
+            if (node == null)
+            {
+                stack = null;
+                return false;
+            }
+
+            IItem item = null;
+
+            if (node.IsBlock)//TODO - IMPORTANT! at this moment this is always true, will need to add another function for the items or something
+                item = new ItemBlock(BlockRegistry.GetBlock(world.GetLocalBlockName(node.LocalItemID)));BlockRegistry.GetBlock(world.GetLocalBlockName(node.LocalItemID));
+
+            stack = new ItemStack(item, node.Count, node.Meta);
+
+            return true;
         }
 
         public EntityPlayerSP GetPlayer(World world)
@@ -36,17 +97,28 @@ namespace SharpCraft.world
 
             for (int i = 0; i < hotbar.Length; i++)
             {
-                player.Hotbar[i] = hotbar[i];
+                if (TryParseStack(world, hotbar[i], out var stack))
+                    player.Hotbar[i] = stack;
             }
 
             for (int i = 0; i < inventory.Length; i++)
             {
-                player.Inventory[i] = inventory[i];
+                if (TryParseStack(world, inventory[i], out var stack))
+                    player.Inventory[i] = stack;
             }
 
             player.Health = healthPercentage;
 
             return player;
+        }
+
+        [Serializable]
+        private class ItemStackNode
+        {
+            public bool IsBlock;
+            public short LocalItemID;
+            public int Count;
+            public short Meta;
         }
     }
 }

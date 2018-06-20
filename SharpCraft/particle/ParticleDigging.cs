@@ -1,10 +1,14 @@
-﻿using OpenTK;
-using SharpCraft.block;
+﻿using SharpCraft.block;
 using SharpCraft.model;
 using SharpCraft.util;
 using SharpCraft.world;
 using System;
 using System.Collections.Generic;
+using System.Numerics;
+using OpenTK.Graphics.OpenGL;
+using SharpCraft.render;
+using Vector2 = OpenTK.Vector2;
+using Vector3 = OpenTK.Vector3;
 
 namespace SharpCraft.particle
 {
@@ -29,11 +33,24 @@ namespace SharpCraft.particle
 
             if (model.RawModel is ModelBlockRaw mbr)
             {
-                List<float> uvs = new List<float>(8);
-                mbr.AppendUvsForSide(side, ref uvs);
+                Vector2 start;
+                Vector2 end;
 
-                Vector2 start = new Vector2(uvs[0], uvs[1]);
-                Vector2 end = new Vector2(uvs[4], uvs[5]); //4,5 because that's the 3. vertex and the local UV there is 1,1
+                if (state.Block.IsFullCube)
+                {
+                    List<float> uvs = new List<float>(8);
+                    mbr.AppendUvsForSide(side, ref uvs);
+
+                    start = new Vector2(uvs[0], uvs[1]);
+                    end = new Vector2(uvs[4], uvs[5]); //4,5 because that's the 3. vertex and the local UV there is 1,1
+                }
+                else
+                {
+                    var tex = model.GetParticleTexture();
+
+                    start = tex.UVMin;
+                    end = tex.UVMax;
+                }
 
                 Vector2 size = end - start;
 
@@ -53,11 +70,11 @@ namespace SharpCraft.particle
 
         public override void Update()
         {
-            lastParticleScale = particleScale;
-            lastParticleAlpha = particleAlpha;
-
             LastPos = Pos;
             lastRot = rot;
+            
+            lastParticleScale = particleScale;
+            lastParticleAlpha = particleAlpha;
 
             if (!isAlive) return;
 
@@ -97,14 +114,14 @@ namespace SharpCraft.particle
             Vector3 partialRot = Vector3.Lerp(lastRot, rot, partialTicks);
 
             float partialScale = lastParticleScale + (particleScale - lastParticleScale) * partialTicks;
-            /*
+
             ModelBaked<Particle> model = ParticleRenderer.ParticleModel;
             model.Shader.UpdateGlobalUniforms();
             model.Shader.UpdateModelUniforms();
             model.Shader.UpdateInstanceUniforms(MatrixHelper.CreateTransformationMatrix(partialPos - (Vector3.UnitX + Vector3.UnitZ) * partialScale / 2, partialRot, partialScale), this);
 
             GL.BindTexture(TextureTarget.Texture2D, textureID);
-            model.RawModel.Render(PrimitiveType.Quads);*/
+            model.RawModel.Render(PrimitiveType.Quads);
         }
     }
 }

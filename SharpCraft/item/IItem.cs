@@ -1,4 +1,6 @@
-﻿namespace SharpCraft.item
+﻿using System;
+
+namespace SharpCraft.item
 {
     public interface IItem
     {

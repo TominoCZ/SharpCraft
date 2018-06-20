@@ -11,6 +11,7 @@ using System.Linq;
 
 namespace SharpCraft.world
 {
+#pragma warning disable CS0618 // Type or member is obsolete
     public class World
     {
         public ConcurrentDictionary<ChunkPos, Chunk> Chunks { get; } = new ConcurrentDictionary<ChunkPos, Chunk>();
@@ -48,20 +49,12 @@ namespace SharpCraft.world
                 RegionStaticImpl<ChunkPos>.Ctor,
                 ChunkPos.Ctor);
 
-            LoadBlockTable(new WorldLut());
+            _worldLut = new WorldLut();
 
             foreach (var block in BlockRegistry.AllBlocks())
             {
                 _worldLut.Put(block.UnlocalizedName);
             }
-        }
-
-        public void LoadBlockTable(WorldLut lut)
-        {
-            if (_worldLut != null)
-                throw new Exception("The LUT is already initialized!");
-
-            _worldLut = lut;
         }
 
         public short GetLocalBlockId(string unlocalizedName)
@@ -72,11 +65,6 @@ namespace SharpCraft.world
         public string GetLocalBlockName(short localId)
         {
             return _worldLut.Translate(localId);
-        }
-
-        public void AddBlockToLUT(string unlocalizedName)
-        {
-            _worldLut.Put(unlocalizedName);
         }
 
         public void AddEntity(Entity e)
@@ -143,7 +131,7 @@ namespace SharpCraft.world
 
         public bool IsAir(BlockPos pos)
         {
-            return GetBlockState(pos).Block == BlockRegistry.GetBlock("air");
+            return GetBlockState(pos).Block == BlockRegistry.GetBlock<BlockAir>();
         }
 
         public BlockState GetBlockState(BlockPos pos)
@@ -163,6 +151,8 @@ namespace SharpCraft.world
             Chunk chunk = GetChunk(ChunkPos.FromWorldSpace(pos));
             if (chunk == null || !chunk.HasData)
                 return;
+
+            _worldLut.Put(state.Block.UnlocalizedName);
 
             chunk.SetBlockState(ChunkPos.ToChunkLocal(pos), state);
         }
@@ -263,7 +253,9 @@ namespace SharpCraft.world
                 return;
 
             var air = BlockRegistry.GetBlock<BlockAir>().GetState();
+
             var leaves = BlockRegistry.GetBlock("leaves").GetState();
+
             var log = BlockRegistry.GetBlock("log").GetState();
             var grass = BlockRegistry.GetBlock<BlockGrass>().GetState();
             var dirt = BlockRegistry.GetBlock("dirt").GetState();
@@ -425,4 +417,5 @@ namespace SharpCraft.world
             return _waypoints.Values;
         }
     }
+#pragma warning restore CS0618 // Type or member is obsolete
 }

@@ -36,7 +36,7 @@ namespace SharpCraft.world.chunk
 
         internal void Add(T t) => (Building ? _backup : _primary).Add(t);
 
-        public void remove(T pos)
+        public void Remove(T pos)
         {
             _primary.Remove(pos);
             _backup.Remove(pos);

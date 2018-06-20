@@ -90,8 +90,8 @@ namespace SharpCraft.block
         {
             switch (t)
             {
-                case TextureType.top: return Up;
-                case TextureType.bottom: return Down;
+                case TextureType.up: return Up;
+                case TextureType.down: return Down;
                 case TextureType.north: return North;
                 case TextureType.south: return South;
                 case TextureType.west: return West;
@@ -102,8 +102,8 @@ namespace SharpCraft.block
 
         public static TextureType Parse(FaceSides fs)
         {
-            if (fs == Up) return TextureType.top;
-            if (fs == Down) return TextureType.bottom;
+            if (fs == Up) return TextureType.up;
+            if (fs == Down) return TextureType.down;
             if (fs == North) return TextureType.north;
             if (fs == South) return TextureType.south;
             if (fs == East) return TextureType.east;

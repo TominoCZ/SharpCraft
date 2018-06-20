@@ -12,16 +12,5 @@ namespace SharpCraft.texture
             this.start = start;
             this.end = end;
         }
-
-        public float[] ToArray()
-        {
-            return new[]
-            {
-                start.X, start.Y,
-                start.X, end.Y,
-                end.X, end.Y,
-                end.X, start.Y
-            };
-        }
     }
 }

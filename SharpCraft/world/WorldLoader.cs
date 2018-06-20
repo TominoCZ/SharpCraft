@@ -3,6 +3,7 @@ using SharpCraft.entity;
 using System;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
+using Newtonsoft.Json;
 
 namespace SharpCraft.world
 {
@@ -24,11 +25,13 @@ namespace SharpCraft.world
 
                 using (FileStream fs = File.OpenWrite(w.SaveRoot + "/player.dat"))
                 {
+                    fs.Position = 0;
                     bf.Serialize(fs, wpn);
                 }
 
                 using (FileStream fs = File.OpenWrite(w.SaveRoot + "/level.dat"))
                 {
+                    fs.Position = 0;
                     bf.Serialize(fs, wdn);
                 }
             }
@@ -56,11 +59,13 @@ namespace SharpCraft.world
 
                 using (FileStream fs = File.OpenRead(dir + "/player.dat"))
                 {
+                    fs.Position = 0;
                     wpn = (WorldPlayerNode)bf.Deserialize(fs);
                 }
 
                 using (FileStream fs = File.OpenRead(dir + "/level.dat"))
                 {
+                    fs.Position = 0;
                     wdn = (WorldDataNode)bf.Deserialize(fs);
                 }
 

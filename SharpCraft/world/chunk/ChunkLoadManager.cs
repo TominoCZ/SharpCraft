@@ -98,7 +98,7 @@ namespace SharpCraft.world.chunk
                 {
                     lock (_chunkLoads)
                     {
-                        _chunkLoads.remove(pos);
+                        _chunkLoads.Remove(pos);
                     }
                     SharpCraft.Instance.World.LoadChunk(pos);
                 }

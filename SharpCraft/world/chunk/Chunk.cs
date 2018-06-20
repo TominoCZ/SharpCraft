@@ -72,7 +72,7 @@ namespace SharpCraft.world.chunk
         public void SetBlockState(BlockPos localPos, BlockState state)
         {
             CheckPos(localPos);
-            World.AddBlockToLUT(state.Block.UnlocalizedName);
+
             short id = World.GetLocalBlockId(state.Block.UnlocalizedName);
             short meta = state.Block.GetMetaFromState(state);
             short value = (short)(id << 4 | meta);
@@ -91,13 +91,13 @@ namespace SharpCraft.world.chunk
 
         public bool IsAir(BlockPos pos)
         {
-            return GetBlockState(pos).Block == BlockRegistry.GetBlock("air");
+            return GetBlockState(pos).Block == BlockRegistry.GetBlock<BlockAir>();
         }
 
         public BlockState GetBlockState(BlockPos localPos)
         {
             if (localPos.Y < 0 || localPos.Y >= ChunkHeight)
-                return BlockRegistry.GetBlock("air").GetState();
+                return BlockRegistry.GetBlock<BlockAir>().GetState();
 
             CheckPosXZ(localPos);
 
@@ -208,7 +208,7 @@ namespace SharpCraft.world.chunk
 
             Stopwatch sw = Stopwatch.StartNew(); //this is just a debug thing....
 
-            var air = BlockRegistry.GetBlock("air");
+            var air = BlockRegistry.GetBlock<BlockAir>();
 
             List<float> vertexes = new List<float>();
             List<float> normals = new List<float>();

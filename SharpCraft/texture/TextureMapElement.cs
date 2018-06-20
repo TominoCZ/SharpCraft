@@ -2,7 +2,7 @@
 
 namespace SharpCraft
 {
-    internal class TextureMapElement
+    public class TextureMapElement
     {
         public Vector2 UVMin { get; }
         public Vector2 UVMax { get; }

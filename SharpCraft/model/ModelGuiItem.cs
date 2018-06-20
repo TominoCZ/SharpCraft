@@ -1,5 +1,4 @@
 ﻿using SharpCraft.render.shader;
-using System.Collections.Generic;
 
 namespace SharpCraft.model
 {
@@ -7,18 +6,22 @@ namespace SharpCraft.model
     {
         public ModelGuiItem(Shader<object> shader) : base(null, shader)
         {
-            RawQuad rawQuad = new RawQuad(new float[] {
-                -1,  1,
+            float[] vertexes =
+            {
+                -1, 1,
                 -1, -1,
                 1, -1,
-                1, 1 },
-                new float[] {
+                1, 1
+            };
+            float[] uvs =
+            {
                 0, 0,
                 1, 0,
                 1, 1,
-                0, 1}, 2);
+                0, 1
+            };
 
-            RawModel = ModelManager.LoadModelToVAO(new List<RawQuad> { rawQuad }, 2);
+            RawModel = ModelManager.LoadModel2ToVao(vertexes, uvs);
         }
     }
 }

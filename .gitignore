@@ -252,8 +252,8 @@ typings/
 
 # Visual Studio LightSwitch build output
 **/*.HTMLClient/GeneratedArtifacts
-**/*.DesktopClient/GeneratedArtifacts
-**/*.DesktopClient/ModelManifest.xml
+**/*.DeskupClient/GeneratedArtifacts
+**/*.DeskupClient/ModelManifest.xml
 **/*.Server/GeneratedArtifacts
 **/*.Server/ModelManifest.xml
 _Pvt_Extensions

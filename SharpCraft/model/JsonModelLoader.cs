@@ -10,6 +10,8 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
+using System.Linq;
+using Newtonsoft.Json.Converters;
 using Bitmap = System.Drawing.Bitmap;
 
 namespace SharpCraft
@@ -23,23 +25,16 @@ namespace SharpCraft
 
         private static JsonModelLoader _instance;
 
+        private static Vector3 V2, V3, V4, NORMAL;
+
         public JsonModelLoader(Shader<ModelBlock> blockShader)
         {
             if (_instance != null)
                 throw new Exception("There can only be one instance of the JsonModelLoader class!");
 
             _instance = this;
+
             TEXTURE_BLOCKS = LoadBlocks(blockShader);
-            //here we have the block models already loaded
-
-            //foreach (var model in _blockModels)
-            //{
-            //var texturedModel = CreateTexturedCubeModel(model.Value.Sprites);
-
-            //BlockModelForRender mfr = new BlockModelForRender(texturedModel, blockShader);
-
-            //_modelsForRender.Add(model.Key, mfr);
-            //}
         }
 
         private int LoadBlocks(Shader<ModelBlock> blockShader)
@@ -48,8 +43,6 @@ namespace SharpCraft
 
             if (!Directory.Exists(dir))
                 return 0;
-
-            // string[] files = Directory.GetFiles(dir); //TODO - ONLY LOAD JSONS FOR REGISTERED BLOCKS!
 
             var listOfBlocks = BlockRegistry.AllBlocks();
 
@@ -64,13 +57,13 @@ namespace SharpCraft
                 if (!File.Exists(file))
                     continue;
 
-                JsonBlockModel bjm = JsonConvert.DeserializeObject<JsonBlockModel>(File.ReadAllText(file));
+                JsonBlockModel bjm = FixBlockJson(file);
 
                 string blockName = Path.GetFileNameWithoutExtension(file);
 
                 blockModels.TryAdd(blockName, bjm); //save what block is using what model
 
-                foreach (var pair in bjm.Textures) //iterating over the textureMap in the Json model
+                foreach (var pair in bjm.textures) //iterating over the textureMap in the Json model
                 {
                     if (!nonDuplicateTextures.Contains(pair.Value))
                     {
@@ -89,55 +82,29 @@ namespace SharpCraft
                 string name = pair.Key;
                 JsonBlockModel model = pair.Value;
 
-                float[] vertexes = new float[72 * model.Cubes.Length];
-                float[] normals = new float[72 * model.Cubes.Length];
-                float[] uvs = new float[48 * model.Cubes.Length];
+                float[] vertexes = new float[72 * model.cubes.Length];
+                float[] normals = new float[72 * model.cubes.Length];
+                float[] uvs = new float[48 * model.cubes.Length];
 
-                for (var index = 0; index < model.Cubes.Length; index++)
+                for (var index = 0; index < model.cubes.Length; index++)
                 {
-                    var cube = model.Cubes[index];
+                    var cube = model.cubes[index];
 
-                    CubeModelBuilder.AppendCubeModel(cube, model.Textures, textureMapElements, ref vertexes, ref normals, ref uvs, index);
+                    CubeModelBuilder.AppendCubeModel(cube, model.textures, textureMapElements, ref vertexes,
+                        ref normals, ref uvs, index);
                 }
 
-                ModelBlock mb = new ModelBlock(blockShader, ModelManager.LoadBlockModelToVAO(vertexes, normals, uvs));
+                string particleTextureName;
+
+                if (!model.textures.TryGetValue("particle", out particleTextureName))
+                    particleTextureName = model.textures.Values.ToArray()[SharpCraft.Instance.Random.Next(0, model.textures.Count)];
+
+                var tme = textureMapElements[particleTextureName];
+
+                ModelBlock mb = new ModelBlock(tme, blockShader, ModelManager.LoadBlockModelToVao(vertexes, normals, uvs));
 
                 _blockModels.Add(name, mb);
             }
-
-            #region OLD
-
-            /*
-            foreach (var pair in textureMap) //iterate over every block name and it's textureMap
-            {
-                var blockName = pair.Key;
-                var model = pair.Value;
-
-                BlockModel blockModel = new BlockModel(); //create a model for the block
-
-                if (model.Textures.TryGetValue(TextureType.Block, out string tex1)
-                    && textureMap.TryGetValue(tex1, out TextureMapElement tp1)) // if json contains a 'block' texture, set that texture for all 6 sides first
-                {
-                    blockModel.SetSpriteForAllSides(tp1);
-                }
-
-                if (model.Textures.TryGetValue(TextureType.Side, out string tex2)
-                    && textureMap.TryGetValue(tex2, out TextureMapElement tp2)) // if json contains a 'side' texture, set that texture for all 4 sides
-                {
-                    blockModel.SetSpriteForSides(tp2);
-                }
-
-                foreach (var texture in model.Textures) //lastly, load all textureMap like north, south,... and override if are set by 'side' or 'block'
-                {
-                    if (texture.Key != TextureType.Side
-                        && textureMap.TryGetValue(texture.Value, out TextureMapElement sprite))
-                        blockModel.AddSpriteForSide(texture.Key, sprite);
-                }
-
-                _blockModels.Add(blockName, blockModel); //register block model for name
-            }*/
-
-            #endregion OLD
 
             return id;
         }
@@ -185,7 +152,7 @@ namespace SharpCraft
                 if (isItemBlock)
                     continue;
 
-                foreach (var pair in bjm.Textures) //iterating over the textureMap in the Json model
+                foreach (var pair in bjm.textures) //iterating over the textureMap in the Json model
                 {
                     if (!nonDuplicateTextures.Contains(pair.Value))
                     {
@@ -203,23 +170,44 @@ namespace SharpCraft
                 string name = pair.Key;
                 JsonBlockModel model = pair.Value;
 
-                float[] vertexes = new float[72 * model.Cubes.Length];
-                float[] normals = new float[72 * model.Cubes.Length];
-                float[] uvs = new float[48 * model.Cubes.Length];
+                float[] vertexes = new float[72 * model.cubes.Length];
+                float[] normals = new float[72 * model.cubes.Length];
+                float[] uvs = new float[48 * model.cubes.Length];
 
-                for (var index = 0; index < model.Cubes.Length; index++)
+                for (var index = 0; index < model.cubes.Length; index++)
                 {
-                    var cube = model.Cubes[index];
+                    var cube = model.cubes[index];
 
-                    CubeModelBuilder.AppendCubeModel(cube, model.Textures, textureMapElements, ref vertexes, ref normals, ref uvs, index);
+                    CubeModelBuilder.AppendCubeModel(cube, model.textures, textureMapElements, ref vertexes, ref normals, ref uvs, index);
                 }
 
-                ModelBlock mb = new ModelBlock(blockShader, ModelManager.LoadBlockModelToVAO(vertexes, normals, uvs));
+                //ModelBlock mb = new ModelBlock(blockShader, ModelManager.LoadBlockModelToVao(vertexes, normals, uvs));
 
                 //_itemModels.Add(name, mb);
             }
 
             return id;
+        }
+
+        private JsonBlockModel FixBlockJson(string file)
+        {
+            var json = File.ReadAllText(file);
+
+            json = json.Replace("elements", "cubes");
+
+            var parsed = JsonConvert.DeserializeObject<JsonBlockModel>(json);
+
+            foreach (var variable in parsed.textures.Keys.ToArray())
+            {
+                var value = parsed.textures[variable];
+                parsed.textures[variable] = value.Split('/').Last();
+            }
+
+            json = JsonConvert.SerializeObject(parsed, Formatting.Indented);
+
+            File.WriteAllText(file, json);
+
+            return parsed;
         }
 
         private int Stitch(string[] textures, int textureSize, Dictionary<string, TextureMapElement> sprites)
@@ -296,6 +284,38 @@ namespace SharpCraft
             _blockModels.TryGetValue(blockName, out var model);
 
             return model;
+        }
+
+        public static float[] CalculateNormals(float[] vertices)
+        {
+            float[] normals = new float[vertices.Length];
+
+            for (int i = 0; i < vertices.Length; i += 12)
+            {
+                V2.X = vertices[i + 3];
+                V2.Y = vertices[i + 4];
+                V2.Z = vertices[i + 5];
+
+                V3.X = vertices[i + 6];
+                V3.Y = vertices[i + 7];
+                V3.Z = vertices[i + 8];
+
+                V4.X = vertices[i + 9];
+                V4.Y = vertices[i + 10];
+                V4.Z = vertices[i + 11];
+
+                NORMAL = Vector3.Cross(V4 - V2, V2 - V3);
+
+                for (int j = 0; j < 4; j++)
+                {
+                    for (int k = 0; k < 3; k++)
+                    {
+                        normals[i + j * 3 + k] = NORMAL[k];
+                    }
+                }
+            }
+
+            return normals;
         }
     }
 }

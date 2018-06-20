@@ -3,7 +3,6 @@ using OpenTK.Graphics.OpenGL;
 using OpenTK.Input;
 using SharpCraft.gui;
 using SharpCraft.model;
-using System.Collections.Generic;
 
 namespace SharpCraft.render
 {
@@ -16,13 +15,15 @@ namespace SharpCraft.render
 
         static GuiRenderer()
         {
-            RawQuad rawQuad = new RawQuad(new float[] {
-                -1,  1,
+            float[] vertexes =
+            {
+                -1, 1,
                 -1, -1,
                 1, -1,
-                1, 1 }, 2);
+                1, 1
+            };
 
-            GuiQuad = ModelManager.LoadModelToVAO(new List<RawQuad> { rawQuad }, 2);
+            GuiQuad = ModelManager.LoadModel2ToVao(vertexes);
         }
 
         public GuiRenderer()

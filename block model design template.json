@@ -34,11 +34,11 @@
 					"uv": "auto", 
 					
 					"faces":{
-						"top":{
+						"up":{
 							"texture":"#Grass", //overrides GrassSide texture
 							"uvRotate":"90"
 						},
-						"bottom":{
+						"down":{
 							"texture":"#Dirt",
 						}
 					}
@@ -47,23 +47,23 @@
 		}
 	},
 	"states":{
-		"snowyTop":{
+		"snowyup":{
 			"acceptedValues":[true,false],
 			"true":{ // if(acceptedValues)
-				//add another cube on top that is 1 px high (like a snow slab from mc)
-				"mainModel.geometry.snowyTop": { // mainModel.geometry.add(...)
+				//add another cube on up that is 1 px high (like a snow slab from mc)
+				"mainModel.geometry.snowyup": { // mainModel.geometry.add(...)
 					"size":[0,1,0, 1,"17px",1],
 					"texture":"#Snow",
 					"uv": "auto", //make sure to do uv%1 so 17px (aka 1.0625) turns to 1px (aka 0.0625)
 					
 					"faces":{
-						"bottom":{//no need to render a face inside the block
+						"down":{//no need to render a face inside the block
 							"disabled": true
 						}
 					}
 				},
-				//disable mainCube top as it is covered by the snowyTop cube
-				"mainModel.geometry.mainCube.faces.top.disabled":true,
+				//disable mainCube up as it is covered by the snowyup cube
+				"mainModel.geometry.mainCube.faces.up.disabled":true,
 				"mainModel.geometry.mainCube.texture":"#GrassSnowySide"
 			}
 		}

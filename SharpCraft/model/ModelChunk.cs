@@ -9,13 +9,13 @@ namespace SharpCraft.model
         public ModelChunk(float[] vertexes, float[] normals, float[] uvs, Shader<ModelBlock> shader) : base(null, shader)
         {
             IsGenerated = vertexes.Length > 0;
-            RawModel = ModelManager.LoadModelToVAO(vertexes, normals, uvs);
+            RawModel = ModelManager.LoadModel3ToVao(vertexes, normals, uvs);
         }
 
         public void OverrideData(float[] vertexes, float[] normals, float[] uvs)
         {
             IsGenerated = vertexes.Length > 0;
-            RawModel = ModelManager.OverrideModel3InVAO(RawModel.VaoID, RawModel.BufferIDs, vertexes, normals, uvs);
+            RawModel = ModelManager.OverrideModel3InVao(RawModel.VaoID, RawModel.BufferIDs, vertexes, normals, uvs);
         }
     }
 }

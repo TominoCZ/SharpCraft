@@ -2,8 +2,8 @@
 {
     public enum TextureType
     {
-        top,
-        bottom,
+        up,
+        down,
         north,
         south,
         east,

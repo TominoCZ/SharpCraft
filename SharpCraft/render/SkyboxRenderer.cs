@@ -13,7 +13,7 @@ namespace SharpCraft.render
     {
         private static readonly float SIZE = 500f;
 
-        private static readonly float[] VERTICES = {
+        private static readonly float[] _vertexes = {
             -SIZE,  SIZE, -SIZE,
             -SIZE, -SIZE, -SIZE,
             SIZE, -SIZE, -SIZE,
@@ -65,21 +65,7 @@ namespace SharpCraft.render
 
         public SkyboxRenderer()
         {
-            List<RawQuad> quads = new List<RawQuad>();
-
-            for (int i = 0; i < VERTICES.Length; i += 18)
-            {
-                float[] vertices = new float[18];
-
-                for (int j = 0; j < 18; j++)
-                {
-                    vertices[j] = VERTICES[i + j];
-                }
-
-                quads.Add(new RawQuad(vertices, 3));
-            }
-
-            cube = new ModelBaked<object>(ModelManager.LoadModelToVAO(quads, 3), new Shader<object>("skybox"));
+            cube = new ModelBaked<object>(ModelManager.LoadModel3ToVao(_vertexes), new Shader<object>("skybox"));
             texture = TextureManager.LoadCubeMap();
         }
 
