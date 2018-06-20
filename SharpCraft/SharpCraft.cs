@@ -82,6 +82,7 @@ namespace SharpCraft
 
         private readonly List<MouseButton> _mouseButtonsDown = new List<MouseButton>();
         private readonly ConcurrentQueue<Action> _glContextQueue = new ConcurrentQueue<Action>();
+        //private DateTime _updateTimer = DateTime.Now;
         private readonly Stopwatch _updateTimer = Stopwatch.StartNew();
         private DateTime _lastFpsDate = DateTime.Now;
         private WindowState _lastWindowState;
@@ -104,6 +105,7 @@ namespace SharpCraft
         private long _interactionTickCounter;
         private float _sensitivity = 1;
         private float _partialTicks;
+        private double _timer;
         private readonly string _glVersion;
 
         private static string _title;
@@ -201,6 +203,7 @@ namespace SharpCraft
             blockRegistry.Put(new BlockSlab());
             blockRegistry.Put(new BlockRare());
             blockRegistry.Put(new BlockLadder());
+            blockRegistry.Put(new BlockTallGrass());
 
             //POST - MOD Blocks and Items
             foreach (ModMain mod in installedMods)
@@ -245,6 +248,7 @@ namespace SharpCraft
                 Player.SetItemStackInInventory(5, new ItemStack(new ItemBlock(BlockRegistry.GetBlock<BlockCraftingTable>())));
                 Player.SetItemStackInInventory(6, new ItemStack(new ItemBlock(BlockRegistry.GetBlock<BlockSlab>())));
                 Player.SetItemStackInInventory(7, new ItemStack(new ItemBlock(BlockRegistry.GetBlock<BlockLadder>())));
+                Player.SetItemStackInInventory(8, new ItemStack(new ItemBlock(BlockRegistry.GetBlock<BlockTallGrass>())));
             }
             else
             {
@@ -293,9 +297,18 @@ namespace SharpCraft
                             if (_lastMouseOverObject.hit == MouseOverObject.hit && lastPos == MouseOverObject.blockPos)
                             {
                                 if (!DestroyProgresses.TryGetValue(lastPos, out DestroyProgress progress))
-                                    DestroyProgresses.TryAdd(lastPos, progress = new DestroyProgress(lastPos, Player));
+                                {
+                                    if (World?.GetBlockState(lastPos).Block.Hardness != -1)
+                                    {
+                                        DestroyProgresses.TryAdd(lastPos,
+                                            progress = new DestroyProgress(lastPos, Player));
+                                        progress.Progress = 0;
+                                    }
+                                }
                                 else
+                                {
                                     progress.Progress++;
+                                }
 
                                 if (progress.Destroyed)
                                     DestroyProgresses.TryRemove(progress.Pos, out DestroyProgress removed);
@@ -381,7 +394,7 @@ namespace SharpCraft
                             {
                                 AxisAlignedBB bb = state.Block.BoundingBox.offset(pos.ToVec());
 
-                                bool hitSomething = RayHelper.rayIntersectsBB(Camera.pos,
+                                bool hitSomething = RayHelper.RayIntersectsBB(Camera.pos,
                                     Camera.GetLookVec(), bb, out Vector3 hitPos, out Vector3 normal);
 
                                 if (hitSomething)
@@ -401,12 +414,12 @@ namespace SharpCraft
                                     else if (normal.Z > 0)
                                         sideHit = FaceSides.South;
 
-                                    BlockPos p = new BlockPos(hitPos - normal * 0.5f);
+                                    BlockPos p = new BlockPos(hitPos - normal * bb.size / 2);
 
                                     if (sideHit == FaceSides.Null)
                                         continue;
 
-                                    float l = Math.Abs((Camera.pos - (p.ToVec() + Vector3.One * 0.5f)).Length);
+                                    float l = Math.Abs((Camera.pos - (p.ToVec() + bb.size / 2)).Length);
 
                                     if (l < dist)
                                     {
@@ -578,10 +591,10 @@ namespace SharpCraft
         protected override void OnRenderFrame(FrameEventArgs e)
         {
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
-            
-            _partialTicks = (float)(_updateTimer.Elapsed.TotalMilliseconds / 50.0D);
 
             DateTime now = DateTime.Now;
+
+            _partialTicks = (float)(_updateTimer.Elapsed.TotalSeconds / TargetUpdatePeriod);
 
             if ((now - _lastFpsDate).TotalMilliseconds >= 1000)
             {
@@ -632,12 +645,14 @@ namespace SharpCraft
 
         protected override void OnUpdateFrame(FrameEventArgs e)
         {
+            _updateTimer.Restart();
+
             if (!IsDisposed && Visible)
                 GetMouseOverObject();
 
             GameLoop();
 
-            _updateTimer.Restart();
+            //_updateTimer = DateTime.Now;
         }
 
         protected override void OnMouseDown(MouseButtonEventArgs e)

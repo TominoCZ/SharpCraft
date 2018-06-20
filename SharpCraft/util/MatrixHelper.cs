@@ -12,13 +12,10 @@ namespace SharpCraft.util
             Matrix4 y = Matrix4.CreateRotationY(MathHelper.DegreesToRadians(rot.Y));
             Matrix4 z = Matrix4.CreateRotationZ(MathHelper.DegreesToRadians(rot.Z));
 
-            Vector3 vec = Vector3.One * 0.5f;
-
             Matrix4 s = Matrix4.CreateScale(scale);
-            Matrix4 t = Matrix4.CreateTranslation(translation + vec * scale);
-            Matrix4 t2 = Matrix4.CreateTranslation(-vec);
+            Matrix4 t = Matrix4.CreateTranslation(translation);
 
-            return t2 * (x * z * y * s) * t;
+            return x * z * y * s * t;
         }
 
         public static Matrix4 CreateTransformationMatrix(Vector2 translation, Vector2 scale)

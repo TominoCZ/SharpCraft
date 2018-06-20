@@ -6,6 +6,7 @@ using SharpCraft.model;
 using SharpCraft.render;
 using SharpCraft.render.shader;
 using SharpCraft.render.shader.shaders;
+using SharpCraft.texture;
 using SharpCraft.util;
 
 namespace SharpCraft.gui

@@ -8,6 +8,7 @@ namespace SharpCraft.block
     {
         public BlockCraftingTable() : base("crafting_table")
         {
+            Hardness = 32;
         }
     }
 }

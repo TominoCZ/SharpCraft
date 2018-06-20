@@ -1,6 +1,7 @@
 {
   "textures": {
-    "block": "stone"
+    "up": "log_up",
+    "side": "log_side"
   },
   "cubes": [
     {
@@ -11,7 +12,7 @@
       ],
       "to": [
         16.0,
-        8.0,
+        16.0,
         16.0
       ],
       "rotation": null,
@@ -23,7 +24,7 @@
             16.0,
             16.0
           ],
-          "texture": "block"
+          "texture": "up"
         },
         "down": {
           "uv": [
@@ -32,43 +33,43 @@
             16.0,
             16.0
           ],
-          "texture": "block"
+          "texture": "up"
         },
         "north": {
           "uv": [
             0.0,
             0.0,
             16.0,
-            8.0
+            16.0
           ],
-          "texture": "block"
+          "texture": "side"
         },
         "south": {
           "uv": [
             0.0,
             0.0,
             16.0,
-            8.0
+            16.0
           ],
-          "texture": "block"
+          "texture": "side"
         },
         "east": {
           "uv": [
             0.0,
             0.0,
             16.0,
-            8.0
+            16.0
           ],
-          "texture": "block"
+          "texture": "side"
         },
         "west": {
           "uv": [
             0.0,
             0.0,
             16.0,
-            8.0
+            16.0
           ],
-          "texture": "block"
+          "texture": "side"
         }
       }
     }

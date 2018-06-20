@@ -7,7 +7,7 @@ namespace SharpCraft.model
     {
         public ModelParticle(ShaderParticle shader) : base(null, shader)
         {
-            var vertexes = CubeModelBuilder.CreateCubeVertexes();
+            var vertexes = CubeModelBuilder.CreateCubeVertexes(true);
             var normals = CubeModelBuilder.CreateCubeNormals();
             var uvs = CubeModelBuilder.CreateCubeUvs();
 

@@ -9,6 +9,7 @@ namespace SharpCraft.block
         public BlockPlanks() : base("planks")
         {
             IsFullCube = false;
+            Hardness = 32;
         }
     }
 }

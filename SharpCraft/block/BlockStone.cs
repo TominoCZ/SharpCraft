@@ -4,7 +4,7 @@
     {
         public BlockStone() : base("stone")
         {
-            Hardness = 32;
+            Hardness = 64;
         }
     }
 }

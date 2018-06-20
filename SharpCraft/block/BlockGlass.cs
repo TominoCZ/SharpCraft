@@ -5,6 +5,7 @@
         public BlockGlass() : base("glass")
         {
             HasTransparency = true;
+            Hardness = 8;
         }
     }
 }

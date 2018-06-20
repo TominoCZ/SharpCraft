@@ -193,7 +193,7 @@ namespace SharpCraft
         {
             var json = File.ReadAllText(file);
 
-            json = json.Replace("elements", "cubes");
+            json = json.Replace("elements", "cubes").Replace("faceData", "faces").Replace("textureFacing", "texture").Replace("#", "");
 
             var parsed = JsonConvert.DeserializeObject<JsonBlockModel>(json);
 
@@ -245,17 +245,9 @@ namespace SharpCraft
         {
             var file = $"{SharpCraft.Instance.GameFolderDir}\\SharpCraft_Data\\assets\\Textures\\blocks\\{texName}.png";
 
-            Bitmap tex = File.Exists(file)
-                ? new Bitmap(Bitmap.FromFile(file), textureSize, textureSize)
-                : null;
-
-            if (tex == null)
-            {
-                using (var img = TextureManager.CreateMissingTexture())
-                {
-                    tex = new Bitmap(img, textureSize, textureSize);
-                }
-            }
+            Bitmap tex = (File.Exists(file)
+                             ? new Bitmap(Bitmap.FromFile(file), textureSize, textureSize)
+                             : null) ?? new Bitmap(TextureManager.TEXTURE_MISSING, textureSize, textureSize);
 
             using (tex)
             {

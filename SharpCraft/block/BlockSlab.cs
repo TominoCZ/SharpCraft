@@ -17,6 +17,8 @@ namespace SharpCraft.block
             size.Y = 0.5f;
 
             BoundingBox = new AxisAlignedBB(size);
+
+            Hardness = 64; //TODO - set based on the state
         }
     }
 }

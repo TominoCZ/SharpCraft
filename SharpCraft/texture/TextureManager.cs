@@ -22,7 +22,7 @@ namespace SharpCraft.texture
 
         private static readonly List<int> _allTextures = new List<int>();
 
-        private static readonly Bitmap TEXTURE_MISSING = CreateMissingTexture();
+        public static readonly Bitmap TEXTURE_MISSING = CreateMissingTexture();
 
         public static Texture TEXTURE_DESTROY_PROGRESS;
 
@@ -193,7 +193,7 @@ namespace SharpCraft.texture
             }
         }*/
 
-        public static Bitmap CreateMissingTexture()
+        private static Bitmap CreateMissingTexture()
         {
             Bitmap bmp = new Bitmap(16, 16);
 
@@ -251,6 +251,48 @@ namespace SharpCraft.texture
             return new Texture(LoadTexture(TEXTURE_MISSING, smooth), TEXTURE_MISSING.Size);
         }
 
+        public static int LoadCubeMap()
+        {
+            int texID = GL.GenTexture();
+
+            _allTextures.Add(texID);
+
+            GL.BindTexture(TextureTarget.TextureCubeMap, texID);
+
+            Dictionary<FaceSides, Bitmap> cubeMapTextures = LoadSkyboxTextures();
+
+            foreach (KeyValuePair<FaceSides, Bitmap> dictValues in cubeMapTextures)
+            {
+                TextureTarget target = TextureTarget.Texture2D;
+
+                if (dictValues.Key.z == 1) target = TextureTarget.TextureCubeMapPositiveZ;
+                else if (dictValues.Key.z == -1) target = TextureTarget.TextureCubeMapNegativeZ;
+                else if (dictValues.Key.x == 1) target = TextureTarget.TextureCubeMapPositiveX;
+                else if (dictValues.Key.x == -1) target = TextureTarget.TextureCubeMapNegativeX;
+                else if (dictValues.Key.y == 1) target = TextureTarget.TextureCubeMapPositiveY;
+                else if (dictValues.Key.y == -1) target = TextureTarget.TextureCubeMapNegativeY;
+
+                Bitmap bmp = (Bitmap)dictValues.Value.Clone();
+                Size size = bmp.Size;
+
+                BitmapData data = bmp.LockBits(new Rectangle(0, 0, size.Width, size.Height),
+                    ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+
+                GL.TexImage2D(target, 0, PixelInternalFormat.Rgba, data.Width, data.Height, 0, OpenTK.Graphics.OpenGL.PixelFormat.Bgra,
+                    PixelType.UnsignedByte, data.Scan0);
+
+                bmp.UnlockBits(data);
+            }
+
+            GL.TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
+            GL.TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
+
+            GL.TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
+            GL.TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge);
+
+            return texID;
+        }
+
         public static TextureUVNode GetUV(int textureSizeX, int textureSizeY, int x, int y, int sizeX, int sizeY) //TODO i might move this to TextureManager or TextureHelper
         {
             var mapSize = new Vector2(textureSizeX, textureSizeY);
@@ -300,47 +342,7 @@ namespace SharpCraft.texture
             return bitmaps;
         }
 
-        public static int LoadCubeMap()
-        {
-            int texID = GL.GenTexture();
 
-            _allTextures.Add(texID);
-
-            GL.BindTexture(TextureTarget.TextureCubeMap, texID);
-
-            Dictionary<FaceSides, Bitmap> cubeMapTextures = LoadSkyboxTextures();
-
-            foreach (KeyValuePair<FaceSides, Bitmap> dictValues in cubeMapTextures)
-            {
-                TextureTarget target = TextureTarget.Texture2D;
-
-                if (dictValues.Key.z == 1) target = TextureTarget.TextureCubeMapPositiveZ;
-                else if (dictValues.Key.z == -1) target = TextureTarget.TextureCubeMapNegativeZ;
-                else if (dictValues.Key.x == 1) target = TextureTarget.TextureCubeMapPositiveX;
-                else if (dictValues.Key.x == -1) target = TextureTarget.TextureCubeMapNegativeX;
-                else if (dictValues.Key.y == 1) target = TextureTarget.TextureCubeMapPositiveY;
-                else if (dictValues.Key.y == -1) target = TextureTarget.TextureCubeMapNegativeY;
-
-                Bitmap bmp = (Bitmap)dictValues.Value.Clone();
-                Size size = bmp.Size;
-
-                BitmapData data = bmp.LockBits(new Rectangle(0, 0, size.Width, size.Height),
-                    ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-
-                GL.TexImage2D(target, 0, PixelInternalFormat.Rgba, data.Width, data.Height, 0, OpenTK.Graphics.OpenGL.PixelFormat.Bgra,
-                    PixelType.UnsignedByte, data.Scan0);
-
-                bmp.UnlockBits(data);
-            }
-
-            GL.TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
-            GL.TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
-
-            GL.TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
-            GL.TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge);
-
-            return texID;
-        }
 
         /*
         public static TextureBlockUV GetUVsFromBlock(EnumBlock block)

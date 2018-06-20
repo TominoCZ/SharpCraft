@@ -8,6 +8,7 @@ namespace SharpCraft.block
     {
         public BlockCobbleStone() : base("cobblestone")
         {
+            Hardness = 64;
         }
     }
 }

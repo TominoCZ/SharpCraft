@@ -9,6 +9,7 @@ namespace SharpCraft.block
         public BlockFurnace() : base("furnace")
         {
             IsFullCube = false;
+            Hardness = 64;
         }
     }
 }

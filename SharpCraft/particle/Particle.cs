@@ -3,6 +3,7 @@ using OpenTK.Graphics.OpenGL;
 using SharpCraft.entity;
 using SharpCraft.model;
 using SharpCraft.render;
+using SharpCraft.texture;
 using SharpCraft.util;
 using SharpCraft.world;
 
@@ -69,11 +70,13 @@ namespace SharpCraft.particle
             Vector3 partialPos = Vector3.Lerp(LastPos, Pos, partialTicks);
             float partialScale = lastParticleScale + (particleScale - lastParticleScale) * partialTicks;
             
+            partialPos.Y += partialScale / 2;
+
             ModelBaked<Particle> model = ParticleRenderer.ParticleModel;
 
             model.Shader.UpdateGlobalUniforms();
             model.Shader.UpdateModelUniforms();
-            model.Shader.UpdateInstanceUniforms(MatrixHelper.CreateTransformationMatrix(partialPos - Vector3.One * partialScale / 20, Vector3.Zero, partialScale), this);
+            model.Shader.UpdateInstanceUniforms(MatrixHelper.CreateTransformationMatrix(partialPos, Vector3.Zero, partialScale), this);
 
             GL.BindTexture(TextureTarget.Texture2D, textureID);
             model.RawModel.Render(PrimitiveType.Quads);

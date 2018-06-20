@@ -26,40 +26,7 @@ namespace SharpCraft.util
 
             return vec;
         }
-
-        public static Vector3 Rotate(this Vector3 vec, float angleX, float angleY, float angleZ)
-        {
-            float sinX = (float)Math.Sin(angleX);
-            float sinY = (float)Math.Sin(angleY);
-            float sinZ = (float)Math.Sin(angleZ);
-
-            float cosX = (float)Math.Cos(angleX);
-            float cosY = (float)Math.Cos(angleY);
-            float cosZ = (float)Math.Cos(angleZ);
-
-            float vecX = vec.X;
-            float vecY = vec.Y * cosX - vec.Z * sinX;
-            float vecZ = vec.Y * sinX + vec.Z * cosX;
-
-            vec.X = vecX;
-            vec.Y = vecY;
-            vec.Z = vecZ;
-
-            vecX = vec.X * cosY + vec.Z * sinY;
-            vecZ = vec.X * sinY - vec.Z * cosY;
-
-            vec.X = vecX;
-            vec.Z = vecZ;
-
-            vecX = vec.X * cosZ - vec.Y * sinZ;
-            vecY = vec.X * sinZ + vec.Y * cosZ;
-
-            vec.X = vecX;
-            vec.Y = vecY;
-
-            return vec;
-        }
-
+        
         public static float NextFloat(float min = 0, float max = 1)
         {
             float f = GetNext();

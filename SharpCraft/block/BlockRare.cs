@@ -8,6 +8,7 @@ namespace SharpCraft.block
     {
         public BlockRare() : base("rare")
         {
+            Hardness = 128;
         }
     }
 }

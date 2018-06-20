@@ -61,21 +61,7 @@ namespace SharpCraft.render
 
         public void UpdateProjectionMatrix()
         {
-            //var matrix = Matrix4.Identity;
-
             float aspectRatio = (float)SharpCraft.Instance.Width / SharpCraft.Instance.Height;
-            /*var yScale = (float)(1f / Math.Tan(MathHelper.DegreesToRadians(PartialFov / 2f)));
-            var xScale = yScale / aspectRatio;
-            var frustumLength = FarPlane - NearPlane;
-
-            matrix.M11 = xScale;
-            matrix.M22 = yScale;
-            matrix.M33 = -((FarPlane + NearPlane) / frustumLength);
-            matrix.M34 = -1;
-            matrix.M43 = -(2 * NearPlane * FarPlane / frustumLength);
-            matrix.M44 = 0;
-
-            Projection = matrix;*/
 
             Projection = Matrix4.CreatePerspectiveFieldOfView(MathHelper.DegreesToRadians(PartialFov), aspectRatio,
                 NearPlane, FarPlane);
@@ -83,7 +69,7 @@ namespace SharpCraft.render
 
         public Vector3 GetLookVec()
         {
-            return MathUtil.Rotate(Vector3.UnitZ, pitch, _yaw, 0).Normalized();
+            return Vector3.Transform(Vector3.UnitX, new Quaternion(-pitch, -_yaw + MathHelper.PiOver2, 0));
         }
 
         public Vector2 left

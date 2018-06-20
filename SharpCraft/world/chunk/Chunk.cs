@@ -237,7 +237,7 @@ namespace SharpCraft.world.chunk
                         {
                             BlockPos worldPosO = worldPos.Offset(dir);
                             BlockState stateO = World.GetBlockState(worldPosO);
-
+                            
                             if (!(stateO.Block == air || stateO.Block.HasTransparency && !state.Block.HasTransparency) && stateO.Block.IsFullCube)
                                 continue;
 
@@ -245,6 +245,9 @@ namespace SharpCraft.world.chunk
 
                             lock (locker)
                             {
+                                if (mbr == null)
+                                    Console.WriteLine();
+
                                 if (!state.Block.IsFullCube)
                                 {
                                     mbr?.AppendAllVertexData(ref vertexes, ref normals, ref uvs, localPos);

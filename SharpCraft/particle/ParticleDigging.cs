@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Numerics;
 using OpenTK.Graphics.OpenGL;
 using SharpCraft.render;
+using SharpCraft.texture;
 using Vector2 = OpenTK.Vector2;
 using Vector3 = OpenTK.Vector3;
 
@@ -14,12 +15,12 @@ namespace SharpCraft.particle
 {
     internal class ParticleDigging : Particle
     {
-        public BlockState state { get; }
+        public BlockState State { get; }
 
-        protected Vector3 rot;
-        protected Vector3 lastRot;
+        private Vector3 _rot;
+        private Vector3 _lastRot;
 
-        protected Vector3 rotStep;
+        private readonly Vector3 _rotStep;
 
         public ParticleDigging(World world, Vector3 pos, Vector3 motion, float particleScale, BlockState state) : this(world, pos, motion, particleScale, state, FaceSides.AllSides[(int)MathUtil.NextFloat(0, 6)])
         {
@@ -27,7 +28,7 @@ namespace SharpCraft.particle
 
         public ParticleDigging(World world, Vector3 pos, Vector3 motion, float particleScale, BlockState state, FaceSides side) : base(world, pos, motion, particleScale, JsonModelLoader.TEXTURE_BLOCKS)
         {
-            this.state = state;
+            State = state;
 
             ModelBlock model = JsonModelLoader.GetModelForBlock(state.Block.UnlocalizedName);
 
@@ -65,14 +66,14 @@ namespace SharpCraft.particle
 
             Vector3 vec = new Vector3(MathUtil.NextFloat(-1), MathUtil.NextFloat(-1), MathUtil.NextFloat(-1));
 
-            rotStep = vec.Normalized() * MathUtil.NextFloat(40, 75);
+            _rotStep = vec.Normalized() * MathUtil.NextFloat(40, 75);
         }
 
         public override void Update()
         {
             LastPos = Pos;
-            lastRot = rot;
-            
+            _lastRot = _rot;
+
             lastParticleScale = particleScale;
             lastParticleAlpha = particleAlpha;
 
@@ -99,26 +100,28 @@ namespace SharpCraft.particle
             {
                 Motion.Xz *= 0.6676801f;
 
-                rot.X = (float)Math.Round(rot.X / 90) * 90;
-                rot.Z = (float)Math.Round(rot.Z / 90) * 90;
+                _rot.X = (float)Math.Round(_rot.X / 90) * 90;
+                _rot.Z = (float)Math.Round(_rot.Z / 90) * 90;
             }
             else
             {
-                rot += rotStep * Math.Clamp((Motion.Xz * 5).LengthFast, onGround ? 0 : 0.2f, 0.3f);
+                _rot += _rotStep * Math.Clamp((Motion.Xz * 5).LengthFast, onGround ? 0 : 0.2f, 0.3f);
             }
         }
 
         public override void Render(float partialTicks)
         {
             Vector3 partialPos = Vector3.Lerp(LastPos, Pos, partialTicks);
-            Vector3 partialRot = Vector3.Lerp(lastRot, rot, partialTicks);
+            Vector3 partialRot = Vector3.Lerp(_lastRot, _rot, partialTicks);
 
             float partialScale = lastParticleScale + (particleScale - lastParticleScale) * partialTicks;
+
+            partialPos.Y += partialScale / 2;
 
             ModelBaked<Particle> model = ParticleRenderer.ParticleModel;
             model.Shader.UpdateGlobalUniforms();
             model.Shader.UpdateModelUniforms();
-            model.Shader.UpdateInstanceUniforms(MatrixHelper.CreateTransformationMatrix(partialPos - (Vector3.UnitX + Vector3.UnitZ) * partialScale / 2, partialRot, partialScale), this);
+            model.Shader.UpdateInstanceUniforms(MatrixHelper.CreateTransformationMatrix(partialPos, partialRot, partialScale), this);
 
             GL.BindTexture(TextureTarget.Texture2D, textureID);
             model.RawModel.Render(PrimitiveType.Quads);

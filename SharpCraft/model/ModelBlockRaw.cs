@@ -42,7 +42,9 @@ namespace SharpCraft.model
                east = 5
                --> these are used as indexes of the faces, since the model vertex data is added in the same exact order of the TextureType enum values
             */
-            TextureType parsed = FaceSides.Parse(side);//FaceSides is a struct containing Vector2 values (normals)
+            if (!FaceSides.Parse(side, out var parsed)) //FaceSides is a struct containing Vector2 values (normals)
+                return;
+
             int faceIndex = (int)parsed * 12;
 
             for (int i = 0; i < 12; i += 3)
@@ -55,7 +57,9 @@ namespace SharpCraft.model
 
         public void AppendNormalsForSide(FaceSides side, ref List<float> normals)
         {
-            TextureType parsed = FaceSides.Parse(side);
+            if (!FaceSides.Parse(side, out var parsed))
+                return;
+
             int faceIndex = (int)parsed * 12;
 
             for (int i = 0; i < 12; i += 3)
@@ -68,7 +72,9 @@ namespace SharpCraft.model
 
         public void AppendUvsForSide(FaceSides side, ref List<float> uvs)
         {
-            TextureType parsed = FaceSides.Parse(side);
+            if (!FaceSides.Parse(side, out var parsed))
+                return;
+
             int faceIndex = (int)parsed * 8;
 
             for (int i = 0; i < 8; i += 2)

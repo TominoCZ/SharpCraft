@@ -4,7 +4,7 @@ namespace SharpCraft.model
 {
     public class ModelBlock : ModelBaked<ModelBlock>
     {
-        private TextureMapElement _particleTexture;
+        private readonly TextureMapElement _particleTexture;
 
         public ModelBlock(TextureMapElement particleTexture, Shader<ModelBlock> shader, ModelBlockRaw rawModel) : base(null, shader)
         {

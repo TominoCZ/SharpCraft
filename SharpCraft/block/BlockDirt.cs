@@ -4,7 +4,7 @@
     {
         public BlockDirt() : base("dirt")
         {
-            //TODO - add grass growth logic
+            Hardness = 16;
         }
     }
 }

@@ -11,7 +11,6 @@ using System.Linq;
 
 namespace SharpCraft.world
 {
-#pragma warning disable CS0618 // Type or member is obsolete
     public class World
     {
         public ConcurrentDictionary<ChunkPos, Chunk> Chunks { get; } = new ConcurrentDictionary<ChunkPos, Chunk>();
@@ -34,7 +33,7 @@ namespace SharpCraft.world
         //TODO - clientside only
         private readonly Dictionary<BlockPos, Waypoint> _waypoints = new Dictionary<BlockPos, Waypoint>();
 
-        private WorldLut _worldLut;
+        private readonly WorldLut _worldLut;
 
         public World(string saveName, string levelName, int seed)
         {
@@ -113,7 +112,7 @@ namespace SharpCraft.world
                     {
                         BlockPos pos = new BlockPos(x, y, z);
                         BlockState state = SharpCraft.Instance.World.GetBlockState(pos);
-                        if (state.Block == air)
+                        if (state.Block == air || !state.Block.IsSolid)
                             continue;
 
                         blocks.Add(state.Block.BoundingBox.offset(pos.ToVec()));
@@ -254,14 +253,15 @@ namespace SharpCraft.world
 
             var air = BlockRegistry.GetBlock<BlockAir>().GetState();
 
-            var leaves = BlockRegistry.GetBlock("leaves").GetState();
+            var leaves = BlockRegistry.GetBlock<BlockLeaves>().GetState();
 
-            var log = BlockRegistry.GetBlock("log").GetState();
+            var log = BlockRegistry.GetBlock<BlockLog>().GetState();
             var grass = BlockRegistry.GetBlock<BlockGrass>().GetState();
-            var dirt = BlockRegistry.GetBlock("dirt").GetState();
-            var stone = BlockRegistry.GetBlock("stone").GetState();
-            var rare = BlockRegistry.GetBlock("rare").GetState();
-            var bedrock = BlockRegistry.GetBlock("bedrock").GetState();
+            var dirt = BlockRegistry.GetBlock<BlockDirt>().GetState();
+            var stone = BlockRegistry.GetBlock<BlockStone>().GetState();
+            var rare = BlockRegistry.GetBlock<BlockRare>().GetState();
+            var bedrock = BlockRegistry.GetBlock<BlockBedrock>().GetState();
+            var tallgrass = BlockRegistry.GetBlock<BlockTallGrass>().GetState();
 
             short airId = GetLocalBlockId(air.Block.UnlocalizedName);
 
@@ -294,12 +294,26 @@ namespace SharpCraft.world
                     int peakY = 32 + (int)Math.Abs(
                                     MathHelper.Clamp(0.35f + _noiseUtil.GetPerlinFractal(xCh, zCh), 0, 1) * 32);
 
+                    float grassSeed = _noiseUtil.GetPerlinFractal(-xCh * 32 + 8, -zCh * 32 + x * 8);
+
                     for (int y = peakY; y >= 0; y--)
                     {
-                        if (y == peakY) SetBlock(x, y, z, grass);
-                        else if (y > 0 && peakY - y > 0 && peakY - y < 3) SetBlock(x, y, z, dirt);
+                        if (y == peakY)
+                        {
+                            SetBlock(x, y, z, grass);
+
+                            //set tallgrass above
+                            if (IsAir(x, y + 1, z) && grassSeed >= 0.3f)
+                                SetBlock(x, y + 1, z, tallgrass);
+                        }
+                        else if (y > 0 && peakY - y > 0 && peakY - y < 3)
+                        {
+                            SetBlock(x, y, z, dirt);
+                        }
                         else if (y == 0)
+                        {
                             SetBlock(x, y, z, bedrock);
+                        }
                         else
                         {
                             float f = _noiseUtil.GetNoise(xCh * 32 - y * 16, zCh * 32 + x * 16);
@@ -308,6 +322,7 @@ namespace SharpCraft.world
                         }
                     }
 
+                    //trees
                     float treeSeed = Math.Abs(MathHelper.Clamp(_noiseUtil.GetWhiteNoise(xCh, zCh), 0, 1));
                     //var treeSeed2 = Math.Abs(MathHelper.Clamp(0.35f + _noiseUtil.GetPerlinFractal(zCh, xCh), 0, 1));
 
@@ -417,5 +432,4 @@ namespace SharpCraft.world
             return _waypoints.Values;
         }
     }
-#pragma warning restore CS0618 // Type or member is obsolete
 }

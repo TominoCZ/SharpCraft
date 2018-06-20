@@ -4,6 +4,7 @@
     {
         public BlockGrass() : base("grass")
         {
+            Hardness = 16;
         }
     }
 }

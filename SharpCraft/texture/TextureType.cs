@@ -7,8 +7,6 @@
         north,
         south,
         east,
-        west,
-        block,
-        side
+        west
     }
 }

@@ -94,11 +94,11 @@ namespace SharpCraft.render
             {
                 var state = world.GetBlockState(hit.blockPos);
                 if (!Equals(state, BlockRegistry.GetBlock<BlockAir>().GetState()))
-                    RenderBlockSelectionOutline(world, state, hit.blockPos);
+                    RenderBlockSelectionOutline(state, hit.blockPos);
             }
 
             RenderChunks(world);
-            RenderSelectedItemBlock(partialTicks);
+            RenderHand(partialTicks);
             RenderWorldWaypoints(world);
             RenderDestroyProgress(world);
 
@@ -177,7 +177,7 @@ namespace SharpCraft.render
 
                 Vector3 size_o = Vector3.One * 0.0045f;
 
-                Matrix4 mat = MatrixHelper.CreateTransformationMatrix(pair.Key.ToVec() - size_o / 2, state.Block.BoundingBox.size + size_o);
+                Matrix4 mat = MatrixHelper.CreateTransformationMatrix(pair.Key.ToVec() - size_o / 2 + state.Block.BoundingBox.min, state.Block.BoundingBox.size + size_o);
 
                 _shaderTexturedCube.UpdateInstanceUniforms(mat);
                 _shaderTexturedCube.UpdateUVs(TextureManager.TEXTURE_DESTROY_PROGRESS, 0, v, 32);
@@ -216,7 +216,7 @@ namespace SharpCraft.render
             _selectionOutline.Unbind();
         }
 
-        private void RenderBlockSelectionOutline(World world, BlockState state, BlockPos pos)
+        private void RenderBlockSelectionOutline(BlockState state, BlockPos pos)
         {
             Shader<ModelCubeOutline> shader = _selectionOutline.Shader;
             AxisAlignedBB bb = state.Block.BoundingBox;
@@ -227,11 +227,11 @@ namespace SharpCraft.render
             Vector3 size = Vector3.One * 0.005f;
 
             _selectionOutline.Bind();
-            _selectionOutline.SetColor(_selectionOutlineColor);
+            _selectionOutline.SetColor(Vector4.One);
 
             shader.UpdateGlobalUniforms();
             shader.UpdateModelUniforms(_selectionOutline.RawModel);
-            shader.UpdateInstanceUniforms(MatrixHelper.CreateTransformationMatrix(pos.ToVec() - size / 2f, bb.size + size), _selectionOutline);
+            shader.UpdateInstanceUniforms(MatrixHelper.CreateTransformationMatrix(pos.ToVec() + bb.min, bb.size + size), _selectionOutline);
 
             GL.LineWidth(2);
             GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
@@ -243,7 +243,7 @@ namespace SharpCraft.render
             _selectionOutline.Unbind();
         }
 
-        private void RenderSelectedItemBlock(float partialTicks)
+        private void RenderHand(float partialTicks)
         {
             if (SharpCraft.Instance.Player == null)
                 return;
@@ -260,7 +260,9 @@ namespace SharpCraft.render
 
                 Vector2 rotVec = new Vector2(-SharpCraft.Instance.Camera.pitch, -SharpCraft.Instance.Camera.yaw);
 
-                Vector3 offset = new Vector3(1.3f, -1.25f, 0.3f) - partialMotion * Vector3.UnitY * 0.1f;
+                float itemBlockOffsetY = itemBlock.Block.BoundingBox.size.Y / 2 - 0.5f;
+
+                Vector3 offset = new Vector3(1.3f, -1.25f - itemBlockOffsetY, 0.3f) - partialMotion * Vector3.UnitY * 0.1f;
 
                 Matrix4 r1 = Matrix4.CreateRotationY(MathHelper.DegreesToRadians(45));
                 Matrix4 r2 = Matrix4.CreateRotationX(rotVec.X - SharpCraft.Instance.Camera.pitchOffset) * Matrix4.CreateRotationY(rotVec.Y);

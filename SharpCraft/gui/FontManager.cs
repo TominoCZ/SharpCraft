@@ -15,7 +15,7 @@ namespace SharpCraft.gui
         {
             _dictionary.Clear();
 
-            var file = $"SharpCraft_Data/assets/Textures/{fntFileName}.fnt";
+            var file = $"SharpCraft_Data/assets/textures/{fntFileName}.fnt";
 
             var lines = File.ReadAllLines(file);
 

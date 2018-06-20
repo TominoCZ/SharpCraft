@@ -100,16 +100,42 @@ namespace SharpCraft.block
             }
         }
 
-        public static TextureType Parse(FaceSides fs)
+        public static bool Parse(FaceSides fs, out TextureType type)
         {
-            if (fs == Up) return TextureType.up;
-            if (fs == Down) return TextureType.down;
-            if (fs == North) return TextureType.north;
-            if (fs == South) return TextureType.south;
-            if (fs == East) return TextureType.east;
-            if (fs == West) return TextureType.west;
+            if (fs == Up)
+            {
+                type = TextureType.up;
+                return true;
+            }
+            else if (fs == Down)
+            {
+                type = TextureType.down;
+                return true;
+            }
+            else if (fs == North)
+            {
+                type = TextureType.north;
+                return true;
+            }
+            else if (fs == South)
+            {
+                type = TextureType.south;
+                return true;
+            }
+            else if (fs == East)
+            {
+                type = TextureType.east;
+                return true;
+            }
+            else if (fs == West)
+            {
+                type = TextureType.west;
+                return true;
+            }
 
-            return TextureType.block;
+            type = TextureType.up;
+
+            return false;
         }
     }
 }

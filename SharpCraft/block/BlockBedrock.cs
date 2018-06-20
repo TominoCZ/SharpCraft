@@ -4,6 +4,7 @@
     {
         public BlockBedrock() : base("bedrock")
         {
+            Hardness = -1;
         }
     }
 }

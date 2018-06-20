@@ -366,7 +366,7 @@ namespace SharpCraft.entity
                 }
                 else if (btn == MouseButton.Left)
                 {
-                    //BreakBlock(); TODO - UVMin breaking
+                    //BreakBlock(); TODO - UVMin breaking EDIT: whhhat? :DDD
                 }
             }
         }
@@ -423,11 +423,10 @@ namespace SharpCraft.entity
             BlockState stateUnder = World.GetBlockState(posUnder);
             BlockState stateAbove = World.GetBlockState(pos.Offset(FaceSides.Up));
 
-            if (stateUnder.Block == grass && heldBlock != glass)
-                World.SetBlockState(posUnder, dirt.GetState(0));
-            if (stateAbove.Block != air && stateAbove.Block != glass &&
-                heldBlock == grass)
-                World.SetBlockState(pos, dirt.GetState(0));
+            if (stateUnder.Block == grass && heldBlock != glass && heldBlock.IsSolid)
+                World.SetBlockState(posUnder, dirt.GetState());
+            if (stateAbove.Block != air && stateAbove.Block != glass && heldBlock == grass && stateAbove.Block.IsSolid)
+                World.SetBlockState(pos, dirt.GetState());
             else
                 World.SetBlockState(pos, heldBlock.GetState(stack.Meta));
 
