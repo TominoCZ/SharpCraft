@@ -580,7 +580,7 @@ namespace SharpCraft
             }
         }
 
-        public int GetFPS()
+        public int GetFps()
         {
             return _fpsCounterLast;
         }

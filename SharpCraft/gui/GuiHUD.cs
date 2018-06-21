@@ -81,7 +81,7 @@ namespace SharpCraft.gui
                     RenderText(stack.Count.ToString(), x + scaledWidth / 2f - 14, _hotbarY + scaledHeight / 2f + 14, 1, true, true);
             }
 
-            RenderText(SharpCraft.Instance.GetFPS() + " FPS", 5, 6, 1, Vector3.UnitY, false, true);
+            RenderText(SharpCraft.Instance.GetFps() + " FPS", 5, 6, 1, Vector3.UnitY, false, true);
         }
 
         private void DrawLives()
