@@ -64,7 +64,7 @@ namespace SharpCraft.model
 
             int faceIndex = 0;
 
-            foreach (var pair in cube.faces)
+            foreach (var pair in cube.faces.OrderBy(p => (int)p.Key))
             {
                 int uvIndex = 8 * faceIndex;
 

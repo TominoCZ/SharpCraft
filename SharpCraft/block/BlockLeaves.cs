@@ -5,7 +5,6 @@
         public BlockLeaves() : base("leaves")
         {
             Hardness = 8;
-            IsFullCube = false;
         }
     }
 }

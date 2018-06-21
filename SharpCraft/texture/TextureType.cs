@@ -1,6 +1,6 @@
 ﻿namespace SharpCraft
 {
-    public enum TextureType
+    public enum TextureType //THE ORDER MUST BE THIS WAY!!!
     {
         up,
         down,

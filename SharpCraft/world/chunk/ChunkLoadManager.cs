@@ -128,7 +128,7 @@ namespace SharpCraft.world.chunk
             {
                 for (int x = -renderDistance; x <= renderDistance; x++)
                 {
-                    ChunkPos pos = playerChunkPos + new ChunkPos(x, z);
+                    ChunkPos pos = new ChunkPos(playerChunkPos.x + x, playerChunkPos.z + z);
                     if (pos.DistanceTo(player.Pos.Xz) < renderDistance * Chunk.ChunkSize)
                     {
                         if (world.GetChunk(pos) == null)

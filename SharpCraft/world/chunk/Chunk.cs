@@ -5,6 +5,7 @@ using SharpCraft.entity;
 using SharpCraft.model;
 using SharpCraft.util;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -110,37 +111,17 @@ namespace SharpCraft.world.chunk
             return BlockRegistry.GetBlock(blockName).GetState(meta);
         }
 
-        /*
-        private int GetMetadata(BlockPos localPos)
-        {
-            CheckPos(localPos);
-            return _chunkBlocks[localPos.X, localPos.Y, localPos.Z] & 15;
-        }*/
-
-        public void SetMetadata(BlockPos localPos, int meta)
-        {
-            CheckPos(localPos);
-            short id = (short)(_chunkBlocks[localPos.X, localPos.Y, localPos.Z] & 4095 | meta);
-
-            if (id != _chunkBlocks[localPos.X, localPos.Y, localPos.Z])
-            {
-                _chunkBlocks[localPos.X, localPos.Y, localPos.Z] = id;
-
-                if (ModelBuilding || !QueuedForModelBuild) //see SetBlock() for why (ModelBuilding || ...) is here
-                {
-                    NotifyModelChange(localPos);
-                    NeedsSave = true;
-                }
-            }
-        }
-
         private void NotifyModelChange(BlockPos localPos)
         {
             MarkDirty();
-            if (localPos.X == 0) World.GetChunk(Pos + FaceSides.West).MarkDirty();
-            if (localPos.X == ChunkSize - 1) World.GetChunk(Pos + FaceSides.East).MarkDirty();
-            if (localPos.Z == 0) World.GetChunk(Pos + FaceSides.North).MarkDirty();
-            if (localPos.Z == ChunkSize - 1) World.GetChunk(Pos + FaceSides.South).MarkDirty();
+            if (localPos.X == 0)
+                World.GetChunk(Pos + FaceSides.West).MarkDirty();
+            if (localPos.X == ChunkSize - 1)
+                World.GetChunk(Pos + FaceSides.East).MarkDirty();
+            if (localPos.Z == 0)
+                World.GetChunk(Pos + FaceSides.North).MarkDirty();
+            if (localPos.Z == ChunkSize - 1)
+                World.GetChunk(Pos + FaceSides.South).MarkDirty();
         }
 
         public int GetHeightAtPos(int x, int z)
@@ -210,9 +191,9 @@ namespace SharpCraft.world.chunk
 
             var air = BlockRegistry.GetBlock<BlockAir>();
 
-            List<float> vertexes = new List<float>();
-            List<float> normals = new List<float>();
-            List<float> uvs = new List<float>();
+            var vertexes = new List<float>();
+            var normals = new List<float>();
+            var uvs = new List<float>();
 
             object locker = new object();
 
@@ -228,36 +209,40 @@ namespace SharpCraft.world.chunk
                         BlockState state = World.GetBlockState(worldPos);
                         if (state.Block == air)
                             continue;
-
+                        
                         BlockPos localPos = new BlockPos(x, y, z);
 
-                        var model = JsonModelLoader.GetModelForBlock(state.Block.UnlocalizedName);
+                        ModelBlock model = JsonModelLoader.GetModelForBlock(state.Block.UnlocalizedName);
+                        ModelBlockRaw mbr = (ModelBlockRaw)model?.RawModel;
 
-                        foreach (FaceSides dir in FaceSides.AllSides)
+                        if (mbr == null)
+                            continue;
+
+                        if (!state.Block.IsFullCube)
                         {
+                            lock (locker)
+                                mbr.AppendAllVertexData(vertexes, normals, uvs, localPos);
+
+                            continue;
+                        }
+
+                        for (var index = 0; index < FaceSides.AllSides.Count; index++)
+                        {
+                            FaceSides dir = FaceSides.AllSides[index];
+
                             BlockPos worldPosO = worldPos.Offset(dir);
                             BlockState stateO = World.GetBlockState(worldPosO);
-                            
-                            if (!(stateO.Block == air || stateO.Block.HasTransparency && !state.Block.HasTransparency) && stateO.Block.IsFullCube)
-                                continue;
 
-                            ModelBlockRaw mbr = (ModelBlockRaw)model?.RawModel;
+                            if (!(stateO.Block == air ||
+                                  stateO.Block.HasTransparency && !state.Block.HasTransparency) &&
+                                stateO.Block.IsFullCube)
+                                continue;
 
                             lock (locker)
                             {
-                                if (mbr == null)
-                                    Console.WriteLine();
-
-                                if (!state.Block.IsFullCube)
-                                {
-                                    mbr?.AppendAllVertexData(ref vertexes, ref normals, ref uvs, localPos);
-                                }
-                                else
-                                {
-                                    mbr?.AppendVertexesForSide(dir, ref vertexes, localPos);
-                                    mbr?.AppendNormalsForSide(dir, ref normals);
-                                    mbr?.AppendUvsForSide(dir, ref uvs);
-                                }
+                                mbr.AppendVertexDataForSide(dir, vertexes, normals, uvs, localPos);
+                                //mbr.AppendNormalsForSide(dir, normals);
+                                //mbr.AppendUvsForSide(dir, uvs);
                             }
                         }
                     }

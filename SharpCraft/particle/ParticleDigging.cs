@@ -40,7 +40,7 @@ namespace SharpCraft.particle
                 if (state.Block.IsFullCube)
                 {
                     List<float> uvs = new List<float>(8);
-                    mbr.AppendUvsForSide(side, ref uvs);
+                    mbr.AppendUvsForSide(side, uvs);
 
                     start = new Vector2(uvs[0], uvs[1]);
                     end = new Vector2(uvs[4], uvs[5]); //4,5 because that's the 3. vertex and the local UV there is 1,1

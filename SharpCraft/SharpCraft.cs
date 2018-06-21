@@ -264,6 +264,8 @@ namespace SharpCraft
 
         private void GameLoop()
         {
+            TargetRenderFrequency = Focused ? 0 : 30;
+
             if (GuiScreen == null && !Focused)
                 OpenGuiScreen(new GuiScreenIngameMenu());
 
