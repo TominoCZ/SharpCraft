@@ -197,6 +197,23 @@ namespace SharpCraft
 
             var parsed = JsonConvert.DeserializeObject<JsonBlockModel>(json);
 
+            //TODO - optional
+            /*
+            foreach (var cube in parsed.cubes)
+            {
+                int faceIndex = 0;
+
+                foreach (var face in cube.faces.Values)
+                {
+                    face.uv[faceIndex] = Math.Clamp(face.uv[faceIndex], 0, 16);
+                    face.uv[faceIndex + 1] = Math.Clamp(face.uv[faceIndex + 1], 0, 16);
+                    face.uv[faceIndex + 2] = Math.Clamp(face.uv[faceIndex + 2], 0, 16);
+                    face.uv[faceIndex + 3] = Math.Clamp(face.uv[faceIndex + 3], 0, 16);
+
+                    faceIndex++;
+                }
+            }*/
+
             foreach (var variable in parsed.textures.Keys.ToArray())
             {
                 var value = parsed.textures[variable];

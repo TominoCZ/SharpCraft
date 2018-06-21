@@ -78,10 +78,10 @@ namespace SharpCraft.model
 
                 if (textureMap.TryGetValue(textureNameForFace, out var tme))
                 {
-                    var percentageU1 = textureNode.uv[0] / 16f;
-                    var percentageV1 = textureNode.uv[1] / 16f;
-                    var percentageU2 = textureNode.uv[2] / 16f;
-                    var percentageV2 = textureNode.uv[3] / 16f;
+                    var percentageU1 = Math.Clamp(textureNode.uv[0] / 16f, 0, 1);
+                    var percentageV1 = Math.Clamp(textureNode.uv[1] / 16f, 0, 1);
+                    var percentageU2 = Math.Clamp(textureNode.uv[2] / 16f, 0, 1);
+                    var percentageV2 = Math.Clamp(textureNode.uv[3] / 16f, 0, 1);
 
                     Vector2 size = tme.UVMax - tme.UVMin;
 
@@ -242,7 +242,7 @@ namespace SharpCraft.model
                 return vertex;
 
             vertex -= origin;
-            vertex = Vector3.Transform(vertex, new Quaternion(rotation.X, rotation.Y, rotation.Z));
+            vertex = Vector3.Transform(vertex, new Quaternion(rotation.Z, rotation.Y, rotation.X));
             vertex += origin;
 
             return vertex;
