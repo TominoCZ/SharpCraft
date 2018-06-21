@@ -17,7 +17,7 @@ namespace SharpCraft.model
             _uvs = uvs;
         }
 
-        public void AppendAllVertexData(ref List<float> vertexes, ref List<float> normals, ref List<float> uvs, BlockPos offset)
+        public void AppendAllVertexData(List<float> vertexes, List<float> normals, List<float> uvs, BlockPos offset)
         {
             for (int i = 0; i < _vertexes.Length; i += 3)
             {
@@ -31,7 +31,35 @@ namespace SharpCraft.model
         }
 
         //TODO - only use these when the block model is one 1x1x1 big cube
-        public void AppendVertexesForSide(FaceSides side, ref List<float> vertexes, BlockPos offset)
+        public void AppendVertexDataForSide(FaceSides side, List<float> vertexes, List<float> normals, List<float> uvs, BlockPos offset)
+        {
+            if (!FaceSides.Parse(side, out var parsed)) //FaceSides is a struct containing Vector2 values (normals)
+                return;
+
+            int faceIndex = (int)parsed * 12;
+
+            for (int i = 0; i < 12; i += 3)
+            {
+                vertexes.Add(_vertexes[faceIndex + i] + offset.X);
+                vertexes.Add(_vertexes[faceIndex + i + 1] + offset.Y);
+                vertexes.Add(_vertexes[faceIndex + i + 2] + offset.Z);
+
+                normals.Add(_normals[faceIndex + i]);
+                normals.Add(_normals[faceIndex + i + 1]);
+                normals.Add(_normals[faceIndex + i + 2]);
+            }
+
+            faceIndex = (int)parsed * 8;
+
+            for (int i = 0; i < 8; i += 2)
+            {
+                uvs.Add(_uvs[faceIndex + i]);
+                uvs.Add(_uvs[faceIndex + i + 1]);
+            }
+        }
+
+        //unused for now
+        public void AppendVertexesForSide(FaceSides side, List<float> vertexes, BlockPos offset)
         {
             /*
                top = 0
@@ -54,8 +82,8 @@ namespace SharpCraft.model
                 vertexes.Add(_vertexes[faceIndex + i + 2] + offset.Z);
             }
         }
-
-        public void AppendNormalsForSide(FaceSides side, ref List<float> normals)
+        //unused for now
+        public void AppendNormalsForSide(FaceSides side, List<float> normals)
         {
             if (!FaceSides.Parse(side, out var parsed))
                 return;
@@ -70,7 +98,7 @@ namespace SharpCraft.model
             }
         }
 
-        public void AppendUvsForSide(FaceSides side, ref List<float> uvs)
+        public void AppendUvsForSide(FaceSides side, List<float> uvs)
         {
             if (!FaceSides.Parse(side, out var parsed))
                 return;

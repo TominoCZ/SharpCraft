@@ -125,46 +125,49 @@ namespace SharpCraft.render
 
         private void RenderWorldWaypoints(World world)
         {
-            Dictionary<BlockPos, Waypoint>.ValueCollection wps = world.GetWaypoints();
+            var wps = world.GetWaypoints();
+
+            if (wps.Count == 0)
+                return;
+
+            ModelBlock model = JsonModelLoader.GetModelForBlock(BlockRegistry.GetBlock<BlockRare>().UnlocalizedName);
+
+            float size = 0.25f;
+
+            GL.DepthRange(0, 0.1f);
+            model.Bind();
 
             foreach (Waypoint wp in wps)
             {
-                ModelBlock model = JsonModelLoader.GetModelForBlock(BlockRegistry.GetBlock<BlockRare>().UnlocalizedName);
-
-                float size = 0.25f;
-
-                GL.DepthRange(0, 0.1f);
-
-                model.Bind();
-
                 model.Shader.UpdateGlobalUniforms();
                 model.Shader.UpdateModelUniforms(model.RawModel);
                 model.Shader.UpdateInstanceUniforms(MatrixHelper.CreateTransformationMatrix(wp.Pos.ToVec() + Vector3.One / 2 * (1 - size), new Vector3(45, 30, 35.264f), size), model);
 
                 model.RawModel.Render(PrimitiveType.Quads);
-
-                model.Unbind();
-
-                GL.DepthRange(0, 1);
             }
+
+            model.Unbind();
+
+            GL.DepthRange(0, 1);
         }
 
         private void RenderDestroyProgress(World world)
         {
-            ConcurrentDictionary<BlockPos, DestroyProgress> progresses = SharpCraft.Instance.DestroyProgresses;
+            var progresses = SharpCraft.Instance.DestroyProgresses;
             if (progresses.Count == 0)
                 return;
 
             GL.BindTexture(TextureTarget.Texture2D, TextureManager.TEXTURE_DESTROY_PROGRESS.ID);
-
             GL.BlendFunc(BlendingFactorSrc.DstColor, BlendingFactorDest.Zero);
+
+            GL.BindVertexArray(_destroyProgressModel.VaoID);
+            GL.EnableVertexAttribArray(0);
 
             _shaderTexturedCube.Bind();
             _shaderTexturedCube.UpdateGlobalUniforms();
             _shaderTexturedCube.UpdateModelUniforms(_destroyProgressModel);
 
-            GL.BindVertexArray(_destroyProgressModel.VaoID);
-            GL.EnableVertexAttribArray(0);
+            Vector3 sizeO = Vector3.One * 0.0045f;
 
             foreach (KeyValuePair<BlockPos, DestroyProgress> pair in progresses)
             {
@@ -173,16 +176,12 @@ namespace SharpCraft.render
                 if (state.Block == BlockRegistry.GetBlock<BlockAir>())
                     continue;
 
-                int v = 32 * (int)(pair.Value.PartialProgress * 8);
-
-                Vector3 size_o = Vector3.One * 0.0045f;
-
-                Matrix4 mat = MatrixHelper.CreateTransformationMatrix(pair.Key.ToVec() - size_o / 2 + state.Block.BoundingBox.min, state.Block.BoundingBox.size + size_o);
+                Matrix4 mat = MatrixHelper.CreateTransformationMatrix(pair.Key.ToVec() - sizeO / 2 + state.Block.BoundingBox.min, state.Block.BoundingBox.size + sizeO);
 
                 _shaderTexturedCube.UpdateInstanceUniforms(mat);
-                _shaderTexturedCube.UpdateUVs(TextureManager.TEXTURE_DESTROY_PROGRESS, 0, v, 32);
+                _shaderTexturedCube.UpdateUVs(TextureManager.TEXTURE_DESTROY_PROGRESS, 0, 32 * (int)(pair.Value.PartialProgress * 8), 32);
+                _destroyProgressModel.Render(PrimitiveType.Quads);
             }
-            _destroyProgressModel.Render(PrimitiveType.Quads);
 
             GL.DisableVertexAttribArray(0);
             GL.BindVertexArray(0);
@@ -218,20 +217,18 @@ namespace SharpCraft.render
 
         private void RenderBlockSelectionOutline(BlockState state, BlockPos pos)
         {
-            Shader<ModelCubeOutline> shader = _selectionOutline.Shader;
+            var shader = _selectionOutline.Shader;
             AxisAlignedBB bb = state.Block.BoundingBox;
 
             if (bb == null)
                 return;
-
-            Vector3 size = Vector3.One * 0.005f;
 
             _selectionOutline.Bind();
             _selectionOutline.SetColor(Vector4.One);
 
             shader.UpdateGlobalUniforms();
             shader.UpdateModelUniforms(_selectionOutline.RawModel);
-            shader.UpdateInstanceUniforms(MatrixHelper.CreateTransformationMatrix(pos.ToVec() + bb.min, bb.size + size), _selectionOutline);
+            shader.UpdateInstanceUniforms(MatrixHelper.CreateTransformationMatrix(pos.ToVec() + bb.min, bb.size + Vector3.One * 0.0025f), _selectionOutline);
 
             GL.LineWidth(2);
             GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
@@ -270,9 +267,9 @@ namespace SharpCraft.render
                 Matrix4 s = Matrix4.CreateScale(0.5525f);
                 Matrix4 t0 = Matrix4.CreateTranslation(Vector3.One * -0.5f);
                 Matrix4 t1 = Matrix4.CreateTranslation(SharpCraft.Instance.Camera.pos + SharpCraft.Instance.Camera.GetLookVec() + partialLookVec * 0.1f);
-                Matrix4 t_final = Matrix4.CreateTranslation(offset);
+                Matrix4 tFinal = Matrix4.CreateTranslation(offset);
 
-                Matrix4 mat = t0 * r1 * Matrix4.CreateScale(itemBlock.Block.BoundingBox.size) * t_final * r2 * s * t1;
+                Matrix4 mat = t0 * r1 * Matrix4.CreateScale(itemBlock.Block.BoundingBox.size) * tFinal * r2 * s * t1;
 
                 GL.DepthRange(0, 0.1f);
 

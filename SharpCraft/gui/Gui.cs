@@ -116,7 +116,7 @@ namespace SharpCraft.gui
 
             ModelBlockRaw mbr = (ModelBlockRaw)model.RawModel;
             List<float> uvs = new List<float>(8);
-            mbr.AppendUvsForSide(FaceSides.South, ref uvs);
+            mbr.AppendUvsForSide(FaceSides.South, uvs);
 
             Vector2 UVmin = new Vector2(uvs[0], uvs[1]);
             Vector2 UVmax = new Vector2(uvs[4], uvs[5]);

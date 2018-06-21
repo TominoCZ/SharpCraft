@@ -1,8 +1,0 @@
-{
-  "textures": {
-    "top": "furnace_top",
-	"bottom": "furnace_top",
-	"south": "furnace_south",
-	"side": "furnace_side"
-  }
-}

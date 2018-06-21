@@ -210,7 +210,7 @@ namespace SharpCraft
             return parsed;
         }
 
-        private int Stitch(string[] textures, int textureSize, Dictionary<string, TextureMapElement> sprites)
+        private int Stitch(string[] allTextures, int textureSize, Dictionary<string, TextureMapElement> sprites)
         {
             Bitmap map = new Bitmap(256, 256);
 
@@ -221,7 +221,7 @@ namespace SharpCraft
                 int countX = 0;
                 int countY = 0;
 
-                foreach (var texName in textures)
+                foreach (var texName in allTextures)
                 {
                     Vector2 start = new Vector2((float)countX / map.Width, (float)countY / map.Height);
                     Vector2 end = start + new Vector2((float)textureSize / map.Width, (float)textureSize / map.Height);
