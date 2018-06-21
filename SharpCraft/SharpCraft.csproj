@@ -34,6 +34,6 @@
     </Reference>
   </ItemGroup>
   <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
-    <Exec Command="xcopy &quot;$(ProjectDir)\SharpCraft\SharpCraft_Data&quot; &quot;$(TargetDir)\SharpCraft_Data&quot; /e /i /h" />
+    <Exec Command="xcopy &quot;$(ProjectDir)\SharpCraft_Data&quot; &quot;$(TargetDir)SharpCraft_Data\&quot; /e /i /h /Y" />
   </Target>
 </Project>
