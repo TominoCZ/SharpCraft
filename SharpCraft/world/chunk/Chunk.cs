@@ -84,6 +84,7 @@ namespace SharpCraft.world.chunk
 
                 if (ModelBuilding || !QueuedForModelBuild) //this is so that we prevent double chunk build calls and invisible placed blocks(if the model is already generating, there is a chance that the block on this position was already processed, so the rebuild is queued again)
                 {
+                    //BuildChunkModel(); TODO - make this run on another thread
                     NotifyModelChange(localPos);
                     NeedsSave = true;
                 }
@@ -130,7 +131,7 @@ namespace SharpCraft.world.chunk
 
             for (int y = ChunkHeight - 1; y >= 0; y--)
             {
-                if (IsAir(pos = pos.Offset(FaceSides.Down)))
+                if (!IsAir(pos = pos.Offset(FaceSides.Down)))
                     return y + 1;
             }
 
@@ -162,7 +163,7 @@ namespace SharpCraft.world.chunk
             //}
         }
 
-        private void BuildChunkModel()
+        public void BuildChunkModel()
         {
             if (!CheckCanBuild())
                 return;

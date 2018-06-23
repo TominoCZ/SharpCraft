@@ -1,8 +1,8 @@
 {
   "textures": {
-    "up": "crafting_table_up",
-    "down": "planks",
-    "side": "crafting_table_side"
+    "up": "blocks/crafting_table_up",
+    "down": "blocks/planks",
+    "side": "blocks/crafting_table_side"
   },
   "cubes": [
     {

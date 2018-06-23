@@ -192,6 +192,11 @@ namespace SharpCraft.world
             {
                 data.DestroyModel();
             }
+            
+            Chunks.Clear();
+            _waypoints.Clear();
+
+            GC.Collect();
         }
 
         /*

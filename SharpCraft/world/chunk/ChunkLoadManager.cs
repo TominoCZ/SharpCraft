@@ -143,5 +143,13 @@ namespace SharpCraft.world.chunk
             LoadChunks();
             BuildChunks();
         }
+
+        public void Cleanup()
+        {
+            _chunkBuilds.Clear();
+            _chunkLoads.Clear();
+            _importantChunkBuilds.Clear();
+            _importantChunkLoads.Clear();
+        }
     }
 }

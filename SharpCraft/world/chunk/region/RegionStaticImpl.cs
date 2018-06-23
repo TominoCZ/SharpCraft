@@ -65,7 +65,8 @@ namespace SharpCraft.world.chunk.region
         {
             if (File.Exists(_filePath)) return;
             Console.WriteLine($"Allocating chunk at: {_filePath}");
-            using (FileStream newFile = File.Create(_filePath))
+
+            using (FileStream newFile = File.OpenWrite(_filePath))
             {
                 byte[] blankChunk = new byte[_info.ChunkByteSize + 1];
                 blankChunk[0] = BlankChunk;

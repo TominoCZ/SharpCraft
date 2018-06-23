@@ -11,21 +11,23 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
-using Newtonsoft.Json.Converters;
+using OpenTK.Graphics.OpenGL;
 using Bitmap = System.Drawing.Bitmap;
 
-namespace SharpCraft
+namespace SharpCraft.model
 {
     public class JsonModelLoader
     {
         public static int TEXTURE_BLOCKS;
 
-        private static readonly Dictionary<string, ModelBlock> _blockModels = new Dictionary<string, ModelBlock>();
-        //private static readonly Dictionary<string, ModelItem> _itemModels = new Dictionary<string, ModelItem>(); TODO
+        private static readonly ConcurrentDictionary<string, ModelBlock> _blockModels = new ConcurrentDictionary<string, ModelBlock>();
+        private static readonly Dictionary<string, ModelCustom> _customModels = new Dictionary<string, ModelCustom>();
 
         private static JsonModelLoader _instance;
 
         private static Vector3 V2, V3, V4, NORMAL;
+
+        private static Shader<ModelBlock> _blockShader;
 
         public JsonModelLoader(Shader<ModelBlock> blockShader)
         {
@@ -34,10 +36,12 @@ namespace SharpCraft
 
             _instance = this;
 
-            TEXTURE_BLOCKS = LoadBlocks(blockShader);
+            _blockShader = blockShader;
+
+            TEXTURE_BLOCKS = LoadBlocks();
         }
 
-        private int LoadBlocks(Shader<ModelBlock> blockShader)
+        private static int LoadBlocks()
         {
             string dir = $"{SharpCraft.Instance.GameFolderDir}\\SharpCraft_Data\\assets\\models\\block";
 
@@ -101,12 +105,54 @@ namespace SharpCraft
 
                 var tme = textureMapElements[particleTextureName];
 
-                ModelBlock mb = new ModelBlock(tme, blockShader, ModelManager.LoadBlockModelToVao(vertexes, normals, uvs));
+                ModelBlock mb = new ModelBlock(tme, _blockShader, ModelManager.LoadBlockModelToVao(vertexes, normals, uvs));
 
-                _blockModels.Add(name, mb);
+                _blockModels.TryAdd(name, mb);
             }
 
             return id;
+        }
+
+        public static void LoadModel(string path, Shader<ModelCustom> shader) //TODO 
+        {
+            string file = $"{SharpCraft.Instance.GameFolderDir}\\SharpCraft_Data\\assets\\models\\{path}.json";
+
+            if (!File.Exists(file))
+                return;
+
+            List<string> nonDuplicateTextures = new List<string>();
+
+            JsonBlockModel model = FixBlockJson(file);
+
+            foreach (var pair in model.textures) //iterating over the textureMap in the Json model
+            {
+                if (!nonDuplicateTextures.Contains(pair.Value))
+                {
+                    nonDuplicateTextures.Add(pair.Value); //add the current texture name to a list of all textureMap if isn't already there
+                }
+            }
+
+            var textureMapElements = new Dictionary<string, TextureMapElement>(); //each texture name has it's UV values TODO - maybe make a TextureMap class where this could be used
+
+            var id = Stitch(nonDuplicateTextures.ToArray(), 16, textureMapElements); //TODO - make the texture size variable
+            
+            float[] vertexes = new float[72 * model.cubes.Length];
+            float[] normals = new float[72 * model.cubes.Length];
+            float[] uvs = new float[48 * model.cubes.Length];
+
+            for (var index = 0; index < model.cubes.Length; index++)
+            {
+                var cube = model.cubes[index];
+
+                CubeModelBuilder.AppendCubeModel(cube, model.textures, textureMapElements, ref vertexes,
+                    ref normals, ref uvs, index);
+            }
+
+            var customModel = new ModelCustom(id, ModelManager.LoadModel3ToVao(vertexes, normals, uvs), shader);
+
+            _customModels.Add(path, customModel);
+
+            //return customModel;
         }
 
         //TODO - finish + create model from texture if model not found
@@ -189,7 +235,7 @@ namespace SharpCraft
             return id;
         }
 
-        private JsonBlockModel FixBlockJson(string file)
+        private static JsonBlockModel FixBlockJson(string file)
         {
             var json = File.ReadAllText(file);
 
@@ -214,12 +260,6 @@ namespace SharpCraft
                 }
             }*/
 
-            foreach (var variable in parsed.textures.Keys.ToArray())
-            {
-                var value = parsed.textures[variable];
-                parsed.textures[variable] = value.Split('/').Last();
-            }
-
             json = JsonConvert.SerializeObject(parsed, Formatting.Indented);
 
             File.WriteAllText(file, json);
@@ -227,7 +267,7 @@ namespace SharpCraft
             return parsed;
         }
 
-        private int Stitch(string[] allTextures, int textureSize, Dictionary<string, TextureMapElement> sprites)
+        private static int Stitch(string[] allTextures, int textureSize, Dictionary<string, TextureMapElement> sprites)
         {
             Bitmap map = new Bitmap(256, 256);
 
@@ -258,9 +298,9 @@ namespace SharpCraft
             return id;
         }
 
-        private void WriteBitmap(Bitmap textureMap, string texName, int textureSize, ref int countX, ref int countY)
+        private static void WriteBitmap(Bitmap textureMap, string texPath, int textureSize, ref int countX, ref int countY)
         {
-            var file = $"{SharpCraft.Instance.GameFolderDir}\\SharpCraft_Data\\assets\\Textures\\blocks\\{texName}.png";
+            var file = $"{SharpCraft.Instance.GameFolderDir}\\SharpCraft_Data\\assets\\textures\\{texPath}.png";
 
             Bitmap tex = (File.Exists(file)
                              ? new Bitmap(Bitmap.FromFile(file), textureSize, textureSize)
@@ -291,6 +331,13 @@ namespace SharpCraft
         public static ModelBlock GetModelForBlock(string blockName)
         {
             _blockModels.TryGetValue(blockName, out var model);
+
+            return model;
+        }
+ 
+        public static ModelCustom GetCustomModel(string path)
+        {
+            _customModels.TryGetValue(path, out var model);
 
             return model;
         }
@@ -325,6 +372,39 @@ namespace SharpCraft
             }
 
             return normals;
+        }
+
+        public static void Reload()
+        {
+            var bkp = new Dictionary<string, ModelCustom>(_customModels);
+
+            Destroy();
+
+            TEXTURE_BLOCKS = LoadBlocks();
+
+            foreach (var pair in bkp)
+            {
+                LoadModel(pair.Key, new Shader<ModelCustom>(pair.Value.Shader.ShaderName));
+            }
+        }
+
+        public static void Destroy()
+        {
+            TextureManager.DestroyTexture(TEXTURE_BLOCKS);
+
+            foreach (var customModel in _customModels.Values)
+            {
+                TextureManager.DestroyTexture(customModel.TextureID);
+                customModel.Destroy();
+            }
+
+            foreach (var pair in _blockModels.Values)
+            {
+                pair.Destroy();
+            }
+
+            _customModels.Clear();
+            _blockModels.Clear();
         }
     }
 }

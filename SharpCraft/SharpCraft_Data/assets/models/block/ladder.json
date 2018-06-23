@@ -1,6 +1,6 @@
 {
   "textures": {
-    "block": "planks"
+    "block": "blocks/planks"
   },
   "cubes": [
     {

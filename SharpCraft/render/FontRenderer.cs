@@ -22,8 +22,10 @@ namespace SharpCraft.render
             Shader = new ShaderText();
         }
 
-        public void RenderText(string text, float x, float y, float scale, Vector3 color, bool centered = false, bool dropShadow = false, int spacing = 4) //#TODO
+        public void RenderText(string text, float x, float y, float scale, Vector3 color, float brightness = 1, bool centered = false, bool dropShadow = false, int spacing = 4) //#TODO
         {
+            brightness = Math.Clamp(brightness, 0, 1);
+
             scale *= 0.5f;
             x = (float)Math.Ceiling(x);
             y = (float)Math.Ceiling(y);
@@ -72,7 +74,7 @@ namespace SharpCraft.render
                 totalSize.X += node.Character.W + node.Character.OffsetX;
                 totalSize.Y += node.Character.H + node.Character.OffsetY;
 
-                present.Enqueue(new Tuple<FontMapCharacter, Vector3>(node, currentColor));
+                present.Enqueue(new Tuple<FontMapCharacter, Vector3>(node, currentColor * brightness));
             }
 
             totalSize.X += (present.Count - 1) * spacing;

@@ -1,7 +1,7 @@
 {
   "textures": {
-    "up": "log_top",
-    "side": "log_side"
+    "up": "blocks/log_top",
+    "side": "blocks/log_side"
   },
   "cubes": [
     {

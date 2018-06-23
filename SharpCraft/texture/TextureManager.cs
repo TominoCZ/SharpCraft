@@ -59,7 +59,7 @@ namespace SharpCraft.texture
 
             Array blocks = Enum.GetValues(typeof(EnumBlock));
 
-            string dir = $"SharpCraft_Data/assets/Textures/{folder}";
+            string dir = $"SharpCraft_Data/assets/textures/{folder}";
 
             string[] files = new string[0];
             if (Directory.Exists(dir))
@@ -237,7 +237,7 @@ namespace SharpCraft.texture
         {
             try
             {
-                Bitmap bmp = (Bitmap)Image.FromFile($"SharpCraft_Data/assets/Textures/{textureName}.png");
+                Bitmap bmp = (Bitmap)Image.FromFile($"SharpCraft_Data/assets/textures/{textureName}.png");
 
                 int id = LoadTexture(bmp, smooth);
 
@@ -313,7 +313,7 @@ namespace SharpCraft.texture
 
             string[] files = new string[0];
 
-            string dir = "SharpCraft_Data/assets/Textures/skybox";
+            string dir = "SharpCraft_Data/assets/textures/skybox";
 
             if (Directory.Exists(dir))
                 files = Directory.GetFiles(dir, "*.png");

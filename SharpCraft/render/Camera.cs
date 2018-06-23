@@ -63,8 +63,7 @@ namespace SharpCraft.render
         {
             float aspectRatio = (float)SharpCraft.Instance.Width / SharpCraft.Instance.Height;
 
-            Projection = Matrix4.CreatePerspectiveFieldOfView(MathHelper.DegreesToRadians(PartialFov), aspectRatio,
-                NearPlane, FarPlane);
+            Projection = Matrix4.CreatePerspectiveFieldOfView(MathHelper.DegreesToRadians(PartialFov), aspectRatio, NearPlane, FarPlane);
         }
 
         public Vector3 GetLookVec()

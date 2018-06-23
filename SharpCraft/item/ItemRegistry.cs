@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using SharpCraft.model;
 
 namespace SharpCraft.item
 {

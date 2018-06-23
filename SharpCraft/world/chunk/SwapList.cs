@@ -41,5 +41,11 @@ namespace SharpCraft.world.chunk
             _primary.Remove(pos);
             _backup.Remove(pos);
         }
+
+        public void Clear()
+        {
+            _primary.Clear();
+            _backup.Clear();
+        }
     }
 }

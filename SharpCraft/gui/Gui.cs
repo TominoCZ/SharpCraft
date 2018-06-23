@@ -31,7 +31,12 @@ namespace SharpCraft.gui
 
         protected void RenderText(string text, float x, float y, float scale, Vector3 color, bool centered = false, bool dropShadow = false)
         {
-            SharpCraft.Instance.FontRenderer.RenderText(text, x, y, scale, color, centered, dropShadow);
+            RenderText(text, x, y, scale, color, 1, centered, dropShadow);
+        }
+
+        protected void RenderText(string text, float x, float y, float scale, Vector3 color, float brightness, bool centered = false, bool dropShadow = false)
+        {
+            SharpCraft.Instance.FontRenderer.RenderText(text, x, y, scale, color, brightness, centered, dropShadow);
         }
 
         protected virtual void RenderTexture(Texture tex, float x, float y, int textureX, int textureY, int sizeX, int sizeY, float scale = 1, bool centered = false)
@@ -135,7 +140,7 @@ namespace SharpCraft.gui
             Vector2 pos = new Vector2(posX, posY).Ceiling() * unit;
 
             Matrix4 mat = MatrixHelper.CreateTransformationMatrix(pos * 2 - Vector2.UnitX + Vector2.UnitY, scale * new Vector2(width, height) * unit);
-            
+
             _item.Bind();
 
             Shader.Bind();

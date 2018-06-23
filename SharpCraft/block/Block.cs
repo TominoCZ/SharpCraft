@@ -24,6 +24,7 @@ namespace SharpCraft.block
         public bool HasTransparency { get; protected set; }
         public bool IsSolid { get; protected set; } = true;
         public bool IsFullCube { get; protected set; } = true;
+        public bool IsReplaceable { get; protected set; } = false;
 
         protected Block(string unlocalizedName)
         {

@@ -7,6 +7,7 @@ using SharpCraft.util;
 using SharpCraft.world;
 using System;
 using System.Linq;
+using SharpCraft.model;
 
 namespace SharpCraft.entity
 {
@@ -409,13 +410,16 @@ namespace SharpCraft.entity
             Block grass = BlockRegistry.GetBlock<BlockGrass>();
             Block dirt = BlockRegistry.GetBlock<BlockDirt>();
 
-            BlockPos pos = moo.blockPos.Offset(moo.sideHit);
-            BlockState stateAtPos = World.GetBlockState(pos);
+            BlockState clickedState = World.GetBlockState(moo.blockPos);
 
+            bool replacing;
+
+            BlockPos pos = (replacing = clickedState.Block.IsReplaceable && itemBlock.Block != clickedState.Block) ? moo.blockPos : moo.blockPos.Offset(moo.sideHit);
+            
             Block heldBlock = itemBlock.Block;
             AxisAlignedBB blockBb = heldBlock.BoundingBox.offset(pos.ToVec());
 
-            if (stateAtPos.Block != air || World.GetIntersectingEntitiesBBs(blockBb).Count > 0)
+            if (!replacing && World.GetBlockState(pos).Block != air || World.GetIntersectingEntitiesBBs(blockBb).Count > 0 && heldBlock.IsSolid)
                 return;
 
             BlockPos posUnder = pos.Offset(FaceSides.Down);

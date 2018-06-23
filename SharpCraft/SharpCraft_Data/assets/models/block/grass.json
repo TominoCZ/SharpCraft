@@ -1,8 +1,8 @@
 {
   "textures": {
-    "up": "grass_up",
-    "down": "dirt",
-    "side": "grass_side"
+    "up": "blocks/grass_up",
+    "down": "blocks/dirt",
+    "side": "blocks/grass_side"
   },
   "cubes": [
     {

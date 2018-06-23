@@ -1,6 +1,6 @@
 {
   "textures": {
-    "block": "glass"
+    "block": "blocks/glass"
   },
   "cubes": [
     {

@@ -24,6 +24,7 @@ namespace SharpCraft.render
 
         private readonly ShaderTexturedCube _shaderTexturedCube;
         private readonly ModelRaw _destroyProgressModel;
+        private ModelCustom _armModel;
 
         private Vector4 _selectionOutlineColor = MathUtil.Hue(0);
 
@@ -39,6 +40,7 @@ namespace SharpCraft.render
 
         private float fov;
         private float lastFov;
+        private int _ticks;
 
         public int RenderDistance
         {
@@ -54,6 +56,7 @@ namespace SharpCraft.render
             var cube = CubeModelBuilder.CreateCubeVertexes();
 
             _destroyProgressModel = ModelManager.LoadModel3ToVao(cube);
+            JsonModelLoader.LoadModel("entity/player/arm", new Shader<ModelCustom>("block"));
 
             RenderDistance = 8;
             lastFov = fov = SharpCraft.Instance.Camera.PartialFov;
@@ -62,8 +65,11 @@ namespace SharpCraft.render
         public void Update()
         {
             lastLookVec = lookVec;
+
             lastMotion = motion;
             lastFov = fov;
+
+            _ticks = (_ticks + 1) % 360;
 
             if (SharpCraft.Instance.Player != null)
             {
@@ -78,6 +84,8 @@ namespace SharpCraft.render
             _selectionOutlineColor = MathUtil.Hue(_hue = (_hue + 5) % 360);
 
             lookVec = SharpCraft.Instance.Camera.GetLookVec();
+
+            _armModel = JsonModelLoader.GetCustomModel("entity/player/arm");
         }
 
         public void Render(World world, float partialTicks)
@@ -248,48 +256,108 @@ namespace SharpCraft.render
             ItemStack stack = SharpCraft.Instance.Player.GetEquippedItemStack();
 
             if (stack == null || stack.IsEmpty)
+            {
+                RenderArmModel(partialTicks);
                 return;
+            }
 
             if (stack.Item is ItemBlock itemBlock)
             {
-                Vector3 partialLookVec = lastLookVec + (lookVec - lastLookVec) * partialTicks;
-                Vector3 partialMotion = lastMotion + (motion - lastMotion) * partialTicks;
-
-                Vector2 rotVec = new Vector2(-SharpCraft.Instance.Camera.pitch, -SharpCraft.Instance.Camera.yaw);
-
-                float itemBlockOffsetY = itemBlock.Block.BoundingBox.size.Y / 2 - 0.5f;
-
-                Vector3 offset = new Vector3(1.3f, -1.25f - itemBlockOffsetY, 0.3f) - partialMotion * Vector3.UnitY * 0.1f;
-
-                Matrix4 r1 = Matrix4.CreateRotationY(MathHelper.DegreesToRadians(45));
-                Matrix4 r2 = Matrix4.CreateRotationX(rotVec.X - SharpCraft.Instance.Camera.pitchOffset) * Matrix4.CreateRotationY(rotVec.Y);
-
-                Matrix4 s = Matrix4.CreateScale(0.5525f);
-                Matrix4 t0 = Matrix4.CreateTranslation(Vector3.One * -0.5f);
-                Matrix4 t1 = Matrix4.CreateTranslation(SharpCraft.Instance.Camera.pos + SharpCraft.Instance.Camera.GetLookVec() + partialLookVec * 0.1f);
-                Matrix4 tFinal = Matrix4.CreateTranslation(offset);
-
-                Matrix4 mat = t0 * r1 * Matrix4.CreateScale(itemBlock.Block.BoundingBox.size) * tFinal * r2 * s * t1;
-
-                GL.DepthRange(0, 0.1f);
-
-                ModelBlock model = JsonModelLoader.GetModelForBlock(itemBlock.Block.UnlocalizedName);
-
-                if (model == null)
-                    return;
-
-                model.Bind();
-
-                model.Shader.UpdateGlobalUniforms();
-                model.Shader.UpdateModelUniforms(model.RawModel);
-                model.Shader.UpdateInstanceUniforms(mat, model);
-
-                model.RawModel.Render(PrimitiveType.Quads);
-
-                model.Unbind();
-
-                GL.DepthRange(0, 1);
+                RenderBlockInHand(itemBlock.Block, partialTicks);
             }
+        }
+
+        private void RenderArmModel(float partialTicks)
+        {
+            if (_armModel == null)
+                return;
+
+            GL.DepthRange(0, 0.1f);
+
+            Vector3 partialLookVec = lastLookVec + (lookVec - lastLookVec) * partialTicks;
+            Vector3 partialMotion = lastMotion + (motion - lastMotion) * partialTicks;
+
+            float angle = MathHelper.DegreesToRadians((_ticks + partialTicks) * 20);
+
+            float height = 0.05f * Math.Clamp(partialMotion.Xz.Length * 5, 0, 1);
+
+            float offsetX = (float)Math.Cos(angle) * height;
+            float offsetY = (float)Math.Sin(_ticks * 2 % 360 > 180 ? -angle * 2 + MathHelper.Pi : angle * 2) * height * 0.5f;
+
+            Vector2 rotVec = new Vector2(-SharpCraft.Instance.Camera.pitch, -SharpCraft.Instance.Camera.yaw);
+
+            Vector3 offset = new Vector3(0.55f + offsetX, -0.475f + offsetY, 0) - partialMotion * Vector3.UnitY * 0.1f;
+
+            Matrix4 r1 = Matrix4.CreateRotationY(MathHelper.DegreesToRadians(75)) * Matrix4.CreateRotationX(MathHelper.DegreesToRadians(15)) * Matrix4.CreateRotationZ(MathHelper.DegreesToRadians(-25));
+            Matrix4 r2 = Matrix4.CreateRotationX(rotVec.X - SharpCraft.Instance.Camera.pitchOffset) * Matrix4.CreateRotationY(rotVec.Y);
+
+            Matrix4 s = Matrix4.CreateScale(1.5f);
+            Matrix4 t0 = Matrix4.CreateTranslation(Vector3.One * -0.5f);
+            Matrix4 t1 = Matrix4.CreateTranslation(SharpCraft.Instance.Camera.pos + SharpCraft.Instance.Camera.GetLookVec() + partialLookVec * 0.1f);
+            Matrix4 tFinal = Matrix4.CreateTranslation(offset);
+
+            Matrix4 mat = t0 * r1 * tFinal * r2 * s * t1;
+
+            GL.BindTexture(TextureTarget.Texture2D, _armModel.TextureID);
+
+            _armModel.Bind();
+            _armModel.Shader.UpdateGlobalUniforms();
+            _armModel.Shader.UpdateModelUniforms(_armModel.RawModel);
+            _armModel.Shader.UpdateInstanceUniforms(mat, _armModel);
+
+            _armModel.RawModel.Render(PrimitiveType.Quads);
+
+            _armModel.Unbind();
+
+            GL.DepthRange(0, 1);
+        }
+
+        private void RenderBlockInHand(Block block, float partialTicks)
+        {
+            GL.DepthRange(0, 0.1f);
+
+            ModelBlock model = JsonModelLoader.GetModelForBlock(block.UnlocalizedName);
+
+            if (model == null)
+                return;
+
+            Vector3 partialLookVec = lastLookVec + (lookVec - lastLookVec) * partialTicks;
+            Vector3 partialMotion = lastMotion + (motion - lastMotion) * partialTicks;
+
+            float angle = MathHelper.DegreesToRadians((_ticks + partialTicks) * 20);
+
+            float height = 0.15f * Math.Clamp(partialMotion.Xz.Length * 5, 0, 1);
+
+            float offsetX = (float)Math.Cos(angle) * height;
+            float offsetY = (float)Math.Sin(_ticks * 2 % 360 > 180 ? -angle * 2 + MathHelper.Pi : angle * 2) * height * 0.5f;
+
+            Vector2 rotVec = new Vector2(-SharpCraft.Instance.Camera.pitch, -SharpCraft.Instance.Camera.yaw);
+
+            float itemBlockOffsetY = block.BoundingBox.size.Y / 2 - 0.5f;
+
+            Vector3 offset = new Vector3(1.35f + offsetX, -1.25f - itemBlockOffsetY + offsetY, 0.3f) - partialMotion * Vector3.UnitY * 0.1f;
+
+            Matrix4 r1 = Matrix4.CreateRotationY(MathHelper.DegreesToRadians(45));
+            Matrix4 r2 = Matrix4.CreateRotationX(rotVec.X - SharpCraft.Instance.Camera.pitchOffset) * Matrix4.CreateRotationY(rotVec.Y);
+
+            Matrix4 s = Matrix4.CreateScale(0.5525f);
+            Matrix4 t0 = Matrix4.CreateTranslation(Vector3.One * -0.5f);
+            Matrix4 t1 = Matrix4.CreateTranslation(SharpCraft.Instance.Camera.pos + SharpCraft.Instance.Camera.GetLookVec() + partialLookVec * 0.1f);
+            Matrix4 tFinal = Matrix4.CreateTranslation(offset);
+
+            Matrix4 mat = t0 * r1 * Matrix4.CreateScale(block.BoundingBox.size) * tFinal * r2 * s * t1;
+
+            model.Bind();
+
+            model.Shader.UpdateGlobalUniforms();
+            model.Shader.UpdateModelUniforms(model.RawModel);
+            model.Shader.UpdateInstanceUniforms(mat, model);
+
+            model.RawModel.Render(PrimitiveType.Quads);
+
+            model.Unbind();
+
+            GL.DepthRange(0, 1);
         }
     }
 }

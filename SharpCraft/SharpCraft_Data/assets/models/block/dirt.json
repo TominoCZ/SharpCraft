@@ -1,6 +1,6 @@
 {
   "textures": {
-    "block": "dirt"
+    "block": "blocks/dirt"
   },
   "cubes": [
     {

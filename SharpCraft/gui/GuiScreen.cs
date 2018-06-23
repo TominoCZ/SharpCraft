@@ -81,7 +81,7 @@ namespace SharpCraft.gui
             {
                 GuiButton btn = buttons[i];
 
-                if (btn.IsMouseOver(x, y))
+                if (btn.Enabled && btn.IsMouseOver(x, y))
                 {
                     ButtonClicked(btn, button);
                     break;

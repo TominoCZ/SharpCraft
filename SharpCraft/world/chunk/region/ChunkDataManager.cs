@@ -82,5 +82,10 @@ namespace SharpCraft.world.chunk.region
 
             return _regions[pos];
         }
+
+        public void Cleanup()
+        {
+            _regions.Clear();
+        }
     }
 }

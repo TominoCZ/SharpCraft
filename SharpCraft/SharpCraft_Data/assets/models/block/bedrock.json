@@ -1,6 +1,6 @@
 {
   "textures": {
-    "block": "bedrock"
+    "block": "blocks/bedrock"
   },
   "cubes": [
     {

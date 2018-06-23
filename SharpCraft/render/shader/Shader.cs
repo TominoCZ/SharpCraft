@@ -47,11 +47,11 @@ namespace SharpCraft.render.shader
         private int vshID;
         private int fshID;
 
-        private readonly string shaderName;
+        public readonly string ShaderName;
 
         public Shader(string shaderName)
         {
-            this.shaderName = shaderName;
+            ShaderName = shaderName;
 
             _modules.Add(new ShaderModule3D<TRenderable>(this));//todo auto detect
 
@@ -61,7 +61,7 @@ namespace SharpCraft.render.shader
 
         private void Init()
         {
-            LoadShader(shaderName);
+            LoadShader(ShaderName);
 
             //creates and ID for this program
             program = GL.CreateProgram();

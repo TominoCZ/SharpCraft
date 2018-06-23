@@ -137,22 +137,16 @@ namespace SharpCraft
             itemRegistry = new ItemRegistry();
             blockRegistry = new BlockRegistry();
 
-            SettingsManager.Load();
-
             WorldRenderer = new WorldRenderer();
             EntityRenderer = new EntityRenderer();
-            ParticleRenderer = new ParticleRenderer();
-            SkyboxRenderer = new SkyboxRenderer();
             GuiRenderer = new GuiRenderer();
             FontRenderer = new FontRenderer();
+
+            SettingsManager.Load();
 
             LoadMods();
 
             RegisterItemsAndBlocks();
-
-            //load settings
-            _sensitivity = SettingsManager.GetFloat("sensitivity");
-            WorldRenderer.RenderDistance = SettingsManager.GetInt("renderdistance");
 
             OpenGuiScreen(new GuiScreenMainMenu());
         }
@@ -224,7 +218,23 @@ namespace SharpCraft
 
         public void StartGame()
         {
-            World loadedWorld = WorldLoader.LoadWorld("MyWorld");
+            //load settings
+            _sensitivity = SettingsManager.GetFloat("sensitivity");
+            WorldRenderer.RenderDistance = SettingsManager.GetInt("renderdistance");
+            //World.setBlock(new BlockPos(player.Pos), EnumBlock.RARE, 1, true); //test of block metadata, works perfectly
+
+            LoadWorld("MyWorld"); //TODO don't create when doesn't exist
+        }
+
+        public void LoadWorld(string saveName)
+        {
+            if (World != null)
+                return;
+
+            ParticleRenderer = new ParticleRenderer();
+            SkyboxRenderer = new SkyboxRenderer();
+
+            World loadedWorld = WorldLoader.LoadWorld(saveName);
 
             if (loadedWorld == null)
             {
@@ -235,8 +245,7 @@ namespace SharpCraft
                 World = new World("MyWorld", "Tomlow's Fuckaround",
                     SettingsManager.GetValue("worldseed").GetHashCode());
 
-                Player = new EntityPlayerSP(World,
-                    new Vector3(playerPos.X, World.GetHeightAtPos(playerPos.X, playerPos.Z), playerPos.Z));
+                Player = new EntityPlayerSP(World, playerPos.ToVec());
 
                 World.AddEntity(Player);
 
@@ -259,7 +268,21 @@ namespace SharpCraft
 
             MouseState state = OpenTK.Input.Mouse.GetState();
             _mouseLast = new Point(state.X, state.Y);
-            //World.setBlock(new BlockPos(player.Pos), EnumBlock.RARE, 1, true); //test of block metadata, works perfectly
+        }
+
+        public void Disconnect()
+        {
+            ParticleRenderer = null;
+            SkyboxRenderer = null;
+
+            World?.SaveAllChunks();
+            World?.DestroyChunkModels();
+
+            Player = null;
+
+            World?.ChunkData.Cleanup();
+            World?.LoadManager.Cleanup();
+            World = null;
         }
 
         private void GameLoop()
@@ -613,24 +636,24 @@ namespace SharpCraft
             //RENDER SCREEN
             if (World != null)
             {
-                WorldRenderer.Render(World, _partialTicks);
-                ParticleRenderer.Render(_partialTicks);
-                EntityRenderer.Render(_partialTicks);
-                SkyboxRenderer.Render(_partialTicks);
+                WorldRenderer?.Render(World, _partialTicks);
+                ParticleRenderer?.Render(_partialTicks);
+                EntityRenderer?.Render(_partialTicks);
+                SkyboxRenderer?.Render(_partialTicks);
             }
 
             //render other gui
             if (Player != null)
             {
-                GuiRenderer.RenderCrosshair();
-                GuiRenderer.RenderHUD();
+                GuiRenderer?.RenderCrosshair();
+                GuiRenderer?.RenderHUD();
             }
 
             //render gui screen
             if (GuiScreen != null)
             {
                 CursorVisible = true;
-                GuiRenderer.Render(GuiScreen);
+                GuiRenderer?.Render(GuiScreen);
             }
 
             if (_takeScreenshot)
@@ -778,7 +801,10 @@ namespace SharpCraft
                         _sensitivity = SettingsManager.GetFloat("sensitivity");
 
                         if (e.Shift)
+                        {
+                            JsonModelLoader.Reload();
                             World?.DestroyChunkModels();
+                        }
 
                         break;
                 }

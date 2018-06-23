@@ -11,62 +11,64 @@ namespace SharpCraft.render
 {
     internal class SkyboxRenderer
     {
-        private static readonly float SIZE = 500f;
-
-        private static readonly float[] _vertexes = {
-            -SIZE,  SIZE, -SIZE,
-            -SIZE, -SIZE, -SIZE,
-            SIZE, -SIZE, -SIZE,
-            SIZE, -SIZE, -SIZE,
-            SIZE,  SIZE, -SIZE,
-            -SIZE,  SIZE, -SIZE,
-
-            -SIZE, -SIZE,  SIZE,
-            -SIZE, -SIZE, -SIZE,
-            -SIZE,  SIZE, -SIZE,
-            -SIZE,  SIZE, -SIZE,
-            -SIZE,  SIZE,  SIZE,
-            -SIZE, -SIZE,  SIZE,
-
-            SIZE, -SIZE, -SIZE,
-            SIZE, -SIZE,  SIZE,
-            SIZE,  SIZE,  SIZE,
-            SIZE,  SIZE,  SIZE,
-            SIZE,  SIZE, -SIZE,
-            SIZE, -SIZE, -SIZE,
-
-            -SIZE, -SIZE,  SIZE,
-            -SIZE,  SIZE,  SIZE,
-            SIZE,  SIZE,  SIZE,
-            SIZE,  SIZE,  SIZE,
-            SIZE, -SIZE,  SIZE,
-            -SIZE, -SIZE,  SIZE,
-
-            -SIZE,  SIZE, -SIZE,
-            SIZE,  SIZE, -SIZE,
-            SIZE,  SIZE,  SIZE,
-            SIZE,  SIZE,  SIZE,
-            -SIZE,  SIZE,  SIZE,
-            -SIZE,  SIZE, -SIZE,
-
-            -SIZE, -SIZE, -SIZE,
-            -SIZE, -SIZE,  SIZE,
-            SIZE, -SIZE, -SIZE,
-            SIZE, -SIZE, -SIZE,
-            -SIZE, -SIZE,  SIZE,
-            SIZE, -SIZE,  SIZE
-        };
-
-        private readonly ModelBaked<object> cube;
-        private readonly int texture;
+        private static ModelBaked<object> cube;
+        private static int texture;
 
         private long tick;
         private long lastTick;
 
         public SkyboxRenderer()
         {
-            cube = new ModelBaked<object>(ModelManager.LoadModel3ToVao(_vertexes), new Shader<object>("skybox"));
-            texture = TextureManager.LoadCubeMap();
+            if (cube == null)
+            {
+                var SIZE = 500f;
+
+                cube = new ModelBaked<object>(ModelManager.LoadModel3ToVao(new[] {
+                    -SIZE,  SIZE, -SIZE,
+                    -SIZE, -SIZE, -SIZE,
+                    SIZE, -SIZE, -SIZE,
+                    SIZE, -SIZE, -SIZE,
+                    SIZE,  SIZE, -SIZE,
+                    -SIZE,  SIZE, -SIZE,
+
+                    -SIZE, -SIZE,  SIZE,
+                    -SIZE, -SIZE, -SIZE,
+                    -SIZE,  SIZE, -SIZE,
+                    -SIZE,  SIZE, -SIZE,
+                    -SIZE,  SIZE,  SIZE,
+                    -SIZE, -SIZE,  SIZE,
+
+                    SIZE, -SIZE, -SIZE,
+                    SIZE, -SIZE,  SIZE,
+                    SIZE,  SIZE,  SIZE,
+                    SIZE,  SIZE,  SIZE,
+                    SIZE,  SIZE, -SIZE,
+                    SIZE, -SIZE, -SIZE,
+
+                    -SIZE, -SIZE,  SIZE,
+                    -SIZE,  SIZE,  SIZE,
+                    SIZE,  SIZE,  SIZE,
+                    SIZE,  SIZE,  SIZE,
+                    SIZE, -SIZE,  SIZE,
+                    -SIZE, -SIZE,  SIZE,
+
+                    -SIZE,  SIZE, -SIZE,
+                    SIZE,  SIZE, -SIZE,
+                    SIZE,  SIZE,  SIZE,
+                    SIZE,  SIZE,  SIZE,
+                    -SIZE,  SIZE,  SIZE,
+                    -SIZE,  SIZE, -SIZE,
+
+                    -SIZE, -SIZE, -SIZE,
+                    -SIZE, -SIZE,  SIZE,
+                    SIZE, -SIZE, -SIZE,
+                    SIZE, -SIZE, -SIZE,
+                    -SIZE, -SIZE,  SIZE,
+                    SIZE, -SIZE,  SIZE
+                }), new Shader<object>("skybox"));
+                
+                texture = TextureManager.LoadCubeMap();
+            }
         }
 
         public void Update()
