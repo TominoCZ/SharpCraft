@@ -345,7 +345,7 @@ namespace SharpCraft.render
             Matrix4 t1 = Matrix4.CreateTranslation(SharpCraft.Instance.Camera.pos + SharpCraft.Instance.Camera.GetLookVec() + partialLookVec * 0.1f);
             Matrix4 tFinal = Matrix4.CreateTranslation(offset);
 
-            Matrix4 mat = t0 * r1 * Matrix4.CreateScale(block.BoundingBox.size) * tFinal * r2 * s * t1;
+            Matrix4 mat = t0 * r1 * tFinal * r2 * s * t1;
 
             model.Bind();
 
