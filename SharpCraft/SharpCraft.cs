@@ -66,6 +66,8 @@ namespace SharpCraft
         public FontRenderer FontRenderer;
         public KeyboardState KeyboardState;
 
+        private FBO _frameBuffer;
+
         //public HashSet<Key> KeysDown = new HashSet<Key>();
         public MouseOverObject MouseOverObject = new MouseOverObject();
 
@@ -149,6 +151,20 @@ namespace SharpCraft
             RegisterItemsAndBlocks();
 
             OpenGuiScreen(new GuiScreenMainMenu());
+        }
+
+        private void GlSetup()
+        {
+            GL.Enable(EnableCap.DepthTest);
+            GL.Enable(EnableCap.DepthClamp);
+            GL.Enable(EnableCap.CullFace);
+            GL.Enable(EnableCap.Blend);
+            GL.CullFace(CullFaceMode.Back);
+            GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
+
+            GL.ActiveTexture(TextureUnit.Texture0);
+
+            _frameBuffer = new FBO(Width, Height, false, 4);
         }
 
         private void LoadMods() //WHY THE FUCK IS THIS IMPLEMENTED RIGHT NOW IN THIS GAME PHASE???!
@@ -368,18 +384,6 @@ namespace SharpCraft
             WorldRenderer?.Update();
             SkyboxRenderer?.Update();
             ParticleRenderer?.TickParticles();
-        }
-
-        private void GlSetup()
-        {
-            GL.Enable(EnableCap.DepthTest);
-            GL.Enable(EnableCap.DepthClamp);
-            GL.Enable(EnableCap.CullFace);
-            GL.Enable(EnableCap.Blend);
-            GL.CullFace(CullFaceMode.Back);
-            GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
-
-            GL.ActiveTexture(TextureUnit.Texture0);
         }
 
         public void GetMouseOverObject()
@@ -617,6 +621,9 @@ namespace SharpCraft
         {
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
+            _frameBuffer.Bind();//TODO
+            GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+
             DateTime now = DateTime.Now;
 
             _partialTicks = (float)(_updateTimer.Elapsed.TotalSeconds / TargetUpdatePeriod);
@@ -662,6 +669,9 @@ namespace SharpCraft
 
                 CaptureScreen();
             }
+
+            _frameBuffer.BindDefault(); 
+            _frameBuffer.CopyColorToScreen();//TODO
 
             SwapBuffers();
 
