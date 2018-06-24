@@ -42,7 +42,8 @@ namespace SharpCraft.entity
 
         public override void Update()
         {
-            tick++;
+            if (onGround)
+                tick = (tick + 1) % 360;
 
             LastPos = Pos;
 

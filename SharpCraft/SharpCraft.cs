@@ -621,8 +621,8 @@ namespace SharpCraft
         {
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
-            _frameBuffer.Bind();//TODO
-            GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+            //_frameBuffer.Bind();//TODO
+            //GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
             DateTime now = DateTime.Now;
 
@@ -670,8 +670,8 @@ namespace SharpCraft
                 CaptureScreen();
             }
 
-            _frameBuffer.BindDefault(); 
-            _frameBuffer.CopyColorToScreen();//TODO
+            //_frameBuffer.BindDefault(); 
+            //_frameBuffer.CopyColorToScreen();//TODO
 
             SwapBuffers();
 

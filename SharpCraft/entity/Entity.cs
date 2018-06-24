@@ -2,6 +2,8 @@
 using SharpCraft.world;
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using SharpCraft.block;
 
 namespace SharpCraft.entity
 {
@@ -22,6 +24,8 @@ namespace SharpCraft.entity
 
         public float gravity = 1.875f;
 
+        protected static readonly float StepHeight = 0.5f;
+
         protected Entity(World world, Vector3 pos, Vector3 motion = new Vector3())
         {
             World = world;
@@ -37,6 +41,33 @@ namespace SharpCraft.entity
             LastPos = Pos;
 
             Motion.Y -= 0.04f * gravity;
+
+            Vector3 motion = Motion;
+            motion.Y = 0;
+
+            if (onGround && Motion.Xz.Length > 0.0001f)
+            {
+                AxisAlignedBB bbO = boundingBox.Union(boundingBox.offset(motion));
+
+                var list = SharpCraft.Instance.World.GetBlockCollisionBoxes(bbO).OrderBy(box => (box.min - new BlockPos(box.min).ToVec() + box.size).Y);
+
+                foreach (var bb in list)
+                {
+                    var blockPos = new BlockPos(bb.min);
+                    var bbTop = bb.min + bb.size;
+                    var b = bbTop - blockPos.ToVec();
+
+                    var step = bbTop.Y - Pos.Y;
+
+                    if (step <= StepHeight && step > 0)
+                    {
+                        Motion.Y = 0;
+                        Pos.Y = blockPos.Y + b.Y;
+                        
+                        TeleportTo(Pos);
+                    }
+                }
+            }
 
             Move();
 
