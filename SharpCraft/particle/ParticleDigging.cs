@@ -83,8 +83,8 @@ namespace SharpCraft.particle
             {
                 if (particleAlpha >= 0.0015f)
                 {
-                    particleAlpha *= 0.575f;
-                    particleScale *= 0.625f;
+                    particleAlpha *= 0.525f;
+                    particleScale *= 0.525f;
                 }
                 else
                     SetDead();
@@ -116,7 +116,7 @@ namespace SharpCraft.particle
 
             float partialScale = lastParticleScale + (particleScale - lastParticleScale) * partialTicks;
 
-            partialPos.Y += partialScale / 2;
+            partialPos.Y += partialScale / 2.0f;
 
             ModelBaked<Particle> model = ParticleRenderer.ParticleModel;
             model.Shader.UpdateGlobalUniforms();

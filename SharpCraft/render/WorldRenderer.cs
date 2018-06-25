@@ -274,6 +274,9 @@ namespace SharpCraft.render
 
             GL.DepthRange(0, 0.1f);
 
+            if (!SharpCraft.Instance.Player.onGround)
+                motion *= Vector3.UnitY;
+
             Vector3 partialLookVec = lastLookVec + (lookVec - lastLookVec) * partialTicks;
             Vector3 partialMotion = lastMotion + (motion - lastMotion) * partialTicks;
 
@@ -286,7 +289,8 @@ namespace SharpCraft.render
 
             Vector2 rotVec = new Vector2(-SharpCraft.Instance.Camera.pitch, -SharpCraft.Instance.Camera.yaw);
 
-            Vector3 offset = new Vector3(0.55f + offsetX, -0.475f + offsetY, 0) - partialMotion * Vector3.UnitY * 0.1f;
+            Vector3 offset = new Vector3(0.55f + offsetX, -0.475f + offsetY, 0);
+            offset.Y -= Math.Clamp(partialMotion.Y, -0.35f, 0.35f) / 15f;
 
             Matrix4 r1 = Matrix4.CreateRotationY(MathHelper.DegreesToRadians(75)) * Matrix4.CreateRotationX(MathHelper.DegreesToRadians(15)) * Matrix4.CreateRotationZ(MathHelper.DegreesToRadians(-25));
             Matrix4 r2 = Matrix4.CreateRotationX(rotVec.X - SharpCraft.Instance.Camera.pitchOffset) * Matrix4.CreateRotationY(rotVec.Y);
@@ -321,6 +325,9 @@ namespace SharpCraft.render
             if (model == null)
                 return;
 
+            if (!SharpCraft.Instance.Player.onGround)
+                motion *= Vector3.UnitY;
+
             Vector3 partialLookVec = lastLookVec + (lookVec - lastLookVec) * partialTicks;
             Vector3 partialMotion = lastMotion + (motion - lastMotion) * partialTicks;
 
@@ -335,7 +342,8 @@ namespace SharpCraft.render
 
             float itemBlockOffsetY = block.BoundingBox.size.Y / 2 - 0.5f;
 
-            Vector3 offset = new Vector3(1.35f + offsetX, -1.25f - itemBlockOffsetY + offsetY, 0.3f) - partialMotion * Vector3.UnitY * 0.1f;
+            Vector3 offset = new Vector3(1.35f + offsetX, -1.25f - itemBlockOffsetY + offsetY, 0.3f);
+            offset.Y -= Math.Clamp(partialMotion.Y, -0.35f, 0.35f) / 10f;
 
             Matrix4 r1 = Matrix4.CreateRotationY(MathHelper.DegreesToRadians(45));
             Matrix4 r2 = Matrix4.CreateRotationX(rotVec.X - SharpCraft.Instance.Camera.pitchOffset) * Matrix4.CreateRotationY(rotVec.Y);

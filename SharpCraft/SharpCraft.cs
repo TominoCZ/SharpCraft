@@ -84,8 +84,7 @@ namespace SharpCraft
 
         private readonly List<MouseButton> _mouseButtonsDown = new List<MouseButton>();
         private readonly ConcurrentQueue<Action> _glContextQueue = new ConcurrentQueue<Action>();
-        //private DateTime _updateTimer = DateTime.Now;
-        private readonly Stopwatch _updateTimer = Stopwatch.StartNew();
+        private DateTime _updateTimer = DateTime.Now;
         private DateTime _lastFpsDate = DateTime.Now;
         private WindowState _lastWindowState;
         private readonly Thread _renderThread = Thread.CurrentThread;
@@ -107,7 +106,6 @@ namespace SharpCraft
         private long _interactionTickCounter;
         private float _sensitivity = 1;
         private float _partialTicks;
-        private double _timer;
         private readonly string _glVersion;
 
         private static string _title;
@@ -626,7 +624,7 @@ namespace SharpCraft
 
             DateTime now = DateTime.Now;
 
-            _partialTicks = (float)(_updateTimer.Elapsed.TotalSeconds / TargetUpdatePeriod);
+            _partialTicks = (float)Math.Clamp((now - _updateTimer).TotalSeconds / TargetUpdatePeriod, 0, 1);
 
             if ((now - _lastFpsDate).TotalMilliseconds >= 1000)
             {
@@ -680,14 +678,12 @@ namespace SharpCraft
 
         protected override void OnUpdateFrame(FrameEventArgs e)
         {
-            _updateTimer.Restart();
-
             if (!IsDisposed && Visible)
                 GetMouseOverObject();
 
             GameLoop();
-
-            //_updateTimer = DateTime.Now;
+            
+            _updateTimer = DateTime.Now;
         }
 
         protected override void OnMouseDown(MouseButtonEventArgs e)
