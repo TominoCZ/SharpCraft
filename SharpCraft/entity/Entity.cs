@@ -9,7 +9,7 @@ namespace SharpCraft.entity
 {
     public class Entity
     {
-        protected AxisAlignedBB boundingBox, collisionBoundingBox;
+        protected AxisAlignedBB BoundingBox, CollisionBoundingBox;
 
         public World World;
 
@@ -18,11 +18,11 @@ namespace SharpCraft.entity
 
         public Vector3 Motion;
 
-        public bool onGround;
+        public bool OnGround;
 
-        public bool isAlive = true;
+        public bool IsAlive = true;
 
-        public float gravity = 1.875f;
+        public float Gravity = 1.875f;
 
         protected static readonly float StepHeight = 0.5f;
 
@@ -32,22 +32,22 @@ namespace SharpCraft.entity
             Pos = LastPos = pos;
             Motion = motion;
 
-            collisionBoundingBox = AxisAlignedBB.BLOCK_FULL;
-            boundingBox = collisionBoundingBox.offset(pos - collisionBoundingBox.size / 2);
+            CollisionBoundingBox = AxisAlignedBB.BLOCK_FULL;
+            BoundingBox = CollisionBoundingBox.offset(pos - CollisionBoundingBox.size / 2);
         }
 
         public virtual void Update()
         {
             LastPos = Pos;
 
-            Motion.Y -= 0.04f * gravity;
+            Motion.Y -= 0.04f * Gravity;
 
             Vector3 motion = Motion;
             motion.Y = 0;
 
-            if (onGround && Motion.Xz.Length > 0.0001f)
+            if (OnGround && Motion.Xz.Length > 0.0001f)
             {
-                AxisAlignedBB bbO = boundingBox.Union(boundingBox.offset(motion));
+                AxisAlignedBB bbO = BoundingBox.Union(BoundingBox.offset(motion));
 
                 var list = SharpCraft.Instance.World.GetBlockCollisionBoxes(bbO).OrderBy(box => (box.min - new BlockPos(box.min).ToVec() + box.size).Y);
 
@@ -73,7 +73,7 @@ namespace SharpCraft.entity
 
             Motion.Xz *= 0.8664021f;
 
-            if (onGround)
+            if (OnGround)
             {
                 Motion.Xz *= 0.6676801f;
             }
@@ -81,7 +81,7 @@ namespace SharpCraft.entity
 
         public virtual void Move()
         {
-            AxisAlignedBB bbO = boundingBox.Union(boundingBox.offset(Motion));
+            AxisAlignedBB bbO = BoundingBox.Union(BoundingBox.offset(Motion));
 
             List<AxisAlignedBB> list = SharpCraft.Instance.World.GetBlockCollisionBoxes(bbO);
 
@@ -90,31 +90,31 @@ namespace SharpCraft.entity
             for (int i = 0; i < list.Count; i++)
             {
                 AxisAlignedBB blockBb = list[i];
-                Motion.Y = blockBb.CalculateYOffset(boundingBox, Motion.Y);
+                Motion.Y = blockBb.CalculateYOffset(BoundingBox, Motion.Y);
             }
-            boundingBox = boundingBox.offset(Motion * Vector3.UnitY);
+            BoundingBox = BoundingBox.offset(Motion * Vector3.UnitY);
 
             for (int i = 0; i < list.Count; i++)
             {
                 AxisAlignedBB blockBb = list[i];
-                Motion.X = blockBb.CalculateXOffset(boundingBox, Motion.X);
+                Motion.X = blockBb.CalculateXOffset(BoundingBox, Motion.X);
             }
-            boundingBox = boundingBox.offset(Motion * Vector3.UnitX);
+            BoundingBox = BoundingBox.offset(Motion * Vector3.UnitX);
 
             for (int i = 0; i < list.Count; i++)
             {
                 AxisAlignedBB blockBb = list[i];
-                Motion.Z = blockBb.CalculateZOffset(boundingBox, Motion.Z);
+                Motion.Z = blockBb.CalculateZOffset(BoundingBox, Motion.Z);
             }
-            boundingBox = boundingBox.offset(Motion * Vector3.UnitZ);
+            BoundingBox = BoundingBox.offset(Motion * Vector3.UnitZ);
 
-            SetPositionToBB();
+            SetPositionToBb();
 
             bool stoppedX = Math.Abs(mOrig.X - Motion.X) > 0.00001f;
             bool stoppedY = Math.Abs(mOrig.Y - Motion.Y) > 0.00001f;
             bool stoppedZ = Math.Abs(mOrig.Z - Motion.Z) > 0.00001f;
 
-            onGround = stoppedY && mOrig.Y < 0.0D;
+            OnGround = stoppedY && mOrig.Y < 0.0D;
 
             bool onCeiling = stoppedY && mOrig.Y > 0.0D;
 
@@ -126,7 +126,7 @@ namespace SharpCraft.entity
 
             if (onCeiling)
                 Motion.Y *= 0.15f;
-            else if (onGround)
+            else if (OnGround)
                 Motion.Y = 0;
         }
 
@@ -138,30 +138,30 @@ namespace SharpCraft.entity
         {
             this.Pos = LastPos = pos;
 
-            boundingBox = collisionBoundingBox.offset(pos - Vector3.UnitX * collisionBoundingBox.size.X / 2 - Vector3.UnitZ * collisionBoundingBox.size.Z / 2);
+            BoundingBox = CollisionBoundingBox.offset(pos - Vector3.UnitX * CollisionBoundingBox.size.X / 2 - Vector3.UnitZ * CollisionBoundingBox.size.Z / 2);
         }
 
         public virtual void SetDead()
         {
-            isAlive = false;
+            IsAlive = false;
         }
 
         public AxisAlignedBB GetEntityBoundingBox()
         {
-            return boundingBox;
+            return BoundingBox;
         }
 
         public AxisAlignedBB GetCollisionBoundingBox()
         {
-            return collisionBoundingBox;
+            return CollisionBoundingBox;
         }
 
-        protected void SetPositionToBB()
+        protected void SetPositionToBb()
         {
-            Vector3 center = boundingBox.GetCenter();
+            Vector3 center = BoundingBox.GetCenter();
 
             Pos.X = center.X;
-            Pos.Y = boundingBox.min.Y;
+            Pos.Y = BoundingBox.min.Y;
             Pos.Z = center.Z;
         }
     }

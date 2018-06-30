@@ -9,7 +9,7 @@ namespace SharpCraft.item
     {
         public string UnlocalizedName { get; }
 
-        private Dictionary<Material, float> _materialTable = new Dictionary<Material, float>();
+        private readonly Dictionary<Material, float> _materialTable = new Dictionary<Material, float>();
 
         protected Item(string unlocalizedItem)
         {

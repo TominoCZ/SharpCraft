@@ -38,12 +38,12 @@ namespace SharpCraft.particle
             this.UVmin = UVmin;
             this.UVmax = UVmax;
 
-            collisionBoundingBox = new AxisAlignedBB(particleScale);
-            boundingBox = collisionBoundingBox.offset(pos - (Vector3.UnitX * collisionBoundingBox.size.X / 2 + Vector3.UnitZ * collisionBoundingBox.size.Z / 2));
+            CollisionBoundingBox = new AxisAlignedBB(particleScale);
+            BoundingBox = CollisionBoundingBox.offset(pos - (Vector3.UnitX * CollisionBoundingBox.size.X / 2 + Vector3.UnitZ * CollisionBoundingBox.size.Z / 2));
 
             particleMaxAge = (int)MathUtil.NextFloat(10, 50);
 
-            gravity = 0.9f;
+            Gravity = 0.9f;
         }
 
         public override void Update()

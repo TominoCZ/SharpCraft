@@ -15,45 +15,51 @@ namespace SharpCraft.entity
 {
     public class EntityItem : Entity
     {
-        private static readonly Shader<EntityItem> _shader;
+        private static readonly Shader<EntityItem> Shader;
 
-        private readonly ItemStack stack;
+        private readonly ItemStack _stack;
 
-        private int entityAge;
+        private int _entityAge;
 
-        private long tick;
+        private int _tick;
+        private int _tickLast;
 
         static EntityItem()
         {
-            _shader = new Shader<EntityItem>("entity_item");
+            Shader = new Shader<EntityItem>("entity_item");
         }
 
-        public EntityItem(World world, Vector3 pos, Vector3 motion, ItemStack stack) : base(world, pos, motion)
+        public EntityItem(World world, Vector3 pos, Vector3 motion, ItemStack stack, bool noDelay = false) : base(world, pos, motion)
         {
-            this.stack = stack;
+            if (noDelay)
+                _entityAge = 14;
 
-            collisionBoundingBox = new AxisAlignedBB(0.25f);
-            boundingBox = collisionBoundingBox.offset(pos - Vector3.One * collisionBoundingBox.size / 2);
+            _stack = stack;
 
-            gravity = 1.25f;
+            CollisionBoundingBox = new AxisAlignedBB(0.25f);
+            BoundingBox = CollisionBoundingBox.offset(pos - Vector3.One * CollisionBoundingBox.size / 2);
 
-            isAlive = stack != null && !stack.IsEmpty;
+            Gravity = 1.25f;
+
+            IsAlive = stack != null && !stack.IsEmpty;
         }
 
         public override void Update()
         {
-            if (onGround)
-                tick = (tick + 1) % 360;
+            _tickLast = _tick;
+
+            if (OnGround)
+                _tick = (_tick + 1) % 360;
 
             LastPos = Pos;
 
-            Motion.Y -= 0.04f * gravity;
+            Motion.Y -= 0.04f * Gravity;
 
             Move();
 
             Motion.Xz *= 0.8664021f;
 
-            List<AxisAlignedBB> bbs = SharpCraft.Instance.World.GetBlockCollisionBoxes(boundingBox);
+            List<AxisAlignedBB> bbs = SharpCraft.Instance.World.GetBlockCollisionBoxes(BoundingBox);
 
             if (bbs.Count > 0)
             {
@@ -70,34 +76,34 @@ namespace SharpCraft.entity
                 }
             }
 
-            if (onGround)
+            if (OnGround)
             {
                 Motion.Xz *= 0.6676801f;
             }
 
-            if (++entityAge >= 20 * 50 * 60 + 10) //stay on ground for a minute, 20 ticks as a pick up delay
+            if (++_entityAge >= 20 * 50 * 60 + 10) //stay on ground for a minute, 20 ticks as a pick up delay
             {
                 SetDead();
                 return;
             }
 
-            if (entityAge < 5)
+            if (_entityAge < 5)
                 return;
 
-            List<EntityItem> inAttractionArea = World.Entities.OfType<EntityItem>().Where(e => e != this && e.isAlive && e.stack.ItemSame(stack)).OrderByDescending(e => e.stack.Count).ToList();
+            List<EntityItem> inAttractionArea = World.Entities.OfType<EntityItem>().Where(e => e != this && e.IsAlive && e._stack.ItemSame(_stack)).OrderByDescending(e => e._stack.Count).ToList();
             float attractionRange = 1.8F;
             float mergeRange = 0.15F;
 
             foreach (EntityItem entity in inAttractionArea)
             {
-                if (stack.IsEmpty || entity.stack.IsEmpty || entity.stack.Count == entity.stack.Item.GetMaxStackSize())
+                if (_stack.IsEmpty || entity._stack.IsEmpty || entity._stack.Count == entity._stack.Item.GetMaxStackSize())
                     continue;
 
                 Vector3 distanceVector = entity.Pos - Pos;
                 float distance = distanceVector.Length;
                 if (distance >= attractionRange) continue;
 
-                int ammountToTake = Math.Min(stack.Item.GetMaxStackSize() - stack.Count, entity.stack.Count);
+                int ammountToTake = Math.Min(_stack.Item.GetMaxStackSize() - _stack.Count, entity._stack.Count);
                 if (ammountToTake == 0) continue;
 
                 if (distance <= mergeRange)
@@ -105,12 +111,12 @@ namespace SharpCraft.entity
                     //Motion -= entity.Motion * MathUtil.Remap(entity.stack.Count / (float)stack.Count, 1, 64, 1, 3);
                     //entity.Motion -= Motion * MathUtil.Remap(stack.Count / (float)entity.stack.Count, 1, 64, 1, 3);
 
-                    entity.stack.Count -= ammountToTake;
-                    if (entity.stack.IsEmpty) entity.SetDead();
-                    stack.Count += ammountToTake;
+                    entity._stack.Count -= ammountToTake;
+                    if (entity._stack.IsEmpty) entity.SetDead();
+                    _stack.Count += ammountToTake;
 
-                    entityAge = 3;
-                    entity.entityAge = 1;
+                    _entityAge = 3;
+                    entity._entityAge = 1;
                     continue;
                 }
 
@@ -118,13 +124,13 @@ namespace SharpCraft.entity
 
                 float distanceMul = (float)Math.Sqrt(1 - distance / attractionRange);
                 if (distanceMul > 0.8) distanceMul = ((1 - distanceMul) / 0.2F) * 0.6F + 0.2F;
-                Vector3 baseForce = distanceVector * 0.02f * distanceMul * MathUtil.Remap(stack.Count / (float)entity.stack.Count, 1, entity.stack.Item.GetMaxStackSize(), 2, 5);
+                Vector3 baseForce = distanceVector * 0.02f * distanceMul * MathUtil.Remap(_stack.Count / (float)entity._stack.Count, 1, entity._stack.Item.GetMaxStackSize(), 2, 5);
 
-                Motion += baseForce * entity.stack.Count / Math.Max(entity.stack.Count, stack.Count);
-                entity.Motion -= baseForce * stack.Count / Math.Max(entity.stack.Count, stack.Count);
+                Motion += baseForce * entity._stack.Count / Math.Max(entity._stack.Count, _stack.Count);
+                entity.Motion -= baseForce * _stack.Count / Math.Max(entity._stack.Count, _stack.Count);
             }
 
-            if (entityAge < 15 || !isAlive)
+            if (_entityAge < 15 || !IsAlive)
                 return;
 
             //TODO change this for multiplayer
@@ -134,7 +140,7 @@ namespace SharpCraft.entity
 
             foreach (EntityPlayerSP player in players)
             {
-                if (!player.CanPickUpStack(stack))
+                if (!player.CanPickUpStack(_stack))
                     continue;
 
                 Vector3 attrTarget = player.Pos;
@@ -144,7 +150,7 @@ namespace SharpCraft.entity
 
                 if (distanceVector.Length <= 0.35f)
                 {
-                    if (player.OnPickup(stack))
+                    if (player.OnPickup(_stack))
                         SetDead();
 
                     Motion *= -1f;
@@ -152,27 +158,27 @@ namespace SharpCraft.entity
 
                 Motion = distanceVector.Normalized() * 0.45f;
             }
-            if (stack.IsEmpty) SetDead();
+            if (_stack.IsEmpty) SetDead();
         }
 
         public override void Render(float partialTicks)
         {
             Vector3 partialPos = LastPos + (Pos - LastPos) * partialTicks;
-            float partialTime = tick + partialTicks;
+            float partialTime = _tickLast + (_tick - _tickLast) * partialTicks;
 
-            if (stack == null || stack.IsEmpty)
+            if (_stack == null || _stack.IsEmpty)
                 return;
 
-            if (stack.Item is ItemBlock itemBlock)
+            if (_stack.Item is ItemBlock itemBlock)
             {
                 ModelBlock model = JsonModelLoader.GetModelForBlock(itemBlock.Block.UnlocalizedName);
 
-                if (model == null || model.RawModel == null)
+                if (model?.RawModel == null)
                     return;
 
-                float time = onGround ? (float)((Math.Sin(partialTime / 8) + 1) / 16) : 0;
+                float time = OnGround ? (float)((Math.Sin(partialTime / 8) + 1) / 16) : 0;
 
-                _shader.Bind();
+                Shader.Bind();
 
                 GL.BindVertexArray(model.RawModel.VaoID);
 
@@ -184,18 +190,18 @@ namespace SharpCraft.entity
 
                 int itemsToRender = 1;
 
-                if (stack.Count > 1)
+                if (_stack.Count > 1)
                     itemsToRender = 2;
-                if (stack.Count >= 32 * 4)
+                if (_stack.Count >= 32 * 4)
                     itemsToRender = 3;
-                if (stack.Count == 64 * 4)
+                if (_stack.Count == 64 * 4)
                     itemsToRender = 4;
 
                 for (int i = 0; i < itemsToRender; i++)
                 {
-                    Vector3 rot = Vector3.UnitY * partialTime * 3;
+                    Vector3 rot = Vector3.UnitY * partialTime * 4;
                     Vector3 pos = partialPos - (Vector3.UnitX * 0.125f + Vector3.UnitZ * 0.125f) + Vector3.UnitY * time;
-                    Vector3 pos_o = Vector3.One * (i / 8f);
+                    Vector3 posO = Vector3.One * (i / 8f);
 
                     Matrix4 x = Matrix4.CreateRotationX(MathHelper.DegreesToRadians(rot.X));
                     Matrix4 y = Matrix4.CreateRotationY(MathHelper.DegreesToRadians(rot.Y));
@@ -206,13 +212,13 @@ namespace SharpCraft.entity
                     Matrix4 s = Matrix4.CreateScale(0.25f);
                     Matrix4 t = Matrix4.CreateTranslation(pos + vec * 0.25f);
                     Matrix4 t2 = Matrix4.CreateTranslation(-vec);
-                    Matrix4 t3 = Matrix4.CreateTranslation(pos_o);
+                    Matrix4 t3 = Matrix4.CreateTranslation(posO);
 
                     Matrix4 mat = t3 * t2 * (z * y * x * s) * t;
 
-                    _shader.UpdateGlobalUniforms();
-                    _shader.UpdateModelUniforms(model.RawModel);
-                    _shader.UpdateInstanceUniforms(mat, this);
+                    Shader.UpdateGlobalUniforms();
+                    Shader.UpdateModelUniforms(model.RawModel);
+                    Shader.UpdateInstanceUniforms(mat, this);
                     model.RawModel.Render(PrimitiveType.Quads);
                 }
 
@@ -222,20 +228,20 @@ namespace SharpCraft.entity
                 GL.DisableVertexAttribArray(1);
                 GL.DisableVertexAttribArray(2);
 
-                _shader.Unbind();
+                Shader.Unbind();
             }
             else
             {
                 GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Fill);
                 GL.Disable(EnableCap.CullFace);
-                ModelItem model = JsonModelLoader.GetModelForItem(stack.Item.UnlocalizedName);
+                ModelItem model = JsonModelLoader.GetModelForItem(_stack.Item.UnlocalizedName);
 
-                if (model == null || model.RawModel == null)
+                if (model?.RawModel == null)
                     return;
 
-                float time = onGround ? (float)((Math.Sin(partialTime / 8) + 1) / 16) : 0;
+                float time = OnGround ? (float)((Math.Sin(partialTime / 8) + 1) / 16) : 0;
 
-                _shader.Bind();
+                Shader.Bind();
 
                 GL.BindVertexArray(model.RawModel.VaoID);
 
@@ -247,16 +253,16 @@ namespace SharpCraft.entity
 
                 int itemsToRender = 1;
 
-                if (stack.Count > 1)
+                if (_stack.Count > 1)
                     itemsToRender = 2;
-                if (stack.Count >= 32 * 4)
+                if (_stack.Count >= 32 * 4)
                     itemsToRender = 3;
-                if (stack.Count == 64 * 4)
+                if (_stack.Count == 64 * 4)
                     itemsToRender = 4;
 
                 for (int i = 0; i < itemsToRender; i++)
                 {
-                    Vector3 rot = Vector3.UnitY * partialTime * 3;
+                    Vector3 rot = Vector3.UnitY * partialTime * 4;
                     Vector3 pos = partialPos - (Vector3.UnitX * 0.125f + Vector3.UnitZ * 0.125f) + Vector3.UnitY * time;
                     Vector3 posO = Vector3.One * (i / 8f);
 
@@ -273,9 +279,9 @@ namespace SharpCraft.entity
 
                     Matrix4 mat = t3 * t2 * (z * y * x * s) * t;
 
-                    _shader.UpdateGlobalUniforms();
-                    _shader.UpdateModelUniforms(model.RawModel);
-                    _shader.UpdateInstanceUniforms(mat, this);
+                    Shader.UpdateGlobalUniforms();
+                    Shader.UpdateModelUniforms(model.RawModel);
+                    Shader.UpdateInstanceUniforms(mat, this);
                     model.RawModel.Render(PrimitiveType.Quads);
                 }
 
@@ -285,7 +291,7 @@ namespace SharpCraft.entity
                 GL.DisableVertexAttribArray(1);
                 GL.DisableVertexAttribArray(2);
 
-                _shader.Unbind();
+                Shader.Unbind();
                 GL.Enable(EnableCap.CullFace);
                 GL.PolygonMode(MaterialFace.Front, PolygonMode.Fill);
             }

@@ -51,7 +51,7 @@ namespace SharpCraft.render
 
                 particle.Update();
 
-                if (!particle.isAlive)
+                if (!particle.IsAlive)
                     _particles.Remove(particle);
             }
         }

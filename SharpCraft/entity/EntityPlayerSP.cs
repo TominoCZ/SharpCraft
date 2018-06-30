@@ -53,8 +53,8 @@ namespace SharpCraft.entity
         {
             SharpCraft.Instance.Camera.pos = pos + Vector3.UnitY * 1.625f;
 
-            collisionBoundingBox = new AxisAlignedBB(new Vector3(0.6f, 1.65f, 0.6f));
-            boundingBox = collisionBoundingBox.offset(pos - (Vector3.UnitX * collisionBoundingBox.size.X / 2 + Vector3.UnitZ * collisionBoundingBox.size.Z / 2));
+            CollisionBoundingBox = new AxisAlignedBB(new Vector3(0.6f, 1.65f, 0.6f));
+            BoundingBox = CollisionBoundingBox.offset(pos - (Vector3.UnitX * CollisionBoundingBox.size.X / 2 + Vector3.UnitZ * CollisionBoundingBox.size.Z / 2));
 
             Hotbar = new ItemStack[9];
             Inventory = new ItemStack[27];

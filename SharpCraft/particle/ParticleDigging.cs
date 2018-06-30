@@ -77,7 +77,7 @@ namespace SharpCraft.particle
             lastParticleScale = particleScale;
             lastParticleAlpha = particleAlpha;
 
-            if (!isAlive) return;
+            if (!IsAlive) return;
 
             if (particleAge++ >= particleMaxAge)
             {
@@ -90,13 +90,13 @@ namespace SharpCraft.particle
                     SetDead();
             }
 
-            Motion.Y -= 0.04f * gravity;
+            Motion.Y -= 0.04f * Gravity;
 
             Move();
 
             Motion.Xz *= 0.8864021f;
 
-            if (onGround)
+            if (OnGround)
             {
                 Motion.Xz *= 0.6676801f;
 
@@ -105,7 +105,7 @@ namespace SharpCraft.particle
             }
             else
             {
-                _rot += _rotStep * Math.Clamp((Motion.Xz * 5).LengthFast, onGround ? 0 : 0.2f, 0.3f);
+                _rot += _rotStep * Math.Clamp((Motion.Xz * 5).LengthFast, OnGround ? 0 : 0.2f, 0.3f);
             }
         }
 

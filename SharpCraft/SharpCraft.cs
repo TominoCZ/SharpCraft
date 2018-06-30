@@ -238,8 +238,10 @@ namespace SharpCraft
             _itemRegistry.Put(new ItemPickaxe("wood"));
             _itemRegistry.Put(new ItemPickaxe("rare"));
 
+            var log = ItemRegistry.GetItem("log");
             var wood = ItemRegistry.GetItem("planks");
             var cobble = ItemRegistry.GetItem("cobblestone");
+            var rare = ItemRegistry.GetItem("rare");
 
             var recipe = new[]
             {
@@ -247,8 +249,55 @@ namespace SharpCraft
                 null, wood, null,
                 null, wood, null
             };
-
             _recipeRegistry.RegisterRecipe(recipe, ItemRegistry.GetItem("pick_stone"));
+
+            recipe = new[]
+            {
+                rare, rare, rare,
+                null, wood, null,
+                null, wood, null
+            };
+            _recipeRegistry.RegisterRecipe(recipe, ItemRegistry.GetItem("pick_rare"));
+
+            recipe = new[]
+            {
+                wood, wood, wood,
+                null, wood, null,
+                null, wood, null
+            };
+            _recipeRegistry.RegisterRecipe(recipe, ItemRegistry.GetItem("pick_wood"));
+
+            recipe = new[]
+            {
+                cobble, cobble, cobble,
+                cobble, null, cobble,
+                cobble, cobble, cobble
+            };
+            _recipeRegistry.RegisterRecipe(recipe, ItemRegistry.GetItem("furnace"));
+
+            recipe = new[]
+            {
+                wood, wood, null,
+                wood, wood, null,
+                null, null, null
+            };
+            _recipeRegistry.RegisterRecipe(recipe, ItemRegistry.GetItem("crafting_table"));
+
+            recipe = new[]
+            {
+                log, null, null,
+                null, null, null,
+                null, null, null
+            };
+            _recipeRegistry.RegisterRecipe(recipe, new ItemStack(wood, 4), true);
+
+            recipe = new[]
+            {
+                wood, null, null,
+                wood, null, null,
+                null, null, null
+            };
+            _recipeRegistry.RegisterRecipe(recipe, wood);
 
             JsonModelLoader loader = new JsonModelLoader(Block.DefaultShader, new Shader<ModelItem>("block"));
 
@@ -284,7 +333,7 @@ namespace SharpCraft
                 Console.WriteLine("DEBUG: generating World");
 
                 BlockPos playerPos = new BlockPos(0, 10, 0);//MathUtil.NextFloat(-100, 100));
-                
+
                 World = new World("MyWorld", "Tomlow's Fuckaround", SettingsManager.GetValue("worldseed").GetHashCode());
 
                 Player = new EntityPlayerSP(World, playerPos.ToVec());
@@ -542,12 +591,12 @@ namespace SharpCraft
 
                 //ResetMouse();
 
-                if (KeyboardState.IsKeyDown(Key.Space) && !_wasSpaceDown && Player.onGround)
+                if (KeyboardState.IsKeyDown(Key.Space) && !_wasSpaceDown && Player.OnGround)
                 {
                     _wasSpaceDown = true;
                     Player.Motion.Y = 0.475F;
                 }
-                else if ((!KeyboardState.IsKeyDown(Key.Space) || Player.onGround) && _wasSpaceDown)
+                else if ((!KeyboardState.IsKeyDown(Key.Space) || Player.OnGround) && _wasSpaceDown)
                     _wasSpaceDown = false;
             }
 
@@ -707,14 +756,12 @@ namespace SharpCraft
 
         protected override void OnUpdateFrame(FrameEventArgs e)
         {
-            var now = DateTime.Now;
+            _updateTimer = DateTime.Now;
 
             if (!IsDisposed && Visible)
                 GetMouseOverObject();
 
             GameLoop();
-
-            _updateTimer = now;
         }
 
         protected override void OnMouseDown(MouseButtonEventArgs e)
@@ -903,7 +950,7 @@ namespace SharpCraft
 
     public class ItemPickaxe : Item
     {
-        private string _pickaxeMaterial;
+        private readonly string _pickaxeMaterial;
 
         public ItemPickaxe(string type) : base("pick_" + type)
         {

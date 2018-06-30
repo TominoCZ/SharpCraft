@@ -18,6 +18,16 @@ namespace SharpCraft.block
         {
 
         } 
+
+        public virtual void OnReadData()
+        {
+
+        }
+        
+        public virtual void OnWriteData()
+        {
+
+        }
         
         public virtual void OnDestroyed(World world, BlockPos pos)
         {

@@ -267,7 +267,7 @@ namespace SharpCraft.render
                 return;
 
             _selectionOutline.Bind();
-            _selectionOutline.SetColor(Vector4.One);
+            _selectionOutline.SetColor(_selectionOutlineColor);
 
             shader.UpdateGlobalUniforms();
             shader.UpdateModelUniforms(_selectionOutline.RawModel);
@@ -313,7 +313,7 @@ namespace SharpCraft.render
 
             GL.DepthRange(0, 0.1f);
 
-            if (!SharpCraft.Instance.Player.onGround)
+            if (!SharpCraft.Instance.Player.OnGround)
                 motion *= Vector3.UnitY;
 
             Vector3 partialLookVec = lastLookVec + (lookVec - lastLookVec) * partialTicks;
@@ -386,7 +386,7 @@ namespace SharpCraft.render
             if (model == null)
                 return;
 
-            if (!SharpCraft.Instance.Player.onGround)
+            if (!SharpCraft.Instance.Player.OnGround)
                 motion *= Vector3.UnitY;
 
             Vector3 partialLookVec = lastLookVec + (lookVec - lastLookVec) * partialTicks;
@@ -463,7 +463,7 @@ namespace SharpCraft.render
             if (model == null)
                 return;
 
-            if (!SharpCraft.Instance.Player.onGround)
+            if (!SharpCraft.Instance.Player.OnGround)
                 motion *= Vector3.UnitY;
 
             Vector3 partialLookVec = lastLookVec + (lookVec - lastLookVec) * partialTicks;

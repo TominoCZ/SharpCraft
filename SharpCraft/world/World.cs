@@ -16,7 +16,7 @@ namespace SharpCraft.world
         public ConcurrentDictionary<ChunkPos, Chunk> Chunks { get; } = new ConcurrentDictionary<ChunkPos, Chunk>();
 
         public List<Entity> Entities = new List<Entity>();
-        private ConcurrentDictionary<BlockPos, TileEntity> _tileEntities = new ConcurrentDictionary<BlockPos, TileEntity>();
+        private readonly ConcurrentDictionary<BlockPos, TileEntity> _tileEntities = new ConcurrentDictionary<BlockPos, TileEntity>();
 
         public readonly int Seed;
         public readonly string LevelName;
@@ -109,10 +109,10 @@ namespace SharpCraft.world
             Entities.RemoveAll(e =>
             {
                 if (!IsChunkLoaded(ChunkPos.FromWorldSpace(e.Pos))) return false;
-                if (e.isAlive)
+                if (e.IsAlive)
                 {
                     e.Update();
-                    return !e.isAlive;
+                    return !e.IsAlive;
                 }
                 return true;
             });

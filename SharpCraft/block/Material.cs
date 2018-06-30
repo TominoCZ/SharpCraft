@@ -8,7 +8,7 @@ namespace SharpCraft.block
 
         public string Name { get; }
 
-        private static Dictionary<string, Material> _materials = new Dictionary<string, Material>();
+        private static readonly Dictionary<string, Material> _materials = new Dictionary<string, Material>();
 
         public Material(string name, bool canWalkThrough)
         {
