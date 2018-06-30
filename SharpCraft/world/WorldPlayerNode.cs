@@ -79,10 +79,10 @@ namespace SharpCraft.world
                 return false;
             }
 
-            IItem item = null;
+            Item item = null;
 
             if (node.IsBlock)//TODO - IMPORTANT! at this moment this is always true, will need to add another function for the items or something
-                item = new ItemBlock(BlockRegistry.GetBlock(world.GetLocalBlockName(node.LocalItemID)));BlockRegistry.GetBlock(world.GetLocalBlockName(node.LocalItemID));
+                item = ItemRegistry.GetItem(BlockRegistry.GetBlock(world.GetLocalBlockName(node.LocalItemID)).UnlocalizedName);
 
             stack = new ItemStack(item, node.Count, node.Meta);
 

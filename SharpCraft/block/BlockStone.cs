@@ -2,7 +2,7 @@
 {
     internal class BlockStone : Block
     {
-        public BlockStone() : base("stone")
+        public BlockStone() : base(Material.GetMaterial("stone"), "stone")
         {
             Hardness = 64;
         }

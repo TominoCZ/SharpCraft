@@ -30,7 +30,7 @@ namespace SharpCraft.entity
             set
             {
                 health = value;
-                GuiHUD.UpdateLivesUI(health);
+                GuiHud.UpdateLivesUi(health);
             }
         }
 
@@ -355,14 +355,9 @@ namespace SharpCraft.entity
                 {
                     BlockState state = World.GetBlockState(moo.blockPos);
 
-                    if (state.Block.CanBeInteractedWith)
-                    {
-                        if (state.Block == BlockRegistry.GetBlock<BlockCraftingTable>())
-                        {
-                            SharpCraft.Instance.OpenGuiScreen(new GuiScreenCrafting());
-                        }
-                    }
-                    else
+                    state.Block.OnRightClicked(SharpCraft.Instance.MouseOverObject, this);
+
+                    if (!state.Block.CanBeInteractedWith)
                         PlaceBlock();
                 }
                 else if (btn == MouseButton.Left)
@@ -385,9 +380,14 @@ namespace SharpCraft.entity
 
             World.SetBlockState(moo.blockPos, BlockRegistry.GetBlock<BlockAir>().GetState());
 
+            state.Block.OnDestroyed(moo.blockPos, state, this);
+
+            if (state.Block == BlockRegistry.GetBlock<BlockStone>())
+                state = BlockRegistry.GetBlock<BlockCobbleStone>().GetState();
+
             Vector3 motion = new Vector3(MathUtil.NextFloat(-0.15f, 0.15f), 0.3f, MathUtil.NextFloat(-0.15f, 0.15f));
 
-            EntityItem entityDrop = new EntityItem(World, moo.blockPos.ToVec() + Vector3.One * 0.5f, motion, new ItemStack(new ItemBlock(state.Block), 1, state.Block.GetMetaFromState(state)));
+            EntityItem entityDrop = new EntityItem(World, moo.blockPos.ToVec() + Vector3.One * 0.5f, motion, new ItemStack((ItemBlock)ItemRegistry.GetItem(state.Block.UnlocalizedName), 1, state.Block.GetMetaFromState(state)));
 
             World.AddEntity(entityDrop);
 
@@ -415,11 +415,11 @@ namespace SharpCraft.entity
             bool replacing;
 
             BlockPos pos = (replacing = clickedState.Block.IsReplaceable && itemBlock.Block != clickedState.Block) ? moo.blockPos : moo.blockPos.Offset(moo.sideHit);
-            
+
             Block heldBlock = itemBlock.Block;
             AxisAlignedBB blockBb = heldBlock.BoundingBox.offset(pos.ToVec());
 
-            if (!replacing && World.GetBlockState(pos).Block != air || World.GetIntersectingEntitiesBBs(blockBb).Count > 0 && heldBlock.IsSolid)
+            if (!replacing && World.GetBlockState(pos).Block != air || World.GetIntersectingEntitiesBBs(blockBb).Count > 0 && !heldBlock.Material.CanWalkThrough)
                 return;
 
             BlockPos posUnder = pos.Offset(FaceSides.Down);
@@ -427,12 +427,22 @@ namespace SharpCraft.entity
             BlockState stateUnder = World.GetBlockState(posUnder);
             BlockState stateAbove = World.GetBlockState(pos.Offset(FaceSides.Up));
 
-            if (stateUnder.Block == grass && heldBlock != glass && heldBlock.IsSolid)
+            BlockState toPlace = heldBlock.GetState(stack.Meta);
+            BlockPos placePos = pos;
+
+            if (stateUnder.Block == grass && heldBlock != glass && !heldBlock.Material.CanWalkThrough)
                 World.SetBlockState(posUnder, dirt.GetState());
-            if (stateAbove.Block != air && stateAbove.Block != glass && heldBlock == grass && stateAbove.Block.IsSolid)
-                World.SetBlockState(pos, dirt.GetState());
-            else
-                World.SetBlockState(pos, heldBlock.GetState(stack.Meta));
+
+            if (stateAbove.Block != air && stateAbove.Block != glass && heldBlock == grass &&
+                !heldBlock.Material.CanWalkThrough)
+            {
+                placePos = pos;
+                toPlace = dirt.GetState();
+            }
+
+            World.SetBlockState(placePos, toPlace);
+
+            toPlace.Block.OnPlaced(World, placePos, this);
 
             stack.Count--;
 
@@ -461,7 +471,7 @@ namespace SharpCraft.entity
 
                         if (stack?.IsEmpty == true)
                         {
-                            ItemBlock itemBlock = new ItemBlock(clickedState.Block);
+                            ItemBlock itemBlock = (ItemBlock)ItemRegistry.GetItem(clickedState.Block.UnlocalizedName);
                             ItemStack itemStack = new ItemStack(itemBlock, 1, clickedState.Block.GetMetaFromState(clickedState));
 
                             SetItemStackInHotbar(i, itemStack);
@@ -470,7 +480,7 @@ namespace SharpCraft.entity
                         }
                     }
 
-                    SetItemStackInSelectedSlot(new ItemStack(new ItemBlock(clickedState.Block), 1, clickedState.Block.GetMetaFromState(clickedState)));
+                    SetItemStackInSelectedSlot(new ItemStack(ItemRegistry.GetItem(clickedState.Block.UnlocalizedName), 1, clickedState.Block.GetMetaFromState(clickedState)));
                 }
             }
         }

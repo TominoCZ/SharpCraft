@@ -2,7 +2,7 @@
 {
     internal class BlockLog : Block
     {
-        public BlockLog() : base("log")
+        public BlockLog() : base(Material.GetMaterial("wood"), "log")
         {
             Hardness = 32;
             IsFullCube = false;

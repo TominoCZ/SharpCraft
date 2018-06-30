@@ -11,7 +11,7 @@ namespace SharpCraft.render
         public static ModelRaw GuiQuad;
 
         private readonly GuiCrosshair crosshairGui;
-        private readonly GuiHUD hudGui;
+        private readonly GuiHud hudGui;
 
         static GuiRenderer()
         {
@@ -29,7 +29,7 @@ namespace SharpCraft.render
         public GuiRenderer()
         {
             crosshairGui = new GuiCrosshair();
-            hudGui = new GuiHUD();
+            hudGui = new GuiHud();
         }
 
         public void Render(Gui gui)

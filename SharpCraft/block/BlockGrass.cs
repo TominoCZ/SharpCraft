@@ -2,7 +2,7 @@
 {
     public class BlockGrass : Block
     {
-        public BlockGrass() : base("grass")
+        public BlockGrass() : base(Material.GetMaterial("grass"), "grass")
         {
             Hardness = 16;
         }

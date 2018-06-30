@@ -5,7 +5,7 @@ namespace SharpCraft.block
 {
     class BlockLadder : Block
     {
-        public BlockLadder() : base("ladder")
+        public BlockLadder() : base(Material.GetMaterial("wood"), "ladder")
         {
             IsFullCube = false;
             

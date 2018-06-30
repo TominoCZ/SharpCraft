@@ -160,7 +160,10 @@ namespace SharpCraft.entity
             Vector3 partialPos = LastPos + (Pos - LastPos) * partialTicks;
             float partialTime = tick + partialTicks;
 
-            if (stack?.Item is ItemBlock itemBlock)
+            if (stack == null || stack.IsEmpty)
+                return;
+
+            if (stack.Item is ItemBlock itemBlock)
             {
                 ModelBlock model = JsonModelLoader.GetModelForBlock(itemBlock.Block.UnlocalizedName);
 
@@ -220,6 +223,71 @@ namespace SharpCraft.entity
                 GL.DisableVertexAttribArray(2);
 
                 _shader.Unbind();
+            }
+            else
+            {
+                GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Fill);
+                GL.Disable(EnableCap.CullFace);
+                ModelItem model = JsonModelLoader.GetModelForItem(stack.Item.UnlocalizedName);
+
+                if (model == null || model.RawModel == null)
+                    return;
+
+                float time = onGround ? (float)((Math.Sin(partialTime / 8) + 1) / 16) : 0;
+
+                _shader.Bind();
+
+                GL.BindVertexArray(model.RawModel.VaoID);
+
+                GL.EnableVertexAttribArray(0);
+                GL.EnableVertexAttribArray(1);
+                GL.EnableVertexAttribArray(2);
+
+                GL.BindTexture(TextureTarget.Texture2D, JsonModelLoader.TEXTURE_ITEMS);
+
+                int itemsToRender = 1;
+
+                if (stack.Count > 1)
+                    itemsToRender = 2;
+                if (stack.Count >= 32 * 4)
+                    itemsToRender = 3;
+                if (stack.Count == 64 * 4)
+                    itemsToRender = 4;
+
+                for (int i = 0; i < itemsToRender; i++)
+                {
+                    Vector3 rot = Vector3.UnitY * partialTime * 3;
+                    Vector3 pos = partialPos - (Vector3.UnitX * 0.125f + Vector3.UnitZ * 0.125f) + Vector3.UnitY * time;
+                    Vector3 posO = Vector3.One * (i / 8f);
+
+                    Matrix4 x = Matrix4.CreateRotationX(MathHelper.DegreesToRadians(rot.X));
+                    Matrix4 y = Matrix4.CreateRotationY(MathHelper.DegreesToRadians(rot.Y));
+                    Matrix4 z = Matrix4.CreateRotationZ(MathHelper.DegreesToRadians(rot.Z));
+
+                    Vector3 vec = Vector3.One * 0.5f;
+
+                    Matrix4 s = Matrix4.CreateScale(0.35f);
+                    Matrix4 t = Matrix4.CreateTranslation(pos + vec * 0.35f);
+                    Matrix4 t2 = Matrix4.CreateTranslation(-vec);
+                    Matrix4 t3 = Matrix4.CreateTranslation(posO);
+
+                    Matrix4 mat = t3 * t2 * (z * y * x * s) * t;
+
+                    _shader.UpdateGlobalUniforms();
+                    _shader.UpdateModelUniforms(model.RawModel);
+                    _shader.UpdateInstanceUniforms(mat, this);
+                    model.RawModel.Render(PrimitiveType.Quads);
+                }
+
+                GL.BindVertexArray(0);
+
+                GL.DisableVertexAttribArray(0);
+                GL.DisableVertexAttribArray(1);
+                GL.DisableVertexAttribArray(2);
+
+                _shader.Unbind();
+                GL.Enable(EnableCap.CullFace);
+                GL.PolygonMode(MaterialFace.Front, PolygonMode.Fill);
             }
         }
     }

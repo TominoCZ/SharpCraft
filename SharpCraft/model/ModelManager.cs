@@ -22,6 +22,19 @@ namespace SharpCraft.model
             return new ModelBlockRaw(vaoId, vertexes, normals, uVs, buff0, buff1, buff2);
         }
 
+        public static ModelItemRaw LoadItemModelToVao(float[] vertexes, float[] normals, float[] uVs)
+        {
+            int vaoId = CreateVao();
+
+            int buff0 = StoreDataInAttribList(0, 3, vertexes);
+            int buff1 = StoreDataInAttribList(1, 2, uVs);
+            int buff2 = StoreDataInAttribList(2, 3, normals);
+
+            UnbindVao();
+
+            return new ModelItemRaw(vaoId, vertexes.Length / 3, buff0, buff1, buff2);
+        }
+
         public static ModelRaw LoadModel3ToVao(float[] vertexes, float[] normals, float[] uvs)
         {
             int vaoId = CreateVao();
@@ -34,7 +47,7 @@ namespace SharpCraft.model
 
             return new ModelRaw(vaoId, vertexes.Length / 3, buff0, buff1, buff2);
         }
-        
+
         public static ModelRaw LoadModel3ToVao(float[] vertexes)
         {
             int vaoId = CreateVao();
@@ -45,7 +58,7 @@ namespace SharpCraft.model
 
             return new ModelRaw(vaoId, vertexes.Length / 3, buff0);
         }
-        
+
         public static ModelRaw OverrideModel3InVao(int id, int[] buffers, float[] vertexes, float[] normals, float[] uvs)
         {
             OverrideDataInAttributeList(buffers[0], 0, 3, vertexes);

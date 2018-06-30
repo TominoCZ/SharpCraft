@@ -16,6 +16,7 @@ namespace SharpCraft.world
         public ConcurrentDictionary<ChunkPos, Chunk> Chunks { get; } = new ConcurrentDictionary<ChunkPos, Chunk>();
 
         public List<Entity> Entities = new List<Entity>();
+        private ConcurrentDictionary<BlockPos, TileEntity> _tileEntities = new ConcurrentDictionary<BlockPos, TileEntity>();
 
         public readonly int Seed;
         public readonly string LevelName;
@@ -72,8 +73,39 @@ namespace SharpCraft.world
                 Entities.Add(e);
         }
 
+        public void AddTileEntity(BlockPos pos, TileEntity te)
+        {
+            _tileEntities.TryAdd(pos, te);
+        }
+
+        public void RemoveTileEntity(BlockPos pos)
+        {
+            _tileEntities.TryRemove(pos, out var removed);
+            removed?.OnDestroyed(this, pos);
+        }
+        
+        public TileEntity GetTileEntity(BlockPos pos)
+        {
+            _tileEntities.TryGetValue(pos, out var te);
+
+            return te;
+        }
+
+        public void RenderTileEntities(float partialTicks)
+        {
+            foreach (var entity in _tileEntities.Values)
+            {
+                entity.Render(partialTicks);
+            }
+        }
+
         private void UpdateEntities()
         {
+            foreach (var entity in _tileEntities.Values)
+            {
+                entity.Update();
+            }
+
             Entities.RemoveAll(e =>
             {
                 if (!IsChunkLoaded(ChunkPos.FromWorldSpace(e.Pos))) return false;
@@ -112,7 +144,7 @@ namespace SharpCraft.world
                     {
                         BlockPos pos = new BlockPos(x, y, z);
                         BlockState state = SharpCraft.Instance.World.GetBlockState(pos);
-                        if (state.Block == air || !state.Block.IsSolid)
+                        if (state.Block == air || state.Block.Material.CanWalkThrough)
                             continue;
 
                         blocks.Add(state.Block.BoundingBox.offset(pos.ToVec()));
@@ -192,7 +224,7 @@ namespace SharpCraft.world
             {
                 data.DestroyModel();
             }
-            
+
             Chunks.Clear();
             _waypoints.Clear();
 

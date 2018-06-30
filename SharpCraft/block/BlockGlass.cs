@@ -2,7 +2,7 @@
 {
     internal class BlockGlass : Block
     {
-        public BlockGlass() : base("glass")
+        public BlockGlass() : base(Material.GetMaterial("stone"), "glass")
         {
             HasTransparency = true;
             Hardness = 8;

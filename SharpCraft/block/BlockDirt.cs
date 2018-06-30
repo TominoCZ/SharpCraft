@@ -2,7 +2,7 @@
 {
     internal class BlockDirt : Block
     {
-        public BlockDirt() : base("dirt")
+        public BlockDirt() : base(Material.GetMaterial("dirt"), "dirt")
         {
             Hardness = 16;
         }

@@ -1,4 +1,5 @@
 {
+  "inherit": null,
   "textures": {
     "up": "blocks/log_top",
     "side": "blocks/log_side"

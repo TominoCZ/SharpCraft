@@ -12,19 +12,23 @@ namespace SharpCraft.gui
         public GuiScreenMainMenu()
         {
             buttons.Add(new GuiButton(0, 0, -45, 2, @"\{66FF00}SINGLEPLAYER") { CenteredX = true, CenteredY = true });
-            buttons.Add(new GuiButton(1, 0, 0, 2, @"\{FF0000}MULTIPLAYER") { CenteredX = true, CenteredY = true, Enabled = false });
+            buttons.Add(new GuiButton(1, 0, 0, 2, @"\{DD6600}MULTIPLAYER") { CenteredX = true, CenteredY = true, Enabled = false });
             buttons.Add(new GuiButton(2, 0, 45, 2, @"\{FF0000}EXIT") { CenteredX = true, CenteredY = true });
 
             var titleTextgure = TextureManager.LoadTexture("gui/title");
 
-            _titleTexture = new GuiTexture(titleTextgure, 0, 0, titleTextgure.TextureSize.Width, titleTextgure.TextureSize.Height);
+            _titleTexture = new GuiTexture(titleTextgure, 0, 0, titleTextgure.TextureSize.Width, titleTextgure.TextureSize.Height, 0.7f);
         }
 
         public override void Render(int mouseX, int mouseY)
         {
             DrawDefaultBackground();
 
-            RenderTexture(_titleTexture, SharpCraft.Instance.Width / 2 - (int)(_titleTexture.Size.X / 2), 25);
+            for (int i = 0; i < 16; i++)
+            {
+                RenderTexture(_titleTexture,
+                    SharpCraft.Instance.Width / 2 - (int)(_titleTexture.Size.X * _titleTexture.Scale / 2) - i, 25 - i);
+            }
 
             base.Render(mouseX, mouseY);
         }

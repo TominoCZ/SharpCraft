@@ -4,11 +4,11 @@ using System;
 namespace SharpCraft.item
 {
     [Serializable]
-    internal class ItemBlock : IItem
+    public class ItemBlock : Item
     {
         public Block Block { get; }
 
-        public ItemBlock(Block block)
+        public ItemBlock(Block block) : base(block.UnlocalizedName)
         {
             Block = block;
         }
@@ -16,16 +16,6 @@ namespace SharpCraft.item
         public int GetMaxStackSize()
         {
             return 256;
-        }
-
-        public string GetUnlocalizedName()
-        {
-            return Block.UnlocalizedName;
-        }
-
-        public string GetDisplayName()
-        {
-            return GetUnlocalizedName();
         }
     }
 }

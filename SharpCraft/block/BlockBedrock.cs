@@ -2,7 +2,7 @@
 {
     internal class BlockBedrock : Block
     {
-        public BlockBedrock() : base("bedrock")
+        public BlockBedrock() : base(Material.GetMaterial("stone"), "bedrock")
         {
             Hardness = -1;
         }

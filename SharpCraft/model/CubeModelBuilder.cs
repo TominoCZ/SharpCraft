@@ -57,6 +57,7 @@ namespace SharpCraft.model
             });
         }
 
+        [Obsolete]
         public static void AppendCubeModel(JsonCube cube, Dictionary<string, string> modelTextureVariables, Dictionary<string, TextureMapElement> textureMap, ref float[] vertexes, ref float[] normals, ref float[] uvs, int n)
         {
             int startIndex2 = n * 48;
@@ -73,10 +74,8 @@ namespace SharpCraft.model
 
                 //edit: textureNode.Texture can be anything. it is a variable defined by the modeller
                 //textureNode.Texture isn't the name of the texture file! it is '#side', '#block', '#bottom', ... TODO - if '#' is not present, use the texture from the texture map
-
-                string textureNameForFace = modelTextureVariables[textureNode.texture];
-
-                if (textureMap.TryGetValue(textureNameForFace, out var tme))
+                
+                if (modelTextureVariables.TryGetValue(textureNode.texture, out var textureNameForFace) && textureMap.TryGetValue(textureNameForFace, out var tme))
                 {
                     var percentageU1 = Math.Clamp(textureNode.uv[0] / 16f, 0, 1);
                     var percentageV1 = Math.Clamp(textureNode.uv[1] / 16f, 0, 1);
@@ -118,7 +117,56 @@ namespace SharpCraft.model
                 faceIndex++;
             }
         }
+        
+        public static void AppendCubeModel(JsonCube cube, Dictionary<string, string> modelTextureVariables, Dictionary<string, TextureMapElement> textureMap, ref List<float> vertexes, ref List<float> normals, ref List<float> uvs)
+        {
+            foreach (var pair in cube.faces.OrderBy(p => (int)p.Key))
+            {
+                TextureType side = pair.Key;
+                JsonCubeFaceUv textureNode = pair.Value;
 
+                if (modelTextureVariables.TryGetValue(textureNode.texture, out var textureNameForFace) && textureMap.TryGetValue(textureNameForFace, out var tme))
+                {
+                    var percentageU1 = Math.Clamp(textureNode.uv[0] / 16f, 0, 1);
+                    var percentageV1 = Math.Clamp(textureNode.uv[1] / 16f, 0, 1);
+                    var percentageU2 = Math.Clamp(textureNode.uv[2] / 16f, 0, 1);
+                    var percentageV2 = Math.Clamp(textureNode.uv[3] / 16f, 0, 1);
+
+                    Vector2 size = tme.UVMax - tme.UVMin;
+
+                    var minU = tme.UVMin.X + size.X * percentageU1;
+                    var minV = tme.UVMin.Y + size.Y * percentageV1;
+                    var maxU = tme.UVMin.X + size.X * percentageU2;
+                    var maxV = tme.UVMin.Y + size.Y * percentageV2;
+
+                    uvs.Add(minU);
+                    uvs.Add(minV);
+
+                    uvs.Add(minU);
+                    uvs.Add(maxV);
+
+                    uvs.Add(maxU);
+                    uvs.Add(maxV);
+
+                    uvs.Add(maxU);
+                    uvs.Add(minV);
+                }
+
+                Vector3 rot = Vector3.Zero;
+                Vector3 ori = Vector3.Zero;
+
+                if (cube.rotation != null)
+                {
+                    ori = new Vector3(cube.rotation.origin[0], cube.rotation.origin[1], cube.rotation.origin[2]) / 16f;
+
+                    rot[(int) cube.rotation.axis] = MathHelper.DegreesToRadians(cube.rotation.angle);
+                }
+
+                AppendFace(side, cube.from, cube.to, rot, ori, ref vertexes, ref normals);
+            }
+        }
+
+        [Obsolete]
         public static void AppendFace(TextureType side, float[] from, float[] to, Vector3 rotation, Vector3 rotationOrigin,
             ref float[] vertexes, ref float[] normals, int startIndex)
         {
@@ -153,6 +201,39 @@ namespace SharpCraft.model
             }
         }
 
+        public static void AppendFace(TextureType side, float[] from, float[] to, Vector3 rotation, Vector3 rotationOrigin,
+            ref List<float> vertexes, ref List<float> normals)
+        {
+            FaceSides faceSide = FaceSides.Parse(side); //TextureType parsed to FaceSides, also a normal of this face
+            Vector3 normal = faceSide.ToVec();
+            float[] unitFace = _cube[faceSide]; //one side of the cube in unit size
+
+            float x = from[0] / 16f;
+            float y = from[1] / 16f;
+            float z = from[2] / 16f;
+
+            float sx = to[0] / 16f - x; //the size of the cube part
+            float sy = to[1] / 16f - y;
+            float sz = to[2] / 16f - z;
+
+            for (var i = 0; i < unitFace.Length; i += 3)
+            {
+                var vertex = RotateVertex(new Vector3(
+                    x + unitFace[i] * sx,
+                    y + unitFace[i + 1] * sy,
+                    z + unitFace[i + 2] * sz), rotation, rotationOrigin);
+
+                vertexes.Add(vertex.X);
+                vertexes.Add(vertex.Y);
+                vertexes.Add(vertex.Z);
+
+                var nrm = RotateVertex(normal, rotation, rotationOrigin);
+
+                normals.Add(nrm.X);
+                normals.Add(nrm.Y);
+                normals.Add(nrm.Z);
+            }
+        }
         public static float[] CreateCubeVertexes(bool centered = false)
         {
             List<float> vertexes = new List<float>();

@@ -2,9 +2,9 @@
 {
     public class BlockAir : Block
     {
-        public BlockAir() : base("air")
+        public BlockAir() : base(Material.GetMaterial("air"), "air")
         {
-            IsSolid = false;
+            //IsSolid = false;
             IsOpaque = false;
         }
     }

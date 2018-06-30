@@ -8,7 +8,7 @@ namespace SharpCraft.block
 {
     class BlockSlab : Block
     {
-        public BlockSlab() : base("slab")
+        public BlockSlab() : base(Material.GetMaterial("stone"), "slab")
         {
             IsFullCube = false;
 

@@ -53,10 +53,11 @@ namespace SharpCraft
             }
         }
 
-        private readonly List<ModMain> installedMods = new List<ModMain>();
+        private readonly List<ModMain> _installedMods = new List<ModMain>();
 
-        private ItemRegistry itemRegistry;
-        private BlockRegistry blockRegistry;
+        private ItemRegistry _itemRegistry;
+        private BlockRegistry _blockRegistry;
+        private RecipeRegistry _recipeRegistry;
 
         public WorldRenderer WorldRenderer;
         public EntityRenderer EntityRenderer;
@@ -105,6 +106,7 @@ namespace SharpCraft
         private int _fpsCounterLast;
         private long _interactionTickCounter;
         private float _sensitivity = 1;
+
         private float _partialTicks;
         private readonly string _glVersion;
 
@@ -122,8 +124,6 @@ namespace SharpCraft
             _glVersion = GL.GetString(StringName.ShadingLanguageVersion);
             Title = _title = $"SharpCraft Alpha 0.0.4 [GLSL {_glVersion}]";
 
-            //TargetRenderFrequency = 60;
-
             Console.WriteLine("DEBUG: stitching Textures");
             TextureManager.LoadTextures();
 
@@ -134,8 +134,9 @@ namespace SharpCraft
         {
             GlSetup();
 
-            itemRegistry = new ItemRegistry();
-            blockRegistry = new BlockRegistry();
+            _itemRegistry = new ItemRegistry();
+            _blockRegistry = new BlockRegistry();
+            _recipeRegistry = new RecipeRegistry();
 
             WorldRenderer = new WorldRenderer();
             EntityRenderer = new EntityRenderer();
@@ -158,6 +159,7 @@ namespace SharpCraft
             GL.Enable(EnableCap.CullFace);
             GL.Enable(EnableCap.Blend);
             GL.CullFace(CullFaceMode.Back);
+            GL.PolygonMode(MaterialFace.Front, PolygonMode.Fill);
             GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
 
             GL.ActiveTexture(TextureUnit.Texture0);
@@ -183,7 +185,7 @@ namespace SharpCraft
                         {
                             Console.WriteLine("registered mod '" + mm.ModInfo.Name + "'!");
 
-                            installedMods.Add(mm);
+                            _installedMods.Add(mm);
                         }
                         else
                         {
@@ -196,38 +198,62 @@ namespace SharpCraft
 
         private void RegisterItemsAndBlocks()
         {
-            blockRegistry.Put(new BlockAir());
-            blockRegistry.Put(new BlockStone());
-            blockRegistry.Put(new BlockGrass());
-            blockRegistry.Put(new BlockDirt());
-            blockRegistry.Put(new BlockCobbleStone());
-            blockRegistry.Put(new BlockPlanks());
-            blockRegistry.Put(new BlockBedrock());
-            blockRegistry.Put(new BlockLog());
-            blockRegistry.Put(new BlockLeaves());
-            blockRegistry.Put(new BlockGlass());
-            blockRegistry.Put(new BlockCraftingTable());
-            blockRegistry.Put(new BlockFurnace());
-            blockRegistry.Put(new BlockSlab());
-            blockRegistry.Put(new BlockRare());
-            blockRegistry.Put(new BlockLadder());
-            blockRegistry.Put(new BlockTallGrass());
+            //register materails
+            Material.RegisterMaterial(new Material("air", true));
+            Material.RegisterMaterial(new Material("tallgrass", true));
+            Material.RegisterMaterial(new Material("grass", false));
+            Material.RegisterMaterial(new Material("dirt", false));
+            Material.RegisterMaterial(new Material("stone", false));
+            Material.RegisterMaterial(new Material("wood", false));
+
+            _blockRegistry.Put(new BlockAir());
+            _blockRegistry.Put(new BlockStone());
+            _blockRegistry.Put(new BlockGrass());
+            _blockRegistry.Put(new BlockDirt());
+            _blockRegistry.Put(new BlockCobbleStone());
+            _blockRegistry.Put(new BlockPlanks());
+            _blockRegistry.Put(new BlockBedrock());
+            _blockRegistry.Put(new BlockLog());
+            _blockRegistry.Put(new BlockLeaves());
+            _blockRegistry.Put(new BlockGlass());
+            _blockRegistry.Put(new BlockCraftingTable());
+            _blockRegistry.Put(new BlockFurnace());
+            _blockRegistry.Put(new BlockSlab());
+            _blockRegistry.Put(new BlockRare());
+            _blockRegistry.Put(new BlockLadder());
+            _blockRegistry.Put(new BlockTallGrass());
 
             //POST - MOD Blocks and Items
-            foreach (ModMain mod in installedMods)
+            foreach (ModMain mod in _installedMods)
             {
-                mod.OnItemsAndBlocksRegistry(new RegistryEventArgs(blockRegistry, itemRegistry));
+                mod.OnItemsAndBlocksRegistry(new RegistryEventArgs(_blockRegistry, _itemRegistry));
             }
 
             foreach (var block in BlockRegistry.AllBlocks())
             {
-                itemRegistry.Put(new ItemBlock(block));
+                _itemRegistry.Put(new ItemBlock(block));
             }
 
-            JsonModelLoader loader = new JsonModelLoader(Block.DefaultShader);
+            _itemRegistry.Put(new ItemPickaxe("stone"));
+            _itemRegistry.Put(new ItemPickaxe("wood"));
+            _itemRegistry.Put(new ItemPickaxe("rare"));
 
-            blockRegistry.RegisterBlocksPost(loader);
-            itemRegistry.RegisterItemsPost(loader);
+            var wood = ItemRegistry.GetItem("planks");
+            var cobble = ItemRegistry.GetItem("cobblestone");
+
+            var recipe = new[]
+            {
+                cobble, cobble, cobble,
+                null, wood, null,
+                null, wood, null
+            };
+
+            _recipeRegistry.RegisterRecipe(recipe, ItemRegistry.GetItem("pick_stone"));
+
+            JsonModelLoader loader = new JsonModelLoader(Block.DefaultShader, new Shader<ModelItem>("block"));
+
+            _blockRegistry.RegisterBlocksPost(loader);
+            _itemRegistry.RegisterItemsPost(loader);
         }
 
         public void StartGame()
@@ -237,7 +263,10 @@ namespace SharpCraft
             WorldRenderer.RenderDistance = SettingsManager.GetInt("renderdistance");
             //World.setBlock(new BlockPos(player.Pos), EnumBlock.RARE, 1, true); //test of block metadata, works perfectly
 
-            LoadWorld("MyWorld"); //TODO don't create when doesn't exist
+            LoadWorld("MyWorld"); //TODO don't create when doesn't exist //EDIT - now redundant comment?
+            Player.OnPickup(new ItemStack(ItemRegistry.GetItem("pick_stone")));
+            Player.OnPickup(new ItemStack(ItemRegistry.GetItem("pick_wood")));
+            Player.OnPickup(new ItemStack(ItemRegistry.GetItem("pick_rare")));
         }
 
         public void LoadWorld(string saveName)
@@ -254,24 +283,23 @@ namespace SharpCraft
             {
                 Console.WriteLine("DEBUG: generating World");
 
-                BlockPos playerPos = new BlockPos(MathUtil.NextFloat(-100, 100), 10, MathUtil.NextFloat(-100, 100));
-
-                World = new World("MyWorld", "Tomlow's Fuckaround",
-                    SettingsManager.GetValue("worldseed").GetHashCode());
+                BlockPos playerPos = new BlockPos(0, 10, 0);//MathUtil.NextFloat(-100, 100));
+                
+                World = new World("MyWorld", "Tomlow's Fuckaround", SettingsManager.GetValue("worldseed").GetHashCode());
 
                 Player = new EntityPlayerSP(World, playerPos.ToVec());
 
                 World.AddEntity(Player);
 
-                Player.SetItemStackInInventory(0, new ItemStack(new ItemBlock(BlockRegistry.GetBlock<BlockCraftingTable>())));
-                Player.SetItemStackInInventory(1, new ItemStack(new ItemBlock(BlockRegistry.GetBlock<BlockFurnace>())));
-                Player.SetItemStackInInventory(2, new ItemStack(new ItemBlock(BlockRegistry.GetBlock<BlockCobbleStone>())));
-                Player.SetItemStackInInventory(3, new ItemStack(new ItemBlock(BlockRegistry.GetBlock<BlockPlanks>())));
-                Player.SetItemStackInInventory(4, new ItemStack(new ItemBlock(BlockRegistry.GetBlock<BlockGlass>())));
-                Player.SetItemStackInInventory(5, new ItemStack(new ItemBlock(BlockRegistry.GetBlock<BlockCraftingTable>())));
-                Player.SetItemStackInInventory(6, new ItemStack(new ItemBlock(BlockRegistry.GetBlock<BlockSlab>())));
-                Player.SetItemStackInInventory(7, new ItemStack(new ItemBlock(BlockRegistry.GetBlock<BlockLadder>())));
-                Player.SetItemStackInInventory(8, new ItemStack(new ItemBlock(BlockRegistry.GetBlock<BlockTallGrass>())));
+                Player.SetItemStackInInventory(0, new ItemStack(ItemRegistry.GetItem(BlockRegistry.GetBlock<BlockCraftingTable>().UnlocalizedName)));
+                Player.SetItemStackInInventory(1, new ItemStack(ItemRegistry.GetItem(BlockRegistry.GetBlock<BlockFurnace>().UnlocalizedName)));
+                Player.SetItemStackInInventory(2, new ItemStack(ItemRegistry.GetItem(BlockRegistry.GetBlock<BlockCobbleStone>().UnlocalizedName)));
+                Player.SetItemStackInInventory(3, new ItemStack(ItemRegistry.GetItem(BlockRegistry.GetBlock<BlockPlanks>().UnlocalizedName)));
+                Player.SetItemStackInInventory(4, new ItemStack(ItemRegistry.GetItem(BlockRegistry.GetBlock<BlockGlass>().UnlocalizedName)));
+                Player.SetItemStackInInventory(5, new ItemStack(ItemRegistry.GetItem(BlockRegistry.GetBlock<BlockCraftingTable>().UnlocalizedName)));
+                Player.SetItemStackInInventory(6, new ItemStack(ItemRegistry.GetItem(BlockRegistry.GetBlock<BlockSlab>().UnlocalizedName)));
+                Player.SetItemStackInInventory(7, new ItemStack(ItemRegistry.GetItem(BlockRegistry.GetBlock<BlockLadder>().UnlocalizedName)));
+                Player.SetItemStackInInventory(8, new ItemStack(ItemRegistry.GetItem(BlockRegistry.GetBlock<BlockTallGrass>().UnlocalizedName)));
             }
             else
             {
@@ -301,14 +329,14 @@ namespace SharpCraft
 
         private void GameLoop()
         {
-            TargetRenderFrequency = Focused ? 0 : 30;
+            TargetRenderFrequency = Focused ? 0 : 60;
 
             if (GuiScreen == null && !Focused)
                 OpenGuiScreen(new GuiScreenIngameMenu());
 
             float wheelValue = Mouse.WheelPrecise;
 
-            if (Player != null) // && GuiScreen == null)
+            if (Player != null)
             {
                 if (AllowInput())
                 {
@@ -346,7 +374,7 @@ namespace SharpCraft
                                 }
                                 else
                                 {
-                                    progress.Progress++;
+                                    progress.Progress += Player.GetEquippedItemStack() is ItemStack st && !st.IsEmpty ? st.Item.GetMiningSpeed(World?.GetBlockState(lastPos).Block.Material) : 1;
                                 }
 
                                 if (progress.Destroyed)
@@ -362,7 +390,7 @@ namespace SharpCraft
                             GetMouseOverObject();
 
                             if (rmb)
-                                Player.PlaceBlock();
+                                Player.OnClick(MouseButton.Right);
                         }
                     }
                     else
@@ -624,7 +652,7 @@ namespace SharpCraft
 
             DateTime now = DateTime.Now;
 
-            _partialTicks = (float)Math.Clamp((now - _updateTimer).TotalSeconds / TargetUpdatePeriod, 0, 1);
+            _partialTicks = (float)(((now - _updateTimer).TotalSeconds + e.Time) / TargetUpdatePeriod);
 
             if ((now - _lastFpsDate).TotalMilliseconds >= 1000)
             {
@@ -642,6 +670,7 @@ namespace SharpCraft
             if (World != null)
             {
                 WorldRenderer?.Render(World, _partialTicks);
+                World.RenderTileEntities(_partialTicks);
                 ParticleRenderer?.Render(_partialTicks);
                 EntityRenderer?.Render(_partialTicks);
                 SkyboxRenderer?.Render(_partialTicks);
@@ -678,12 +707,14 @@ namespace SharpCraft
 
         protected override void OnUpdateFrame(FrameEventArgs e)
         {
+            var now = DateTime.Now;
+
             if (!IsDisposed && Visible)
                 GetMouseOverObject();
 
             GameLoop();
-            
-            _updateTimer = DateTime.Now;
+
+            _updateTimer = now;
         }
 
         protected override void OnMouseDown(MouseButtonEventArgs e)
@@ -867,6 +898,42 @@ namespace SharpCraft
                 WorldLoader.SaveWorld(World);
 
             base.OnClosing(e);
+        }
+    }
+
+    public class ItemPickaxe : Item
+    {
+        private string _pickaxeMaterial;
+
+        public ItemPickaxe(string type) : base("pick_" + type)
+        {
+            _pickaxeMaterial = type;
+        }
+
+        public override float GetMiningSpeed(Material mat)
+        {
+            float mult = 1f;
+
+            switch (_pickaxeMaterial)
+            {
+                case "rare":
+                    mult = 4f;
+                    break;
+                case "stone":
+                    mult = 2.5f;
+                    break;
+                case "wood":
+                    mult = 1.5f;
+                    break;
+            }
+
+            switch (mat.Name)
+            {
+                case "stone":
+                    return mult;
+            }
+
+            return 1;
         }
     }
 }

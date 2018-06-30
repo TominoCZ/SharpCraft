@@ -5,7 +5,7 @@ namespace SharpCraft.item
     [Serializable]
     public class ItemStack
     {
-        public IItem Item;
+        public Item Item;
 
         private int _count;
 
@@ -31,7 +31,7 @@ namespace SharpCraft.item
 
         public bool IsEmpty => Count == 0 || Item == null;
 
-        public ItemStack(IItem item, int count = 1, short meta = 0)
+        public ItemStack(Item item, int count = 1, short meta = 0)
         {
             Item = item;
             Meta = meta;
@@ -52,10 +52,10 @@ namespace SharpCraft.item
         public bool ItemSame(ItemStack other)
         {
             if (other == null) return false;
-            return !IsEmpty && !other.IsEmpty && Meta == other.Meta && Item.GetUnlocalizedName() == other.Item.GetUnlocalizedName(); //TODO - REALLY BAD!!! (because rn the unlocalized names are 'dirt', 'stone', .. and not 'sharpcraft.blocks.dirt') 
+            return !IsEmpty && !other.IsEmpty && Meta == other.Meta && Item.UnlocalizedName == other.Item.UnlocalizedName; //TODO - REALLY BAD!!! (because rn the unlocalized names are 'dirt', 'stone', .. and not 'sharpcraft.blocks.dirt') 
         }
 
-        public override string ToString() => Item != null ? Item.GetDisplayName() : "";
+        public override string ToString() => Item != null ? Item.UnlocalizedName : ""; //TODO!!
 
         public ItemStack Combine(ItemStack other)
         {

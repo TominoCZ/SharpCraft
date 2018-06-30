@@ -6,24 +6,24 @@ using System;
 
 namespace SharpCraft.gui
 {
-    internal class GuiHUD : Gui
+    internal class GuiHud : Gui
     {
         private float _hotbarX;
         private float _hotbarY;
 
-        private const int HEARTS_GAP = 19;
-        private static int fullHearts = 10;
-        private static double halfHearts = 0.0;
-        private static double totalOccupiedHearts = 0.0f;
+        private const int HeartsGap = 19;
+        private static int _fullHearts = 10;
+        private static double _halfHearts = 0.0;
+        private static double _totalOccupiedHearts = 0.0;
 
-        public static void UpdateLivesUI(float health)
+        public static void UpdateLivesUi(float health)
         {
-            fullHearts = (int)(health / 10);
+            _fullHearts = (int)(health / 10);
 
             float remainder = health % 10.0f / 10.0f;
-            halfHearts = Math.Round(remainder);
+            _halfHearts = Math.Round(remainder);
 
-            totalOccupiedHearts = fullHearts + halfHearts;
+            _totalOccupiedHearts = _fullHearts + _halfHearts;
         }
 
         public override void Render(int mouseX, int mouseY)
@@ -67,15 +67,10 @@ namespace SharpCraft.gui
                 if (stack == null || stack.IsEmpty)
                     continue;
 
-                if (stack.Item is ItemBlock itemBlock)
-                {
-                    Block block = itemBlock.Block;
+                x += 14;
+                y += 14;
 
-                    x += 14;
-                    y += 14;
-
-                    RenderBlock(block, x, y, 2.25f);
-                }
+                RenderStack(stack, x, y, 2.25f);
 
                 if (stack.Count > 1)
                     RenderText(stack.Count.ToString(), x + scaledWidth / 2f - 14, _hotbarY + scaledHeight / 2f + 14, 1, true, true);
@@ -94,13 +89,13 @@ namespace SharpCraft.gui
                 int u = 0;
 
                 // Full hearts
-                if (i < fullHearts)
+                if (i < _fullHearts)
                     u = 32;
                 // Half hearts
-                else if (i < totalOccupiedHearts)
+                else if (i < _totalOccupiedHearts)
                     u = 16;
 
-                RenderTexture(TextureManager.TEXTURE_GUI_WIDGETS, _hotbarX + (i * HEARTS_GAP), y, u, 40, 16, 16);
+                RenderTexture(TextureManager.TEXTURE_GUI_WIDGETS, _hotbarX + (i * HeartsGap), y, u, 40, 16, 16);
             }
         }
     }

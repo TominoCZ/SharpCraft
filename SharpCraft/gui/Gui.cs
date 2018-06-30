@@ -1,12 +1,13 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using OpenTK;
 using OpenTK.Graphics.OpenGL;
 using SharpCraft.block;
+using SharpCraft.item;
 using SharpCraft.model;
 using SharpCraft.render;
 using SharpCraft.render.shader;
 using SharpCraft.render.shader.shaders;
-using SharpCraft.texture;
 using SharpCraft.util;
 
 namespace SharpCraft.gui
@@ -112,6 +113,7 @@ namespace SharpCraft.gui
             Shader.Unbind();
         }
 
+        [Obsolete("Use RenderStack() instead")]
         protected virtual void RenderBlock(Block block, float x, float y, float scale)
         {
             var model = JsonModelLoader.GetModelForBlock(block.UnlocalizedName);
@@ -152,6 +154,50 @@ namespace SharpCraft.gui
             _item.RawModel.Render(PrimitiveType.Quads);
 
             _item.Unbind();
+        }
+
+        [Obsolete("Use RenderStack() instead")]
+        protected virtual void RenderItem(Item item, float x, float y, float scale)
+        {
+            var model = JsonModelLoader.GetModelForItem(item.UnlocalizedName);
+
+            if (model?.SlotTexture == null)
+                return;
+
+            Vector2 unit = new Vector2(1f / SharpCraft.Instance.ClientSize.Width, 1f / SharpCraft.Instance.ClientSize.Height);
+
+            float width = 16;
+            float height = 16;
+
+            float scaledWidth = 16 * scale;
+            float scaledHeight = 16 * scale;
+
+            float posX = x + scaledWidth / 2;
+            float posY = -y - scaledHeight / 2;
+
+            Vector2 pos = new Vector2(posX, posY).Ceiling() * unit;
+
+            Matrix4 mat = MatrixHelper.CreateTransformationMatrix(pos * 2 - Vector2.UnitX + Vector2.UnitY, scale * new Vector2(width, height) * unit);
+
+            _item.Bind();
+
+            Shader.Bind();
+            Shader.UpdateGlobalUniforms();
+            Shader.UpdateModelUniforms();
+            Shader.UpdateInstanceUniforms(mat, model.SlotTexture.UVMin, model.SlotTexture.UVMax);
+
+            GL.BindTexture(TextureTarget.Texture2D, JsonModelLoader.TEXTURE_ITEMS);
+            _item.RawModel.Render(PrimitiveType.Quads);
+
+            _item.Unbind();
+        }
+
+        protected void RenderStack(ItemStack stack, float x, float y, float scale)
+        {
+            if (stack.Item is ItemBlock itemBlock)
+                RenderBlock(itemBlock.Block, x, y, scale);
+            else
+                RenderItem(stack.Item, x, y, scale);
         }
 
         public virtual void Render(int mouseX, int mouseY)

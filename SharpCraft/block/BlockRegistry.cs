@@ -28,6 +28,8 @@ namespace SharpCraft.block
                 pair.Value.RegisterState(loader,
                     new BlockState(pair.Value, JsonModelLoader.GetModelForBlock(pair.Key)));
             }
+
+            loader.LoadBlocks();
         }
 
         public static List<Block> AllBlocks()

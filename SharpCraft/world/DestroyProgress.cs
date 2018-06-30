@@ -21,7 +21,7 @@ namespace SharpCraft.world
             }
         }
 
-        public int Progress
+        public float Progress
         {
             get => _progress;
 
@@ -34,8 +34,8 @@ namespace SharpCraft.world
             }
         }
 
-        private int _progress;
-        private int _lastProgress;
+        private float _progress;
+        private float _lastProgress;
 
         private readonly int _blockHardness;
 

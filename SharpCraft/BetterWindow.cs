@@ -3,7 +3,9 @@ using OpenTK.Graphics;
 using OpenTK.Input;
 using System;
 using System.ComponentModel;
+using System.ComponentModel.Design;
 using System.Diagnostics;
+using System.Threading.Tasks;
 
 namespace SharpCraft
 {
@@ -11,8 +13,6 @@ namespace SharpCraft
     {
         private IGraphicsContext glContext;
         private bool isExiting;
-
-        public float LastFrameRenderTime { get; private set; }
 
         public BetterWindow(int width, int height, GraphicsMode mode, string title, GameWindowFlags options, DisplayDevice device)
           : this(width, height, mode, title, options, device, 1, 0, GraphicsContextFlags.Default)
@@ -31,7 +31,7 @@ namespace SharpCraft
             {
                 glContext = new GraphicsContext(mode ?? GraphicsMode.Default, WindowInfo, major, minor, flags);
                 glContext.MakeCurrent(WindowInfo);
-                (glContext as IGraphicsContextInternal).LoadAll();
+                ((IGraphicsContextInternal)glContext).LoadAll();
                 VSync = VSyncMode.On;
             }
             catch (Exception ex)
@@ -77,7 +77,7 @@ namespace SharpCraft
             Context.MakeCurrent(WindowInfo);
         }
 
-        public void Run()
+        public void Run(int updateRate = 0)
         {
             EnsureUndisposed();
 
@@ -86,14 +86,29 @@ namespace SharpCraft
 
             Stopwatch sw = Stopwatch.StartNew();
 
+            double timer = updateRate != 0 ? 1000.0D / updateRate : 0;
+
+            DateTime updateTimer = DateTime.Now;
+
             while (true)
             {
                 ProcessEvents();
 
+                var now = DateTime.Now;
+
+                double partialTicks = (now - updateTimer).TotalMilliseconds / timer;
+
+                if (partialTicks >= 1)
+                {
+                    OnUpdateFrame();
+
+                    updateTimer = now;
+                    partialTicks %= 1.0D;
+                }
+
                 if (Exists && !IsExiting)
                 {
-                    OnRenderFrame();
-                    LastFrameRenderTime = (float)sw.Elapsed.TotalMilliseconds;
+                    OnRenderFrame(partialTicks);
                     sw.Restart();
                 }
                 else
@@ -130,9 +145,7 @@ namespace SharpCraft
             get
             {
 #pragma warning disable CS0612 // Type or member is obsolete
-                if (InputDriver.Keyboard.Count <= 0)
-                    return null;
-                return InputDriver.Keyboard[0];
+                return InputDriver.Keyboard.Count <= 0 ? null : InputDriver.Keyboard[0];
             }
         }
 
@@ -140,9 +153,7 @@ namespace SharpCraft
         {
             get
             {
-                if (InputDriver.Mouse.Count <= 0)
-                    return null;
-                return InputDriver.Mouse[0];
+                return InputDriver.Mouse.Count <= 0 ? null : InputDriver.Mouse[0];
 #pragma warning restore CS0612 // Type or member is obsolete
             }
         }
@@ -180,17 +191,12 @@ namespace SharpCraft
 
         public override WindowState WindowState
         {
-            get
-            {
-                return base.WindowState;
-            }
+            get => base.WindowState;
             set
             {
                 base.WindowState = value;
                 Debug.Print("Updating Context after setting WindowState to {0}", (object)value);
-                if (Context == null)
-                    return;
-                Context.Update(WindowInfo);
+                Context?.Update(WindowInfo);
             }
         }
 
@@ -198,7 +204,11 @@ namespace SharpCraft
         {
         }
 
-        protected virtual void OnRenderFrame()
+        protected virtual void OnRenderFrame(double partialTicks)
+        {
+        }
+
+        protected virtual void OnUpdateFrame()
         {
         }
 

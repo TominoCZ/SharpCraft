@@ -1,30 +1,32 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using SharpCraft.block;
 
 namespace SharpCraft.item
 {
-    [Serializable]
-    public abstract class Item : IItem
+    public abstract class Item
     {
-        private string _unlocalizedName { get; }
+        public string UnlocalizedName { get; }
 
-        public Item(string unlocalizedItem)
+        private Dictionary<Material, float> _materialTable = new Dictionary<Material, float>();
+
+        protected Item(string unlocalizedItem)
         {
-            _unlocalizedName = unlocalizedItem;
+            UnlocalizedName = unlocalizedItem;
         }
 
-        public int GetMaxStackSize()
+        public virtual int GetMaxStackSize()
         {
             return 256;
         }
 
-        public string GetUnlocalizedName()
+        public virtual float GetMiningSpeed(Material mat)
         {
-            return _unlocalizedName;
-        }
+            if (_materialTable.TryGetValue(mat, out float speed))
+                return speed;
 
-        public string GetDisplayName()
-        {
-            return GetUnlocalizedName();
+            return 1;
         }
     }
 }

@@ -6,28 +6,28 @@ namespace SharpCraft.item
 {
     internal class ItemRegistry //TODO
     {
-        private static readonly Dictionary<string, IItem> Registry = new Dictionary<string, IItem>();
+        private static readonly Dictionary<string, Item> Registry = new Dictionary<string, Item>();
 
-        public void Put(IItem i)
+        public void Put(Item i)
         {
-            var s = i.GetUnlocalizedName();
-
-            Registry.Add(s, i);
+            Registry.Add(i.UnlocalizedName, i);
         }
 
         public void RegisterItemsPost(JsonModelLoader loader)
         {
-            //Item.DefaultShader = new Shader<ModelItem>("item"); TODO
+            loader.LoadItems();
         }
 
-        public static List<IItem> AllItems()
+        public static List<Item> AllItems()
         {
             return Registry.Values.ToList();
         }
 
-        public static IItem GetItem(string unlocalizedName)
+        public static Item GetItem(string unlocalizedName)
         {
-            return Registry[unlocalizedName];
+            Registry.TryGetValue(unlocalizedName, out Item item);
+
+            return item;
         }
     }
 }

@@ -1,0 +1,8 @@
+{
+  "inherit": "item/pick",
+  "textures": {
+    "0": "blocks/stone",
+    "item": "items/pick_stone"
+  },
+  "cubes": []
+}

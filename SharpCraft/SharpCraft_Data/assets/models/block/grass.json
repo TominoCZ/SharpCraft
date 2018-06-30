@@ -1,6 +1,7 @@
 {
+  "inherit": null,
   "textures": {
-    "up": "blocks/grass_up",
+    "up": "blocks/grass_top",
     "down": "blocks/dirt",
     "side": "blocks/grass_side"
   },

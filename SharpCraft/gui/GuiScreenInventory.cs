@@ -109,12 +109,12 @@ namespace SharpCraft.gui
             // Draw slots
             base.Render(mouseX, mouseY);
 
-            if (draggedStack != null && !draggedStack.IsEmpty && draggedStack.Item is ItemBlock itemBlock)
+            if (draggedStack != null && !draggedStack.IsEmpty)
             {
                 float x = mouseX - 16 * guiScale / 2;
                 float y = mouseY - 16 * guiScale / 2;
 
-                RenderBlock(itemBlock.Block, x, y, guiScale); //TODO - make this render Items too once they're implemented
+               RenderStack(draggedStack, x, y, guiScale);
 
                 if (draggedStack.Count > 1)
                     RenderText(draggedStack.Count.ToString(), x + 16 * guiScale / 2f, y + 16 * guiScale / 2f + 14, 1,

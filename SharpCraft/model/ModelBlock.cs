@@ -6,9 +6,8 @@ namespace SharpCraft.model
     {
         private readonly TextureMapElement _particleTexture;
 
-        public ModelBlock(TextureMapElement particleTexture, Shader<ModelBlock> shader, ModelBlockRaw rawModel) : base(null, shader)
+        public ModelBlock(TextureMapElement particleTexture, Shader<ModelBlock> shader, ModelBlockRaw rawModel) : base(rawModel, shader)
         {
-            RawModel = rawModel;
             _particleTexture = particleTexture;
         }
 

@@ -1,6 +1,7 @@
 {
+  "inherit": null,
   "textures": {
-    "up": "blocks/crafting_table_up",
+    "up": "blocks/crafting_table_top",
     "down": "blocks/planks",
     "side": "blocks/crafting_table_side"
   },

@@ -34,15 +34,10 @@ namespace SharpCraft.gui
             if (Stack == null || Stack.IsEmpty)
                 return;
 
-            if (Stack.Item is ItemBlock itemBlock)
-            {
-                Block block = itemBlock.Block;
+            x += 14 * Scale / 2;
+            y += 14 * Scale / 2;
 
-                x += 14 * Scale / 2;
-                y += 14 * Scale / 2;
-
-                RenderBlock(block, x, y, 2.25f * Scale / 2);
-            }
+            RenderStack(Stack, x, y, 2.25f * Scale / 2);
 
             if (Stack.Count > 1)
                 RenderText(Stack.Count.ToString(), PosX + 32 * Scale / 2f, PosY + 32 * Scale / 2f + 14, 1, Hovered ? HoverColor : Vector3.One, true, true);
