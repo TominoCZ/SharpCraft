@@ -6,7 +6,7 @@ namespace SharpCraft.world
 {
     internal class DestroyProgress
     {
-        public EntityPlayerSP Player { get; }
+        public EntityPlayerSp Player { get; }
         public BlockPos Pos { get; }
 
         public bool Destroyed { get; private set; }
@@ -39,7 +39,7 @@ namespace SharpCraft.world
 
         private readonly int _blockHardness;
 
-        public DestroyProgress(BlockPos pos, EntityPlayerSP player) //TODO - once again, change this for multiplayer once its implemented
+        public DestroyProgress(BlockPos pos, EntityPlayerSp player) //TODO - once again, change this for multiplayer once its implemented
         {
             Pos = pos;
 

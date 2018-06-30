@@ -8,6 +8,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 
 namespace SharpCraft.world.chunk
@@ -26,6 +27,9 @@ namespace SharpCraft.world.chunk
         public AxisAlignedBB BoundingBox { get; }
 
         public World World { get; }
+
+        private readonly ConcurrentDictionary<BlockPos, TileEntity> _tileEntities = new ConcurrentDictionary<BlockPos, TileEntity>();
+
         private readonly ChunkLoadManager _loadManager;
 
         private ModelChunk _model;
@@ -41,6 +45,8 @@ namespace SharpCraft.world.chunk
             World = world;
             _loadManager = World.LoadManager;
             BoundingBox = new AxisAlignedBB(Vector3.Zero, Vector3.One * ChunkSize + Vector3.UnitY * 240).offset(Pos.ToVec());
+
+            Load();
         }
 
         public Chunk(ChunkPos pos, World world, short[,,] blockData) : this(pos, world)
@@ -53,6 +59,10 @@ namespace SharpCraft.world.chunk
         public void Update()
         {
             //update entities here
+            foreach (var tileEntity in _tileEntities.Values)
+            {
+                tileEntity.Update();
+            }
         }
 
         private void CheckPos(BlockPos localPos)
@@ -86,14 +96,10 @@ namespace SharpCraft.world.chunk
                 {
                     //BuildChunkModel(); TODO - make this run on another thread
                     NotifyModelChange(localPos);
-                    NeedsSave = true;
                 }
-            }
-        }
 
-        public bool IsAir(BlockPos pos)
-        {
-            return GetBlockState(pos).Block == BlockRegistry.GetBlock<BlockAir>();
+                NeedsSave = true;
+            }
         }
 
         public BlockState GetBlockState(BlockPos localPos)
@@ -110,6 +116,42 @@ namespace SharpCraft.world.chunk
             string blockName = World.GetLocalBlockName(id);
 
             return BlockRegistry.GetBlock(blockName).GetState(meta);
+        }
+
+        public void AddTileEntity(BlockPos localPos, TileEntity te)
+        {
+            if (localPos.Y < 0 || localPos.Y >= ChunkHeight)
+                return;
+
+            _tileEntities.TryAdd(localPos, te);
+        }
+
+        public void RemoveTileEntity(BlockPos localPos)
+        {
+            if (localPos.Y < 0 || localPos.Y >= ChunkHeight)
+                return;
+
+            if (!_tileEntities.TryRemove(localPos, out var te))
+                return;
+
+            var worldPos = new BlockPos(Pos.ToVec() + localPos.ToVec());
+
+            te.OnDestroyed(World, worldPos);
+        }
+
+        public TileEntity GetTileEntity(BlockPos localPos)
+        {
+            if (localPos.Y < 0 || localPos.Y >= ChunkHeight)
+                return null;
+
+            _tileEntities.TryGetValue(localPos, out var te);
+
+            return te;
+        }
+
+        public bool IsAir(BlockPos pos)
+        {
+            return GetBlockState(pos).Block == BlockRegistry.GetBlock<BlockAir>();
         }
 
         private void NotifyModelChange(BlockPos localPos)
@@ -138,7 +180,7 @@ namespace SharpCraft.world.chunk
             return 0;
         }
 
-        public void Render()
+        public void Render(float partialTicks)
         {
             if (_model == null)
             {
@@ -160,6 +202,11 @@ namespace SharpCraft.world.chunk
             _model.RawModel.Render(PrimitiveType.Quads);
 
             _model.Unbind();
+
+            foreach (var tileEntity in _tileEntities)
+            {
+                tileEntity.Value.Render(partialTicks);
+            }
             //}
         }
 
@@ -210,7 +257,7 @@ namespace SharpCraft.world.chunk
                         BlockState state = World.GetBlockState(worldPos);
                         if (state.Block == air)
                             continue;
-                        
+
                         BlockPos localPos = new BlockPos(x, y, z);
 
                         ModelBlock model = JsonModelLoader.GetModelForBlock(state.Block.UnlocalizedName);
@@ -294,9 +341,63 @@ namespace SharpCraft.world.chunk
 
             Console.WriteLine($"Saving chunk @ {Pos.x} x {Pos.z}");
 
+            //TODO - svae tile entities
+
+            var dir = $"{World.SaveRoot}\\{World.Dimension}\\te";
+
+            if (!Directory.Exists(dir))
+                Directory.CreateDirectory(dir);
+
+            foreach (var pair in _tileEntities)
+            {
+                var file =
+                    $"{dir}\\te_{Pos.WorldSpaceX() + pair.Key.X}.{pair.Key.Y}.{Pos.WorldSpaceZ() + pair.Key.Z}.te";
+
+                ByteBufferWriter bbw = new ByteBufferWriter(0);
+
+                pair.Value.WriteData(bbw);
+
+                File.WriteAllBytes(file, bbw.ToArray());
+            }
+
             byte[] data = new byte[World.ChunkData.Info.ChunkByteSize];
             Buffer.BlockCopy(_chunkBlocks, 0, data, 0, data.Length);
             World.ChunkData.WriteChunkData(Pos, data);
+        }
+
+        private void Load()
+        {
+            var dir = $"{World.SaveRoot}\\{World.Dimension}\\te";
+
+            if (!Directory.Exists(dir))
+                return;
+
+            var files = Directory.GetFiles(dir, "*.te");
+
+            foreach (var file in files)
+            {
+                if (!File.Exists(file))
+                    continue;
+
+                var fileName = Path.GetFileNameWithoutExtension(file).Replace("te_", "");
+
+                var split = fileName.Split('.');
+
+                var pos = new BlockPos(int.Parse(split[0]), int.Parse(split[1]), int.Parse(split[2]));
+
+                if (pos.ChunkPos() != Pos)
+                    continue;
+
+                TileEntity te = null;
+
+                /*
+                _tileEntities.TryAdd(pos, te); //TODO - figure this out
+
+                using (ByteBufferReader bbr = new ByteBufferReader(File.ReadAllBytes(file)))
+                {
+                    te.ReadData(bbr);
+                }*/
+            }
         }
 
         public void GeneratedData(short[,,] chunkData)

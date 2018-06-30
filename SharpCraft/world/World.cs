@@ -16,14 +16,13 @@ namespace SharpCraft.world
         public ConcurrentDictionary<ChunkPos, Chunk> Chunks { get; } = new ConcurrentDictionary<ChunkPos, Chunk>();
 
         public List<Entity> Entities = new List<Entity>();
-        private readonly ConcurrentDictionary<BlockPos, TileEntity> _tileEntities = new ConcurrentDictionary<BlockPos, TileEntity>();
 
         public readonly int Seed;
         public readonly string LevelName;
 
         private readonly NoiseUtil _noiseUtil;
-        private readonly int _dimension = 0;
-        public readonly String SaveRoot;
+        public readonly int Dimension = 0;
+        public readonly string SaveRoot;
 
         public readonly ChunkDataManager<RegionStaticImpl<ChunkPos>, ChunkPos> ChunkData;
 
@@ -44,7 +43,7 @@ namespace SharpCraft.world
             LevelName = levelName;
             SaveRoot = $"{SharpCraft.Instance.GameFolderDir}/saves/{saveName}/";
             ChunkData = new ChunkDataManager<RegionStaticImpl<ChunkPos>, ChunkPos>(
-                $"{SaveRoot}{_dimension}/region",
+                $"{SaveRoot}{Dimension}/region",
                 new RegionInfo<ChunkPos>(new[] { 12, 12 }, 2 * Chunk.ChunkSize * Chunk.ChunkHeight * Chunk.ChunkSize),
                 RegionStaticImpl<ChunkPos>.Ctor,
                 ChunkPos.Ctor);
@@ -75,37 +74,23 @@ namespace SharpCraft.world
 
         public void AddTileEntity(BlockPos pos, TileEntity te)
         {
-            _tileEntities.TryAdd(pos, te);
+            var chp = pos.ChunkPos();
+
+            GetChunk(chp)?.AddTileEntity(ChunkPos.ToChunkLocal(pos), te);
         }
 
         public void RemoveTileEntity(BlockPos pos)
         {
-            _tileEntities.TryRemove(pos, out var removed);
-            removed?.OnDestroyed(this, pos);
+            GetChunk(pos.ChunkPos())?.RemoveTileEntity(ChunkPos.ToChunkLocal(pos));
         }
-        
+
         public TileEntity GetTileEntity(BlockPos pos)
         {
-            _tileEntities.TryGetValue(pos, out var te);
-
-            return te;
-        }
-
-        public void RenderTileEntities(float partialTicks)
-        {
-            foreach (var entity in _tileEntities.Values)
-            {
-                entity.Render(partialTicks);
-            }
+            return GetChunk(pos.ChunkPos())?.GetTileEntity(ChunkPos.ToChunkLocal(pos));
         }
 
         private void UpdateEntities()
         {
-            foreach (var entity in _tileEntities.Values)
-            {
-                entity.Update();
-            }
-
             Entities.RemoveAll(e =>
             {
                 if (!IsChunkLoaded(ChunkPos.FromWorldSpace(e.Pos))) return false;
@@ -186,6 +171,8 @@ namespace SharpCraft.world
             _worldLut.Put(state.Block.UnlocalizedName);
 
             chunk.SetBlockState(ChunkPos.ToChunkLocal(pos), state);
+
+            chunk.Save();
         }
 
         public void UnloadChunk(ChunkPos pos)
@@ -427,7 +414,7 @@ namespace SharpCraft.world
             return GetNeighbourChunks(pos).All(chunk => chunk != null && chunk.HasData);
         }
 
-        public void Update(EntityPlayerSP player, int renderDistance)
+        public void Update(EntityPlayerSp player, int renderDistance)
         {
             if (player == null) return;
 

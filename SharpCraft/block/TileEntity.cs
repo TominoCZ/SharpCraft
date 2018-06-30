@@ -1,4 +1,5 @@
-﻿using SharpCraft.world;
+﻿using SharpCraft.util;
+using SharpCraft.world;
 
 namespace SharpCraft.block
 {
@@ -19,12 +20,12 @@ namespace SharpCraft.block
 
         } 
 
-        public virtual void OnReadData()
+        public virtual void ReadData(ByteBufferReader bbr)
         {
 
         }
         
-        public virtual void OnWriteData()
+        public virtual void WriteData(ByteBufferWriter bbw)
         {
 
         }

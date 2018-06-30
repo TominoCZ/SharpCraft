@@ -118,7 +118,7 @@ namespace SharpCraft.world.chunk
             }
         }
 
-        public void UpdateLoad(EntityPlayerSP player, int renderDistance, bool important)
+        public void UpdateLoad(EntityPlayerSp player, int renderDistance, bool important)
         {
             World world = SharpCraft.Instance.World;
 

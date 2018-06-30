@@ -56,17 +56,17 @@ namespace SharpCraft.block
             DefaultShader = shader;
         }
 
-        public virtual void OnRightClicked(MouseOverObject moo, EntityPlayerSP clicked)
+        public virtual void OnRightClicked(MouseOverObject moo, EntityPlayerSp clicked)
         {
 
         }
 
-        public virtual void OnPlaced(World world, BlockPos pos, EntityPlayerSP placer)
+        public virtual void OnPlaced(World world, BlockPos pos, EntityPlayerSp placer)
         {
 
         }
 
-        public virtual void OnDestroyed(BlockPos pos, BlockState oldState, EntityPlayerSP player)
+        public virtual void OnDestroyed(BlockPos pos, BlockState oldState, EntityPlayerSp player)
         {
             player.World.RemoveTileEntity(pos);
         }

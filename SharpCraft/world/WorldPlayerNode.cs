@@ -19,7 +19,7 @@ namespace SharpCraft.world
 
         private readonly float healthPercentage;
 
-        public WorldPlayerNode(EntityPlayerSP player)
+        public WorldPlayerNode(EntityPlayerSp player)
         {
             pitch = SharpCraft.Instance.Camera.pitch;
             yaw = SharpCraft.Instance.Camera.yaw;
@@ -46,7 +46,7 @@ namespace SharpCraft.world
             healthPercentage = player.Health;
         }
 
-        private bool TryParseStack(EntityPlayerSP player, ItemStack stack, out ItemStackNode node)
+        private bool TryParseStack(EntityPlayerSp player, ItemStack stack, out ItemStackNode node)
         {
             if (stack == null || stack.IsEmpty)
             {
@@ -89,9 +89,9 @@ namespace SharpCraft.world
             return true;
         }
 
-        public EntityPlayerSP GetPlayer(World world)
+        public EntityPlayerSp GetPlayer(World world)
         {
-            EntityPlayerSP player = new EntityPlayerSP(world, pos);
+            EntityPlayerSp player = new EntityPlayerSp(world, pos);
             SharpCraft.Instance.Camera.pitch = pitch;
             SharpCraft.Instance.Camera.yaw = yaw;
 

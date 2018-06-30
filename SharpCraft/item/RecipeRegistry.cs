@@ -41,7 +41,7 @@ namespace SharpCraft.item
             foreach (var recipe in _registry)
             {
                 if (recipe.Matches(table))
-                    return recipe.Product;
+                    return recipe.Product.Copy();
             }
 
             return null;

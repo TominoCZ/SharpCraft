@@ -30,6 +30,24 @@ using Size = OpenTK.Size;
 
 namespace SharpCraft
 {
+    class TestMod : ModMain
+    {
+        public TestMod() : base(new ModInfo("testmod", "The Test Mod", "1.0", "Me"))
+        {
+
+        }
+
+        public override void OnItemsAndBlocksRegistry(RegistryEventArgs args)
+        {
+            args.Register(new BlockGrass());
+        }
+
+        public override void OnRecipeRegistry(RecipeRegistryEventArgs args)
+        {
+            
+        }
+    }
+
     internal class SharpCraft : GameWindow
     {
         //string _dir = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "/.sharpcraft";
@@ -74,7 +92,7 @@ namespace SharpCraft
 
         private MouseOverObject _lastMouseOverObject = new MouseOverObject();
 
-        public EntityPlayerSP Player;
+        public EntityPlayerSp Player;
 
         public World World;
 
@@ -100,6 +118,8 @@ namespace SharpCraft
         private float _mouseWheelLast;
 
         public bool IsPaused { get; private set; }
+        public bool IsLocal { get; private set; } = true;
+
         private bool _takeScreenshot;
         private bool _wasSpaceDown;
         private int _fpsCounter;
@@ -132,6 +152,9 @@ namespace SharpCraft
 
         private void Init()
         {
+            //TODO - just a test - WORKS!
+            //_installedMods.Add(new TestMod());
+
             GlSetup();
 
             _itemRegistry = new ItemRegistry();
@@ -226,9 +249,9 @@ namespace SharpCraft
             //POST - MOD Blocks and Items
             foreach (ModMain mod in _installedMods)
             {
-                mod.OnItemsAndBlocksRegistry(new RegistryEventArgs(_blockRegistry, _itemRegistry));
+                mod.OnItemsAndBlocksRegistry(new RegistryEventArgs(_blockRegistry, _itemRegistry, _recipeRegistry));
             }
-
+            
             foreach (var block in BlockRegistry.AllBlocks())
             {
                 _itemRegistry.Put(new ItemBlock(block));
@@ -299,6 +322,11 @@ namespace SharpCraft
             };
             _recipeRegistry.RegisterRecipe(recipe, wood);
 
+            foreach (ModMain mod in _installedMods)
+            {
+                mod.OnRecipeRegistry(new RecipeRegistryEventArgs(_recipeRegistry));
+            }
+
             JsonModelLoader loader = new JsonModelLoader(Block.DefaultShader, new Shader<ModelItem>("block"));
 
             _blockRegistry.RegisterBlocksPost(loader);
@@ -336,7 +364,7 @@ namespace SharpCraft
 
                 World = new World("MyWorld", "Tomlow's Fuckaround", SettingsManager.GetValue("worldseed").GetHashCode());
 
-                Player = new EntityPlayerSP(World, playerPos.ToVec());
+                Player = new EntityPlayerSp(World, playerPos.ToVec());
 
                 World.AddEntity(Player);
 
@@ -366,7 +394,11 @@ namespace SharpCraft
             ParticleRenderer = null;
             SkyboxRenderer = null;
 
-            World?.SaveAllChunks();
+            if (IsLocal)
+            {
+                WorldLoader.SaveWorld(World);
+            }
+
             World?.DestroyChunkModels();
 
             Player = null;
@@ -547,7 +579,7 @@ namespace SharpCraft
             MouseOverObject = final;
         }
 
-        private void ResetDestroyProgress(EntityPlayerSP player)
+        private void ResetDestroyProgress(EntityPlayerSp player)
         {
             foreach (DestroyProgress progress in DestroyProgresses.Values)
             {
@@ -719,7 +751,6 @@ namespace SharpCraft
             if (World != null)
             {
                 WorldRenderer?.Render(World, _partialTicks);
-                World.RenderTileEntities(_partialTicks);
                 ParticleRenderer?.Render(_partialTicks);
                 EntityRenderer?.Render(_partialTicks);
                 SkyboxRenderer?.Render(_partialTicks);
@@ -964,7 +995,7 @@ namespace SharpCraft
             switch (_pickaxeMaterial)
             {
                 case "rare":
-                    mult = 4f;
+                    mult = 8f;
                     break;
                 case "stone":
                     mult = 2.5f;
@@ -980,6 +1011,11 @@ namespace SharpCraft
                     return mult;
             }
 
+            return 1;
+        }
+
+        public override int GetMaxStackSize()
+        {
             return 1;
         }
     }

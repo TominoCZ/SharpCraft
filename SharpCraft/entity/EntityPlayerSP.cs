@@ -11,30 +11,31 @@ using SharpCraft.model;
 
 namespace SharpCraft.entity
 {
-    public class EntityPlayerSP : Entity
+    public class EntityPlayerSp : Entity
     {
-        private readonly float maxMoveSpeed = 0.22f;
-        private float moveSpeedMult = 1;
+        private readonly float _maxMoveSpeed = 0.22f;
+        private float _moveSpeedMult = 1;
 
         public float EyeHeight = 1.625f;
 
-        private Vector2 moveSpeed;
+        private Vector2 _moveSpeed;
 
         // Health Variables
         // 0% is death, 100% is full health
-        private float health = 100.0f;
+        private float _health = 100.0f;
 
         public float Health
         {
-            get { return health; }
+            get { return _health; }
             set
             {
-                health = value;
-                GuiHud.UpdateLivesUi(health);
+                _health = value;
+                GuiHud.UpdateLivesUi(_health);
             }
         }
 
         public bool IsRunning { get; private set; }
+        public bool IsSneaking { get; private set; }
 
         public int HotbarIndex { get; private set; }
 
@@ -42,14 +43,16 @@ namespace SharpCraft.entity
         public ItemStack[] Inventory { get; }
 
         // falling variables
-        private float fallDistance;
+        private float _fallDistance;
 
-        private bool isFalling;
-        private float fallYPosition;
+        private bool _wasWalkDown;
+        private bool _isFalling;
+        private float _fallYPosition;
+        private int _runTimer;
 
         public bool HasFullInventory => Hotbar.All(stack => stack != null && !stack.IsEmpty) && Inventory.All(stack => stack != null && !stack.IsEmpty);
 
-        public EntityPlayerSP(World world, Vector3 pos = new Vector3()) : base(world, pos)
+        public EntityPlayerSp(World world, Vector3 pos = new Vector3()) : base(world, pos)
         {
             SharpCraft.Instance.Camera.pos = pos + Vector3.UnitY * 1.625f;
 
@@ -72,6 +75,9 @@ namespace SharpCraft.entity
                 LifeRegen();
             }
 
+            if (_runTimer > 0)
+                _runTimer--;
+
             base.Update();
         }
 
@@ -79,7 +85,36 @@ namespace SharpCraft.entity
         {
             Vector3 interpolatedPos = LastPos + (Pos - LastPos) * partialTicks;
 
-            SharpCraft.Instance.Camera.pos = interpolatedPos + Vector3.UnitY * EyeHeight;
+            KeyboardState state = SharpCraft.Instance.KeyboardState;
+
+            Vector3 offset = Vector3.Zero;
+
+            if (IsSneaking = state.IsKeyDown(Key.LShift))
+                offset = Vector3.UnitY * -0.15f;
+
+            SharpCraft.Instance.Camera.pos = interpolatedPos + Vector3.UnitY * EyeHeight + offset;
+
+            if (state.IsKeyDown(Key.W))
+            {
+                if (!_wasWalkDown)
+                {
+                    _wasWalkDown = true;
+
+                    if (_runTimer > 0)
+                        IsRunning = true;
+                    else
+                    {
+                        IsRunning = false;
+                        _runTimer = 6;
+                    }
+
+                    Console.WriteLine(_runTimer);
+                }
+            }
+            else
+            {
+                _wasWalkDown = false;
+            }
         }
 
         private void FallDamage()
@@ -89,33 +124,33 @@ namespace SharpCraft.entity
             // Falling
             if (Pos.Y < LastPos.Y)
             {
-                if (isFalling == false)
+                if (_isFalling == false)
                 {
                     // inital conditions
-                    isFalling = true;
-                    fallYPosition = Pos.Y;
+                    _isFalling = true;
+                    _fallYPosition = Pos.Y;
                 }
             }
             else
             {
                 // hit the ground
-                if (isFalling == true)
+                if (_isFalling == true)
                 {
                     // final condition
-                    fallDistance = fallYPosition - Pos.Y;
+                    _fallDistance = _fallYPosition - Pos.Y;
 
                     // damage calculation:
                     // do half a heart of damage for every block passed past 3 blocks
                     const float halfHeartPercentage = 5.0f;
                     const int lowestBlockHeight = 3;
 
-                    if (fallDistance > lowestBlockHeight)
-                        TakeDamage((fallDistance - lowestBlockHeight) * halfHeartPercentage);
+                    if (_fallDistance > lowestBlockHeight)
+                        TakeDamage((_fallDistance - lowestBlockHeight) * halfHeartPercentage);
                 }
 
                 // Not falling
-                isFalling = false;
-                fallYPosition = 0.0f;
+                _isFalling = false;
+                _fallYPosition = 0.0f;
             }
         }
 
@@ -166,21 +201,23 @@ namespace SharpCraft.entity
 
             float mult = 1;
 
-            if (IsRunning = state.IsKeyDown(Key.LShift))
+            if (IsRunning && !IsSneaking)
                 mult = 1.5f;
+            else if (IsSneaking)
+                mult = 0.625f;
 
             if (dirVec != Vector2.Zero)
             {
-                moveSpeedMult = MathHelper.Clamp(moveSpeedMult + 0.085f, 1, 1.55f);
+                _moveSpeedMult = MathHelper.Clamp(_moveSpeedMult + 0.085f, 1, 1.55f);
 
-                moveSpeed = MathUtil.Clamp(moveSpeed + dirVec.Normalized() * 0.1f * moveSpeedMult, 0, maxMoveSpeed);
+                _moveSpeed = MathUtil.Clamp(_moveSpeed + dirVec.Normalized() * 0.1f * _moveSpeedMult, 0, _maxMoveSpeed);
 
-                Motion.Xz = moveSpeed * mult;
+                Motion.Xz = _moveSpeed * mult;
             }
             else
             {
-                moveSpeed = Vector2.Zero;
-                moveSpeedMult = 1;
+                _moveSpeed = Vector2.Zero;
+                _moveSpeedMult = 1;
             }
         }
 
@@ -357,7 +394,7 @@ namespace SharpCraft.entity
 
                     state.Block.OnRightClicked(SharpCraft.Instance.MouseOverObject, this);
 
-                    if (!state.Block.CanBeInteractedWith)
+                    if (!state.Block.CanBeInteractedWith || IsSneaking)
                         PlaceBlock();
                 }
                 else if (btn == MouseButton.Left)

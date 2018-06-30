@@ -3,7 +3,6 @@ using SharpCraft.entity;
 using System;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
-using Newtonsoft.Json;
 
 namespace SharpCraft.world
 {
@@ -21,15 +20,21 @@ namespace SharpCraft.world
             try
             {
                 WorldPlayerNode wpn = new WorldPlayerNode(SharpCraft.Instance.Player);
-                WorldDataNode wdn = new WorldDataNode(w);
-
-                using (FileStream fs = File.OpenWrite(w.SaveRoot + "/player.dat"))
+                using (FileStream fs = new FileStream(w.SaveRoot + "/player.dat", FileMode.OpenOrCreate))
                 {
                     fs.Position = 0;
                     bf.Serialize(fs, wpn);
                 }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.StackTrace);
+            }
 
-                using (FileStream fs = File.OpenWrite(w.SaveRoot + "/level.dat"))
+            try
+            {
+                WorldDataNode wdn = new WorldDataNode(w);
+                using (FileStream fs = new FileStream(w.SaveRoot + "/level.dat", FileMode.OpenOrCreate))
                 {
                     fs.Position = 0;
                     bf.Serialize(fs, wdn);
@@ -50,36 +55,46 @@ namespace SharpCraft.world
             if (!Directory.Exists(dir))
                 return null;
 
-            World world = null;
+            WorldDataNode wdn = null;
+            WorldPlayerNode wpn = null;
 
             try
             {
-                WorldDataNode wdn;
-                WorldPlayerNode wpn;
-
-                using (FileStream fs = File.OpenRead(dir + "/player.dat"))
+                using (FileStream fs = new FileStream(dir + "/player.dat", FileMode.Open))
                 {
                     fs.Position = 0;
                     wpn = (WorldPlayerNode)bf.Deserialize(fs);
                 }
 
-                using (FileStream fs = File.OpenRead(dir + "/level.dat"))
-                {
-                    fs.Position = 0;
-                    wdn = (WorldDataNode)bf.Deserialize(fs);
-                }
-
-                world = wdn.GetWorld(saveName);
-
-                EntityPlayerSP player = wpn.GetPlayer(world);
-
-                world.AddEntity(player);
-                world.LoadChunk(new BlockPos(player.Pos).ChunkPos());
-                SharpCraft.Instance.Player = player;
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.StackTrace);
+            }
+
+            try
+            {
+                using (FileStream fs = new FileStream(dir + "/level.dat", FileMode.Open))
+                {
+                    fs.Position = 0;
+                    wdn = (WorldDataNode)bf.Deserialize(fs);
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.StackTrace);
+            }
+
+            var world = wdn?.GetWorld(saveName);
+
+            EntityPlayerSp player = wpn?.GetPlayer(world);
+
+            if (player != null)
+            {
+                world?.AddEntity(player);
+
+                world?.LoadChunk(new BlockPos(player.Pos).ChunkPos());
+                SharpCraft.Instance.Player = player;
             }
 
             return world;

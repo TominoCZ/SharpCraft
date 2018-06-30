@@ -10,5 +10,7 @@
         }
 
         public abstract void OnItemsAndBlocksRegistry(RegistryEventArgs args);
+
+        public abstract void OnRecipeRegistry(RecipeRegistryEventArgs args);
     }
 }

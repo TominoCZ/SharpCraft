@@ -134,11 +134,11 @@ namespace SharpCraft.entity
                 return;
 
             //TODO change this for multiplayer
-            IEnumerable<EntityPlayerSP> players = World.Entities.OfType<EntityPlayerSP>()
+            IEnumerable<EntityPlayerSp> players = World.Entities.OfType<EntityPlayerSp>()
                                .OrderBy(entity => MathUtil.Distance(entity.Pos, Pos))
                                .Where(e => MathUtil.Distance(e.Pos, Pos) <= attractionRange);
 
-            foreach (EntityPlayerSP player in players)
+            foreach (EntityPlayerSp player in players)
             {
                 if (!player.CanPickUpStack(_stack))
                     continue;

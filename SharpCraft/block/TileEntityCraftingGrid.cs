@@ -136,8 +136,26 @@ namespace SharpCraft.block
             }
         }
 
-        public void OnRightClicked(World world, Vector3 hitVec, ItemStack with)
+        public void OnRightClicked(World world, Vector3 hitVec, ItemStack with, EntityPlayerSp clicked)
         {
+            if (clicked.IsSneaking && _product != null)
+            {
+                for (int y = 0; y < 3; y++)
+                {
+                    for (int x = 0; x < 3; x++)
+                    {
+                        _grid[x, y] = null;
+                    }
+                }
+
+                var pos = new Vector3(_pos.X + 0.5f, hitVec.Y, _pos.Z + 0.5f);
+
+                world.AddEntity(new EntityItem(world, pos, Vector3.UnitY * 0.25f, _product));
+                _product = null;
+
+                return;
+            }
+
             var gap = 1 / 16f;
             var slot = 1 / 4f;
 

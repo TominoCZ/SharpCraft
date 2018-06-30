@@ -140,7 +140,7 @@ namespace SharpCraft.render
                     RenderBlockSelectionOutline(state, hit.blockPos);
             }
 
-            RenderChunks(world);
+            RenderChunks(world, partialTicks);
             RenderHand(partialTicks);
             RenderWorldWaypoints(world);
             RenderDestroyProgress(world);
@@ -152,7 +152,7 @@ namespace SharpCraft.render
             SharpCraft.Instance.Camera.SetFOV(partialFov);
         }
 
-        private void RenderChunks(World world)
+        private void RenderChunks(World world, float partialTicks)
         {
             foreach (Chunk chunk in world.Chunks.Values)
             {
@@ -162,7 +162,7 @@ namespace SharpCraft.render
                 if (chunk.QueuedForModelBuild)
                     RenderChunkOutline(chunk);
 
-                chunk.Render();
+                chunk.Render(partialTicks);
             }
         }
 
@@ -172,6 +172,8 @@ namespace SharpCraft.render
 
             if (wps.Count == 0)
                 return;
+
+            GL.BindTexture(TextureTarget.Texture2D, JsonModelLoader.TEXTURE_BLOCKS);
 
             ModelBlock model = JsonModelLoader.GetModelForBlock(BlockRegistry.GetBlock<BlockRare>().UnlocalizedName);
 
