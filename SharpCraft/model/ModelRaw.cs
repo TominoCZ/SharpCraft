@@ -27,7 +27,7 @@ namespace SharpCraft.model
             VertexCount = vertexCount;
         }
 
-        public bool hasLocalData() => true;
+        public bool HasLocalData() => true;
 
         public void Render(PrimitiveType primitiveType) => GL.DrawArrays(primitiveType, 0, VertexCount);
     }

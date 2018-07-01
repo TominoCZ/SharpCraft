@@ -18,23 +18,27 @@ namespace SharpCraft.block
 
         public override bool OnActivated(MouseOverObject moo, EntityPlayerSp clicked)
         {
-            if (moo.sideHit == FaceSides.Up && clicked.World.GetTileEntity(moo.blockPos) is TileEntityCraftingGrid tecg)
-            {
-                var wasEmpty = tecg.IsEmpty();
+            if (moo.sideHit != FaceSides.Up ||
+                !(clicked.World.GetTileEntity(moo.blockPos) is TileEntityCraftingGrid tecg))
+                return false;
 
-                if (wasEmpty && clicked.IsSneaking)
-                    return false;
+            //var wasEmpty = tecg.IsEmpty();
 
-                if (!wasEmpty && clicked.IsSneaking && !tecg.HasResult)
-                    return true;
-
-                tecg.OnRightClicked(clicked.World, moo.hitVec, clicked.GetEquippedItemStack(), clicked);
-                
-                if (tecg.IsEmpty() || !wasEmpty)
-                    return true;
-            }
+            tecg.OnRightClicked(clicked.World, moo.hitVec, clicked.GetEquippedItemStack(), clicked);
+ 
+            //if (wasEmpty)
+                //return true;
 
             return false;
+        }
+
+        public override bool CanBlockBePlacedAtSide(World world, BlockPos blockPos, FaceSides sideHit, EntityPlayerSp placer)
+        {
+            if (sideHit != FaceSides.Up ||
+                !(world.GetTileEntity(blockPos) is TileEntityCraftingGrid tecg))
+                return true;
+
+            return tecg.IsEmpty() && placer.IsSneaking;
         }
 
         public override TileEntity CreateTileEntity(World world, BlockPos pos)

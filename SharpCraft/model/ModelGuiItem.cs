@@ -10,15 +10,21 @@ namespace SharpCraft.model
             {
                 -1, 1,
                 -1, -1,
-                1, -1,
-                1, 1
+                1, 1,
+
+                1, 1,
+                -1, -1,
+                1, -1
             };
             float[] uvs =
             {
                 0, 0,
+                0, 1,
                 1, 0,
-                1, 1,
-                0, 1
+
+                1, 0,
+                0, 1,
+                1, 1
             };
 
             RawModel = ModelManager.LoadModel2ToVao(vertexes, uvs);

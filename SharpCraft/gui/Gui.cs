@@ -82,7 +82,7 @@ namespace SharpCraft.gui
 
             GL.ActiveTexture(TextureUnit.Texture0);
             GL.BindTexture(TextureTarget.Texture2D, tex.ID);
-            GL.DrawArrays(PrimitiveType.Quads, 0, 4);
+            GL.DrawArrays(PrimitiveType.Triangles, 0, 6);
 
             GL.DisableVertexAttribArray(0);
 
@@ -106,7 +106,7 @@ namespace SharpCraft.gui
 
             GL.ActiveTexture(TextureUnit.Texture0);
             GL.BindTexture(TextureTarget.Texture2D, tex.ID);
-            GL.DrawArrays(PrimitiveType.Quads, 0, 4);
+            GL.DrawArrays(PrimitiveType.Triangles, 0, 6);
 
             GL.DisableVertexAttribArray(0);
 
@@ -144,7 +144,7 @@ namespace SharpCraft.gui
             Shader.UpdateInstanceUniforms(mat, model.SlotTexture.UVMin, model.SlotTexture.UVMax);
 
             GL.BindTexture(TextureTarget.Texture2D, JsonModelLoader.TextureBlocks);
-            _item.RawModel.Render(PrimitiveType.Quads);
+            _item.RawModel.Render(PrimitiveType.Triangles);
 
             _item.Unbind();
         }
@@ -180,7 +180,7 @@ namespace SharpCraft.gui
             Shader.UpdateInstanceUniforms(mat, model.SlotTexture.UVMin, model.SlotTexture.UVMax);
 
             GL.BindTexture(TextureTarget.Texture2D, JsonModelLoader.TextureItems);
-            _item.RawModel.Render(PrimitiveType.Quads);
+            _item.RawModel.Render(PrimitiveType.Triangles);
 
             _item.Unbind();
         }

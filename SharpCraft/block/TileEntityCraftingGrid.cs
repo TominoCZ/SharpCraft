@@ -224,6 +224,9 @@ namespace SharpCraft.block
                 return;
             }
 
+            if (IsEmpty() && clicked.IsSneaking)
+                return;
+
             var gap = 1 / 16f;
             var slot = 1 / 4f;
 
