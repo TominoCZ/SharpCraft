@@ -53,7 +53,7 @@ namespace SharpCraft.entity
                 _ticks = (_ticks + 1) % 90;
 
                 if (_ticksLast > _ticks)
-                    _ticksLast = _ticks;
+                    _ticksLast = _ticks - 1;
             }
 
             LastPos = Pos;
@@ -174,14 +174,18 @@ namespace SharpCraft.entity
             if (_stack == null || _stack.IsEmpty)
                 return;
 
+            float offY = (float)((Math.Sin(partialTime / 90f * MathHelper.TwoPi) + 1) / 16);
+            Vector3 vec = Vector3.One * 0.5f;
+            Vector3 pos = partialPos - (Vector3.UnitX * 0.125f + Vector3.UnitZ * 0.125f) + Vector3.UnitY * offY;
+            Matrix4 rot = Matrix4.CreateRotationY(partialTime / 90f * MathHelper.TwoPi);
+            Matrix4 t2 = Matrix4.CreateTranslation(-vec);
+
             if (_stack.Item is ItemBlock itemBlock)
             {
                 ModelBlock model = JsonModelLoader.GetModelForBlock(itemBlock.Block.UnlocalizedName);
 
                 if (model?.RawModel == null)
                     return;
-
-                float time = OnGround ? (float)((Math.Sin(partialTime / 8) + 1) / 16) : 0;
 
                 Shader.Bind();
 
@@ -204,22 +208,14 @@ namespace SharpCraft.entity
 
                 for (int i = 0; i < itemsToRender; i++)
                 {
-                    Vector3 rot = Vector3.UnitY * partialTime * 4;
-                    Vector3 pos = partialPos - (Vector3.UnitX * 0.125f + Vector3.UnitZ * 0.125f) + Vector3.UnitY * time;
                     Vector3 posO = Vector3.One * (i / 8f);
-
-                    Matrix4 x = Matrix4.CreateRotationX(MathHelper.DegreesToRadians(rot.X));
-                    Matrix4 y = Matrix4.CreateRotationY(MathHelper.DegreesToRadians(rot.Y));
-                    Matrix4 z = Matrix4.CreateRotationZ(MathHelper.DegreesToRadians(rot.Z));
-
-                    Vector3 vec = Vector3.One * 0.5f;
-
+                    
                     Matrix4 s = Matrix4.CreateScale(0.25f);
                     Matrix4 t = Matrix4.CreateTranslation(pos + vec * 0.25f);
-                    Matrix4 t2 = Matrix4.CreateTranslation(-vec);
+                    
                     Matrix4 t3 = Matrix4.CreateTranslation(posO);
 
-                    Matrix4 mat = t3 * t2 * (z * y * x * s) * t;
+                    Matrix4 mat = t3 * t2 * (rot * s) * t;
 
                     Shader.UpdateGlobalUniforms();
                     Shader.UpdateModelUniforms(model.RawModel);
@@ -243,9 +239,7 @@ namespace SharpCraft.entity
 
                 if (model?.RawModel == null)
                     return;
-
-                float time = OnGround ? (float)((Math.Sin(partialTime / 90f * MathHelper.TwoPi) + 1) / 16) : 0;
-
+                
                 Shader.Bind();
 
                 GL.BindVertexArray(model.RawModel.VaoID);
@@ -267,22 +261,14 @@ namespace SharpCraft.entity
 
                 for (int i = 0; i < itemsToRender; i++)
                 {
-                    Vector3 rot = Vector3.UnitY * partialTime / 90f * MathHelper.TwoPi;
-                    Vector3 pos = partialPos - (Vector3.UnitX * 0.125f + Vector3.UnitZ * 0.125f) + Vector3.UnitY * time;
+                    
                     Vector3 posO = Vector3.One * (i / 8f);
-
-                    Matrix4 x = Matrix4.CreateRotationX(rot.X);
-                    Matrix4 y = Matrix4.CreateRotationY(rot.Y);
-                    Matrix4 z = Matrix4.CreateRotationZ(rot.Z);
-
-                    Vector3 vec = Vector3.One * 0.5f;
-
+                    
                     Matrix4 s = Matrix4.CreateScale(0.35f);
                     Matrix4 t = Matrix4.CreateTranslation(pos + vec * 0.35f);
-                    Matrix4 t2 = Matrix4.CreateTranslation(-vec);
                     Matrix4 t3 = Matrix4.CreateTranslation(posO);
 
-                    Matrix4 mat = t3 * t2 * (z * y * x * s) * t;
+                    Matrix4 mat = t3 * t2 * (rot * s) * t;
 
                     Shader.UpdateGlobalUniforms();
                     Shader.UpdateModelUniforms(model.RawModel);

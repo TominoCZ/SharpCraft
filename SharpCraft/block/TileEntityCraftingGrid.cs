@@ -76,7 +76,7 @@ namespace SharpCraft.block
             _ticks = (_ticks + 1) % 90;
 
             if (_ticksLast > _ticks)
-                _ticksLast = _ticks;
+                _ticksLast = _ticks - 1;
 
             Item[] table = new Item[9];
 
