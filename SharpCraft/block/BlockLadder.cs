@@ -1,15 +1,14 @@
-﻿using OpenTK;
-using SharpCraft.entity;
+﻿using SharpCraft.entity;
 
 namespace SharpCraft.block
 {
-    class BlockLadder : Block
+    internal class BlockLadder : Block
     {
         public BlockLadder() : base(Material.GetMaterial("wood"), "ladder")
         {
             IsFullCube = false;
-            
-            BoundingBox = new AxisAlignedBB(0, 0, 0.8f, 1, 1, 1);
+
+            BoundingBox = new AxisAlignedBb(0, 0, 0.8f, 1, 1, 1);
 
             Hardness = 32;
         }

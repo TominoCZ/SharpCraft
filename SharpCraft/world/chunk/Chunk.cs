@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+#pragma warning disable 618
 
 namespace SharpCraft.world.chunk
 {
@@ -24,7 +25,7 @@ namespace SharpCraft.world.chunk
 
         public ChunkPos Pos { get; }
 
-        public AxisAlignedBB BoundingBox { get; }
+        public AxisAlignedBb BoundingBox { get; }
 
         public World World { get; }
 
@@ -44,7 +45,7 @@ namespace SharpCraft.world.chunk
             Pos = pos;
             World = world;
             _loadManager = World.LoadManager;
-            BoundingBox = new AxisAlignedBB(Vector3.Zero, Vector3.One * ChunkSize + Vector3.UnitY * 240).offset(Pos.ToVec());
+            BoundingBox = new AxisAlignedBb(Vector3.Zero, Vector3.One * ChunkSize + Vector3.UnitY * 240).Offset(Pos.ToVec());
 
             //Load();
         }
@@ -86,7 +87,10 @@ namespace SharpCraft.world.chunk
 
             short id = World.GetLocalBlockId(state.Block.UnlocalizedName);
             short meta = state.Block.GetMetaFromState(state);
+
+#pragma warning disable CS0675 // Bitwise-or operator used on a sign-extended operand
             short value = (short)(id << 4 | meta);
+#pragma warning restore CS0675 // Bitwise-or operator used on a sign-extended operand
 
             if (_chunkBlocks[localPos.X, localPos.Y, localPos.Z] != value)
             {
@@ -379,7 +383,7 @@ namespace SharpCraft.world.chunk
 
         public bool ShouldRender(int renderDistance)
         {
-            return Pos.DistanceTo(SharpCraft.Instance.Camera.pos.Xz) < renderDistance * ChunkSize;
+            return Pos.DistanceTo(SharpCraft.Instance.Camera.Pos.Xz) < renderDistance * ChunkSize;
         }
 
         public void Save()
@@ -400,41 +404,6 @@ namespace SharpCraft.world.chunk
 
             Buffer.BlockCopy(_chunkBlocks, 0, data, 0, data.Length);
             World.ChunkData.WriteChunkData(Pos, data);
-        }
-
-        private void Load()
-        {
-            var dir = $"{World.SaveRoot}\\{World.Dimension}\\te";
-
-            if (!Directory.Exists(dir))
-                return;
-
-            var files = Directory.GetFiles(dir, "*.te");
-
-            foreach (var file in files)
-            {
-                if (!File.Exists(file))
-                    continue;
-
-                var fileName = Path.GetFileNameWithoutExtension(file).Replace("te_", "");
-
-                var split = fileName.Split('.');
-
-                var pos = new BlockPos(int.Parse(split[0]), int.Parse(split[1]), int.Parse(split[2]));
-
-                if (pos.ChunkPos() != Pos)
-                    continue;
-
-                TileEntity te = null;
-
-                /*
-                _tileEntities.TryAdd(pos, te); //TODO - figure this out
-
-                using (ByteBufferReader bbr = new ByteBufferReader(File.ReadAllBytes(file)))
-                {
-                    te.ReadData(bbr);
-                }*/
-            }
         }
 
         public void GeneratedData(short[,,] chunkData)

@@ -1,7 +1,5 @@
-﻿using OpenTK;
-using OpenTK.Input;
+﻿using OpenTK.Input;
 using SharpCraft.texture;
-using SharpCraft.util;
 
 namespace SharpCraft.gui
 {
@@ -41,6 +39,7 @@ namespace SharpCraft.gui
                     SharpCraft.Instance.CloseGuiScreen();
                     SharpCraft.Instance.StartGame();
                     break;
+
                 case 2:
                     SharpCraft.Instance.Close();
                     break;

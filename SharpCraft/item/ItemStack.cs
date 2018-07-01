@@ -52,7 +52,7 @@ namespace SharpCraft.item
         public bool ItemSame(ItemStack other)
         {
             if (other == null) return false;
-            return !IsEmpty && !other.IsEmpty && Meta == other.Meta && Item.UnlocalizedName == other.Item.UnlocalizedName; //TODO - REALLY BAD!!! (because rn the unlocalized names are 'dirt', 'stone', .. and not 'sharpcraft.blocks.dirt') 
+            return !IsEmpty && !other.IsEmpty && Meta == other.Meta && Item.UnlocalizedName == other.Item.UnlocalizedName; //TODO - REALLY BAD!!! (because rn the unlocalized names are 'dirt', 'stone', .. and not 'sharpcraft.blocks.dirt')
         }
 
         public override string ToString() => Item != null ? Item.UnlocalizedName : ""; //TODO!!

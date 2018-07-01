@@ -4,27 +4,27 @@ using System;
 
 namespace SharpCraft.entity
 {
-    public class AxisAlignedBB
+    public class AxisAlignedBb
     {
-        public static readonly AxisAlignedBB BLOCK_FULL = new AxisAlignedBB(Vector3.Zero, Vector3.One);
-        public static readonly AxisAlignedBB NULL = new AxisAlignedBB(Vector3.Zero, Vector3.Zero);
-        public readonly Vector3 min;
-        public readonly Vector3 max;
+        public static readonly AxisAlignedBb BlockFull = new AxisAlignedBb(Vector3.Zero, Vector3.One);
+        public static readonly AxisAlignedBb Null = new AxisAlignedBb(Vector3.Zero, Vector3.Zero);
+        public readonly Vector3 Min;
+        public readonly Vector3 Max;
 
-        public readonly Vector3 size;
+        public readonly Vector3 Size;
 
-        public AxisAlignedBB(float size) : this(Vector3.One * size)
+        public AxisAlignedBb(float size) : this(Vector3.One * size)
         {
         }
 
-        public AxisAlignedBB(Vector3 size) : this(Vector3.Zero, size)
+        public AxisAlignedBb(Vector3 size) : this(Vector3.Zero, size)
         {
         }
 
-        public AxisAlignedBB(Vector3 min, Vector3 max)
+        public AxisAlignedBb(Vector3 min, Vector3 max)
         {
-            this.min = min;
-            this.max = max;
+            this.Min = min;
+            this.Max = max;
 
             float minX = MathUtil.Min(min.X, max.X);
             float minY = MathUtil.Min(min.Y, max.Y);
@@ -37,53 +37,53 @@ namespace SharpCraft.entity
             Vector3 v1 = new Vector3(minX, minY, minZ);
             Vector3 v2 = new Vector3(maxX, maxY, maxZ);
 
-            size = v2 - v1;
+            Size = v2 - v1;
         }
 
-        public AxisAlignedBB(float minX, float minY, float minZ, float maxX, float maxY, float maxZ) : this(new Vector3(minX, minY, minZ), new Vector3(maxX, maxY, maxZ))
+        public AxisAlignedBb(float minX, float minY, float minZ, float maxX, float maxY, float maxZ) : this(new Vector3(minX, minY, minZ), new Vector3(maxX, maxY, maxZ))
         {
         }
 
-        public AxisAlignedBB offset(Vector3 by)
+        public AxisAlignedBb Offset(Vector3 by)
         {
-            return new AxisAlignedBB(min + by, max + by);
+            return new AxisAlignedBb(Min + by, Max + by);
         }
 
-        public AxisAlignedBB Grow(Vector3 by)
+        public AxisAlignedBb Grow(Vector3 by)
         {
-            return new AxisAlignedBB(min + by / 2, max - by / 2);
+            return new AxisAlignedBb(Min + by / 2, Max - by / 2);
         }
 
-        public AxisAlignedBB Union(AxisAlignedBB other)
+        public AxisAlignedBb Union(AxisAlignedBb other)
         {
-            int minX = (int)Math.Floor(MathUtil.Min(min.X, max.X, other.min.X, other.max.X));
-            int minY = (int)Math.Floor(MathUtil.Min(min.Y, max.Y, other.min.Y, other.max.Y));
-            int minZ = (int)Math.Floor(MathUtil.Min(min.Z, max.Z, other.min.Z, other.max.Z));
+            int minX = (int)Math.Floor(MathUtil.Min(Min.X, Max.X, other.Min.X, other.Max.X));
+            int minY = (int)Math.Floor(MathUtil.Min(Min.Y, Max.Y, other.Min.Y, other.Max.Y));
+            int minZ = (int)Math.Floor(MathUtil.Min(Min.Z, Max.Z, other.Min.Z, other.Max.Z));
 
-            int maxX = (int)Math.Ceiling(MathUtil.Max(min.X, max.X, other.min.X, other.max.X));
-            int maxY = (int)Math.Ceiling(MathUtil.Max(min.Y, max.Y, other.min.Y, other.max.Y));
-            int maxZ = (int)Math.Ceiling(MathUtil.Max(min.Z, max.Z, other.min.Z, other.max.Z));
+            int maxX = (int)Math.Ceiling(MathUtil.Max(Min.X, Max.X, other.Min.X, other.Max.X));
+            int maxY = (int)Math.Ceiling(MathUtil.Max(Min.Y, Max.Y, other.Min.Y, other.Max.Y));
+            int maxZ = (int)Math.Ceiling(MathUtil.Max(Min.Z, Max.Z, other.Min.Z, other.Max.Z));
 
-            return new AxisAlignedBB(minX, minY, minZ, maxX, maxY, maxZ);
+            return new AxisAlignedBb(minX, minY, minZ, maxX, maxY, maxZ);
         }
 
-        public float CalculateYOffset(AxisAlignedBB other, float offset)
+        public float CalculateYOffset(AxisAlignedBb other, float offset)
         {
             //Y
-            if (other.max.X > min.X && other.min.X < max.X && other.max.Z > min.Z && other.min.Z < max.Z)
+            if (other.Max.X > Min.X && other.Min.X < Max.X && other.Max.Z > Min.Z && other.Min.Z < Max.Z)
             {
-                if (offset > 0.0D && other.max.Y <= min.Y)
+                if (offset > 0.0D && other.Max.Y <= Min.Y)
                 {
-                    float d1 = min.Y - other.max.Y;
+                    float d1 = Min.Y - other.Max.Y;
 
                     if (d1 < offset)
                     {
                         offset = d1;
                     }
                 }
-                else if (offset < 0.0D && other.min.Y >= max.Y)
+                else if (offset < 0.0D && other.Min.Y >= Max.Y)
                 {
-                    float d0 = max.Y - other.min.Y;
+                    float d0 = Max.Y - other.Min.Y;
 
                     if (d0 > offset)
                     {
@@ -95,23 +95,23 @@ namespace SharpCraft.entity
             return offset;
         }
 
-        public float CalculateXOffset(AxisAlignedBB other, float offset)
+        public float CalculateXOffset(AxisAlignedBb other, float offset)
         {
             //x
-            if (other.max.Y > min.Y && other.min.Y < max.Y && other.max.Z > min.Z && other.min.Z < max.Z)
+            if (other.Max.Y > Min.Y && other.Min.Y < Max.Y && other.Max.Z > Min.Z && other.Min.Z < Max.Z)
             {
-                if (offset > 0.0D && other.max.X <= min.X)
+                if (offset > 0.0D && other.Max.X <= Min.X)
                 {
-                    float d1 = min.X - other.max.X;
+                    float d1 = Min.X - other.Max.X;
 
                     if (d1 < offset)
                     {
                         offset = d1;
                     }
                 }
-                else if (offset < 0.0D && other.min.X >= max.X)
+                else if (offset < 0.0D && other.Min.X >= Max.X)
                 {
-                    float d0 = max.X - other.min.X;
+                    float d0 = Max.X - other.Min.X;
 
                     if (d0 > offset)
                     {
@@ -123,23 +123,23 @@ namespace SharpCraft.entity
             return offset;
         }
 
-        public float CalculateZOffset(AxisAlignedBB other, float offset)
+        public float CalculateZOffset(AxisAlignedBb other, float offset)
         {
             //z
-            if (other.max.X > min.X && other.min.X < max.X && other.max.Y > min.Y && other.min.Y < max.Y)
+            if (other.Max.X > Min.X && other.Min.X < Max.X && other.Max.Y > Min.Y && other.Min.Y < Max.Y)
             {
-                if (offset > 0.0D && other.max.Z <= min.Z)
+                if (offset > 0.0D && other.Max.Z <= Min.Z)
                 {
-                    float d1 = min.Z - other.max.Z;
+                    float d1 = Min.Z - other.Max.Z;
 
                     if (d1 < offset)
                     {
                         offset = d1;
                     }
                 }
-                else if (offset < 0.0D && other.min.Z >= max.Z)
+                else if (offset < 0.0D && other.Min.Z >= Max.Z)
                 {
-                    float d0 = max.Z - other.min.Z;
+                    float d0 = Max.Z - other.Min.Z;
 
                     if (d0 > offset)
                     {
@@ -153,14 +153,14 @@ namespace SharpCraft.entity
 
         public Vector3 GetCenter()
         {
-            return (min + max) / 2;
+            return (Min + Max) / 2;
         }
 
-        public bool IntersectsWith(AxisAlignedBB other)
+        public bool IntersectsWith(AxisAlignedBb other)
         {
-            return min.X < other.max.X && max.X > other.min.X &&
-                   min.Y < other.max.Y && max.Y > other.min.Y &&
-                   min.Z < other.max.Z && max.Z > other.min.Z;
+            return Min.X < other.Max.X && Max.X > other.Min.X &&
+                   Min.Y < other.Max.Y && Max.Y > other.Min.Y &&
+                   Min.Z < other.Max.Z && Max.Z > other.Min.Z;
         }
     }
 }

@@ -4,7 +4,6 @@ using SharpCraft.model;
 using SharpCraft.render.shader;
 using SharpCraft.texture;
 using SharpCraft.util;
-using System.Collections.Generic;
 using Vector3 = OpenTK.Vector3;
 
 namespace SharpCraft.render
@@ -66,7 +65,7 @@ namespace SharpCraft.render
                     -SIZE, -SIZE,  SIZE,
                     SIZE, -SIZE,  SIZE
                 }), new Shader<object>("skybox"));
-                
+
                 texture = TextureManager.LoadCubeMap();
             }
         }
@@ -80,7 +79,7 @@ namespace SharpCraft.render
         {
             float partialRot = lastTick + (tick - lastTick) * partialTicks;
 
-            Matrix4 mat = MatrixHelper.CreateTransformationMatrix(SharpCraft.Instance.Camera.pos, Vector3.UnitY * partialRot / 10, 1);
+            Matrix4 mat = MatrixHelper.CreateTransformationMatrix(SharpCraft.Instance.Camera.Pos, Vector3.UnitY * partialRot / 10, 1);
 
             cube.Bind();
             cube.Shader.UpdateGlobalUniforms();

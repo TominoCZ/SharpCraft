@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using SharpCraft.render.shader;
+﻿using SharpCraft.render.shader;
 
 namespace SharpCraft.model
 {

@@ -26,7 +26,7 @@ namespace SharpCraft.util
 
             return vec;
         }
-        
+
         public static float NextFloat(float min = 0, float max = 1)
         {
             float f = GetNext();

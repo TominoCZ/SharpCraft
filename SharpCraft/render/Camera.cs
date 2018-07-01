@@ -1,6 +1,6 @@
 ﻿using OpenTK;
-using SharpCraft.util;
 using System;
+#pragma warning disable CS0675 // Bitwise-or operator used on a sign-extended operand
 
 namespace SharpCraft.render
 {
@@ -16,18 +16,18 @@ namespace SharpCraft.render
         private float _pitch;
         private float _yaw = MathHelper.PiOver2;
 
-        public Vector3 pos;
+        public Vector3 Pos;
 
-        public float pitchOffset;
+        public float PitchOffset;
 
-        public float pitch
+        public float Pitch
         {
             get => _pitch;
 
             set => _pitch = MathHelper.Clamp(value, -MathHelper.PiOver2 + MathHelper.DegreesToRadians(0.1f), MathHelper.PiOver2 - MathHelper.DegreesToRadians(0.1f));
         }
 
-        public float yaw
+        public float Yaw
         {
             get => _yaw;
 
@@ -42,7 +42,7 @@ namespace SharpCraft.render
             UpdateProjectionMatrix();
         }
 
-        public void SetFOV(float fov)
+        public void SetFov(float fov)
         {
             PartialFov = fov;
 
@@ -51,10 +51,10 @@ namespace SharpCraft.render
 
         public void UpdateViewMatrix()
         {
-            Matrix4 x = Matrix4.CreateRotationX(pitch + pitchOffset);
-            Matrix4 y = Matrix4.CreateRotationY(yaw);
+            Matrix4 x = Matrix4.CreateRotationX(Pitch + PitchOffset);
+            Matrix4 y = Matrix4.CreateRotationY(Yaw);
 
-            Matrix4 t = Matrix4.CreateTranslation(-pos);
+            Matrix4 t = Matrix4.CreateTranslation(-Pos);
 
             View = t * y * x;
         }
@@ -68,10 +68,10 @@ namespace SharpCraft.render
 
         public Vector3 GetLookVec()
         {
-            return Vector3.Transform(Vector3.UnitX, new Quaternion(-pitch, -_yaw + MathHelper.PiOver2, 0));
+            return Vector3.Transform(Vector3.UnitX, new Quaternion(-Pitch, -_yaw + MathHelper.PiOver2, 0));
         }
 
-        public Vector2 left
+        public Vector2 Left
         {
             get
             {
@@ -82,7 +82,7 @@ namespace SharpCraft.render
             }
         }
 
-        public Vector2 forward
+        public Vector2 Forward
         {
             get
             {

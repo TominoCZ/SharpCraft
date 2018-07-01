@@ -1,13 +1,11 @@
-﻿using SharpCraft.block;
+﻿using OpenTK.Graphics.OpenGL;
+using SharpCraft.block;
 using SharpCraft.model;
+using SharpCraft.render;
 using SharpCraft.util;
 using SharpCraft.world;
 using System;
 using System.Collections.Generic;
-using System.Numerics;
-using OpenTK.Graphics.OpenGL;
-using SharpCraft.render;
-using SharpCraft.texture;
 using Vector2 = OpenTK.Vector2;
 using Vector3 = OpenTK.Vector3;
 

@@ -1,6 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using SharpCraft.model;
+using System.Collections.Generic;
 using System.Linq;
-using SharpCraft.model;
 
 namespace SharpCraft.item
 {

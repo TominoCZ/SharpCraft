@@ -14,27 +14,22 @@ namespace SharpCraft.block
 
         public virtual void Update()
         {
-
         }
 
         public virtual void Render(float partialTicks)
         {
-
-        } 
+        }
 
         public virtual void ReadData(ByteBufferReader bbr)
         {
-
         }
-        
+
         public virtual void WriteData(ByteBufferWriter bbw)
         {
-
         }
-        
+
         public virtual void OnDestroyed(World world, BlockPos pos)
         {
-
         }
     }
 }

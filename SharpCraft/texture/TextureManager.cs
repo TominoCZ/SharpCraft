@@ -342,8 +342,6 @@ namespace SharpCraft.texture
             return bitmaps;
         }
 
-
-
         /*
         public static TextureBlockUV GetUVsFromBlock(EnumBlock block)
         {

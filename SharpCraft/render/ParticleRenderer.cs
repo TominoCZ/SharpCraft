@@ -1,13 +1,13 @@
 ﻿using OpenTK;
 using SharpCraft.block;
 using SharpCraft.entity;
+using SharpCraft.model;
 using SharpCraft.particle;
+using SharpCraft.render.shader.shaders;
 using SharpCraft.util;
 using SharpCraft.world;
 using System;
 using System.Collections.Generic;
-using SharpCraft.model;
-using SharpCraft.render.shader.shaders;
 
 namespace SharpCraft.render
 {
@@ -66,24 +66,24 @@ namespace SharpCraft.render
                     return;
 
                 float f0 = moo.hitVec.X
-                     + MathUtil.NextFloat(-0.21f, 0.21f) * Math.Abs(moo.boundingBox.max.X - moo.boundingBox.min.X);
+                     + MathUtil.NextFloat(-0.21f, 0.21f) * Math.Abs(moo.boundingBox.Max.X - moo.boundingBox.Min.X);
                 float f1 = moo.hitVec.Y
-                     + MathUtil.NextFloat(0, 0.1f) * Math.Abs(moo.boundingBox.max.Y - moo.boundingBox.min.Y);
+                     + MathUtil.NextFloat(0, 0.1f) * Math.Abs(moo.boundingBox.Max.Y - moo.boundingBox.Min.Y);
                 float f2 = moo.hitVec.Z
-                     + MathUtil.NextFloat(-0.21f, 0.21f) * Math.Abs(moo.boundingBox.max.Z - moo.boundingBox.min.Z);
+                     + MathUtil.NextFloat(-0.21f, 0.21f) * Math.Abs(moo.boundingBox.Max.Z - moo.boundingBox.Min.Z);
 
                 if (moo.sideHit == FaceSides.Down)
-                    f1 = moo.boundingBox.min.Y - 0.05f;
+                    f1 = moo.boundingBox.Min.Y - 0.05f;
                 else if (moo.sideHit == FaceSides.East)
-                    f0 = moo.boundingBox.max.X + 0.05f;
+                    f0 = moo.boundingBox.Max.X + 0.05f;
                 else if (moo.sideHit == FaceSides.North)
-                    f2 = moo.boundingBox.min.Z - 0.05f;
+                    f2 = moo.boundingBox.Min.Z - 0.05f;
                 else if (moo.sideHit == FaceSides.South)
-                    f2 = moo.boundingBox.max.Z + 0.05f;
+                    f2 = moo.boundingBox.Max.Z + 0.05f;
                 else if (moo.sideHit == FaceSides.Up)
-                    f1 = moo.boundingBox.max.Y + 0.1f;
+                    f1 = moo.boundingBox.Max.Y + 0.1f;
                 else if (moo.sideHit == FaceSides.West)
-                    f0 = moo.boundingBox.min.X - 0.05f;
+                    f0 = moo.boundingBox.Min.X - 0.05f;
 
                 Vector3 pos = new Vector3(f0, f1, f2) + moo.normal * 0.1f;
 

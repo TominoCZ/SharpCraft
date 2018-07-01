@@ -3,7 +3,6 @@ using OpenTK.Graphics.OpenGL;
 using SharpCraft.entity;
 using SharpCraft.model;
 using SharpCraft.render;
-using SharpCraft.texture;
 using SharpCraft.util;
 using SharpCraft.world;
 
@@ -38,8 +37,8 @@ namespace SharpCraft.particle
             this.UVmin = UVmin;
             this.UVmax = UVmax;
 
-            CollisionBoundingBox = new AxisAlignedBB(particleScale);
-            BoundingBox = CollisionBoundingBox.offset(pos - (Vector3.UnitX * CollisionBoundingBox.size.X / 2 + Vector3.UnitZ * CollisionBoundingBox.size.Z / 2));
+            CollisionBoundingBox = new AxisAlignedBb(particleScale);
+            BoundingBox = CollisionBoundingBox.Offset(pos - (Vector3.UnitX * CollisionBoundingBox.Size.X / 2 + Vector3.UnitZ * CollisionBoundingBox.Size.Z / 2));
 
             particleMaxAge = (int)MathUtil.NextFloat(10, 50);
 
@@ -69,7 +68,7 @@ namespace SharpCraft.particle
         {
             Vector3 partialPos = Vector3.Lerp(LastPos, Pos, partialTicks);
             float partialScale = lastParticleScale + (particleScale - lastParticleScale) * partialTicks;
-            
+
             partialPos.Y += partialScale / 2;
 
             ModelBaked<Particle> model = ParticleRenderer.ParticleModel;

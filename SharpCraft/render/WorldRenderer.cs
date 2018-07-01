@@ -1,5 +1,6 @@
 ﻿using OpenTK;
 using OpenTK.Graphics.OpenGL;
+using OpenTK.Input;
 using SharpCraft.block;
 using SharpCraft.entity;
 using SharpCraft.item;
@@ -11,9 +12,7 @@ using SharpCraft.util;
 using SharpCraft.world;
 using SharpCraft.world.chunk;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-using OpenTK.Input;
 using GL = OpenTK.Graphics.OpenGL.GL;
 using TextureTarget = OpenTK.Graphics.OpenGL.TextureTarget;
 
@@ -87,7 +86,10 @@ namespace SharpCraft.render
             _ticksLast = _ticks;
             _animationTimerLast = _animationTimer;
 
-            _ticks = (_ticks + 1) % 360;
+            _ticks = (_ticks + 1) % 90;
+
+            if (_ticksLast > _ticks)
+                _ticksLast = _ticks - 1;
 
             var down = _buttonDown;
 
@@ -148,8 +150,8 @@ namespace SharpCraft.render
             float partialFov = lastFov + (fov - lastFov) * partialTicks;
             Vector3 partialMotion = lastMotion + (motion - lastMotion) * partialTicks;
 
-            SharpCraft.Instance.Camera.pitchOffset = partialMotion.Y * 0.025f;
-            SharpCraft.Instance.Camera.SetFOV(partialFov);
+            SharpCraft.Instance.Camera.PitchOffset = partialMotion.Y * 0.025f;
+            SharpCraft.Instance.Camera.SetFov(partialFov);
         }
 
         private void RenderChunks(World world, float partialTicks)
@@ -221,7 +223,7 @@ namespace SharpCraft.render
                 if (state.Block == BlockRegistry.GetBlock<BlockAir>())
                     continue;
 
-                Matrix4 mat = MatrixHelper.CreateTransformationMatrix(pair.Key.ToVec() - sizeO / 2 + state.Block.BoundingBox.min, state.Block.BoundingBox.size + sizeO);
+                Matrix4 mat = MatrixHelper.CreateTransformationMatrix(pair.Key.ToVec() - sizeO / 2 + state.Block.BoundingBox.Min, state.Block.BoundingBox.Size + sizeO);
 
                 _shaderTexturedCube.UpdateInstanceUniforms(mat);
                 _shaderTexturedCube.UpdateUVs(TextureManager.TEXTURE_DESTROY_PROGRESS, 0, 32 * (int)(pair.Value.PartialProgress * 8), 32);
@@ -263,7 +265,7 @@ namespace SharpCraft.render
         private void RenderBlockSelectionOutline(BlockState state, BlockPos pos)
         {
             var shader = _selectionOutline.Shader;
-            AxisAlignedBB bb = state.Block.BoundingBox;
+            AxisAlignedBb bb = state.Block.BoundingBox;
 
             if (bb == null)
                 return;
@@ -273,7 +275,7 @@ namespace SharpCraft.render
 
             shader.UpdateGlobalUniforms();
             shader.UpdateModelUniforms(_selectionOutline.RawModel);
-            shader.UpdateInstanceUniforms(MatrixHelper.CreateTransformationMatrix(pos.ToVec() + bb.min, bb.size + Vector3.One * 0.0025f), _selectionOutline);
+            shader.UpdateInstanceUniforms(MatrixHelper.CreateTransformationMatrix(pos.ToVec() + bb.Min, bb.Size + Vector3.One * 0.0025f), _selectionOutline);
 
             GL.LineWidth(2);
             GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
@@ -321,17 +323,17 @@ namespace SharpCraft.render
             Vector3 partialLookVec = lastLookVec + (lookVec - lastLookVec) * partialTicks;
             Vector3 partialMotion = lastMotion + (motion - lastMotion) * partialTicks;
 
-            float partialTick = _ticksLast + (_ticks - _ticksLast) * partialTicks;
+            float partialTick = (_ticksLast + (_ticks - _ticksLast) * partialTicks) / 90f;
             float partialAnimationTimer = _animationTimerLast + (_animationTimer - _animationTimerLast) * partialTicks;
 
-            float angle = MathHelper.DegreesToRadians(partialTick * 20);
+            float angle = partialTick * MathHelper.TwoPi * (SharpCraft.Instance.Player.IsRunning ? 7 : 5);
 
             float height = 0.05f * Math.Clamp(partialMotion.Xz.Length * 5, 0, 1);
 
             float offsetX = (float)Math.Cos(angle) * height;
-            float offsetY = (float)Math.Sin(partialTick * 2 % 360 > 180 ? -angle * 2 + MathHelper.Pi : angle * 2) * height * 0.5f;
+            float offsetY = (float)Math.Sin(partialTick * 360 > 180 ? -angle * 2 + MathHelper.Pi : angle * 2) * height * 0.5f;
 
-            Vector2 rotVec = new Vector2(-SharpCraft.Instance.Camera.pitch, -SharpCraft.Instance.Camera.yaw);
+            Vector2 rotVec = new Vector2(-SharpCraft.Instance.Camera.Pitch, -SharpCraft.Instance.Camera.Yaw);
 
             Vector3 offset = new Vector3(0.85f + offsetX, -0.75f + offsetY, -0.3f);
             offset.Y -= Math.Clamp(partialMotion.Y, -0.35f, 0.35f) / 15f;
@@ -355,11 +357,11 @@ namespace SharpCraft.render
                                       * Matrix4.CreateTranslation(0, 0.5f, 0);
 
             Matrix4 r1 = Matrix4.CreateRotationY(MathHelper.DegreesToRadians(0)) * Matrix4.CreateRotationX(MathHelper.DegreesToRadians(45)) * Matrix4.CreateRotationZ(MathHelper.DegreesToRadians(-40));
-            Matrix4 r2 = Matrix4.CreateRotationX(rotVec.X - SharpCraft.Instance.Camera.pitchOffset) * Matrix4.CreateRotationY(rotVec.Y);
+            Matrix4 r2 = Matrix4.CreateRotationX(rotVec.X - SharpCraft.Instance.Camera.PitchOffset) * Matrix4.CreateRotationY(rotVec.Y);
 
             Matrix4 s = Matrix4.CreateScale(1.5f);
             Matrix4 t0 = Matrix4.CreateTranslation(Vector3.One * -0.5f);
-            Matrix4 t1 = Matrix4.CreateTranslation(SharpCraft.Instance.Camera.pos + SharpCraft.Instance.Camera.GetLookVec() + partialLookVec * 0.1f);
+            Matrix4 t1 = Matrix4.CreateTranslation(SharpCraft.Instance.Camera.Pos + SharpCraft.Instance.Camera.GetLookVec() + partialLookVec * 0.1f);
             Matrix4 tFinal = Matrix4.CreateTranslation(offset);
 
             Matrix4 mat = t0 * r1 * animationMatrix * tFinal * r2 * s * t1;
@@ -394,23 +396,22 @@ namespace SharpCraft.render
             Vector3 partialLookVec = lastLookVec + (lookVec - lastLookVec) * partialTicks;
             Vector3 partialMotion = lastMotion + (motion - lastMotion) * partialTicks;
 
-            float partialTick = _ticksLast + (_ticks - _ticksLast) * partialTicks;
+            float partialTick = (_ticksLast + (_ticks - _ticksLast) * partialTicks) / 90f;
+            float partialAnimationTimer = _animationTimerLast + (_animationTimer - _animationTimerLast) * partialTicks;
 
-            float angle = MathHelper.DegreesToRadians(partialTick * 20);
+            float angle = partialTick * MathHelper.TwoPi * (SharpCraft.Instance.Player.IsRunning ? 7 : 5);
 
             float height = 0.15f * Math.Clamp(partialMotion.Xz.Length * 5, 0, 1);
 
             float offsetX = (float)Math.Cos(angle) * height;
-            float offsetY = (float)Math.Sin(partialTick * 2 % 360 > 180 ? -angle * 2 + MathHelper.Pi : angle * 2) * height * 0.5f;
+            float offsetY = (float)Math.Sin(partialTick * 360 > 180 ? -angle * 2 + MathHelper.Pi : angle * 2) * height * 0.5f;
 
-            Vector2 rotVec = new Vector2(-SharpCraft.Instance.Camera.pitch, -SharpCraft.Instance.Camera.yaw);
+            Vector2 rotVec = new Vector2(-SharpCraft.Instance.Camera.Pitch, -SharpCraft.Instance.Camera.Yaw);
 
-            float itemBlockOffsetY = block.BoundingBox.size.Y / 2 - 0.5f;
+            float itemBlockOffsetY = block.BoundingBox.Size.Y / 2 - 0.5f;
 
             Vector3 offset = new Vector3(1.35f + offsetX, -1.25f - itemBlockOffsetY + offsetY, 0.3f);
             offset.Y -= Math.Clamp(partialMotion.Y, -0.35f, 0.35f) / 10f;
-
-            float partialAnimationTimer = _animationTimerLast + (_animationTimer - _animationTimerLast) * partialTicks;
 
             float angle1 = Math.Clamp(partialAnimationTimer * 1.2f, 0, 10) / 10 * MathHelper.Pi;
             float angle2 = Math.Clamp(partialAnimationTimer, 0, 10) / 10 * MathHelper.Pi;
@@ -431,11 +432,11 @@ namespace SharpCraft.render
                                       * Matrix4.CreateTranslation(0, -1.25f, 0);
 
             Matrix4 r1 = Matrix4.CreateRotationY(MathHelper.DegreesToRadians(45));
-            Matrix4 r2 = Matrix4.CreateRotationX(rotVec.X - SharpCraft.Instance.Camera.pitchOffset) * Matrix4.CreateRotationY(rotVec.Y);
+            Matrix4 r2 = Matrix4.CreateRotationX(rotVec.X - SharpCraft.Instance.Camera.PitchOffset) * Matrix4.CreateRotationY(rotVec.Y);
 
             Matrix4 s = Matrix4.CreateScale(0.5525f);
             Matrix4 t0 = Matrix4.CreateTranslation(Vector3.One * -0.5f);
-            Matrix4 t1 = Matrix4.CreateTranslation(SharpCraft.Instance.Camera.pos + SharpCraft.Instance.Camera.GetLookVec() + partialLookVec * 0.1f);
+            Matrix4 t1 = Matrix4.CreateTranslation(SharpCraft.Instance.Camera.Pos + SharpCraft.Instance.Camera.GetLookVec() + partialLookVec * 0.1f);
             Matrix4 tFinal = Matrix4.CreateTranslation(offset);
 
             Matrix4 mat = t0 * r1 * animationMatrix * tFinal * r2 * s * t1;
@@ -471,17 +472,17 @@ namespace SharpCraft.render
             Vector3 partialLookVec = lastLookVec + (lookVec - lastLookVec) * partialTicks;
             Vector3 partialMotion = lastMotion + (motion - lastMotion) * partialTicks;
 
-            float partialTick = _ticksLast + (_ticks - _ticksLast) * partialTicks;
+            float partialTick = (_ticksLast + (_ticks - _ticksLast) * partialTicks) / 90f;
             float partialAnimationTimer = _animationTimerLast + (_animationTimer - _animationTimerLast) * partialTicks;
 
-            float angle = MathHelper.DegreesToRadians(partialTick * 20);
+            float angle = partialTick * MathHelper.TwoPi * (SharpCraft.Instance.Player.IsRunning ? 7 : 5);
 
             float height = 0.15f * Math.Clamp(partialMotion.Xz.Length * 5, 0, 1);
 
             float offsetX = (float)Math.Cos(angle) * height;
-            float offsetY = (float)Math.Sin(partialTick * 2 % 360 > 180 ? -angle * 2 + MathHelper.Pi : angle * 2) * height * 0.5f;
+            float offsetY = (float)Math.Sin(partialTick * 360 > 180 ? -angle * 2 + MathHelper.Pi : angle * 2) * height * 0.5f;
 
-            Vector2 rotVec = new Vector2(-SharpCraft.Instance.Camera.pitch, -SharpCraft.Instance.Camera.yaw);
+            Vector2 rotVec = new Vector2(-SharpCraft.Instance.Camera.Pitch, -SharpCraft.Instance.Camera.Yaw);
 
             Vector3 offset = new Vector3(0.85f + offsetX, -0.4f + offsetY, 1);
             offset.Y -= Math.Clamp(partialMotion.Y, -0.35f, 0.35f) / 10f;
@@ -505,11 +506,11 @@ namespace SharpCraft.render
                                       * Matrix4.CreateTranslation(0, -1.25f, 0);
 
             Matrix4 r1 = Matrix4.CreateRotationY(MathHelper.DegreesToRadians(5));
-            Matrix4 r2 = Matrix4.CreateRotationX(rotVec.X - SharpCraft.Instance.Camera.pitchOffset) * Matrix4.CreateRotationY(rotVec.Y);
+            Matrix4 r2 = Matrix4.CreateRotationX(rotVec.X - SharpCraft.Instance.Camera.PitchOffset) * Matrix4.CreateRotationY(rotVec.Y);
 
             Matrix4 s = Matrix4.CreateScale(0.5525f);
             Matrix4 t0 = Matrix4.CreateTranslation(Vector3.One * -0.5f);
-            Matrix4 t1 = Matrix4.CreateTranslation(SharpCraft.Instance.Camera.pos + SharpCraft.Instance.Camera.GetLookVec() + partialLookVec * 0.1f);
+            Matrix4 t1 = Matrix4.CreateTranslation(SharpCraft.Instance.Camera.Pos + SharpCraft.Instance.Camera.GetLookVec() + partialLookVec * 0.1f);
             Matrix4 tFinal = Matrix4.CreateTranslation(offset);
 
             Matrix4 mat = t0 * r1 * animationMatrix * tFinal * r2 * s * t1;

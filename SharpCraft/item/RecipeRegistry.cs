@@ -1,15 +1,10 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
-using System.Resources;
-using System.Text;
-using System.Threading;
 
 namespace SharpCraft.item
 {
-    class RecipeRegistry
+    internal class RecipeRegistry
     {
         private static readonly BlockingCollection<Recipe> _registry = new BlockingCollection<Recipe>();
 
@@ -47,7 +42,7 @@ namespace SharpCraft.item
             return null;
         }
 
-        struct Recipe
+        private struct Recipe
         {
             public readonly ItemStack Product;
 

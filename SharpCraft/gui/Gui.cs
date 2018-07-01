@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using OpenTK;
+﻿using OpenTK;
 using OpenTK.Graphics.OpenGL;
 using SharpCraft.block;
 using SharpCraft.item;
@@ -9,6 +7,8 @@ using SharpCraft.render;
 using SharpCraft.render.shader;
 using SharpCraft.render.shader.shaders;
 using SharpCraft.util;
+using System;
+#pragma warning disable 618
 
 namespace SharpCraft.gui
 {

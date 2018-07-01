@@ -2,7 +2,6 @@
 using OpenTK;
 using SharpCraft.block;
 using SharpCraft.item;
-using SharpCraft.model;
 using SharpCraft.render.shader;
 using SharpCraft.texture;
 using System;
@@ -11,9 +10,8 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Net.Mime;
-using OpenTK.Graphics.OpenGL;
 using Bitmap = System.Drawing.Bitmap;
+#pragma warning disable 612
 
 namespace SharpCraft.model
 {
@@ -250,7 +248,7 @@ namespace SharpCraft.model
                     {
                         cubes.Add(cube);
                     }
-                    
+
                     foreach (var (key, value) in model.textures)
                     {
                         try
@@ -266,7 +264,7 @@ namespace SharpCraft.model
                     if (model.textures.TryGetValue("item", out var texName))
                         textureMapElements.TryGetValue(texName, out tme);
                 }
-                
+
                 foreach (var cube in cubes)
                 {
                     CubeModelBuilder.AppendCubeModel(cube, textures, textureMapElements, ref vertexes,
@@ -281,7 +279,7 @@ namespace SharpCraft.model
             TEXTURE_ITEMS = id;
         }
 
-        public static bool LoadModel(string path, Shader<ModelCustom> shader) //TODO 
+        public static bool LoadModel(string path, Shader<ModelCustom> shader) //TODO
         {
             string file = $"{SharpCraft.Instance.GameFolderDir}\\SharpCraft_Data\\assets\\models\\{path}.json";
 
@@ -344,6 +342,7 @@ namespace SharpCraft.model
             return true;
             //return customModel;
         }
+
         /*
         //TODO - finish + create model from texture if model not found
         private int LoadItems()
@@ -425,6 +424,7 @@ namespace SharpCraft.model
             return id;
         }
         */
+
         private static JsonModel FixBlockJson(string file)
         {
             var json = File.ReadAllText(file);

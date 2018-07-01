@@ -1,5 +1,4 @@
 ﻿using OpenTK;
-using SharpCraft.block;
 using SharpCraft.item;
 using SharpCraft.texture;
 using System;

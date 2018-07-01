@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using System.Collections.Generic;
+#pragma warning disable CS0649
 
 namespace SharpCraft.model
 {

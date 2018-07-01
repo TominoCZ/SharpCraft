@@ -12,10 +12,5 @@ namespace SharpCraft.item
         {
             Block = block;
         }
-
-        public int GetMaxStackSize()
-        {
-            return 256;
-        }
     }
 }

@@ -1,15 +1,15 @@
 ﻿using OpenTK;
+using SharpCraft.block;
 using SharpCraft.world;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using SharpCraft.block;
 
 namespace SharpCraft.entity
 {
     public class Entity
     {
-        protected AxisAlignedBB BoundingBox, CollisionBoundingBox;
+        protected AxisAlignedBb BoundingBox, CollisionBoundingBox;
 
         public World World;
 
@@ -32,8 +32,8 @@ namespace SharpCraft.entity
             Pos = LastPos = pos;
             Motion = motion;
 
-            CollisionBoundingBox = AxisAlignedBB.BLOCK_FULL;
-            BoundingBox = CollisionBoundingBox.offset(pos - CollisionBoundingBox.size / 2);
+            CollisionBoundingBox = AxisAlignedBb.BlockFull;
+            BoundingBox = CollisionBoundingBox.Offset(pos - CollisionBoundingBox.Size / 2);
         }
 
         public virtual void Update()
@@ -47,14 +47,14 @@ namespace SharpCraft.entity
 
             if (OnGround && Motion.Xz.Length > 0.0001f)
             {
-                AxisAlignedBB bbO = BoundingBox.Union(BoundingBox.offset(motion));
+                AxisAlignedBb bbO = BoundingBox.Union(BoundingBox.Offset(motion));
 
-                var list = SharpCraft.Instance.World.GetBlockCollisionBoxes(bbO).OrderBy(box => (box.min - new BlockPos(box.min).ToVec() + box.size).Y);
+                var list = SharpCraft.Instance.World.GetBlockCollisionBoxes(bbO).OrderBy(box => (box.Min - new BlockPos(box.Min).ToVec() + box.Size).Y);
 
                 foreach (var bb in list)
                 {
-                    var blockPos = new BlockPos(bb.min);
-                    var bbTop = bb.min + bb.size;
+                    var blockPos = new BlockPos(bb.Min);
+                    var bbTop = bb.Min + bb.Size;
                     var b = bbTop - blockPos.ToVec();
 
                     var step = bbTop.Y - Pos.Y;
@@ -63,7 +63,7 @@ namespace SharpCraft.entity
                     {
                         Motion.Y = 0;
                         Pos.Y = blockPos.Y + b.Y;
-                        
+
                         TeleportTo(Pos);
                     }
                 }
@@ -81,32 +81,32 @@ namespace SharpCraft.entity
 
         public virtual void Move()
         {
-            AxisAlignedBB bbO = BoundingBox.Union(BoundingBox.offset(Motion));
+            AxisAlignedBb bbO = BoundingBox.Union(BoundingBox.Offset(Motion));
 
-            List<AxisAlignedBB> list = SharpCraft.Instance.World.GetBlockCollisionBoxes(bbO);
+            List<AxisAlignedBb> list = SharpCraft.Instance.World.GetBlockCollisionBoxes(bbO);
 
             Vector3 mOrig = Motion;
 
             for (int i = 0; i < list.Count; i++)
             {
-                AxisAlignedBB blockBb = list[i];
+                AxisAlignedBb blockBb = list[i];
                 Motion.Y = blockBb.CalculateYOffset(BoundingBox, Motion.Y);
             }
-            BoundingBox = BoundingBox.offset(Motion * Vector3.UnitY);
+            BoundingBox = BoundingBox.Offset(Motion * Vector3.UnitY);
 
             for (int i = 0; i < list.Count; i++)
             {
-                AxisAlignedBB blockBb = list[i];
+                AxisAlignedBb blockBb = list[i];
                 Motion.X = blockBb.CalculateXOffset(BoundingBox, Motion.X);
             }
-            BoundingBox = BoundingBox.offset(Motion * Vector3.UnitX);
+            BoundingBox = BoundingBox.Offset(Motion * Vector3.UnitX);
 
             for (int i = 0; i < list.Count; i++)
             {
-                AxisAlignedBB blockBb = list[i];
+                AxisAlignedBb blockBb = list[i];
                 Motion.Z = blockBb.CalculateZOffset(BoundingBox, Motion.Z);
             }
-            BoundingBox = BoundingBox.offset(Motion * Vector3.UnitZ);
+            BoundingBox = BoundingBox.Offset(Motion * Vector3.UnitZ);
 
             SetPositionToBb();
 
@@ -138,7 +138,7 @@ namespace SharpCraft.entity
         {
             this.Pos = LastPos = pos;
 
-            BoundingBox = CollisionBoundingBox.offset(pos - Vector3.UnitX * CollisionBoundingBox.size.X / 2 - Vector3.UnitZ * CollisionBoundingBox.size.Z / 2);
+            BoundingBox = CollisionBoundingBox.Offset(pos - Vector3.UnitX * CollisionBoundingBox.Size.X / 2 - Vector3.UnitZ * CollisionBoundingBox.Size.Z / 2);
         }
 
         public virtual void SetDead()
@@ -146,12 +146,12 @@ namespace SharpCraft.entity
             IsAlive = false;
         }
 
-        public AxisAlignedBB GetEntityBoundingBox()
+        public AxisAlignedBb GetEntityBoundingBox()
         {
             return BoundingBox;
         }
 
-        public AxisAlignedBB GetCollisionBoundingBox()
+        public AxisAlignedBb GetCollisionBoundingBox()
         {
             return CollisionBoundingBox;
         }
@@ -161,7 +161,7 @@ namespace SharpCraft.entity
             Vector3 center = BoundingBox.GetCenter();
 
             Pos.X = center.X;
-            Pos.Y = BoundingBox.min.Y;
+            Pos.Y = BoundingBox.Min.Y;
             Pos.Z = center.Z;
         }
     }

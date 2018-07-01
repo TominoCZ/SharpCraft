@@ -1,9 +1,8 @@
-﻿using SharpCraft.block;
+﻿using OpenTK;
+using SharpCraft.block;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using OpenTK;
-using SharpCraft.util;
 
 namespace SharpCraft.model
 {
@@ -74,7 +73,7 @@ namespace SharpCraft.model
 
                 //edit: textureNode.Texture can be anything. it is a variable defined by the modeller
                 //textureNode.Texture isn't the name of the texture file! it is '#side', '#block', '#bottom', ... TODO - if '#' is not present, use the texture from the texture map
-                
+
                 if (modelTextureVariables.TryGetValue(textureNode.texture, out var textureNameForFace) && textureMap.TryGetValue(textureNameForFace, out var tme))
                 {
                     var percentageU1 = Math.Clamp(textureNode.uv[0] / 16f, 0, 1);
@@ -109,15 +108,15 @@ namespace SharpCraft.model
                 {
                     ori = new Vector3(cube.rotation.origin[0], cube.rotation.origin[1], cube.rotation.origin[2]) / 16f;
 
-                    rot[(int) cube.rotation.axis] = MathHelper.DegreesToRadians(cube.rotation.angle);
+                    rot[(int)cube.rotation.axis] = MathHelper.DegreesToRadians(cube.rotation.angle);
                 }
-                
+
                 AppendFace(side, cube.from, cube.to, rot, ori, ref vertexes, ref normals, startIndex3 + 12 * faceIndex);
 
                 faceIndex++;
             }
         }
-        
+
         public static void AppendCubeModel(JsonCube cube, Dictionary<string, string> modelTextureVariables, Dictionary<string, TextureMapElement> textureMap, ref List<float> vertexes, ref List<float> normals, ref List<float> uvs)
         {
             foreach (var pair in cube.faces.OrderBy(p => (int)p.Key))
@@ -159,7 +158,7 @@ namespace SharpCraft.model
                 {
                     ori = new Vector3(cube.rotation.origin[0], cube.rotation.origin[1], cube.rotation.origin[2]) / 16f;
 
-                    rot[(int) cube.rotation.axis] = MathHelper.DegreesToRadians(cube.rotation.angle);
+                    rot[(int)cube.rotation.axis] = MathHelper.DegreesToRadians(cube.rotation.angle);
                 }
 
                 AppendFace(side, cube.from, cube.to, rot, ori, ref vertexes, ref normals);
@@ -234,6 +233,7 @@ namespace SharpCraft.model
                 normals.Add(nrm.Z);
             }
         }
+
         public static float[] CreateCubeVertexes(bool centered = false)
         {
             List<float> vertexes = new List<float>();

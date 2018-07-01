@@ -113,31 +113,31 @@ namespace SharpCraft.world
             return GetChunk(pos) is Chunk chunk && chunk.HasData;
         }
 
-        public List<AxisAlignedBB> GetIntersectingEntitiesBBs(AxisAlignedBB with)
+        public List<AxisAlignedBb> GetIntersectingEntitiesBBs(AxisAlignedBb with)
         {
             return (from entity in Entities where !(entity is EntityItem) select entity.GetEntityBoundingBox() into bb where bb.IntersectsWith(with) select bb).ToList();
         }
 
-        public List<AxisAlignedBB> GetBlockCollisionBoxes(AxisAlignedBB box)
+        public List<AxisAlignedBb> GetBlockCollisionBoxes(AxisAlignedBb box)
         {
-            List<AxisAlignedBB> blocks = new List<AxisAlignedBB>();
+            List<AxisAlignedBb> blocks = new List<AxisAlignedBb>();
 
-            AxisAlignedBB bb = box.Union(box);
+            AxisAlignedBb bb = box.Union(box);
 
             var air = BlockRegistry.GetBlock<BlockAir>();
 
-            for (int x = (int)bb.min.X, maxX = (int)bb.max.X; x < maxX; x++)
+            for (int x = (int)bb.Min.X, maxX = (int)bb.Max.X; x < maxX; x++)
             {
-                for (int y = (int)bb.min.Y, maxY = (int)bb.max.Y; y < maxY; y++)
+                for (int y = (int)bb.Min.Y, maxY = (int)bb.Max.Y; y < maxY; y++)
                 {
-                    for (int z = (int)bb.min.Z, maxZ = (int)bb.max.Z; z < maxZ; z++)
+                    for (int z = (int)bb.Min.Z, maxZ = (int)bb.Max.Z; z < maxZ; z++)
                     {
                         BlockPos pos = new BlockPos(x, y, z);
                         BlockState state = SharpCraft.Instance.World.GetBlockState(pos);
                         if (state.Block == air || state.Block.Material.CanWalkThrough)
                             continue;
 
-                        blocks.Add(state.Block.BoundingBox.offset(pos.ToVec()));
+                        blocks.Add(state.Block.BoundingBox.Offset(pos.ToVec()));
                     }
                 }
             }
@@ -174,7 +174,7 @@ namespace SharpCraft.world
                 return;
 
             _worldLut.Put(state.Block.UnlocalizedName);
-            
+
             var localPos = ChunkPos.ToChunkLocal(pos);
 
             chunk.SetBlockState(localPos, state);
@@ -337,7 +337,9 @@ namespace SharpCraft.world
                 short id = GetLocalBlockId(s.Block.UnlocalizedName);
                 short meta = s.Block.GetMetaFromState(s);
 
+#pragma warning disable CS0675 // Bitwise-or operator used on a sign-extended operand
                 short value = (short)(id << 4 | meta);
+#pragma warning restore CS0675 // Bitwise-or operator used on a sign-extended operand
                 chunkData[x, y, z] = value;
             }
 

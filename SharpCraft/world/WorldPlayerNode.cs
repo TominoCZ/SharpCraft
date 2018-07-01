@@ -1,8 +1,9 @@
 ﻿using OpenTK;
+using SharpCraft.block;
 using SharpCraft.entity;
 using SharpCraft.item;
 using System;
-using SharpCraft.block;
+#pragma warning disable 618
 
 namespace SharpCraft.world
 {
@@ -21,8 +22,8 @@ namespace SharpCraft.world
 
         public WorldPlayerNode(EntityPlayerSp player)
         {
-            pitch = SharpCraft.Instance.Camera.pitch;
-            yaw = SharpCraft.Instance.Camera.yaw;
+            pitch = SharpCraft.Instance.Camera.Pitch;
+            yaw = SharpCraft.Instance.Camera.Yaw;
             pos = player.Pos;
 
             hotbar = new ItemStackNode[player.Hotbar.Length];
@@ -92,8 +93,8 @@ namespace SharpCraft.world
         public EntityPlayerSp GetPlayer(World world)
         {
             EntityPlayerSp player = new EntityPlayerSp(world, pos);
-            SharpCraft.Instance.Camera.pitch = pitch;
-            SharpCraft.Instance.Camera.yaw = yaw;
+            SharpCraft.Instance.Camera.Pitch = pitch;
+            SharpCraft.Instance.Camera.Yaw = yaw;
 
             for (int i = 0; i < hotbar.Length; i++)
             {

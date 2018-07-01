@@ -3,9 +3,7 @@ using OpenTK.Graphics;
 using OpenTK.Input;
 using System;
 using System.ComponentModel;
-using System.ComponentModel.Design;
 using System.Diagnostics;
-using System.Threading.Tasks;
 
 namespace SharpCraft
 {

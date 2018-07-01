@@ -16,7 +16,6 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
@@ -30,11 +29,10 @@ using Size = OpenTK.Size;
 
 namespace SharpCraft
 {
-    class TestMod : ModMain
+    internal class TestMod : ModMain
     {
         public TestMod() : base(new ModInfo("testmod", "The Test Mod", "1.0", "Me"))
         {
-
         }
 
         public override void OnItemsAndBlocksRegistry(RegistryEventArgs args)
@@ -44,7 +42,6 @@ namespace SharpCraft
 
         public override void OnRecipeRegistry(RecipeRegistryEventArgs args)
         {
-            
         }
     }
 
@@ -251,7 +248,7 @@ namespace SharpCraft
             {
                 mod.OnItemsAndBlocksRegistry(new RegistryEventArgs(_blockRegistry, _itemRegistry, _recipeRegistry));
             }
-            
+
             foreach (var block in BlockRegistry.AllBlocks())
             {
                 _itemRegistry.Put(new ItemBlock(block));
@@ -504,7 +501,7 @@ namespace SharpCraft
 
             float dist = float.MaxValue;
 
-            Vector3 camPos = Vector3.One * 0.5f + Camera.pos;
+            Vector3 camPos = Vector3.One * 0.5f + Camera.Pos;
 
             var air = BlockRegistry.GetBlock<BlockAir>();
 
@@ -519,7 +516,7 @@ namespace SharpCraft
                         vec.Y += y;
                         vec.Z += z;
 
-                        float f = (vec - Camera.pos).LengthFast;
+                        float f = (vec - Camera.Pos).LengthFast;
 
                         if (f <= radius + 0.5f)
                         {
@@ -528,9 +525,9 @@ namespace SharpCraft
 
                             if (state.Block != air)
                             {
-                                AxisAlignedBB bb = state.Block.BoundingBox.offset(pos.ToVec());
+                                AxisAlignedBb bb = state.Block.BoundingBox.Offset(pos.ToVec());
 
-                                bool hitSomething = RayHelper.RayIntersectsBB(Camera.pos,
+                                bool hitSomething = RayHelper.RayIntersectsBB(Camera.Pos,
                                     Camera.GetLookVec(), bb, out Vector3 hitPos, out Vector3 normal);
 
                                 if (hitSomething)
@@ -550,12 +547,12 @@ namespace SharpCraft
                                     else if (normal.Z > 0)
                                         sideHit = FaceSides.South;
 
-                                    BlockPos p = new BlockPos(hitPos - normal * bb.size / 2);
+                                    BlockPos p = new BlockPos(hitPos - normal * bb.Size / 2);
 
                                     if (sideHit == FaceSides.Null)
                                         continue;
 
-                                    float l = Math.Abs((Camera.pos - (p.ToVec() + bb.size / 2)).Length);
+                                    float l = Math.Abs((Camera.Pos - (p.ToVec() + bb.Size / 2)).Length);
 
                                     if (l < dist)
                                     {
@@ -618,8 +615,8 @@ namespace SharpCraft
             {
                 Point delta = new Point(_mouseLast.X - point.X, _mouseLast.Y - point.Y);
 
-                Camera.yaw -= delta.X / 1000f * _sensitivity;
-                Camera.pitch -= delta.Y / 1000f * _sensitivity;
+                Camera.Yaw -= delta.X / 1000f * _sensitivity;
+                Camera.Pitch -= delta.Y / 1000f * _sensitivity;
 
                 //ResetMouse();
 
@@ -777,7 +774,7 @@ namespace SharpCraft
                 CaptureScreen();
             }
 
-            //_frameBuffer.BindDefault(); 
+            //_frameBuffer.BindDefault();
             //_frameBuffer.CopyColorToScreen();//TODO
 
             SwapBuffers();
@@ -997,9 +994,11 @@ namespace SharpCraft
                 case "rare":
                     mult = 8f;
                     break;
+
                 case "stone":
                     mult = 2.5f;
                     break;
+
                 case "wood":
                     mult = 1.5f;
                     break;

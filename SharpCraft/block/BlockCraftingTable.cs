@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using SharpCraft.entity;
+﻿using SharpCraft.entity;
 using SharpCraft.world;
 
 namespace SharpCraft.block

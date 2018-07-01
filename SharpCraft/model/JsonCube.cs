@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
-using System.Collections.Generic;
 using Newtonsoft.Json.Serialization;
+using System.Collections.Generic;
 
 namespace SharpCraft.model
 {

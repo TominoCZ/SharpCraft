@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.IO.Compression;
 using System.Text;
 using System.Threading;
 
@@ -134,7 +133,7 @@ namespace SharpCraft.world.chunk.region
             return _hash;
         }
 
-        private void checkCreateFile()
+        private void CheckCreateFile()
         {
             lock (CreateLock)
             {
@@ -148,7 +147,7 @@ namespace SharpCraft.world.chunk.region
 
         private FileStream Write()
         {
-            checkCreateFile();
+            CheckCreateFile();
             _rwLock.EnterWriteLock();
             while (true)
             {
@@ -179,33 +178,33 @@ namespace SharpCraft.world.chunk.region
 
         protected class WriteC : FileStream
         {
-            private readonly RegionStaticImpl<TCord> r;
+            private readonly RegionStaticImpl<TCord> _r;
 
             public WriteC(RegionStaticImpl<TCord> r) : base(r._filePath, FileMode.Open, FileAccess.Write, FileShare.Write)
             {
-                this.r = r;
+                this._r = r;
             }
 
             public override void Close()
             {
                 base.Close();
-                if (r._rwLock.IsWriteLockHeld) r._rwLock.ExitWriteLock();
+                if (_r._rwLock.IsWriteLockHeld) _r._rwLock.ExitWriteLock();
             }
         }
 
         protected class ReadC : FileStream
         {
-            private readonly RegionStaticImpl<TCord> r;
+            private readonly RegionStaticImpl<TCord> _r;
 
             public ReadC(RegionStaticImpl<TCord> r) : base(r._filePath, FileMode.Open, FileAccess.Read, FileShare.Read)
             {
-                this.r = r;
+                this._r = r;
             }
 
             public override void Close()
             {
                 base.Close();
-                if (r._rwLock.IsReadLockHeld) r._rwLock.ExitReadLock();
+                if (_r._rwLock.IsReadLockHeld) _r._rwLock.ExitReadLock();
             }
         }
 

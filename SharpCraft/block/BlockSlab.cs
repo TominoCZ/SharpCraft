@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using OpenTK;
+﻿using OpenTK;
 using SharpCraft.entity;
 
 namespace SharpCraft.block
 {
-    class BlockSlab : Block
+    internal class BlockSlab : Block
     {
         public BlockSlab() : base(Material.GetMaterial("stone"), "slab")
         {
@@ -16,7 +13,7 @@ namespace SharpCraft.block
 
             size.Y = 0.5f;
 
-            BoundingBox = new AxisAlignedBB(size);
+            BoundingBox = new AxisAlignedBb(size);
 
             Hardness = 64; //TODO - set based on the state
         }

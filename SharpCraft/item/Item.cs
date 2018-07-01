@@ -1,7 +1,5 @@
-﻿using System;
+﻿using SharpCraft.block;
 using System.Collections.Generic;
-using System.ComponentModel;
-using SharpCraft.block;
 
 namespace SharpCraft.item
 {

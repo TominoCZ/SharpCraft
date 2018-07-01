@@ -114,7 +114,7 @@ namespace SharpCraft.gui
                 float x = mouseX - 16 * guiScale / 2;
                 float y = mouseY - 16 * guiScale / 2;
 
-               RenderStack(draggedStack, x, y, guiScale);
+                RenderStack(draggedStack, x, y, guiScale);
 
                 if (draggedStack.Count > 1)
                     RenderText(draggedStack.Count.ToString(), x + 16 * guiScale / 2f, y + 16 * guiScale / 2f + 14, 1,

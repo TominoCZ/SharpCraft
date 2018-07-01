@@ -1,11 +1,11 @@
-﻿using System;
-using OpenTK;
+﻿using OpenTK;
 using OpenTK.Graphics.OpenGL;
 using SharpCraft.entity;
 using SharpCraft.item;
 using SharpCraft.model;
 using SharpCraft.util;
 using SharpCraft.world;
+using System;
 
 namespace SharpCraft.block
 {
@@ -19,6 +19,7 @@ namespace SharpCraft.block
 
         private int _ticks;
         private int _ticksLast;
+        private readonly int[,] _placeDelay = new int[3, 3];
 
         public TileEntityCraftingGrid(World world, BlockPos pos) : base(world)
         {
@@ -77,6 +78,15 @@ namespace SharpCraft.block
 
             if (_ticksLast > _ticks)
                 _ticksLast = _ticks - 1;
+
+            for (int y = 0; y < 3; y++)
+            {
+                for (int x = 0; x < 3; x++)
+                {
+                    if (_placeDelay[x, y] > 0)
+                        _placeDelay[x, y]--;
+                }
+            }
 
             Item[] table = new Item[9];
 
@@ -220,6 +230,11 @@ namespace SharpCraft.block
 
             var indexX = (int)(localPos.X / (slot + 4 * gap / 3));
             var indexY = (int)(localPos.Y / (slot + 4 * gap / 3));
+
+            if (_placeDelay[indexX, indexY] > 0)
+                return;
+
+            _placeDelay[indexX, indexY] = 6;
 
             Console.WriteLine((hitVec.X < 0) + "," + (hitVec.Z < 0));
             Console.WriteLine(indexX + "," + indexY);

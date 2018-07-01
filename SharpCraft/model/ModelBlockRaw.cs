@@ -1,5 +1,4 @@
-﻿using System;
-using SharpCraft.block;
+﻿using SharpCraft.block;
 using System.Collections.Generic;
 
 namespace SharpCraft.model
@@ -82,6 +81,7 @@ namespace SharpCraft.model
                 vertexes.Add(_vertexes[faceIndex + i + 2] + offset.Z);
             }
         }
+
         //unused for now
         public void AppendNormalsForSide(FaceSides side, List<float> normals)
         {

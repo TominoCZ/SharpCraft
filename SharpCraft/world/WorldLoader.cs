@@ -65,7 +65,6 @@ namespace SharpCraft.world
                     fs.Position = 0;
                     wpn = (WorldPlayerNode)bf.Deserialize(fs);
                 }
-
             }
             catch (Exception e)
             {

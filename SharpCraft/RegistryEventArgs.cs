@@ -36,8 +36,8 @@ namespace SharpCraft
         {
             _funcRegisterRecipe(items, new ItemStack(product), shapeless);
         }
-    }  
-    
+    }
+
     internal class RecipeRegistryEventArgs : EventArgs
     {
         private readonly Action<Item[], ItemStack, bool> _funcRegisterRecipe;
@@ -46,7 +46,7 @@ namespace SharpCraft
         {
             _funcRegisterRecipe = recipeRegistry.RegisterRecipe;
         }
-        
+
         public void Register(Item[] items, ItemStack product, bool shapeless)
         {
             _funcRegisterRecipe(items, product, shapeless);

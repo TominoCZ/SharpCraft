@@ -3,7 +3,7 @@ using SharpCraft.entity;
 
 namespace SharpCraft.block
 {
-    class BlockTallGrass : Block
+    internal class BlockTallGrass : Block
     {
         public BlockTallGrass() : base(Material.GetMaterial("tallgrass"), "tallgrass")
         {
@@ -11,7 +11,7 @@ namespace SharpCraft.block
             //IsSolid = false;
             IsReplaceable = true;
 
-            BoundingBox = new AxisAlignedBB(0.85f).offset(new Vector3(0.075f, 0, 0.075f));
+            BoundingBox = new AxisAlignedBb(0.85f).Offset(new Vector3(0.075f, 0, 0.075f));
 
             Hardness = 0;
         }

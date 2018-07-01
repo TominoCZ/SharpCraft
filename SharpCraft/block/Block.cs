@@ -1,9 +1,8 @@
 ﻿using SharpCraft.entity;
 using SharpCraft.model;
 using SharpCraft.render.shader;
-using System.Collections.Generic;
-using OpenTK;
 using SharpCraft.world;
+using System.Collections.Generic;
 
 namespace SharpCraft.block
 {
@@ -15,7 +14,7 @@ namespace SharpCraft.block
 
         public Material Material { get; }
 
-        public AxisAlignedBB BoundingBox { get; protected set; } = AxisAlignedBB.BLOCK_FULL;
+        public AxisAlignedBb BoundingBox { get; protected set; } = AxisAlignedBb.BlockFull;
 
         public string UnlocalizedName { get; protected set; }
 
@@ -26,8 +25,10 @@ namespace SharpCraft.block
         public bool CanBeInteractedWith { get; protected set; } = false;
         public bool IsOpaque { get; protected set; } = true;
         public bool HasTransparency { get; protected set; }
+
         //public bool IsSolid { get; protected set; } = true;
         public bool IsFullCube { get; protected set; } = true;
+
         public bool IsReplaceable { get; protected set; } = false;
 
         protected Block(Material material, string unlocalizedName)
@@ -58,12 +59,10 @@ namespace SharpCraft.block
 
         public virtual void OnRightClicked(MouseOverObject moo, EntityPlayerSp clicked)
         {
-
         }
 
         public virtual void OnPlaced(World world, BlockPos pos, EntityPlayerSp placer)
         {
-
         }
 
         public virtual void OnDestroyed(BlockPos pos, BlockState oldState, EntityPlayerSp player)

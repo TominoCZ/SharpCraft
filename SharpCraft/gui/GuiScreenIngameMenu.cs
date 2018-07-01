@@ -30,11 +30,13 @@ namespace SharpCraft.gui
                 case 0:
                     SharpCraft.Instance.CloseGuiScreen();
                     break;
+
                 case 1:
                     SharpCraft.Instance.Disconnect();
 
                     SharpCraft.Instance.OpenGuiScreen(new GuiScreenMainMenu());
                     break;
+
                 case 2:
                     SharpCraft.Instance.Close();
                     break;

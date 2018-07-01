@@ -9,7 +9,6 @@ using SharpCraft.world;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using SharpCraft.texture;
 
 namespace SharpCraft.entity
 {
@@ -36,8 +35,8 @@ namespace SharpCraft.entity
 
             _stack = stack;
 
-            CollisionBoundingBox = new AxisAlignedBB(0.25f);
-            BoundingBox = CollisionBoundingBox.offset(pos - Vector3.One * CollisionBoundingBox.size / 2);
+            CollisionBoundingBox = new AxisAlignedBb(0.25f);
+            BoundingBox = CollisionBoundingBox.Offset(pos - Vector3.One * CollisionBoundingBox.Size / 2);
 
             Gravity = 1.25f;
 
@@ -64,7 +63,7 @@ namespace SharpCraft.entity
 
             Motion.Xz *= 0.8664021f;
 
-            List<AxisAlignedBB> bbs = SharpCraft.Instance.World.GetBlockCollisionBoxes(BoundingBox);
+            List<AxisAlignedBb> bbs = SharpCraft.Instance.World.GetBlockCollisionBoxes(BoundingBox);
 
             if (bbs.Count > 0)
             {
@@ -149,7 +148,7 @@ namespace SharpCraft.entity
                     continue;
 
                 Vector3 attrTarget = player.Pos;
-                attrTarget.Y += player.GetCollisionBoundingBox().size.Y / 2;
+                attrTarget.Y += player.GetCollisionBoundingBox().Size.Y / 2;
 
                 Vector3 distanceVector = attrTarget - Pos;
 
@@ -209,10 +208,10 @@ namespace SharpCraft.entity
                 for (int i = 0; i < itemsToRender; i++)
                 {
                     Vector3 posO = Vector3.One * (i / 8f);
-                    
+
                     Matrix4 s = Matrix4.CreateScale(0.25f);
                     Matrix4 t = Matrix4.CreateTranslation(pos + vec * 0.25f);
-                    
+
                     Matrix4 t3 = Matrix4.CreateTranslation(posO);
 
                     Matrix4 mat = t3 * t2 * (rot * s) * t;
@@ -239,7 +238,7 @@ namespace SharpCraft.entity
 
                 if (model?.RawModel == null)
                     return;
-                
+
                 Shader.Bind();
 
                 GL.BindVertexArray(model.RawModel.VaoID);
@@ -261,9 +260,8 @@ namespace SharpCraft.entity
 
                 for (int i = 0; i < itemsToRender; i++)
                 {
-                    
                     Vector3 posO = Vector3.One * (i / 8f);
-                    
+
                     Matrix4 s = Matrix4.CreateScale(0.35f);
                     Matrix4 t = Matrix4.CreateTranslation(pos + vec * 0.35f);
                     Matrix4 t3 = Matrix4.CreateTranslation(posO);

@@ -1,6 +1,6 @@
-﻿using System;
+﻿using OpenTK;
+using System;
 using System.IO;
-using OpenTK;
 
 namespace SharpCraft.util
 {

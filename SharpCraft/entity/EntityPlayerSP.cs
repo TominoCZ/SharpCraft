@@ -3,12 +3,12 @@ using OpenTK.Input;
 using SharpCraft.block;
 using SharpCraft.gui;
 using SharpCraft.item;
+using SharpCraft.model;
 using SharpCraft.util;
 using SharpCraft.world;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using SharpCraft.model;
 
 namespace SharpCraft.entity
 {
@@ -58,10 +58,10 @@ namespace SharpCraft.entity
 
         public EntityPlayerSp(World world, Vector3 pos = new Vector3()) : base(world, pos)
         {
-            SharpCraft.Instance.Camera.pos = pos + Vector3.UnitY * 1.625f;
+            SharpCraft.Instance.Camera.Pos = pos + Vector3.UnitY * 1.625f;
 
-            CollisionBoundingBox = new AxisAlignedBB(new Vector3(0.6f, 1.65f, 0.6f));
-            BoundingBox = CollisionBoundingBox.offset(pos - (Vector3.UnitX * CollisionBoundingBox.size.X / 2 + Vector3.UnitZ * CollisionBoundingBox.size.Z / 2));
+            CollisionBoundingBox = new AxisAlignedBb(new Vector3(0.6f, 1.65f, 0.6f));
+            BoundingBox = CollisionBoundingBox.Offset(pos - (Vector3.UnitX * CollisionBoundingBox.Size.X / 2 + Vector3.UnitZ * CollisionBoundingBox.Size.Z / 2));
 
             Hotbar = new ItemStack[9];
             Inventory = new ItemStack[27];
@@ -87,9 +87,9 @@ namespace SharpCraft.entity
 
         public override void Move()
         {
-            AxisAlignedBB bbO = BoundingBox.Union(BoundingBox.offset(Motion));
+            AxisAlignedBb bbO = BoundingBox.Union(BoundingBox.Offset(Motion));
 
-            List<AxisAlignedBB> list = SharpCraft.Instance.World.GetBlockCollisionBoxes(bbO);
+            List<AxisAlignedBb> list = SharpCraft.Instance.World.GetBlockCollisionBoxes(bbO);
 
             if (IsSneaking)
             {
@@ -114,9 +114,9 @@ namespace SharpCraft.entity
                         if (blockO != air || !blockO.Material.CanWalkThrough)
                             continue;
 
-                        var offset = side.ToVec() * CollisionBoundingBox.size * 0.975f;
+                        var offset = side.ToVec() * CollisionBoundingBox.Size * 0.975f;
 
-                        var box = AxisAlignedBB.BLOCK_FULL.offset(posO.Offset(FaceSides.Up).ToVec() + offset);
+                        var box = AxisAlignedBb.BlockFull.Offset(posO.Offset(FaceSides.Up).ToVec() + offset);
 
                         list.Add(box);
                     }
@@ -131,24 +131,24 @@ namespace SharpCraft.entity
 
             for (int i = 0; i < list.Count; i++)
             {
-                AxisAlignedBB blockBb = list[i];
+                AxisAlignedBb blockBb = list[i];
                 Motion.Y = blockBb.CalculateYOffset(BoundingBox, Motion.Y);
             }
-            BoundingBox = BoundingBox.offset(Motion * Vector3.UnitY);
+            BoundingBox = BoundingBox.Offset(Motion * Vector3.UnitY);
 
             for (int i = 0; i < list.Count; i++)
             {
-                AxisAlignedBB blockBb = list[i];
+                AxisAlignedBb blockBb = list[i];
                 Motion.X = blockBb.CalculateXOffset(BoundingBox, Motion.X);
             }
-            BoundingBox = BoundingBox.offset(Motion * Vector3.UnitX);
+            BoundingBox = BoundingBox.Offset(Motion * Vector3.UnitX);
 
             for (int i = 0; i < list.Count; i++)
             {
-                AxisAlignedBB blockBb = list[i];
+                AxisAlignedBb blockBb = list[i];
                 Motion.Z = blockBb.CalculateZOffset(BoundingBox, Motion.Z);
             }
-            BoundingBox = BoundingBox.offset(Motion * Vector3.UnitZ);
+            BoundingBox = BoundingBox.Offset(Motion * Vector3.UnitZ);
 
             SetPositionToBb();
 
@@ -183,7 +183,7 @@ namespace SharpCraft.entity
             if (IsSneaking = state.IsKeyDown(Key.LShift))
                 offset = Vector3.UnitY * -0.15f;
 
-            SharpCraft.Instance.Camera.pos = interpolatedPos + Vector3.UnitY * EyeHeight + offset;
+            SharpCraft.Instance.Camera.Pos = interpolatedPos + Vector3.UnitY * EyeHeight + offset;
 
             if (state.IsKeyDown(Key.W))
             {
@@ -285,10 +285,10 @@ namespace SharpCraft.entity
             bool a = state.IsKeyDown(Key.A);
             bool d = state.IsKeyDown(Key.D);
 
-            if (w) dirVec += SharpCraft.Instance.Camera.forward;
-            if (s) dirVec += -SharpCraft.Instance.Camera.forward;
-            if (a) dirVec += SharpCraft.Instance.Camera.left;
-            if (d) dirVec += -SharpCraft.Instance.Camera.left;
+            if (w) dirVec += SharpCraft.Instance.Camera.Forward;
+            if (s) dirVec += -SharpCraft.Instance.Camera.Forward;
+            if (a) dirVec += SharpCraft.Instance.Camera.Left;
+            if (d) dirVec += -SharpCraft.Instance.Camera.Left;
 
             float mult = 1;
 
@@ -545,7 +545,7 @@ namespace SharpCraft.entity
             BlockPos pos = (replacing = clickedState.Block.IsReplaceable && itemBlock.Block != clickedState.Block) ? moo.blockPos : moo.blockPos.Offset(moo.sideHit);
 
             Block heldBlock = itemBlock.Block;
-            AxisAlignedBB blockBb = heldBlock.BoundingBox.offset(pos.ToVec());
+            AxisAlignedBb blockBb = heldBlock.BoundingBox.Offset(pos.ToVec());
 
             if (!replacing && World.GetBlockState(pos).Block != air || World.GetIntersectingEntitiesBBs(blockBb).Count > 0 && !heldBlock.Material.CanWalkThrough)
                 return;
@@ -641,7 +641,7 @@ namespace SharpCraft.entity
             ItemStack toThrow = stack.Copy(1);
             toThrow.Count = ammountToThrow;
 
-            World?.AddEntity(new EntityItem(World, SharpCraft.Instance.Camera.pos - Vector3.UnitY * 0.35f,
+            World?.AddEntity(new EntityItem(World, SharpCraft.Instance.Camera.Pos - Vector3.UnitY * 0.35f,
                 SharpCraft.Instance.Camera.GetLookVec() * 0.75f + Vector3.UnitY * 0.1f, toThrow));
 
             stack.Count -= ammountToThrow;

@@ -6,7 +6,7 @@ namespace SharpCraft.util
 {
     internal class RayHelper
     {
-        public static bool RayIntersectsBB(Vector3 /*ray*/origin, Vector3 /*ray*/direction, AxisAlignedBB bb, out Vector3 hitPosition, out Vector3 hitNormal)
+        public static bool RayIntersectsBB(Vector3 /*ray*/origin, Vector3 /*ray*/direction, AxisAlignedBb bb, out Vector3 hitPosition, out Vector3 hitNormal)
         {
             direction = direction.Normalized();
             hitNormal = Vector3.One.Normalized();
@@ -20,24 +20,24 @@ namespace SharpCraft.util
 
             if (invrd.X >= 0.0f)
             {
-                tmin = (bb.min.X - origin.X) * invrd.X;
-                tmax = (bb.max.X - origin.X) * invrd.X;
+                tmin = (bb.Min.X - origin.X) * invrd.X;
+                tmax = (bb.Max.X - origin.X) * invrd.X;
             }
             else
             {
-                tmin = (bb.max.X - origin.X) * invrd.X;
-                tmax = (bb.min.X - origin.X) * invrd.X;
+                tmin = (bb.Max.X - origin.X) * invrd.X;
+                tmax = (bb.Min.X - origin.X) * invrd.X;
             }
 
             if (invrd.Y >= 0.0f)
             {
-                tymin = (bb.min.Y - origin.Y) * invrd.Y;
-                tymax = (bb.max.Y - origin.Y) * invrd.Y;
+                tymin = (bb.Min.Y - origin.Y) * invrd.Y;
+                tymax = (bb.Max.Y - origin.Y) * invrd.Y;
             }
             else
             {
-                tymin = (bb.max.Y - origin.Y) * invrd.Y;
-                tymax = (bb.min.Y - origin.Y) * invrd.Y;
+                tymin = (bb.Max.Y - origin.Y) * invrd.Y;
+                tymax = (bb.Min.Y - origin.Y) * invrd.Y;
             }
 
             if (tmin > tymax || tymin > tmax)
@@ -49,13 +49,13 @@ namespace SharpCraft.util
 
             if (invrd.Z >= 0.0f)
             {
-                tzmin = (bb.min.Z - origin.Z) * invrd.Z;
-                tzmax = (bb.max.Z - origin.Z) * invrd.Z;
+                tzmin = (bb.Min.Z - origin.Z) * invrd.Z;
+                tzmax = (bb.Max.Z - origin.Z) * invrd.Z;
             }
             else
             {
-                tzmin = (bb.max.Z - origin.Z) * invrd.Z;
-                tzmax = (bb.min.Z - origin.Z) * invrd.Z;
+                tzmin = (bb.Max.Z - origin.Z) * invrd.Z;
+                tzmax = (bb.Min.Z - origin.Z) * invrd.Z;
             }
 
             if (tmin > tzmax || tzmin > tmax)
@@ -74,11 +74,11 @@ namespace SharpCraft.util
             float t = tmin;
             hitPosition = origin + t * direction;
 
-            Vector3 AABBCenter = (bb.min + bb.max) * 0.5f;
+            Vector3 AABBCenter = (bb.Min + bb.Max) * 0.5f;
 
             Vector3 dir = hitPosition - AABBCenter;
 
-            Vector3 width = bb.max - bb.min;
+            Vector3 width = bb.Max - bb.Min;
             width.X = Math.Abs(width.X);
             width.Y = Math.Abs(width.Y);
             width.Z = Math.Abs(width.Z);
