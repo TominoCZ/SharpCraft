@@ -3,9 +3,9 @@ using SharpCraft.entity;
 
 namespace SharpCraft.block
 {
-    internal class BlockSlab : Block
+    public class BlockSlab : Block
     {
-        public BlockSlab() : base(Material.GetMaterial("stone"), "slab")
+        protected BlockSlab(Material mat) : base(mat) //TODO
         {
             IsFullCube = false;
 

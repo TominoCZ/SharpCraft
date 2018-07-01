@@ -131,7 +131,7 @@ namespace SharpCraft.render
             world.LoadManager.LoadImportantChunks();
             world.LoadManager.BuildImportantChunks();
 
-            GL.BindTexture(TextureTarget.Texture2D, JsonModelLoader.TEXTURE_BLOCKS);
+            GL.BindTexture(TextureTarget.Texture2D, JsonModelLoader.TextureBlocks);
 
             MouseOverObject hit = SharpCraft.Instance.MouseOverObject;
 
@@ -175,9 +175,9 @@ namespace SharpCraft.render
             if (wps.Count == 0)
                 return;
 
-            GL.BindTexture(TextureTarget.Texture2D, JsonModelLoader.TEXTURE_BLOCKS);
+            GL.BindTexture(TextureTarget.Texture2D, JsonModelLoader.TextureBlocks);
 
-            ModelBlock model = JsonModelLoader.GetModelForBlock(BlockRegistry.GetBlock<BlockRare>().UnlocalizedName);
+            ModelBlock model = JsonModelLoader.GetModelForBlock(BlockRegistry.GetBlock<BlockRare>());
 
             float size = 0.25f;
 
@@ -328,7 +328,7 @@ namespace SharpCraft.render
 
             float angle = partialTick * MathHelper.TwoPi * (SharpCraft.Instance.Player.IsRunning ? 7 : 5);
 
-            float height = 0.05f * Math.Clamp(partialMotion.Xz.Length * 5, 0, 1);
+            float height = 0.075f * Math.Clamp(partialMotion.Xz.Length * 5, 0, 1);
 
             float offsetX = (float)Math.Cos(angle) * height;
             float offsetY = (float)Math.Sin(partialTick * 360 > 180 ? -angle * 2 + MathHelper.Pi : angle * 2) * height * 0.5f;
@@ -356,7 +356,7 @@ namespace SharpCraft.render
                                       * Matrix4.CreateRotationZ(animationSine1 * MathHelper.PiOver6 / 1.35f)
                                       * Matrix4.CreateTranslation(0, 0.5f, 0);
 
-            Matrix4 r1 = Matrix4.CreateRotationY(MathHelper.DegreesToRadians(0)) * Matrix4.CreateRotationX(MathHelper.DegreesToRadians(45)) * Matrix4.CreateRotationZ(MathHelper.DegreesToRadians(-40));
+            Matrix4 r1 = Matrix4.CreateRotationX(MathHelper.DegreesToRadians(45)) * Matrix4.CreateRotationZ(MathHelper.DegreesToRadians(-40)) * Matrix4.CreateRotationY(MathHelper.DegreesToRadians(5));
             Matrix4 r2 = Matrix4.CreateRotationX(rotVec.X - SharpCraft.Instance.Camera.PitchOffset) * Matrix4.CreateRotationY(rotVec.Y);
 
             Matrix4 s = Matrix4.CreateScale(1.5f);
@@ -382,10 +382,10 @@ namespace SharpCraft.render
 
         private void RenderBlockInHand(Block block, float partialTicks)
         {
-            GL.BindTexture(TextureTarget.Texture2D, JsonModelLoader.TEXTURE_BLOCKS);
+            GL.BindTexture(TextureTarget.Texture2D, JsonModelLoader.TextureBlocks);
             GL.DepthRange(0, 0.1f);
 
-            ModelBlock model = JsonModelLoader.GetModelForBlock(block.UnlocalizedName);
+            ModelBlock model = JsonModelLoader.GetModelForBlock(block);
 
             if (model == null)
                 return;
@@ -456,12 +456,12 @@ namespace SharpCraft.render
 
         private void RenderItemInHand(Item item, float partialTicks)
         {
-            GL.BindTexture(TextureTarget.Texture2D, JsonModelLoader.TEXTURE_ITEMS);
+            GL.BindTexture(TextureTarget.Texture2D, JsonModelLoader.TextureItems);
             GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Fill);
             GL.Disable(EnableCap.CullFace);
             GL.DepthRange(0, 0.1f);
 
-            ModelItem model = JsonModelLoader.GetModelForItem(item.UnlocalizedName);
+            ModelItem model = JsonModelLoader.GetModelForItem(item);
 
             if (model == null)
                 return;
@@ -477,7 +477,7 @@ namespace SharpCraft.render
 
             float angle = partialTick * MathHelper.TwoPi * (SharpCraft.Instance.Player.IsRunning ? 7 : 5);
 
-            float height = 0.15f * Math.Clamp(partialMotion.Xz.Length * 5, 0, 1);
+            float height = 0.1f * Math.Clamp(partialMotion.Xz.Length * 5, 0, 1);
 
             float offsetX = (float)Math.Cos(angle) * height;
             float offsetY = (float)Math.Sin(partialTick * 360 > 180 ? -angle * 2 + MathHelper.Pi : angle * 2) * height * 0.5f;

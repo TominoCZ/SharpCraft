@@ -8,8 +8,9 @@ namespace SharpCraft.item
     {
         public Block Block { get; }
 
-        public ItemBlock(Block block) : base(block.UnlocalizedName)
+        public ItemBlock(Block block)
         {
+            SetUnlocalizedName(block.UnlocalizedName);
             Block = block;
         }
     }

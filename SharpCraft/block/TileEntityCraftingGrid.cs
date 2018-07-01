@@ -6,6 +6,7 @@ using SharpCraft.model;
 using SharpCraft.util;
 using SharpCraft.world;
 using System;
+#pragma warning disable 618
 
 namespace SharpCraft.block
 {
@@ -20,6 +21,8 @@ namespace SharpCraft.block
         private int _ticks;
         private int _ticksLast;
         private readonly int[,] _placeDelay = new int[3, 3];
+
+        public bool HasResult => _product != null;
 
         public TileEntityCraftingGrid(World world, BlockPos pos) : base(world)
         {
@@ -124,12 +127,12 @@ namespace SharpCraft.block
                     {
                         if (stack.Item is ItemBlock ib)
                         {
-                            var model = JsonModelLoader.GetModelForBlock(ib.UnlocalizedName);
+                            var model = JsonModelLoader.GetModelForBlock(ib.Block);
 
                             var mat = Matrix4.CreateTranslation(_pos.X + offX + offsetX, _pos.Y + 1, _pos.Z + offZ + offsetY);
                             var scale = Matrix4.CreateScale(grid);
 
-                            GL.BindTexture(TextureTarget.Texture2D, JsonModelLoader.TEXTURE_BLOCKS);
+                            GL.BindTexture(TextureTarget.Texture2D, JsonModelLoader.TextureBlocks);
 
                             model.Bind();
                             model.Shader.UpdateGlobalUniforms();
@@ -140,13 +143,13 @@ namespace SharpCraft.block
                         }
                         else
                         {
-                            var model = JsonModelLoader.GetModelForItem(stack.Item.UnlocalizedName);
+                            var model = JsonModelLoader.GetModelForItem(stack.Item);
 
                             var rot = Matrix4.CreateRotationZ(MathHelper.DegreesToRadians(90));
                             var mat = rot * Matrix4.CreateTranslation(_pos.X + offX + offsetX + grid, _pos.Y + 1, _pos.Z + offZ + offsetY);
                             var scale = Matrix4.CreateScale(grid);
 
-                            GL.BindTexture(TextureTarget.Texture2D, JsonModelLoader.TEXTURE_ITEMS);
+                            GL.BindTexture(TextureTarget.Texture2D, JsonModelLoader.TextureItems);
 
                             model.Bind();
                             model.Shader.UpdateGlobalUniforms();
@@ -169,9 +172,9 @@ namespace SharpCraft.block
                 {
                     var mat = Matrix4.CreateTranslation(_pos.X + 0.5f, _pos.Y + 1.5f + offY, _pos.Z + 0.5f);
                     var scale = Matrix4.CreateTranslation(Vector3.One * -0.5f) * Matrix4.CreateScale(0.35f);
-                    var model = JsonModelLoader.GetModelForBlock(ib.UnlocalizedName);
+                    var model = JsonModelLoader.GetModelForBlock(ib.Block);
 
-                    GL.BindTexture(TextureTarget.Texture2D, JsonModelLoader.TEXTURE_BLOCKS);
+                    GL.BindTexture(TextureTarget.Texture2D, JsonModelLoader.TextureBlocks);
 
                     model.Bind();
                     model.Shader.UpdateGlobalUniforms();
@@ -184,9 +187,9 @@ namespace SharpCraft.block
                 {
                     var mat = Matrix4.CreateTranslation(_pos.X + 0.5f, _pos.Y + 1.55f + offY, _pos.Z + 0.5f);
                     var scale = Matrix4.CreateTranslation(Vector3.One * -0.5f) * Matrix4.CreateScale(0.475f);
-                    var model = JsonModelLoader.GetModelForItem(_product.Item.UnlocalizedName);
+                    var model = JsonModelLoader.GetModelForItem(_product.Item);
 
-                    GL.BindTexture(TextureTarget.Texture2D, JsonModelLoader.TEXTURE_ITEMS);
+                    GL.BindTexture(TextureTarget.Texture2D, JsonModelLoader.TextureItems);
 
                     model.Bind();
                     model.Shader.UpdateGlobalUniforms();
@@ -265,6 +268,20 @@ namespace SharpCraft.block
             _grid[x, y] = stack;
 
             Save();
+        }
+
+        public bool IsEmpty()
+        {
+            for (int y = 0; y < 3; y++)
+            {
+                for (int x = 0; x < 3; x++)
+                {
+                    if (_grid[x, y] != null)
+                        return false;
+                }
+            }
+
+            return true;
         }
 
         private void ClearGrid()

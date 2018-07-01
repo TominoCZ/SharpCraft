@@ -46,6 +46,7 @@ namespace SharpCraft.entity
         // falling variables
         private float _fallDistance;
 
+        private bool _wasSpaceDown;
         private bool _wasWalkDown;
         private bool _wasSneaking;
         private bool _isFalling;
@@ -83,6 +84,50 @@ namespace SharpCraft.entity
                 _runTimer--;
 
             base.Update();
+        }
+
+        private void UpdateCameraMovement()
+        {
+            if (SharpCraft.Instance.GuiScreen != null)
+                return;
+
+            KeyboardState state = SharpCraft.Instance.KeyboardState;
+
+            Vector2 dirVec = Vector2.Zero;
+
+            bool w = state.IsKeyDown(Key.W); //might use this later
+            bool s = state.IsKeyDown(Key.S);
+            bool a = state.IsKeyDown(Key.A);
+            bool d = state.IsKeyDown(Key.D);
+
+            if (w) dirVec += SharpCraft.Instance.Camera.Forward;
+            if (s) dirVec += -SharpCraft.Instance.Camera.Forward;
+            if (a) dirVec += SharpCraft.Instance.Camera.Left;
+            if (d) dirVec += -SharpCraft.Instance.Camera.Left;
+
+            float mult = 1;
+
+            if (IsRunning && !IsSneaking)
+                mult = 1.5f;
+            else if (IsSneaking)
+            {
+                IsRunning = false;
+                mult = 0.625f;
+            }
+
+            if (dirVec != Vector2.Zero)
+            {
+                _moveSpeedMult = MathHelper.Clamp(_moveSpeedMult + 0.085f, 1, 1.55f);
+
+                _moveSpeed = MathUtil.Clamp(_moveSpeed + dirVec.Normalized() * 0.1f * _moveSpeedMult, 0, _maxMoveSpeed);
+
+                Motion.Xz = _moveSpeed * mult;
+            }
+            else
+            {
+                _moveSpeed = Vector2.Zero;
+                _moveSpeedMult = 1;
+            }
         }
 
         public override void Move()
@@ -170,6 +215,9 @@ namespace SharpCraft.entity
                 Motion.Y *= 0.15f;
             else if (OnGround)
                 Motion.Y = 0;
+
+            if (stoppedX || stoppedZ)
+                IsRunning = false;
         }
 
         public override void Render(float partialTicks)
@@ -181,7 +229,15 @@ namespace SharpCraft.entity
             Vector3 offset = Vector3.Zero;
 
             if (IsSneaking = state.IsKeyDown(Key.LShift))
-                offset = Vector3.UnitY * -0.15f;
+                offset = Vector3.UnitY * -0.2f;
+
+            if (state.IsKeyDown(Key.Space) && !_wasSpaceDown && OnGround)
+            {
+                _wasSpaceDown = true;
+                Motion.Y = 0.55F;
+            }
+            else if ((!state.IsKeyDown(Key.Space) || OnGround) && _wasSpaceDown)
+                _wasSpaceDown = false;
 
             SharpCraft.Instance.Camera.Pos = interpolatedPos + Vector3.UnitY * EyeHeight + offset;
 
@@ -269,47 +325,6 @@ namespace SharpCraft.entity
 
             // increase health
             Health += 0.06f; // 0.5 heart in 4 seconds
-        }
-
-        private void UpdateCameraMovement()
-        {
-            if (SharpCraft.Instance.GuiScreen != null)
-                return;
-
-            KeyboardState state = SharpCraft.Instance.KeyboardState;
-
-            Vector2 dirVec = Vector2.Zero;
-
-            bool w = state.IsKeyDown(Key.W); //might use this later
-            bool s = state.IsKeyDown(Key.S);
-            bool a = state.IsKeyDown(Key.A);
-            bool d = state.IsKeyDown(Key.D);
-
-            if (w) dirVec += SharpCraft.Instance.Camera.Forward;
-            if (s) dirVec += -SharpCraft.Instance.Camera.Forward;
-            if (a) dirVec += SharpCraft.Instance.Camera.Left;
-            if (d) dirVec += -SharpCraft.Instance.Camera.Left;
-
-            float mult = 1;
-
-            if (IsRunning && !IsSneaking)
-                mult = 1.5f;
-            else if (IsSneaking)
-                mult = 0.625f;
-
-            if (dirVec != Vector2.Zero)
-            {
-                _moveSpeedMult = MathHelper.Clamp(_moveSpeedMult + 0.085f, 1, 1.55f);
-
-                _moveSpeed = MathUtil.Clamp(_moveSpeed + dirVec.Normalized() * 0.1f * _moveSpeedMult, 0, _maxMoveSpeed);
-
-                Motion.Xz = _moveSpeed * mult;
-            }
-            else
-            {
-                _moveSpeed = Vector2.Zero;
-                _moveSpeedMult = 1;
-            }
         }
 
         public void FastMoveStack(int index)
@@ -483,9 +498,9 @@ namespace SharpCraft.entity
                 {
                     BlockState state = World.GetBlockState(moo.blockPos);
 
-                    state.Block.OnRightClicked(SharpCraft.Instance.MouseOverObject, this);
+                    var activated = state.Block.OnActivated(SharpCraft.Instance.MouseOverObject, this);
 
-                    if (!state.Block.CanBeInteractedWith || IsSneaking)
+                    if (IsSneaking && !activated)
                         PlaceBlock();
                 }
                 else if (btn == MouseButton.Left)
@@ -503,7 +518,7 @@ namespace SharpCraft.entity
 
             BlockState state = World.GetBlockState(moo.blockPos);
 
-            if (JsonModelLoader.GetModelForBlock(state.Block.UnlocalizedName) != null)
+            if (JsonModelLoader.GetModelForBlock(state.Block) != null)
                 SharpCraft.Instance.ParticleRenderer.SpawnDestroyParticles(moo.blockPos, state);
 
             World.SetBlockState(moo.blockPos, BlockRegistry.GetBlock<BlockAir>().GetState());
@@ -515,20 +530,22 @@ namespace SharpCraft.entity
 
             Vector3 motion = new Vector3(MathUtil.NextFloat(-0.15f, 0.15f), 0.3f, MathUtil.NextFloat(-0.15f, 0.15f));
 
-            EntityItem entityDrop = new EntityItem(World, moo.blockPos.ToVec() + Vector3.One * 0.5f, motion, new ItemStack((ItemBlock)ItemRegistry.GetItem(state.Block.UnlocalizedName), 1, state.Block.GetMetaFromState(state)));
+            EntityItem entityDrop = new EntityItem(World, moo.blockPos.ToVec() + Vector3.One * 0.5f, motion, new ItemStack(ItemRegistry.GetItem(state.Block), 1, state.Block.GetMetaFromState(state)));
 
             World.AddEntity(entityDrop);
 
             SharpCraft.Instance.GetMouseOverObject();
         }
 
-        public void PlaceBlock()
+        private void PlaceBlock()
         {
             MouseOverObject moo = SharpCraft.Instance.MouseOverObject;
             if (moo.hit != HitType.Block)
                 return;
 
             ItemStack stack = GetEquippedItemStack();
+
+            BlockState clickedState = World.GetBlockState(moo.blockPos);
 
             if (!(stack?.Item is ItemBlock itemBlock))
                 return;
@@ -537,8 +554,6 @@ namespace SharpCraft.entity
             Block glass = BlockRegistry.GetBlock<BlockGlass>();
             Block grass = BlockRegistry.GetBlock<BlockGrass>();
             Block dirt = BlockRegistry.GetBlock<BlockDirt>();
-
-            BlockState clickedState = World.GetBlockState(moo.blockPos);
 
             bool replacing;
 
@@ -599,7 +614,7 @@ namespace SharpCraft.entity
 
                         if (stack?.IsEmpty == true)
                         {
-                            ItemBlock itemBlock = (ItemBlock)ItemRegistry.GetItem(clickedState.Block.UnlocalizedName);
+                            ItemBlock itemBlock = ItemRegistry.GetItem(clickedState.Block);
                             ItemStack itemStack = new ItemStack(itemBlock, 1, clickedState.Block.GetMetaFromState(clickedState));
 
                             SetItemStackInHotbar(i, itemStack);
@@ -608,7 +623,7 @@ namespace SharpCraft.entity
                         }
                     }
 
-                    SetItemStackInSelectedSlot(new ItemStack(ItemRegistry.GetItem(clickedState.Block.UnlocalizedName), 1, clickedState.Block.GetMetaFromState(clickedState)));
+                    SetItemStackInSelectedSlot(new ItemStack(ItemRegistry.GetItem(clickedState.Block), 1, clickedState.Block.GetMetaFromState(clickedState)));
                 }
             }
         }

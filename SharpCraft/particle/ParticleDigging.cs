@@ -24,11 +24,11 @@ namespace SharpCraft.particle
         {
         }
 
-        public ParticleDigging(World world, Vector3 pos, Vector3 motion, float particleScale, BlockState state, FaceSides side) : base(world, pos, motion, particleScale, JsonModelLoader.TEXTURE_BLOCKS)
+        public ParticleDigging(World world, Vector3 pos, Vector3 motion, float particleScale, BlockState state, FaceSides side) : base(world, pos, motion, particleScale, JsonModelLoader.TextureBlocks)
         {
             State = state;
 
-            ModelBlock model = JsonModelLoader.GetModelForBlock(state.Block.UnlocalizedName);
+            ModelBlock model = JsonModelLoader.GetModelForBlock(state.Block);
 
             if (model.RawModel is ModelBlockRaw mbr)
             {

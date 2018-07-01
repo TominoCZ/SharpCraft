@@ -182,7 +182,7 @@ namespace SharpCraft.world.chunk.region
 
             public WriteC(RegionStaticImpl<TCord> r) : base(r._filePath, FileMode.Open, FileAccess.Write, FileShare.Write)
             {
-                this._r = r;
+                _r = r;
             }
 
             public override void Close()
@@ -198,7 +198,7 @@ namespace SharpCraft.world.chunk.region
 
             public ReadC(RegionStaticImpl<TCord> r) : base(r._filePath, FileMode.Open, FileAccess.Read, FileShare.Read)
             {
-                this._r = r;
+                _r = r;
             }
 
             public override void Close()

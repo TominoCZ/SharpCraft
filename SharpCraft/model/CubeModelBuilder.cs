@@ -68,7 +68,7 @@ namespace SharpCraft.model
             {
                 int uvIndex = 8 * faceIndex;
 
-                TextureType side = pair.Key;
+                Facing side = pair.Key;
                 JsonCubeFaceUv textureNode = pair.Value;
 
                 //edit: textureNode.Texture can be anything. it is a variable defined by the modeller
@@ -121,7 +121,7 @@ namespace SharpCraft.model
         {
             foreach (var pair in cube.faces.OrderBy(p => (int)p.Key))
             {
-                TextureType side = pair.Key;
+                Facing side = pair.Key;
                 JsonCubeFaceUv textureNode = pair.Value;
 
                 if (modelTextureVariables.TryGetValue(textureNode.texture, out var textureNameForFace) && textureMap.TryGetValue(textureNameForFace, out var tme))
@@ -166,7 +166,7 @@ namespace SharpCraft.model
         }
 
         [Obsolete]
-        public static void AppendFace(TextureType side, float[] from, float[] to, Vector3 rotation, Vector3 rotationOrigin,
+        public static void AppendFace(Facing side, float[] from, float[] to, Vector3 rotation, Vector3 rotationOrigin,
             ref float[] vertexes, ref float[] normals, int startIndex)
         {
             FaceSides faceSide = FaceSides.Parse(side); //TextureType parsed to FaceSides, also a normal of this face
@@ -200,7 +200,7 @@ namespace SharpCraft.model
             }
         }
 
-        public static void AppendFace(TextureType side, float[] from, float[] to, Vector3 rotation, Vector3 rotationOrigin,
+        public static void AppendFace(Facing side, float[] from, float[] to, Vector3 rotation, Vector3 rotationOrigin,
             ref List<float> vertexes, ref List<float> normals)
         {
             FaceSides faceSide = FaceSides.Parse(side); //TextureType parsed to FaceSides, also a normal of this face
@@ -238,7 +238,7 @@ namespace SharpCraft.model
         {
             List<float> vertexes = new List<float>();
 
-            void AppendVertexes(TextureType side)
+            void AppendVertexes(Facing side)
             {
                 var face = _cube[FaceSides.Parse(side)];
 
@@ -261,12 +261,12 @@ namespace SharpCraft.model
                 }
             }
 
-            AppendVertexes(TextureType.up);
-            AppendVertexes(TextureType.down);
-            AppendVertexes(TextureType.north);
-            AppendVertexes(TextureType.south);
-            AppendVertexes(TextureType.east);
-            AppendVertexes(TextureType.west);
+            AppendVertexes(Facing.up);
+            AppendVertexes(Facing.down);
+            AppendVertexes(Facing.north);
+            AppendVertexes(Facing.south);
+            AppendVertexes(Facing.east);
+            AppendVertexes(Facing.west);
 
             return vertexes.ToArray();
         }
@@ -275,7 +275,7 @@ namespace SharpCraft.model
         {
             List<float> normals = new List<float>();
 
-            void AppendVertexes(TextureType side)
+            void AppendVertexes(Facing side)
             {
                 var normal = FaceSides.Parse(side);
 
@@ -287,12 +287,12 @@ namespace SharpCraft.model
                 }
             }
 
-            AppendVertexes(TextureType.up);
-            AppendVertexes(TextureType.down);
-            AppendVertexes(TextureType.north);
-            AppendVertexes(TextureType.south);
-            AppendVertexes(TextureType.east);
-            AppendVertexes(TextureType.west);
+            AppendVertexes(Facing.up);
+            AppendVertexes(Facing.down);
+            AppendVertexes(Facing.north);
+            AppendVertexes(Facing.south);
+            AppendVertexes(Facing.east);
+            AppendVertexes(Facing.west);
 
             return normals.ToArray();
         }

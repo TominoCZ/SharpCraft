@@ -1,4 +1,5 @@
 ﻿using System;
+using SharpCraft.util;
 
 namespace SharpCraft.item
 {
@@ -55,7 +56,7 @@ namespace SharpCraft.item
             return !IsEmpty && !other.IsEmpty && Meta == other.Meta && Item.UnlocalizedName == other.Item.UnlocalizedName; //TODO - REALLY BAD!!! (because rn the unlocalized names are 'dirt', 'stone', .. and not 'sharpcraft.blocks.dirt')
         }
 
-        public override string ToString() => Item != null ? Item.UnlocalizedName : ""; //TODO!!
+        public override string ToString() => Item != null ? LangUtil.GetLocalized(Item.UnlocalizedName) : ""; //TODO!!
 
         public ItemStack Combine(ItemStack other)
         {

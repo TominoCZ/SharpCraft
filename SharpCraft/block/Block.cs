@@ -16,13 +16,12 @@ namespace SharpCraft.block
 
         public AxisAlignedBb BoundingBox { get; protected set; } = AxisAlignedBb.BlockFull;
 
-        public string UnlocalizedName { get; protected set; }
+        public string UnlocalizedName { get; private set; }
 
         public int StateCount => _states.Count;
 
         public int Hardness { get; protected set; } = 8;
-
-        public bool CanBeInteractedWith { get; protected set; } = false;
+        
         public bool IsOpaque { get; protected set; } = true;
         public bool HasTransparency { get; protected set; }
 
@@ -31,10 +30,14 @@ namespace SharpCraft.block
 
         public bool IsReplaceable { get; protected set; } = false;
 
-        protected Block(Material material, string unlocalizedName)
+        protected Block(Material material)
         {
-            UnlocalizedName = unlocalizedName;
             Material = material;
+        }
+
+        protected void SetUnlocalizedName(string modid, string unlocalizedName)
+        {
+            UnlocalizedName = modid + ".block." + unlocalizedName;
         }
 
         public void RegisterState(JsonModelLoader loader, BlockState state)
@@ -57,8 +60,15 @@ namespace SharpCraft.block
             DefaultShader = shader;
         }
 
-        public virtual void OnRightClicked(MouseOverObject moo, EntityPlayerSp clicked)
+        /// <summary>
+        /// If the returned value is true, the held block is not going to be placed.
+        /// </summary>
+        /// <param name="moo"></param>
+        /// <param name="clicked"></param>
+        /// <returns></returns>
+        public virtual bool OnActivated(MouseOverObject moo, EntityPlayerSp clicked)
         {
+            return false;
         }
 
         public virtual void OnPlaced(World world, BlockPos pos, EntityPlayerSp placer)
@@ -69,7 +79,7 @@ namespace SharpCraft.block
         {
             player.World.RemoveTileEntity(pos);
         }
-
+        
         public virtual TileEntity CreateTileEntity(World world, BlockPos pos)
         {
             return null;

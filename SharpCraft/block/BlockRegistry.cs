@@ -23,10 +23,9 @@ namespace SharpCraft.block
         {
             Block.SetDefaultShader(new Shader<ModelBlock>("block"));
 
-            foreach (var pair in _registry)
+            foreach (var block in _registry.Values)
             {
-                pair.Value.RegisterState(loader,
-                    new BlockState(pair.Value, JsonModelLoader.GetModelForBlock(pair.Key)));
+                block.RegisterState(loader, new BlockState(block, JsonModelLoader.GetModelForBlock(block)));
             }
 
             loader.LoadBlocks();

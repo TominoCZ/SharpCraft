@@ -10,23 +10,27 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using SharpCraft.util;
 using Bitmap = System.Drawing.Bitmap;
+using Image = System.Drawing.Image;
+#pragma warning disable 618
+
 #pragma warning disable 612
 
 namespace SharpCraft.model
 {
     public class JsonModelLoader
     {
-        public static int TEXTURE_BLOCKS;
-        public static int TEXTURE_ITEMS;
+        public static int TextureBlocks;
+        public static int TextureItems;
 
-        private static readonly ConcurrentDictionary<string, ModelBlock> _blockModels = new ConcurrentDictionary<string, ModelBlock>();
-        private static readonly ConcurrentDictionary<string, ModelItem> _itemModels = new ConcurrentDictionary<string, ModelItem>();
-        private static readonly Dictionary<string, ModelCustom> _customModels = new Dictionary<string, ModelCustom>();
+        private static readonly ConcurrentDictionary<string, ModelBlock> BlockModels = new ConcurrentDictionary<string, ModelBlock>();
+        private static readonly ConcurrentDictionary<string, ModelItem> ItemModels = new ConcurrentDictionary<string, ModelItem>();
+        private static readonly Dictionary<string, ModelCustom> CustomModels = new Dictionary<string, ModelCustom>();
 
         private static JsonModelLoader _instance;
 
-        private static Vector3 V2, V3, V4, NORMAL;
+        private static Vector3 _v2, _v3, _v4, _normal;
 
         private static Shader<ModelBlock> _blockShader;
         private static Shader<ModelItem> _itemShader;
@@ -57,7 +61,9 @@ namespace SharpCraft.model
 
             foreach (var block in listOfBlocks)
             {
-                string file = $"{dir}\\{block.UnlocalizedName}.json";
+                var unlocalizedLast = LangUtil.GetUnlocalizedNameLast(block.UnlocalizedName);
+
+                string file = $"{dir}\\{unlocalizedLast}.json";
 
                 JsonModel bjm;
 
@@ -66,14 +72,14 @@ namespace SharpCraft.model
                     var cube = new JsonCube();
                     var uv = new JsonCubeFaceUv { texture = "item" };
 
-                    cube.faces = new Dictionary<TextureType, JsonCubeFaceUv>
+                    cube.faces = new Dictionary<Facing, JsonCubeFaceUv>
                     {
-                        { TextureType.north, uv },
-                        { TextureType.south, uv },
-                        { TextureType.west, uv },
-                        { TextureType.east, uv },
-                        { TextureType.up, uv },
-                        { TextureType.down, uv }
+                        { Facing.north, uv },
+                        { Facing.south, uv },
+                        { Facing.west, uv },
+                        { Facing.east, uv },
+                        { Facing.up, uv },
+                        { Facing.down, uv }
                     };
 
                     cube.from = new[] { 0f, 0, 0 };
@@ -93,9 +99,7 @@ namespace SharpCraft.model
                     bjm = FixBlockJson(file);
                 }
 
-                string blockName = Path.GetFileNameWithoutExtension(file);
-
-                blockModels.TryAdd(blockName, bjm); //save what block is using what model
+                blockModels.TryAdd(block.UnlocalizedName, bjm); //save what block is using what model
 
                 foreach (var pair in bjm.textures) //iterating over the textureMap in the Json model
                 {
@@ -132,7 +136,7 @@ namespace SharpCraft.model
                     particleTexture = model.textures.Values.ToArray()[SharpCraft.Instance.Random.Next(0, model.textures.Count)];
                 if (!model.textures.TryGetValue("item", out var slotTexture))
                 {
-                    if (model.cubes.Length > 0 && model.cubes[0].faces.TryGetValue(TextureType.south, out var uv))
+                    if (model.cubes.Length > 0 && model.cubes[0].faces.TryGetValue(Facing.south, out var uv))
                         slotTexture = model.textures[uv.texture];
                 }
 
@@ -141,10 +145,10 @@ namespace SharpCraft.model
 
                 ModelBlock mb = new ModelBlock(slotTme, particleTme, _blockShader, ModelManager.LoadBlockModelToVao(vertexes, normals, uvs));
 
-                _blockModels.TryAdd(name, mb);
+                BlockModels.TryAdd(name, mb);
             }
 
-            TEXTURE_BLOCKS = id;
+            TextureBlocks = id;
         }
 
         public void LoadItems()
@@ -162,7 +166,9 @@ namespace SharpCraft.model
                 if (item is ItemBlock)
                     continue;
 
-                string file = $"{dir}\\{item.UnlocalizedName}.json";
+                string unlocalizedLast = LangUtil.GetUnlocalizedNameLast(item.UnlocalizedName);
+
+                string file = $"{dir}\\{unlocalizedLast}.json";
 
                 var models = new List<JsonModel>();
 
@@ -171,9 +177,9 @@ namespace SharpCraft.model
                     var cube = new JsonCube();
                     var uv = new JsonCubeFaceUv { texture = "item" };
 
-                    cube.faces = new Dictionary<TextureType, JsonCubeFaceUv>
+                    cube.faces = new Dictionary<Facing, JsonCubeFaceUv>
                     {
-                        { TextureType.west, uv }
+                        { Facing.west, uv }
                     };
 
                     cube.from = new[] { 8f, 0, 0 };
@@ -185,7 +191,7 @@ namespace SharpCraft.model
                         {
                             cube
                         },
-                        textures = new Dictionary<string, string> { { "item", item.UnlocalizedName } }
+                        textures = new Dictionary<string, string> { { "item", unlocalizedLast } }
                     };
 
                     models.Add(bjm);
@@ -204,10 +210,8 @@ namespace SharpCraft.model
 
                     models.Reverse();
                 }
-
-                string itemName = Path.GetFileNameWithoutExtension(file);
-
-                itemModels.TryAdd(itemName, models); //save what block is using what model
+                
+                itemModels.TryAdd(item.UnlocalizedName, models); //save what block is using what model
 
                 foreach (var jsonModel in models)
                 {
@@ -257,7 +261,7 @@ namespace SharpCraft.model
                         }
                         catch
                         {
-                            Console.WriteLine($"ERROR: Found duplicate texture names in inhertied models!");
+                            Console.WriteLine("ERROR: Found duplicate texture names in inhertied models!");
                         }
                     }
 
@@ -273,10 +277,10 @@ namespace SharpCraft.model
 
                 ModelItem mi = new ModelItem(tme, _itemShader, ModelManager.LoadItemModelToVao(vertexes.ToArray(), normals.ToArray(), uvs.ToArray()));
 
-                _itemModels.TryAdd(name, mi);
+                ItemModels.TryAdd(name, mi);
             }
 
-            TEXTURE_ITEMS = id;
+            TextureItems = id;
         }
 
         public static bool LoadModel(string path, Shader<ModelCustom> shader) //TODO
@@ -322,10 +326,6 @@ namespace SharpCraft.model
             List<float> normals = new List<float>();
             List<float> uvs = new List<float>();
 
-            //float[] vertexes = new float[72 * model.cubes.Length];
-            //float[] normals = new float[72 * model.cubes.Length];
-            //float[] uvs = new float[48 * model.cubes.Length];
-
             foreach (var model in models)
             {
                 foreach (var cube in model.cubes)
@@ -337,94 +337,11 @@ namespace SharpCraft.model
 
             var customModel = new ModelCustom(id, ModelManager.LoadModel3ToVao(vertexes.ToArray(), normals.ToArray(), uvs.ToArray()), shader);
 
-            _customModels.Add(path, customModel);
+            CustomModels.Add(path, customModel);
 
             return true;
-            //return customModel;
         }
-
-        /*
-        //TODO - finish + create model from texture if model not found
-        private int LoadItems()
-        {
-            string dirBlock = $"{SharpCraft.Instance.GameFolderDir}\\SharpCraft_Data\\assets\\models\\block";
-            string dirItem = $"{SharpCraft.Instance.GameFolderDir}\\SharpCraft_Data\\assets\\models\\item";
-
-            if (!Directory.Exists(dirBlock) || !Directory.Exists(dirItem))
-                return 0;
-
-            // string[] files = Directory.GetFiles(dir); //TODO - ONLY LOAD JSONS FOR REGISTERED BLOCKS!
-
-            var listOfItems = ItemRegistry.AllItems();
-
-            List<string> nonDuplicateTextures = new List<string>();
-
-            var itemModels = new ConcurrentDictionary<string, JsonModel>();
-
-            foreach (var iitem in listOfItems)
-            {
-                string file = "";
-
-                bool isItemBlock = false;
-
-                if (iitem is ItemBlock itemBlock)
-                {
-                    isItemBlock = true;
-                    file = $"{dirBlock}\\{itemBlock.UnlocalizedName}.json";
-                }
-                else if (iitem is Item item)
-                    file = $"{dirItem}\\{item.UnlocalizedName}.json";
-
-                if (!File.Exists(file))
-                    continue;
-
-                JsonModel bjm = JsonConvert.DeserializeObject<JsonModel>(File.ReadAllText(file));
-
-                string itemName = Path.GetFileNameWithoutExtension(file);
-
-                itemModels.TryAdd(itemName, bjm); //save what block is using what model
-
-                if (isItemBlock)
-                    continue;
-
-                foreach (var pair in bjm.textures) //iterating over the textureMap in the Json model
-                {
-                    if (!nonDuplicateTextures.Contains(pair.Value))
-                    {
-                        nonDuplicateTextures.Add(pair.Value); //add the current texture name to a list of all textureMap if isn't already there
-                    }
-                }
-            }
-
-            var textureMapElements = new Dictionary<string, TextureMapElement>(); //each texture name has it's UV values TODO - maybe make a TextureMap class where this could be used
-
-            var id = Stitch(nonDuplicateTextures.ToArray(), 16, textureMapElements); // stitch all textureMap, return the texture ID of the registered texture in VRAM
-
-            foreach (var pair in itemModels) //one model per registered block
-            {
-                string name = pair.Key;
-                JsonModel model = pair.Value;
-
-                float[] vertexes = new float[72 * model.cubes.Length];
-                float[] normals = new float[72 * model.cubes.Length];
-                float[] uvs = new float[48 * model.cubes.Length];
-
-                for (var index = 0; index < model.cubes.Length; index++)
-                {
-                    var cube = model.cubes[index];
-
-                    CubeModelBuilder.AppendCubeModel(cube, model.textures, textureMapElements, ref vertexes, ref normals, ref uvs, index);
-                }
-
-                //ModelBlock mb = new ModelBlock(blockShader, ModelManager.LoadBlockModelToVao(vertexes, normals, uvs));
-
-                //_itemModels.Add(name, mb);
-            }
-
-            return id;
-        }
-        */
-
+        
         private static JsonModel FixBlockJson(string file)
         {
             var json = File.ReadAllText(file);
@@ -493,7 +410,7 @@ namespace SharpCraft.model
             var file = $"{SharpCraft.Instance.GameFolderDir}\\SharpCraft_Data\\assets\\textures\\{texPath}.png";
 
             Bitmap tex = (File.Exists(file)
-                             ? new Bitmap(Bitmap.FromFile(file), textureSize, textureSize)
+                             ? new Bitmap(Image.FromFile(file), textureSize, textureSize)
                              : null) ?? new Bitmap(TextureManager.TEXTURE_MISSING, textureSize, textureSize);
 
             using (tex)
@@ -516,25 +433,53 @@ namespace SharpCraft.model
         /// <summary>
         /// Returns null if block is not registered
         /// </summary>
-        /// <param name="blockName"></param>
+        /// <param name="unlocalizedName"></param>
         /// <returns></returns>
-        public static ModelBlock GetModelForBlock(string blockName)
+        [Obsolete("Use GetModelForBlock(Block)")]
+        public static ModelBlock GetModelForBlock(string unlocalizedName)
         {
-            _blockModels.TryGetValue(blockName, out var model);
+            BlockModels.TryGetValue(unlocalizedName, out var model);
 
             return model;
         }
 
-        public static ModelItem GetModelForItem(string itemName)
+        /// <summary>
+        /// Returns null if block is not registered
+        /// </summary>
+        /// <param name="block"></param>
+        /// <returns></returns>
+        public static ModelBlock GetModelForBlock(Block block)
         {
-            _itemModels.TryGetValue(itemName, out var model);
+            return GetModelForBlock(block.UnlocalizedName);
+        }
+
+        /// <summary>
+        /// Returns null if item is not registered
+        /// </summary>
+        /// <param name="unlocalizedName"></param>
+        /// <returns></returns>
+        [Obsolete("Use GetModelForItem(Item)")]
+        public static ModelItem GetModelForItem(string unlocalizedName)
+        {
+            ItemModels.TryGetValue(unlocalizedName, out var model);
 
             return model;
+        }
+
+        /// <summary>
+        /// Returns null if item is not registered
+        /// </summary>
+        /// <param name="item"></param>
+        /// <returns></returns>
+        ///
+        public static ModelItem GetModelForItem(Item item)
+        {
+            return GetModelForItem(item.UnlocalizedName);
         }
 
         public static ModelCustom GetCustomModel(string path)
         {
-            _customModels.TryGetValue(path, out var model);
+            CustomModels.TryGetValue(path, out var model);
 
             return model;
         }
@@ -545,25 +490,25 @@ namespace SharpCraft.model
 
             for (int i = 0; i < vertices.Length; i += 12)
             {
-                V2.X = vertices[i + 3];
-                V2.Y = vertices[i + 4];
-                V2.Z = vertices[i + 5];
+                _v2.X = vertices[i + 3];
+                _v2.Y = vertices[i + 4];
+                _v2.Z = vertices[i + 5];
 
-                V3.X = vertices[i + 6];
-                V3.Y = vertices[i + 7];
-                V3.Z = vertices[i + 8];
+                _v3.X = vertices[i + 6];
+                _v3.Y = vertices[i + 7];
+                _v3.Z = vertices[i + 8];
 
-                V4.X = vertices[i + 9];
-                V4.Y = vertices[i + 10];
-                V4.Z = vertices[i + 11];
+                _v4.X = vertices[i + 9];
+                _v4.Y = vertices[i + 10];
+                _v4.Z = vertices[i + 11];
 
-                NORMAL = Vector3.Cross(V4 - V2, V2 - V3);
+                _normal = Vector3.Cross(_v4 - _v2, _v2 - _v3);
 
                 for (int j = 0; j < 4; j++)
                 {
                     for (int k = 0; k < 3; k++)
                     {
-                        normals[i + j * 3 + k] = NORMAL[k];
+                        normals[i + j * 3 + k] = _normal[k];
                     }
                 }
             }
@@ -573,7 +518,7 @@ namespace SharpCraft.model
 
         public static void Reload()
         {
-            var bkp = new Dictionary<string, ModelCustom>(_customModels);
+            var bkp = new Dictionary<string, ModelCustom>(CustomModels);
 
             Destroy();
 
@@ -588,28 +533,28 @@ namespace SharpCraft.model
 
         public static void Destroy()
         {
-            TextureManager.DestroyTexture(TEXTURE_BLOCKS);
-            TextureManager.DestroyTexture(TEXTURE_ITEMS);
+            TextureManager.DestroyTexture(TextureBlocks);
+            TextureManager.DestroyTexture(TextureItems);
 
-            foreach (var customModel in _customModels.Values)
+            foreach (var customModel in CustomModels.Values)
             {
                 TextureManager.DestroyTexture(customModel.TextureID);
                 customModel.Destroy();
             }
 
-            foreach (var pair in _blockModels.Values)
+            foreach (var pair in BlockModels.Values)
             {
                 pair.Destroy();
             }
 
-            foreach (var pair in _itemModels.Values)
+            foreach (var pair in ItemModels.Values)
             {
                 pair.Destroy();
             }
 
-            _customModels.Clear();
-            _blockModels.Clear();
-            _itemModels.Clear();
+            CustomModels.Clear();
+            BlockModels.Clear();
+            ItemModels.Clear();
         }
     }
 }

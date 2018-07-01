@@ -116,7 +116,7 @@ namespace SharpCraft.gui
         [Obsolete("Use RenderStack() instead")]
         protected virtual void RenderBlock(Block block, float x, float y, float scale)
         {
-            var model = JsonModelLoader.GetModelForBlock(block.UnlocalizedName);
+            var model = JsonModelLoader.GetModelForBlock(block);
 
             if (model == null)
                 return;
@@ -143,7 +143,7 @@ namespace SharpCraft.gui
             Shader.UpdateModelUniforms();
             Shader.UpdateInstanceUniforms(mat, model.SlotTexture.UVMin, model.SlotTexture.UVMax);
 
-            GL.BindTexture(TextureTarget.Texture2D, JsonModelLoader.TEXTURE_BLOCKS);
+            GL.BindTexture(TextureTarget.Texture2D, JsonModelLoader.TextureBlocks);
             _item.RawModel.Render(PrimitiveType.Quads);
 
             _item.Unbind();
@@ -179,7 +179,7 @@ namespace SharpCraft.gui
             Shader.UpdateModelUniforms();
             Shader.UpdateInstanceUniforms(mat, model.SlotTexture.UVMin, model.SlotTexture.UVMax);
 
-            GL.BindTexture(TextureTarget.Texture2D, JsonModelLoader.TEXTURE_ITEMS);
+            GL.BindTexture(TextureTarget.Texture2D, JsonModelLoader.TextureItems);
             _item.RawModel.Render(PrimitiveType.Quads);
 
             _item.Unbind();

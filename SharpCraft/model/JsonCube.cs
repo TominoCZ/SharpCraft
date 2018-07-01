@@ -9,6 +9,6 @@ namespace SharpCraft.model
         [JsonProperty] public float[] from = { 0, 0, 0 };
         [JsonProperty] public float[] to = { 16, 16, 16 };
         [JsonProperty] public JsonModelRotation rotation;
-        [JsonProperty] public Dictionary<TextureType, JsonCubeFaceUv> faces;
+        [JsonProperty] public Dictionary<Facing, JsonCubeFaceUv> faces;
     }
 }

@@ -29,22 +29,6 @@ using Size = OpenTK.Size;
 
 namespace SharpCraft
 {
-    internal class TestMod : ModMain
-    {
-        public TestMod() : base(new ModInfo("testmod", "The Test Mod", "1.0", "Me"))
-        {
-        }
-
-        public override void OnItemsAndBlocksRegistry(RegistryEventArgs args)
-        {
-            args.Register(new BlockGrass());
-        }
-
-        public override void OnRecipeRegistry(RecipeRegistryEventArgs args)
-        {
-        }
-    }
-
     internal class SharpCraft : GameWindow
     {
         //string _dir = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "/.sharpcraft";
@@ -118,7 +102,6 @@ namespace SharpCraft
         public bool IsLocal { get; private set; } = true;
 
         private bool _takeScreenshot;
-        private bool _wasSpaceDown;
         private int _fpsCounter;
         private int _fpsCounterLast;
         private long _interactionTickCounter;
@@ -238,7 +221,7 @@ namespace SharpCraft
             _blockRegistry.Put(new BlockGlass());
             _blockRegistry.Put(new BlockCraftingTable());
             _blockRegistry.Put(new BlockFurnace());
-            _blockRegistry.Put(new BlockSlab());
+            //_blockRegistry.Put(new BlockSlab());
             _blockRegistry.Put(new BlockRare());
             _blockRegistry.Put(new BlockLadder());
             _blockRegistry.Put(new BlockTallGrass());
@@ -254,30 +237,30 @@ namespace SharpCraft
                 _itemRegistry.Put(new ItemBlock(block));
             }
 
-            _itemRegistry.Put(new ItemPickaxe("stone"));
             _itemRegistry.Put(new ItemPickaxe("wood"));
+            _itemRegistry.Put(new ItemPickaxe("stone"));
             _itemRegistry.Put(new ItemPickaxe("rare"));
 
-            var log = ItemRegistry.GetItem("log");
-            var wood = ItemRegistry.GetItem("planks");
-            var cobble = ItemRegistry.GetItem("cobblestone");
-            var rare = ItemRegistry.GetItem("rare");
+            var log = ItemRegistry.GetItem(BlockRegistry.GetBlock<BlockLog>());
+            var wood = ItemRegistry.GetItem(BlockRegistry.GetBlock<BlockPlanks>());
+            var cobble = ItemRegistry.GetItem(BlockRegistry.GetBlock<BlockCobbleStone>());
+            var rare = ItemRegistry.GetItem(BlockRegistry.GetBlock<BlockRare>());
 
-            var recipe = new[]
+            Item[] recipe =
             {
                 cobble, cobble, cobble,
                 null, wood, null,
                 null, wood, null
             };
-            _recipeRegistry.RegisterRecipe(recipe, ItemRegistry.GetItem("pick_stone"));
+            _recipeRegistry.RegisterRecipe(recipe, ItemRegistry.GetItem("sharpcraft", "pick_stone"));
 
-            recipe = new[]
+            recipe = new []
             {
                 rare, rare, rare,
                 null, wood, null,
                 null, wood, null
             };
-            _recipeRegistry.RegisterRecipe(recipe, ItemRegistry.GetItem("pick_rare"));
+            _recipeRegistry.RegisterRecipe(recipe, ItemRegistry.GetItem("sharpcraft", "pick_rare"));
 
             recipe = new[]
             {
@@ -285,7 +268,7 @@ namespace SharpCraft
                 null, wood, null,
                 null, wood, null
             };
-            _recipeRegistry.RegisterRecipe(recipe, ItemRegistry.GetItem("pick_wood"));
+            _recipeRegistry.RegisterRecipe(recipe, ItemRegistry.GetItem("sharpcraft", "pick_wood"));
 
             recipe = new[]
             {
@@ -293,7 +276,7 @@ namespace SharpCraft
                 cobble, null, cobble,
                 cobble, cobble, cobble
             };
-            _recipeRegistry.RegisterRecipe(recipe, ItemRegistry.GetItem("furnace"));
+            _recipeRegistry.RegisterRecipe(recipe, ItemRegistry.GetItem(BlockRegistry.GetBlock<BlockFurnace>()));
 
             recipe = new[]
             {
@@ -301,7 +284,7 @@ namespace SharpCraft
                 wood, wood, null,
                 null, null, null
             };
-            _recipeRegistry.RegisterRecipe(recipe, ItemRegistry.GetItem("crafting_table"));
+            _recipeRegistry.RegisterRecipe(recipe, ItemRegistry.GetItem(BlockRegistry.GetBlock<BlockCraftingTable>()));
 
             recipe = new[]
             {
@@ -328,6 +311,8 @@ namespace SharpCraft
 
             _blockRegistry.RegisterBlocksPost(loader);
             _itemRegistry.RegisterItemsPost(loader);
+
+            LangUtil.LoadLang(SettingsManager.GetString("lang"));//TODO - find a proper placement for this line
         }
 
         public void StartGame()
@@ -338,9 +323,9 @@ namespace SharpCraft
             //World.setBlock(new BlockPos(player.Pos), EnumBlock.RARE, 1, true); //test of block metadata, works perfectly
 
             LoadWorld("MyWorld"); //TODO don't create when doesn't exist //EDIT - now redundant comment?
-            Player.OnPickup(new ItemStack(ItemRegistry.GetItem("pick_stone")));
-            Player.OnPickup(new ItemStack(ItemRegistry.GetItem("pick_wood")));
-            Player.OnPickup(new ItemStack(ItemRegistry.GetItem("pick_rare")));
+            Player.OnPickup(new ItemStack(ItemRegistry.GetItem("sharpcraft", "pick_stone")));
+            Player.OnPickup(new ItemStack(ItemRegistry.GetItem("sharpcraft", "pick_wood")));
+            Player.OnPickup(new ItemStack(ItemRegistry.GetItem("sharpcraft", "pick_rare")));
         }
 
         public void LoadWorld(string saveName)
@@ -359,21 +344,22 @@ namespace SharpCraft
 
                 BlockPos playerPos = new BlockPos(0, 10, 0);//MathUtil.NextFloat(-100, 100));
 
-                World = new World("MyWorld", "Tomlow's Fuckaround", SettingsManager.GetValue("worldseed").GetHashCode());
+                World = new World("MyWorld", "Tomlow's Fuckaround", SettingsManager.GetString("worldseed").GetHashCode());
 
                 Player = new EntityPlayerSp(World, playerPos.ToVec());
 
                 World.AddEntity(Player);
 
-                Player.SetItemStackInInventory(0, new ItemStack(ItemRegistry.GetItem(BlockRegistry.GetBlock<BlockCraftingTable>().UnlocalizedName)));
-                Player.SetItemStackInInventory(1, new ItemStack(ItemRegistry.GetItem(BlockRegistry.GetBlock<BlockFurnace>().UnlocalizedName)));
-                Player.SetItemStackInInventory(2, new ItemStack(ItemRegistry.GetItem(BlockRegistry.GetBlock<BlockCobbleStone>().UnlocalizedName)));
-                Player.SetItemStackInInventory(3, new ItemStack(ItemRegistry.GetItem(BlockRegistry.GetBlock<BlockPlanks>().UnlocalizedName)));
-                Player.SetItemStackInInventory(4, new ItemStack(ItemRegistry.GetItem(BlockRegistry.GetBlock<BlockGlass>().UnlocalizedName)));
-                Player.SetItemStackInInventory(5, new ItemStack(ItemRegistry.GetItem(BlockRegistry.GetBlock<BlockCraftingTable>().UnlocalizedName)));
-                Player.SetItemStackInInventory(6, new ItemStack(ItemRegistry.GetItem(BlockRegistry.GetBlock<BlockSlab>().UnlocalizedName)));
-                Player.SetItemStackInInventory(7, new ItemStack(ItemRegistry.GetItem(BlockRegistry.GetBlock<BlockLadder>().UnlocalizedName)));
-                Player.SetItemStackInInventory(8, new ItemStack(ItemRegistry.GetItem(BlockRegistry.GetBlock<BlockTallGrass>().UnlocalizedName)));
+                Player.SetItemStackInInventory(0, new ItemStack(ItemRegistry.GetItem(BlockRegistry.GetBlock<BlockCraftingTable>())));
+                Player.SetItemStackInInventory(1, new ItemStack(ItemRegistry.GetItem(BlockRegistry.GetBlock<BlockFurnace>())));
+                Player.SetItemStackInInventory(2, new ItemStack(ItemRegistry.GetItem(BlockRegistry.GetBlock<BlockCobbleStone>())));
+                Player.SetItemStackInInventory(3, new ItemStack(ItemRegistry.GetItem(BlockRegistry.GetBlock<BlockPlanks>())));
+                Player.SetItemStackInInventory(4, new ItemStack(ItemRegistry.GetItem(BlockRegistry.GetBlock<BlockGlass>())));
+                Player.SetItemStackInInventory(5, new ItemStack(ItemRegistry.GetItem(BlockRegistry.GetBlock<BlockCraftingTable>())));
+                Player.SetItemStackInInventory(7, new ItemStack(ItemRegistry.GetItem(BlockRegistry.GetBlock<BlockLadder>())));
+                Player.SetItemStackInInventory(8, new ItemStack(ItemRegistry.GetItem(BlockRegistry.GetBlock<BlockTallGrass>())));
+
+                WorldLoader.SaveWorld(World); //TODO - this is really dirty
             }
             else
             {
@@ -619,14 +605,6 @@ namespace SharpCraft
                 Camera.Pitch -= delta.Y / 1000f * _sensitivity;
 
                 //ResetMouse();
-
-                if (KeyboardState.IsKeyDown(Key.Space) && !_wasSpaceDown && Player.OnGround)
-                {
-                    _wasSpaceDown = true;
-                    Player.Motion.Y = 0.475F;
-                }
-                else if ((!KeyboardState.IsKeyDown(Key.Space) || Player.OnGround) && _wasSpaceDown)
-                    _wasSpaceDown = false;
             }
 
             _mouseLast = point;
@@ -790,6 +768,14 @@ namespace SharpCraft
                 GetMouseOverObject();
 
             GameLoop();
+        }
+
+        protected override void OnFocusedChanged(EventArgs e)
+        {
+            Console.WriteLine("Focus changed to " + Focused);
+
+            if (!Focused)
+                _mouseButtonsDown.Clear();
         }
 
         protected override void OnMouseDown(MouseButtonEventArgs e)
@@ -973,49 +959,6 @@ namespace SharpCraft
                 WorldLoader.SaveWorld(World);
 
             base.OnClosing(e);
-        }
-    }
-
-    public class ItemPickaxe : Item
-    {
-        private readonly string _pickaxeMaterial;
-
-        public ItemPickaxe(string type) : base("pick_" + type)
-        {
-            _pickaxeMaterial = type;
-        }
-
-        public override float GetMiningSpeed(Material mat)
-        {
-            float mult = 1f;
-
-            switch (_pickaxeMaterial)
-            {
-                case "rare":
-                    mult = 8f;
-                    break;
-
-                case "stone":
-                    mult = 2.5f;
-                    break;
-
-                case "wood":
-                    mult = 1.5f;
-                    break;
-            }
-
-            switch (mat.Name)
-            {
-                case "stone":
-                    return mult;
-            }
-
-            return 1;
-        }
-
-        public override int GetMaxStackSize()
-        {
-            return 1;
         }
     }
 }

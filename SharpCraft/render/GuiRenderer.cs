@@ -41,7 +41,7 @@ namespace SharpCraft.render
 
             GL.BindVertexArray(GuiQuad.VaoID);
 
-            MouseState state = OpenTK.Input.Mouse.GetCursorState();
+            MouseState state = Mouse.GetCursorState();
             Point mouse = SharpCraft.Instance.PointToClient(new Point(state.X, state.Y));
 
             gui.Render(mouse.X, mouse.Y);

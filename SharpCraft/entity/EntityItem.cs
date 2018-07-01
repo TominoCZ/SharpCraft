@@ -181,7 +181,7 @@ namespace SharpCraft.entity
 
             if (_stack.Item is ItemBlock itemBlock)
             {
-                ModelBlock model = JsonModelLoader.GetModelForBlock(itemBlock.Block.UnlocalizedName);
+                ModelBlock model = JsonModelLoader.GetModelForBlock(itemBlock.Block);
 
                 if (model?.RawModel == null)
                     return;
@@ -194,7 +194,7 @@ namespace SharpCraft.entity
                 GL.EnableVertexAttribArray(1);
                 GL.EnableVertexAttribArray(2);
 
-                GL.BindTexture(TextureTarget.Texture2D, JsonModelLoader.TEXTURE_BLOCKS);
+                GL.BindTexture(TextureTarget.Texture2D, JsonModelLoader.TextureBlocks);
 
                 int itemsToRender = 1;
 
@@ -234,7 +234,7 @@ namespace SharpCraft.entity
             {
                 GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Fill);
                 GL.Disable(EnableCap.CullFace);
-                ModelItem model = JsonModelLoader.GetModelForItem(_stack.Item.UnlocalizedName);
+                ModelItem model = JsonModelLoader.GetModelForItem(_stack.Item);
 
                 if (model?.RawModel == null)
                     return;
@@ -247,7 +247,7 @@ namespace SharpCraft.entity
                 GL.EnableVertexAttribArray(1);
                 GL.EnableVertexAttribArray(2);
 
-                GL.BindTexture(TextureTarget.Texture2D, JsonModelLoader.TEXTURE_ITEMS);
+                GL.BindTexture(TextureTarget.Texture2D, JsonModelLoader.TextureItems);
 
                 int itemsToRender = 1;
 

@@ -2,8 +2,9 @@
 {
     public class BlockPlanks : Block
     {
-        public BlockPlanks() : base(Material.GetMaterial("wood"), "planks")
+        public BlockPlanks() : base(Material.GetMaterial("wood"))
         {
+            SetUnlocalizedName("sharpcraft", "planks");
             IsFullCube = false;
             Hardness = 32;
         }

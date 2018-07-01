@@ -1,6 +1,9 @@
-﻿using SharpCraft.model;
+﻿using System;
+using SharpCraft.model;
 using System.Collections.Generic;
 using System.Linq;
+using SharpCraft.block;
+#pragma warning disable 618
 
 namespace SharpCraft.item
 {
@@ -23,11 +26,22 @@ namespace SharpCraft.item
             return Registry.Values.ToList();
         }
 
+        [Obsolete("Use GetItem(modid, name)")]
         public static Item GetItem(string unlocalizedName)
         {
             Registry.TryGetValue(unlocalizedName, out Item item);
 
             return item;
+        }
+
+        public static Item GetItem(string modid, string name)
+        {
+            return GetItem(modid + ".item." + name);
+        }
+        
+        public static ItemBlock GetItem(Block block)
+        {
+            return GetItem(block.UnlocalizedName) is ItemBlock ib ? ib : null;
         }
     }
 }

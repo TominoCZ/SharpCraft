@@ -2,8 +2,9 @@
 {
     internal class BlockBedrock : Block
     {
-        public BlockBedrock() : base(Material.GetMaterial("stone"), "bedrock")
+        public BlockBedrock() : base(Material.GetMaterial("stone"))
         {
+            SetUnlocalizedName("sharpcraft", "bedrock");
             Hardness = -1;
         }
     }

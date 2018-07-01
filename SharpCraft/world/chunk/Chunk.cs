@@ -258,7 +258,7 @@ namespace SharpCraft.world.chunk
                 tileEntity.Value.Render(partialTicks);
             }
 
-            GL.BindTexture(TextureTarget.Texture2D, JsonModelLoader.TEXTURE_BLOCKS);
+            GL.BindTexture(TextureTarget.Texture2D, JsonModelLoader.TextureBlocks);
             //}
         }
 
@@ -312,7 +312,7 @@ namespace SharpCraft.world.chunk
 
                         BlockPos localPos = new BlockPos(x, y, z);
 
-                        ModelBlock model = JsonModelLoader.GetModelForBlock(state.Block.UnlocalizedName);
+                        ModelBlock model = JsonModelLoader.GetModelForBlock(state.Block);
                         ModelBlockRaw mbr = (ModelBlockRaw)model?.RawModel;
 
                         if (mbr == null)

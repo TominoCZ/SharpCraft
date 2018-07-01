@@ -1,28 +1,40 @@
-﻿using SharpCraft.entity;
+﻿using System.Runtime.InteropServices.ComTypes;
+using SharpCraft.entity;
+using SharpCraft.item;
 using SharpCraft.world;
 
 namespace SharpCraft.block
 {
     public class BlockCraftingTable : Block
     {
-        public BlockCraftingTable() : base(Material.GetMaterial("wood"), "crafting_table")
+        public BlockCraftingTable() : base(Material.GetMaterial("wood"))
         {
-            IsFullCube = false;
+            SetUnlocalizedName("sharpcraft", "crafting_table");
 
-            CanBeInteractedWith = true;
+            IsFullCube = false;
 
             Hardness = 32;
         }
 
-        public override void OnRightClicked(MouseOverObject moo, EntityPlayerSp clicked)
+        public override bool OnActivated(MouseOverObject moo, EntityPlayerSp clicked)
         {
-            if (moo.sideHit != FaceSides.Up)
-                return;
-
-            if (clicked.World.GetTileEntity(moo.blockPos) is TileEntityCraftingGrid tecg)
+            if (moo.sideHit == FaceSides.Up && clicked.World.GetTileEntity(moo.blockPos) is TileEntityCraftingGrid tecg)
             {
+                var wasEmpty = tecg.IsEmpty();
+
+                if (wasEmpty && clicked.IsSneaking)
+                    return false;
+
+                if (!wasEmpty && clicked.IsSneaking && !tecg.HasResult)
+                    return true;
+
                 tecg.OnRightClicked(clicked.World, moo.hitVec, clicked.GetEquippedItemStack(), clicked);
+                
+                if (tecg.IsEmpty() || !wasEmpty)
+                    return true;
             }
+
+            return false;
         }
 
         public override TileEntity CreateTileEntity(World world, BlockPos pos)

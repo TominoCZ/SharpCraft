@@ -2,9 +2,10 @@
 {
     public class BlockAir : Block
     {
-        public BlockAir() : base(Material.GetMaterial("air"), "air")
+        public BlockAir() : base(Material.GetMaterial("air"))
         {
-            //IsSolid = false;
+            SetUnlocalizedName("sharpcraft", "air");
+            
             IsOpaque = false;
         }
     }

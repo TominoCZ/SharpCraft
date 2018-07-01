@@ -86,54 +86,54 @@ namespace SharpCraft.block
 
         public static Vector3 operator *(FaceSides l, float r) => new Vector3(l.x + r, l.y + r, l.z + r);
 
-        public static FaceSides Parse(TextureType t)
+        public static FaceSides Parse(Facing t)
         {
             switch (t)
             {
-                case TextureType.up: return Up;
-                case TextureType.down: return Down;
-                case TextureType.north: return North;
-                case TextureType.south: return South;
-                case TextureType.west: return West;
-                case TextureType.east: return East;
+                case Facing.up: return Up;
+                case Facing.down: return Down;
+                case Facing.north: return North;
+                case Facing.south: return South;
+                case Facing.west: return West;
+                case Facing.east: return East;
                 default: return Null;
             }
         }
 
-        public static bool Parse(FaceSides fs, out TextureType type)
+        public static bool Parse(FaceSides fs, out Facing type)
         {
             if (fs == Up)
             {
-                type = TextureType.up;
+                type = Facing.up;
                 return true;
             }
             else if (fs == Down)
             {
-                type = TextureType.down;
+                type = Facing.down;
                 return true;
             }
             else if (fs == North)
             {
-                type = TextureType.north;
+                type = Facing.north;
                 return true;
             }
             else if (fs == South)
             {
-                type = TextureType.south;
+                type = Facing.south;
                 return true;
             }
             else if (fs == East)
             {
-                type = TextureType.east;
+                type = Facing.east;
                 return true;
             }
             else if (fs == West)
             {
-                type = TextureType.west;
+                type = Facing.west;
                 return true;
             }
 
-            type = TextureType.up;
+            type = Facing.up;
 
             return false;
         }

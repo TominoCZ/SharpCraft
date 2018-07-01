@@ -40,7 +40,7 @@ namespace SharpCraft.entity
         {
             LastPos = Pos;
 
-            Motion.Y -= 0.04f * Gravity;
+            Motion.Y -= 0.045f * Gravity;
 
             Vector3 motion = Motion;
             motion.Y = 0;
@@ -71,7 +71,7 @@ namespace SharpCraft.entity
 
             Move();
 
-            Motion.Xz *= 0.8664021f;
+            Motion.Xz *= 0.864021f;
 
             if (OnGround)
             {
@@ -136,7 +136,7 @@ namespace SharpCraft.entity
 
         public void TeleportTo(Vector3 pos)
         {
-            this.Pos = LastPos = pos;
+            Pos = LastPos = pos;
 
             BoundingBox = CollisionBoundingBox.Offset(pos - Vector3.UnitX * CollisionBoundingBox.Size.X / 2 - Vector3.UnitZ * CollisionBoundingBox.Size.Z / 2);
         }

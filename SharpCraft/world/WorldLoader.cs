@@ -20,8 +20,9 @@ namespace SharpCraft.world
             try
             {
                 WorldPlayerNode wpn = new WorldPlayerNode(SharpCraft.Instance.Player);
-                using (FileStream fs = new FileStream(w.SaveRoot + "/player.dat", FileMode.OpenOrCreate))
+                using (FileStream fs = File.OpenWrite(w.SaveRoot + "/player.dat"))
                 {
+                    fs.SetLength(0);
                     fs.Position = 0;
                     bf.Serialize(fs, wpn);
                 }
@@ -34,8 +35,9 @@ namespace SharpCraft.world
             try
             {
                 WorldDataNode wdn = new WorldDataNode(w);
-                using (FileStream fs = new FileStream(w.SaveRoot + "/level.dat", FileMode.OpenOrCreate))
+                using (FileStream fs = File.OpenWrite(w.SaveRoot + "/level.dat"))
                 {
+                    fs.SetLength(0);
                     fs.Position = 0;
                     bf.Serialize(fs, wdn);
                 }
@@ -60,7 +62,7 @@ namespace SharpCraft.world
 
             try
             {
-                using (FileStream fs = new FileStream(dir + "/player.dat", FileMode.Open))
+                using (FileStream fs = File.OpenRead(dir + "/player.dat"))
                 {
                     fs.Position = 0;
                     wpn = (WorldPlayerNode)bf.Deserialize(fs);
@@ -73,7 +75,7 @@ namespace SharpCraft.world
 
             try
             {
-                using (FileStream fs = new FileStream(dir + "/level.dat", FileMode.Open))
+                using (FileStream fs = File.OpenRead(dir + "/level.dat"))
                 {
                     fs.Position = 0;
                     wdn = (WorldDataNode)bf.Deserialize(fs);

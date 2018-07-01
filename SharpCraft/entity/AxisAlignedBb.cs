@@ -23,8 +23,8 @@ namespace SharpCraft.entity
 
         public AxisAlignedBb(Vector3 min, Vector3 max)
         {
-            this.Min = min;
-            this.Max = max;
+            Min = min;
+            Max = max;
 
             float minX = MathUtil.Min(min.X, max.X);
             float minY = MathUtil.Min(min.Y, max.Y);

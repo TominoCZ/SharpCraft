@@ -10,41 +10,41 @@ namespace SharpCraft.world
     [Serializable]
     internal class WorldPlayerNode
     {
-        private readonly float pitch;
-        private readonly float yaw;
+        private readonly float _pitch;
+        private readonly float _yaw;
 
-        private readonly Vector3 pos;
+        private readonly Vector3 _pos;
 
-        private readonly ItemStackNode[] hotbar;
-        private readonly ItemStackNode[] inventory;
+        private readonly ItemStackNode[] _hotbar;
+        private readonly ItemStackNode[] _inventory;
 
-        private readonly float healthPercentage;
+        private readonly float _healthPercentage;
 
         public WorldPlayerNode(EntityPlayerSp player)
         {
-            pitch = SharpCraft.Instance.Camera.Pitch;
-            yaw = SharpCraft.Instance.Camera.Yaw;
-            pos = player.Pos;
+            _pitch = SharpCraft.Instance.Camera.Pitch;
+            _yaw = SharpCraft.Instance.Camera.Yaw;
+            _pos = player.Pos;
 
-            hotbar = new ItemStackNode[player.Hotbar.Length];
-            inventory = new ItemStackNode[player.Inventory.Length];
+            _hotbar = new ItemStackNode[player.Hotbar.Length];
+            _inventory = new ItemStackNode[player.Inventory.Length];
 
             for (var i = 0; i < player.Hotbar.Length; i++)
             {
                 ItemStack stack = player.Hotbar[i];
 
                 if (TryParseStack(player, stack, out var node))
-                    hotbar[i] = node;
+                    _hotbar[i] = node;
             }
             for (var i = 0; i < player.Inventory.Length; i++)
             {
                 ItemStack stack = player.Inventory[i];
 
                 if (TryParseStack(player, stack, out var node))
-                    inventory[i] = node;
+                    _inventory[i] = node;
             }
 
-            healthPercentage = player.Health;
+            _healthPercentage = player.Health;
         }
 
         private bool TryParseStack(EntityPlayerSp player, ItemStack stack, out ItemStackNode node)
@@ -57,16 +57,19 @@ namespace SharpCraft.world
 
             node = new ItemStackNode();
 
-            if (stack.Item is ItemBlock itemBlock) //TODO - IMPORTANT! at this moment this is always true, will need to add another function for the items or something
+            if (stack.Item is ItemBlock itemBlock)
             {
                 node.IsBlock = true;
-                node.LocalItemID = player.World.GetLocalBlockId(itemBlock.Block.UnlocalizedName);
+                node.LocalItemId = player.World.GetLocalBlockId(itemBlock.Block.UnlocalizedName);
                 node.Count = stack.Count;
                 node.Meta = stack.Meta;
             }
             else
             {
-                //TODO
+                //TODO - saving items
+                //node.LocalItemId = player.World.GetLocalItemId(stack.Item.UnlocalizedName); //TODO
+                //node.Count = stack.Count;
+                //node.Meta = stack.Meta;
             }
 
             return true;
@@ -82,8 +85,10 @@ namespace SharpCraft.world
 
             Item item = null;
 
-            if (node.IsBlock)//TODO - IMPORTANT! at this moment this is always true, will need to add another function for the items or something
-                item = ItemRegistry.GetItem(BlockRegistry.GetBlock(world.GetLocalBlockName(node.LocalItemID)).UnlocalizedName);
+            if (node.IsBlock)
+                item = ItemRegistry.GetItem(BlockRegistry.GetBlock(world.GetLocalBlockName(node.LocalItemId)));
+            //else
+                //item = ItemRegistry.GetItem(ItemRegistry.GetItem(world.GetLocalItemName(node.LocalItemId))); //TODO
 
             stack = new ItemStack(item, node.Count, node.Meta);
 
@@ -92,23 +97,23 @@ namespace SharpCraft.world
 
         public EntityPlayerSp GetPlayer(World world)
         {
-            EntityPlayerSp player = new EntityPlayerSp(world, pos);
-            SharpCraft.Instance.Camera.Pitch = pitch;
-            SharpCraft.Instance.Camera.Yaw = yaw;
+            EntityPlayerSp player = new EntityPlayerSp(world, _pos);
+            SharpCraft.Instance.Camera.Pitch = _pitch;
+            SharpCraft.Instance.Camera.Yaw = _yaw;
 
-            for (int i = 0; i < hotbar.Length; i++)
+            for (int i = 0; i < _hotbar.Length; i++)
             {
-                if (TryParseStack(world, hotbar[i], out var stack))
+                if (TryParseStack(world, _hotbar[i], out var stack))
                     player.Hotbar[i] = stack;
             }
 
-            for (int i = 0; i < inventory.Length; i++)
+            for (int i = 0; i < _inventory.Length; i++)
             {
-                if (TryParseStack(world, inventory[i], out var stack))
+                if (TryParseStack(world, _inventory[i], out var stack))
                     player.Inventory[i] = stack;
             }
 
-            player.Health = healthPercentage;
+            player.Health = _healthPercentage;
 
             return player;
         }
@@ -117,7 +122,7 @@ namespace SharpCraft.world
         private class ItemStackNode
         {
             public bool IsBlock;
-            public short LocalItemID;
+            public short LocalItemId;
             public int Count;
             public short Meta;
         }

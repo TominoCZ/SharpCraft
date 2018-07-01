@@ -5,13 +5,18 @@ namespace SharpCraft.item
 {
     public abstract class Item
     {
-        public string UnlocalizedName { get; }
+        public string UnlocalizedName { get; private set; }
 
         private readonly Dictionary<Material, float> _materialTable = new Dictionary<Material, float>();
 
-        protected Item(string unlocalizedItem)
+        protected void SetUnlocalizedName(string modid, string unlocalizedName)
         {
-            UnlocalizedName = unlocalizedItem;
+            SetUnlocalizedName(modid + ".item." + unlocalizedName);
+        }
+        
+        protected void SetUnlocalizedName(string mergedUnlocalizedName)
+        {
+            UnlocalizedName = mergedUnlocalizedName;
         }
 
         public virtual int GetMaxStackSize()

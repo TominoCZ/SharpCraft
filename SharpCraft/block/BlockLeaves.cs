@@ -2,8 +2,9 @@
 {
     internal class BlockLeaves : Block
     {
-        public BlockLeaves() : base(Material.GetMaterial("grass"), "leaves")
+        public BlockLeaves() : base(Material.GetMaterial("grass"))
         {
+            SetUnlocalizedName("sharpcraft", "leaves");
             Hardness = 8;
         }
     }

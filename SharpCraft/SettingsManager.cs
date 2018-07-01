@@ -14,6 +14,7 @@ namespace SharpCraft
             _settings.Add("sensitivity", "1");
             _settings.Add("renderdistance", "8");
             _settings.Add("worldseed", "yeet");
+            _settings.Add("lang", "en-US");
         }
 
         public static void Load()
@@ -58,34 +59,34 @@ namespace SharpCraft
             {
                 string key = keys[index];
 
-                sb.AppendLine($"{key}={GetValue(key)}");
+                sb.AppendLine($"{key}={GetString(key)}");
             }
 
             KeyValuePair<string, string> last = _settings.Last();
 
-            sb.Append($"{last.Key}={GetValue(last.Key)}");
+            sb.Append($"{last.Key}={GetString(last.Key)}");
 
             File.WriteAllText(file, sb.ToString());
         }
 
-        public static string GetValue(string variable)
+        public static string GetString(string variable)
         {
             return _settings[variable];
         }
 
         public static int GetInt(string variable)
         {
-            return int.Parse(GetValue(variable));
+            return int.Parse(GetString(variable));
         }
 
         public static float GetFloat(string variable)
         {
-            return float.Parse(GetValue(variable));
+            return float.Parse(GetString(variable));
         }
 
         public static bool GetBool(string variable)
         {
-            return bool.Parse(GetValue(variable));
+            return bool.Parse(GetString(variable));
         }
     }
 }
