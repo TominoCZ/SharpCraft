@@ -46,7 +46,7 @@ namespace SharpCraft.world.chunk
             _loadManager = World.LoadManager;
             BoundingBox = new AxisAlignedBB(Vector3.Zero, Vector3.One * ChunkSize + Vector3.UnitY * 240).offset(Pos.ToVec());
 
-            Load();
+            //Load();
         }
 
         public Chunk(ChunkPos pos, World world, short[,,] blockData) : this(pos, world)
@@ -123,7 +123,20 @@ namespace SharpCraft.world.chunk
             if (localPos.Y < 0 || localPos.Y >= ChunkHeight)
                 return;
 
-            _tileEntities.TryAdd(localPos, te);
+            if (_tileEntities.TryAdd(localPos, te))
+            {
+                var worldPos = new BlockPos(localPos.ToVec() + Pos.ToVec());
+
+                var file = $"{World.SaveRoot}\\{World.Dimension}\\te\\te_{worldPos.X}.{worldPos.Y}.{worldPos.Z}.te";
+
+                if (!File.Exists(file))
+                    return;
+
+                using (ByteBufferReader bbr = new ByteBufferReader(File.ReadAllBytes(file)))
+                {
+                    te.ReadData(bbr);
+                }
+            }
         }
 
         public void RemoveTileEntity(BlockPos localPos)
@@ -136,6 +149,11 @@ namespace SharpCraft.world.chunk
 
             var worldPos = new BlockPos(Pos.ToVec() + localPos.ToVec());
 
+            var file = $"{World.SaveRoot}\\{World.Dimension}\\te\\te_{Pos.WorldSpaceX() + localPos.X}.{localPos.Y}.{Pos.WorldSpaceZ() + localPos.Z}.te";
+
+            if (File.Exists(file))
+                File.Delete(file);
+
             te.OnDestroyed(World, worldPos);
         }
 
@@ -147,6 +165,34 @@ namespace SharpCraft.world.chunk
             _tileEntities.TryGetValue(localPos, out var te);
 
             return te;
+        }
+
+        public void SaveTileEntity(BlockPos localPos)
+        {
+            if (localPos.Y < 0 || localPos.Y >= ChunkHeight)
+                return;
+
+            SaveTileEntityData(localPos);
+        }
+
+        private void SaveTileEntityData(BlockPos localPos)
+        {
+            if (!_tileEntities.TryGetValue(localPos, out var te))
+                return;
+
+            var dir = $"{World.SaveRoot}\\{World.Dimension}\\te";
+
+            if (!Directory.Exists(dir))
+                Directory.CreateDirectory(dir);
+
+            var file =
+                $"{dir}\\te_{Pos.WorldSpaceX() + localPos.X}.{localPos.Y}.{Pos.WorldSpaceZ() + localPos.Z}.te";
+
+            ByteBufferWriter bbw = new ByteBufferWriter(0);
+
+            te.WriteData(bbw);
+
+            File.WriteAllBytes(file, bbw.ToArray());
         }
 
         public bool IsAir(BlockPos pos)
@@ -207,6 +253,8 @@ namespace SharpCraft.world.chunk
             {
                 tileEntity.Value.Render(partialTicks);
             }
+
+            GL.BindTexture(TextureTarget.Texture2D, JsonModelLoader.TEXTURE_BLOCKS);
             //}
         }
 
@@ -343,24 +391,13 @@ namespace SharpCraft.world.chunk
 
             //TODO - svae tile entities
 
-            var dir = $"{World.SaveRoot}\\{World.Dimension}\\te";
-
-            if (!Directory.Exists(dir))
-                Directory.CreateDirectory(dir);
-
-            foreach (var pair in _tileEntities)
+            foreach (var pair in _tileEntities.Keys)
             {
-                var file =
-                    $"{dir}\\te_{Pos.WorldSpaceX() + pair.Key.X}.{pair.Key.Y}.{Pos.WorldSpaceZ() + pair.Key.Z}.te";
-
-                ByteBufferWriter bbw = new ByteBufferWriter(0);
-
-                pair.Value.WriteData(bbw);
-
-                File.WriteAllBytes(file, bbw.ToArray());
+                SaveTileEntityData(pair);
             }
 
             byte[] data = new byte[World.ChunkData.Info.ChunkByteSize];
+
             Buffer.BlockCopy(_chunkBlocks, 0, data, 0, data.Length);
             World.ChunkData.WriteChunkData(Pos, data);
         }

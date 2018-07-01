@@ -4,6 +4,7 @@ using OpenTK.Graphics.OpenGL;
 using SharpCraft.entity;
 using SharpCraft.item;
 using SharpCraft.model;
+using SharpCraft.util;
 using SharpCraft.world;
 
 namespace SharpCraft.block
@@ -11,17 +12,72 @@ namespace SharpCraft.block
     public class TileEntityCraftingGrid : TileEntity
     {
         private readonly BlockPos _pos;
+
         private readonly ItemStack[,] _grid = new ItemStack[3, 3];
 
         private ItemStack _product;
 
-        public TileEntityCraftingGrid(BlockPos pos)
+        private int _ticks;
+        private int _ticksLast;
+
+        public TileEntityCraftingGrid(World world, BlockPos pos) : base(world)
         {
             _pos = pos;
         }
 
+        public override void ReadData(ByteBufferReader bbr)
+        {
+            ClearGrid();
+
+            var count = bbr.ReadInt32();
+
+            for (int i = 0; i < count; i++)
+            {
+                var x = bbr.ReadInt32();
+                var y = bbr.ReadInt32();
+
+                var meta = bbr.ReadInt32();
+                var name = bbr.ReadString();
+
+                _grid[x, y] = new ItemStack(ItemRegistry.GetItem(name), 1, (short)meta);
+            }
+        }
+
+        public override void WriteData(ByteBufferWriter bbw)
+        {
+            var count = 0;
+
+            for (var y = 0; y < _grid.GetLength(1); y++)
+                for (var x = 0; x < _grid.GetLength(0); x++)
+                    if (_grid[x, y] is ItemStack stack && !stack.IsEmpty)
+                        count++;
+
+            bbw.WriteInt32(count);
+
+            for (var y = 0; y < _grid.GetLength(1); y++)
+            {
+                for (var x = 0; x < _grid.GetLength(0); x++)
+                {
+                    if (_grid[x, y] is ItemStack stack && !stack.IsEmpty)
+                    {
+                        bbw.WriteInt32(x);
+                        bbw.WriteInt32(y);
+                        bbw.WriteInt32(stack.Meta);
+                        bbw.WriteString(stack.Item.UnlocalizedName);
+                    }
+                }
+            }
+        }
+
         public override void Update()
         {
+            _ticksLast = _ticks;
+
+            _ticks = (_ticks + 1) % 90;
+
+            if (_ticksLast > _ticks)
+                _ticksLast = _ticks;
+
             Item[] table = new Item[9];
 
             for (var y = 0; y < _grid.GetLength(1); y++)
@@ -37,6 +93,8 @@ namespace SharpCraft.block
 
         public override void Render(float partialTicks)
         {
+            float partialTime = _ticksLast + (_ticks - _ticksLast) * partialTicks;
+
             var grid = 1 / 4f;
             var gap = 1 / 16f;
 
@@ -93,34 +151,36 @@ namespace SharpCraft.block
 
             if (_product != null && !_product.IsEmpty)
             {
+                float offY = (float)((Math.Sin(partialTime / 90f * MathHelper.TwoPi) + 1) / 16);
+
+                var rot = Matrix4.CreateRotationY(partialTime / 90f * MathHelper.TwoPi);
+
                 if (_product.Item is ItemBlock ib)
                 {
+                    var mat = Matrix4.CreateTranslation(_pos.X + 0.5f, _pos.Y + 1.5f + offY, _pos.Z + 0.5f);
+                    var scale = Matrix4.CreateTranslation(Vector3.One * -0.5f) * Matrix4.CreateScale(0.35f);
                     var model = JsonModelLoader.GetModelForBlock(ib.UnlocalizedName);
-
-                    var mat = Matrix4.CreateTranslation(_pos.X + 0.5f, _pos.Y + 1.75f, _pos.Z + 0.5f);
-                    var scale = Matrix4.CreateTranslation(Vector3.One * -0.5f) * Matrix4.CreateScale(0.5f);
 
                     GL.BindTexture(TextureTarget.Texture2D, JsonModelLoader.TEXTURE_BLOCKS);
 
                     model.Bind();
                     model.Shader.UpdateGlobalUniforms();
-                    model.Shader.UpdateInstanceUniforms(scale * mat, model);
+                    model.Shader.UpdateInstanceUniforms(scale * rot * mat, model);
                     model.Shader.UpdateModelUniforms();
                     model.RawModel.Render(PrimitiveType.Quads);
                     model.Unbind();
                 }
                 else
                 {
+                    var mat = Matrix4.CreateTranslation(_pos.X + 0.5f, _pos.Y + 1.55f + offY, _pos.Z + 0.5f);
+                    var scale = Matrix4.CreateTranslation(Vector3.One * -0.5f) * Matrix4.CreateScale(0.475f);
                     var model = JsonModelLoader.GetModelForItem(_product.Item.UnlocalizedName);
-
-                    var mat = Matrix4.CreateTranslation(_pos.X + 0.5f, _pos.Y + 1.75f, _pos.Z + 0.5f);
-                    var scale = Matrix4.CreateTranslation(Vector3.One * -0.5f) * Matrix4.CreateScale(0.75f);
 
                     GL.BindTexture(TextureTarget.Texture2D, JsonModelLoader.TEXTURE_ITEMS);
 
                     model.Bind();
                     model.Shader.UpdateGlobalUniforms();
-                    model.Shader.UpdateInstanceUniforms(scale * mat, model);
+                    model.Shader.UpdateInstanceUniforms(scale * rot * mat, model);
                     model.Shader.UpdateModelUniforms();
                     model.RawModel.Render(PrimitiveType.Quads);
                     model.Unbind();
@@ -140,13 +200,8 @@ namespace SharpCraft.block
         {
             if (clicked.IsSneaking && _product != null)
             {
-                for (int y = 0; y < 3; y++)
-                {
-                    for (int x = 0; x < 3; x++)
-                    {
-                        _grid[x, y] = null;
-                    }
-                }
+                ClearGrid();
+                Save();
 
                 var pos = new Vector3(_pos.X + 0.5f, hitVec.Y, _pos.Z + 0.5f);
 
@@ -175,7 +230,7 @@ namespace SharpCraft.block
 
             if (item != null)
             {
-                _grid[indexX, indexY] = null;
+                SetGridElement(indexX, indexY, null);
                 world?.AddEntity(new EntityItem(world, hitVec + Vector3.UnitY * 0.25f, Vector3.UnitY * 0.1f, item, true));
 
                 //TODO - maybe make the items swap?
@@ -184,10 +239,33 @@ namespace SharpCraft.block
             {
                 if (!stackEmpty)
                 {
-                    _grid[indexX, indexY] = with.Copy(1);
+                    SetGridElement(indexX, indexY, with.Copy(1));
                     with.Count--;
                 }
             }
+        }
+
+        private void SetGridElement(int x, int y, ItemStack stack)
+        {
+            _grid[x, y] = stack;
+
+            Save();
+        }
+
+        private void ClearGrid()
+        {
+            for (int y = 0; y < 3; y++)
+            {
+                for (int x = 0; x < 3; x++)
+                {
+                    _grid[x, y] = null;
+                }
+            }
+        }
+
+        private void Save()
+        {
+            World.SaveTileEntity(_pos);
         }
     }
 }

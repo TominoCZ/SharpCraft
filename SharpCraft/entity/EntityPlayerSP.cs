@@ -6,6 +6,7 @@ using SharpCraft.item;
 using SharpCraft.util;
 using SharpCraft.world;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using SharpCraft.model;
 
@@ -46,9 +47,12 @@ namespace SharpCraft.entity
         private float _fallDistance;
 
         private bool _wasWalkDown;
+        private bool _wasSneaking;
         private bool _isFalling;
         private float _fallYPosition;
         private int _runTimer;
+
+        private BlockPos _sneakPos;
 
         public bool HasFullInventory => Hotbar.All(stack => stack != null && !stack.IsEmpty) && Inventory.All(stack => stack != null && !stack.IsEmpty);
 
@@ -79,6 +83,93 @@ namespace SharpCraft.entity
                 _runTimer--;
 
             base.Update();
+        }
+
+        public override void Move()
+        {
+            AxisAlignedBB bbO = BoundingBox.Union(BoundingBox.offset(Motion));
+
+            List<AxisAlignedBB> list = SharpCraft.Instance.World.GetBlockCollisionBoxes(bbO);
+
+            if (IsSneaking)
+            {
+                if (OnGround)
+                {
+                    var pos = new BlockPos(Pos - Vector3.UnitY * 0.1f);
+                    var air = BlockRegistry.GetBlock<BlockAir>();
+                    var block = World.GetBlockState(pos).Block;
+
+                    if ((!_wasSneaking || _sneakPos != pos && !block.Material.CanWalkThrough) && block != air)
+                    {
+                        _wasSneaking = true;
+
+                        _sneakPos = pos;
+                    }
+
+                    foreach (var side in FaceSides.YPlane)
+                    {
+                        var posO = _sneakPos.Offset(side);
+                        var blockO = World.GetBlockState(posO).Block;
+
+                        if (blockO != air || !blockO.Material.CanWalkThrough)
+                            continue;
+
+                        var offset = side.ToVec() * CollisionBoundingBox.size * 0.975f;
+
+                        var box = AxisAlignedBB.BLOCK_FULL.offset(posO.Offset(FaceSides.Up).ToVec() + offset);
+
+                        list.Add(box);
+                    }
+                }
+            }
+            else
+            {
+                _wasSneaking = false;
+            }
+
+            Vector3 mOrig = Motion;
+
+            for (int i = 0; i < list.Count; i++)
+            {
+                AxisAlignedBB blockBb = list[i];
+                Motion.Y = blockBb.CalculateYOffset(BoundingBox, Motion.Y);
+            }
+            BoundingBox = BoundingBox.offset(Motion * Vector3.UnitY);
+
+            for (int i = 0; i < list.Count; i++)
+            {
+                AxisAlignedBB blockBb = list[i];
+                Motion.X = blockBb.CalculateXOffset(BoundingBox, Motion.X);
+            }
+            BoundingBox = BoundingBox.offset(Motion * Vector3.UnitX);
+
+            for (int i = 0; i < list.Count; i++)
+            {
+                AxisAlignedBB blockBb = list[i];
+                Motion.Z = blockBb.CalculateZOffset(BoundingBox, Motion.Z);
+            }
+            BoundingBox = BoundingBox.offset(Motion * Vector3.UnitZ);
+
+            SetPositionToBb();
+
+            bool stoppedX = Math.Abs(mOrig.X - Motion.X) > 0.00001f;
+            bool stoppedY = Math.Abs(mOrig.Y - Motion.Y) > 0.00001f;
+            bool stoppedZ = Math.Abs(mOrig.Z - Motion.Z) > 0.00001f;
+
+            OnGround = stoppedY && mOrig.Y < 0.0D;
+
+            bool onCeiling = stoppedY && mOrig.Y > 0.0D;
+
+            if (stoppedX)
+                Motion.X = 0;
+
+            if (stoppedZ)
+                Motion.Z = 0;
+
+            if (onCeiling)
+                Motion.Y *= 0.15f;
+            else if (OnGround)
+                Motion.Y = 0;
         }
 
         public override void Render(float partialTicks)

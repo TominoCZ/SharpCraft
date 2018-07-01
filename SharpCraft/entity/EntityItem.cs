@@ -21,8 +21,8 @@ namespace SharpCraft.entity
 
         private int _entityAge;
 
-        private int _tick;
-        private int _tickLast;
+        private int _ticks;
+        private int _ticksLast;
 
         static EntityItem()
         {
@@ -46,10 +46,15 @@ namespace SharpCraft.entity
 
         public override void Update()
         {
-            _tickLast = _tick;
+            _ticksLast = _ticks;
 
             if (OnGround)
-                _tick = (_tick + 1) % 360;
+            {
+                _ticks = (_ticks + 1) % 90;
+
+                if (_ticksLast > _ticks)
+                    _ticksLast = _ticks;
+            }
 
             LastPos = Pos;
 
@@ -164,7 +169,7 @@ namespace SharpCraft.entity
         public override void Render(float partialTicks)
         {
             Vector3 partialPos = LastPos + (Pos - LastPos) * partialTicks;
-            float partialTime = _tickLast + (_tick - _tickLast) * partialTicks;
+            float partialTime = _ticksLast + (_ticks - _ticksLast) * partialTicks;
 
             if (_stack == null || _stack.IsEmpty)
                 return;
@@ -239,7 +244,7 @@ namespace SharpCraft.entity
                 if (model?.RawModel == null)
                     return;
 
-                float time = OnGround ? (float)((Math.Sin(partialTime / 8) + 1) / 16) : 0;
+                float time = OnGround ? (float)((Math.Sin(partialTime / 90f * MathHelper.TwoPi) + 1) / 16) : 0;
 
                 Shader.Bind();
 
@@ -262,13 +267,13 @@ namespace SharpCraft.entity
 
                 for (int i = 0; i < itemsToRender; i++)
                 {
-                    Vector3 rot = Vector3.UnitY * partialTime * 4;
+                    Vector3 rot = Vector3.UnitY * partialTime / 90f * MathHelper.TwoPi;
                     Vector3 pos = partialPos - (Vector3.UnitX * 0.125f + Vector3.UnitZ * 0.125f) + Vector3.UnitY * time;
                     Vector3 posO = Vector3.One * (i / 8f);
 
-                    Matrix4 x = Matrix4.CreateRotationX(MathHelper.DegreesToRadians(rot.X));
-                    Matrix4 y = Matrix4.CreateRotationY(MathHelper.DegreesToRadians(rot.Y));
-                    Matrix4 z = Matrix4.CreateRotationZ(MathHelper.DegreesToRadians(rot.Z));
+                    Matrix4 x = Matrix4.CreateRotationX(rot.X);
+                    Matrix4 y = Matrix4.CreateRotationY(rot.Y);
+                    Matrix4 z = Matrix4.CreateRotationZ(rot.Z);
 
                     Vector3 vec = Vector3.One * 0.5f;
 

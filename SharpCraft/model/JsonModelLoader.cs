@@ -61,10 +61,39 @@ namespace SharpCraft.model
             {
                 string file = $"{dir}\\{block.UnlocalizedName}.json";
 
-                if (!File.Exists(file))
-                    continue;
+                JsonModel bjm;
 
-                JsonModel bjm = FixBlockJson(file);
+                if (!File.Exists(file))
+                {
+                    var cube = new JsonCube();
+                    var uv = new JsonCubeFaceUv { texture = "item" };
+
+                    cube.faces = new Dictionary<TextureType, JsonCubeFaceUv>
+                    {
+                        { TextureType.north, uv },
+                        { TextureType.south, uv },
+                        { TextureType.west, uv },
+                        { TextureType.east, uv },
+                        { TextureType.up, uv },
+                        { TextureType.down, uv }
+                    };
+
+                    cube.from = new[] { 0f, 0, 0 };
+                    cube.to = new[] { 16f, 16, 16 };
+
+                    bjm = new JsonModel
+                    {
+                        cubes = new[]
+                        {
+                            cube
+                        },
+                        textures = new Dictionary<string, string> { { "item", "" } }
+                    };
+                }
+                else
+                {
+                    bjm = FixBlockJson(file);
+                }
 
                 string blockName = Path.GetFileNameWithoutExtension(file);
 
@@ -101,14 +130,18 @@ namespace SharpCraft.model
                         ref normals, ref uvs, index);
                 }
 
-                string particleTextureName;
+                if (!model.textures.TryGetValue("particle", out var particleTexture))
+                    particleTexture = model.textures.Values.ToArray()[SharpCraft.Instance.Random.Next(0, model.textures.Count)];
+                if (!model.textures.TryGetValue("item", out var slotTexture))
+                {
+                    if (model.cubes.Length > 0 && model.cubes[0].faces.TryGetValue(TextureType.south, out var uv))
+                        slotTexture = model.textures[uv.texture];
+                }
 
-                if (!model.textures.TryGetValue("particle", out particleTextureName))
-                    particleTextureName = model.textures.Values.ToArray()[SharpCraft.Instance.Random.Next(0, model.textures.Count)];
+                var particleTme = textureMapElements[particleTexture];
+                var slotTme = textureMapElements[slotTexture];
 
-                var tme = textureMapElements[particleTextureName];
-
-                ModelBlock mb = new ModelBlock(tme, _blockShader, ModelManager.LoadBlockModelToVao(vertexes, normals, uvs));
+                ModelBlock mb = new ModelBlock(slotTme, particleTme, _blockShader, ModelManager.LoadBlockModelToVao(vertexes, normals, uvs));
 
                 _blockModels.TryAdd(name, mb);
             }
@@ -154,7 +187,7 @@ namespace SharpCraft.model
                         {
                             cube
                         },
-                        textures = new Dictionary<string, string> { { "item", "items/pick_stone" } }
+                        textures = new Dictionary<string, string> { { "item", item.UnlocalizedName } }
                     };
 
                     models.Add(bjm);

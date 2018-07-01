@@ -121,13 +121,6 @@ namespace SharpCraft.gui
             if (model == null)
                 return;
 
-            ModelBlockRaw mbr = (ModelBlockRaw)model.RawModel;
-            List<float> uvs = new List<float>(8);
-            mbr.AppendUvsForSide(FaceSides.South, uvs);
-
-            Vector2 UVmin = new Vector2(uvs[0], uvs[1]);
-            Vector2 UVmax = new Vector2(uvs[4], uvs[5]);
-
             Vector2 unit = new Vector2(1f / SharpCraft.Instance.ClientSize.Width, 1f / SharpCraft.Instance.ClientSize.Height);
 
             float width = 16;
@@ -148,7 +141,7 @@ namespace SharpCraft.gui
             Shader.Bind();
             Shader.UpdateGlobalUniforms();
             Shader.UpdateModelUniforms();
-            Shader.UpdateInstanceUniforms(mat, UVmin, UVmax);
+            Shader.UpdateInstanceUniforms(mat, model.SlotTexture.UVMin, model.SlotTexture.UVMax);
 
             GL.BindTexture(TextureTarget.Texture2D, JsonModelLoader.TEXTURE_BLOCKS);
             _item.RawModel.Render(PrimitiveType.Quads);

@@ -71,6 +71,11 @@ namespace SharpCraft.block
             player.World.RemoveTileEntity(pos);
         }
 
+        public virtual TileEntity CreateTileEntity(World world, BlockPos pos)
+        {
+            return null;
+        }
+
         public override string ToString()
         {
             //TODO - localization

@@ -47,7 +47,7 @@ namespace SharpCraft.particle
                 }
                 else
                 {
-                    var tex = model.GetParticleTexture();
+                    var tex = model.ParticleTexture;
 
                     start = tex.UVMin;
                     end = tex.UVMax;

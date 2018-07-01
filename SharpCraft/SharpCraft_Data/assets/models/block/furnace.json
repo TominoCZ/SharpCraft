@@ -1,6 +1,7 @@
 {
   "inherit": null,
   "textures": {
+    "item": "blocks/furnace_south",
     "particle": "blocks/furnace_south",
     "0": "blocks/furnace_side",
     "1": "blocks/furnace_south",

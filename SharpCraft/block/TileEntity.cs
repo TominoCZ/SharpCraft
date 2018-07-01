@@ -5,9 +5,11 @@ namespace SharpCraft.block
 {
     public class TileEntity
     {
-        protected TileEntity()
-        {
+        protected World World { get; }
 
+        protected TileEntity(World world)
+        {
+            World = world;
         }
 
         public virtual void Update()

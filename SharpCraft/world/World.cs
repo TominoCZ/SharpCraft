@@ -89,6 +89,11 @@ namespace SharpCraft.world
             return GetChunk(pos.ChunkPos())?.GetTileEntity(ChunkPos.ToChunkLocal(pos));
         }
 
+        public void SaveTileEntity(BlockPos pos)
+        {
+            GetChunk(pos.ChunkPos())?.SaveTileEntity(ChunkPos.ToChunkLocal(pos));
+        }
+
         private void UpdateEntities()
         {
             Entities.RemoveAll(e =>
@@ -169,8 +174,15 @@ namespace SharpCraft.world
                 return;
 
             _worldLut.Put(state.Block.UnlocalizedName);
+            
+            var localPos = ChunkPos.ToChunkLocal(pos);
 
-            chunk.SetBlockState(ChunkPos.ToChunkLocal(pos), state);
+            chunk.SetBlockState(localPos, state);
+
+            if (state.Block.CreateTileEntity(this, pos) is TileEntity te)
+            {
+                chunk.AddTileEntity(localPos, te);
+            }
 
             chunk.Save();
         }
@@ -192,7 +204,36 @@ namespace SharpCraft.world
             short[,,] blockData = new short[Chunk.ChunkSize, Chunk.ChunkHeight, Chunk.ChunkSize];
             Buffer.BlockCopy(data, 0, blockData, 0, data.Length);
 
-            CreateChunk(chunkPos, blockData);
+            var chunk = CreateChunk(chunkPos, blockData);
+
+            if (chunk != null)
+            {
+                var air = BlockRegistry.GetBlock<BlockAir>();
+
+                Enumerable.Range(0, Chunk.ChunkHeight).AsParallel().ForAll(y =>
+                {
+                    for (int x = 0; x < Chunk.ChunkSize; x++)
+                    {
+                        for (int z = 0; z < Chunk.ChunkSize; z++)
+                        {
+                            var localPos = new BlockPos(x, y, z);
+
+                            var state = chunk.GetBlockState(localPos);
+
+                            if (state.Block == air)
+                                continue;
+
+                            var worldPos = new BlockPos(chunkPos.ToVec() + localPos.ToVec());
+
+                            if (state.Block.CreateTileEntity(this, worldPos) is TileEntity te)
+                            {
+                                chunk.AddTileEntity(localPos, te);
+                            }
+                        }
+                    }
+                });
+            }
+
             return true;
         }
 

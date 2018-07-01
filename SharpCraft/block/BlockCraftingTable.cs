@@ -17,11 +17,6 @@ namespace SharpCraft.block
             Hardness = 32;
         }
 
-        public override void OnPlaced(World world, BlockPos pos, EntityPlayerSp placer)
-        {
-            world.AddTileEntity(pos, new TileEntityCraftingGrid(pos));
-        }
-
         public override void OnRightClicked(MouseOverObject moo, EntityPlayerSp clicked)
         {
             if (moo.sideHit != FaceSides.Up)
@@ -31,6 +26,11 @@ namespace SharpCraft.block
             {
                 tecg.OnRightClicked(clicked.World, moo.hitVec, clicked.GetEquippedItemStack(), clicked);
             }
+        }
+
+        public override TileEntity CreateTileEntity(World world, BlockPos pos)
+        {
+            return new TileEntityCraftingGrid(world, pos);
         }
     }
 }

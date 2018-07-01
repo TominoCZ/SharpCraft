@@ -1,0 +1,79 @@
+{
+  "inherit": null,
+  "textures": {
+    "up": "blocks/crafting_table_top",
+    "down": "blocks/planks",
+    "side": "blocks/crafting_table_side"
+  },
+  "cubes": [
+    {
+      "from": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "to": [
+        16.0,
+        16.0,
+        16.0
+      ],
+      "rotation": null,
+      "faces": {
+        "up": {
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ],
+          "texture": "up"
+        },
+        "down": {
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ],
+          "texture": "down"
+        },
+        "north": {
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ],
+          "texture": "side"
+        },
+        "south": {
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ],
+          "texture": "side"
+        },
+        "east": {
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ],
+          "texture": "side"
+        },
+        "west": {
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ],
+          "texture": "side"
+        }
+      }
+    }
+  ]
+}

@@ -4,16 +4,13 @@ namespace SharpCraft.model
 {
     public class ModelBlock : ModelBaked<ModelBlock>
     {
-        private readonly TextureMapElement _particleTexture;
+        public TextureMapElement SlotTexture { get; }
+        public TextureMapElement ParticleTexture { get; }
 
-        public ModelBlock(TextureMapElement particleTexture, Shader<ModelBlock> shader, ModelBlockRaw rawModel) : base(rawModel, shader)
+        public ModelBlock(TextureMapElement slotTexture, TextureMapElement particleTexture, Shader<ModelBlock> shader, ModelBlockRaw rawModel) : base(rawModel, shader)
         {
-            _particleTexture = particleTexture;
-        }
-
-        public TextureMapElement GetParticleTexture()
-        {
-            return _particleTexture;
+            SlotTexture = slotTexture;
+            ParticleTexture = particleTexture;
         }
     }
 }
