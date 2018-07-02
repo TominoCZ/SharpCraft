@@ -2,6 +2,7 @@
 using SharpCraft.item;
 using SharpCraft.texture;
 using System;
+using System.Drawing;
 
 namespace SharpCraft.gui
 {

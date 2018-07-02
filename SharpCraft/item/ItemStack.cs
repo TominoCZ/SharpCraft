@@ -1,4 +1,5 @@
 ﻿using System;
+using OpenTK;
 using SharpCraft.util;
 
 namespace SharpCraft.item
@@ -21,7 +22,7 @@ namespace SharpCraft.item
                     return;
                 }
 
-                _count = Math.Clamp(value, 0, Item.GetMaxStackSize());
+                _count = MathHelper.Clamp(value, 0, Item.GetMaxStackSize());
 
                 if (_count == 0)
                     Item = null;

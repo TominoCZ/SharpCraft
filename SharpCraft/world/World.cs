@@ -7,6 +7,7 @@ using SharpCraft.world.chunk.region;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 
 namespace SharpCraft.world
@@ -397,7 +398,7 @@ namespace SharpCraft.world
                     {
                         int treeTop = 0;
 
-                        int height = (int)Math.Clamp(peakY * treeSeed / 64f * 7.5f, 3, 4);
+                        int height = (int)MathHelper.Clamp(peakY * treeSeed / 64f * 7.5f, 3, 4);
 
                         for (int treeY = 0; treeY < height; treeY++)
                         {
@@ -477,7 +478,8 @@ namespace SharpCraft.world
 
         public void AddWaypoint(BlockPos pos, Color color, string name)
         {
-            _waypoints.TryAdd(pos, new Waypoint(pos, color, name));
+            if (!_waypoints.ContainsKey(pos))
+            _waypoints.Add(pos, new Waypoint(pos, color, name));
         }
 
         public void RemoveWaypoint(BlockPos pos)

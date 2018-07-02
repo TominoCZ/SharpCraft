@@ -113,8 +113,8 @@ namespace SharpCraft.render
                 _motion = SharpCraft.Instance.Player.Motion;
 
                 _fov = SharpCraft.Instance.Player.Motion.Xz.LengthFast > 0.15f && SharpCraft.Instance.Player.IsRunning
-                    ? Math.Clamp(_fov * 1.065f, 0, SharpCraft.Instance.Camera.TargetFov + 6)
-                    : Math.Clamp(_fov * 0.965f, SharpCraft.Instance.Camera.TargetFov,
+                    ? MathHelper.Clamp(_fov * 1.065f, 0, SharpCraft.Instance.Camera.TargetFov + 6)
+                    : MathHelper.Clamp(_fov * 0.965f, SharpCraft.Instance.Camera.TargetFov,
                         SharpCraft.Instance.Camera.TargetFov + 6);
             }
 
@@ -205,7 +205,7 @@ namespace SharpCraft.render
                 return;
 
             GL.BindTexture(TextureTarget.Texture2D, TextureManager.TEXTURE_DESTROY_PROGRESS.ID);
-            GL.BlendFunc(BlendingFactorSrc.DstColor, BlendingFactorDest.Zero);
+            GL.BlendFunc(BlendingFactor.DstColor, BlendingFactor.Zero);
 
             GL.BindVertexArray(_destroyProgressModel.VaoID);
             GL.EnableVertexAttribArray(0);
@@ -233,7 +233,7 @@ namespace SharpCraft.render
             GL.DisableVertexAttribArray(0);
             GL.BindVertexArray(0);
 
-            GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
+            GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
 
             _shaderTexturedCube.Unbind();
         }
@@ -335,7 +335,7 @@ namespace SharpCraft.render
 
             float angle = partialTick * MathHelper.TwoPi * (SharpCraft.Instance.Player.IsRunning ? 7 : 5);
 
-            float height = 0.075f * Math.Clamp(partialMotion.Xz.Length * 5, 0, 1);
+            float height = 0.075f * MathHelper.Clamp(partialMotion.Xz.Length * 5, 0, 1);
 
             float offsetX = (float)Math.Cos(angle) * height;
             float offsetY = (float)Math.Sin(partialTick * 360 > 180 ? -angle * 2 + MathHelper.Pi : angle * 2) * height * 0.5f;
@@ -343,11 +343,11 @@ namespace SharpCraft.render
             Vector2 rotVec = new Vector2(-SharpCraft.Instance.Camera.Pitch, -SharpCraft.Instance.Camera.Yaw);
 
             Vector3 offset = new Vector3(0.85f + offsetX, -0.75f + offsetY, -0.3f);
-            offset.Y -= Math.Clamp(partialMotion.Y, -0.35f, 0.35f) / 15f;
+            offset.Y -= MathHelper.Clamp(partialMotion.Y, -0.35f, 0.35f) / 15f;
 
-            float angle1 = Math.Clamp(partialAnimationTimer * 1.2f, 0, 10) / 10 * MathHelper.Pi;
-            float angle2 = Math.Clamp(partialAnimationTimer, 0, 10) / 10 * MathHelper.Pi;
-            float angle3 = Math.Clamp(partialAnimationTimer * 1.5f, 0, 10) / 10 * MathHelper.Pi;
+            float angle1 = MathHelper.Clamp(partialAnimationTimer * 1.2f, 0, 10) / 10 * MathHelper.Pi;
+            float angle2 = MathHelper.Clamp(partialAnimationTimer, 0, 10) / 10 * MathHelper.Pi;
+            float angle3 = MathHelper.Clamp(partialAnimationTimer * 1.5f, 0, 10) / 10 * MathHelper.Pi;
 
             float animationSine1 = (float)Math.Sin(angle1);
             float animationSine2 = (float)Math.Sin(angle2);
@@ -408,7 +408,7 @@ namespace SharpCraft.render
 
             float angle = partialTick * MathHelper.TwoPi * (SharpCraft.Instance.Player.IsRunning ? 7 : 5);
 
-            float height = 0.15f * Math.Clamp(partialMotion.Xz.Length * 5, 0, 1);
+            float height = 0.15f * MathHelper.Clamp(partialMotion.Xz.Length * 5, 0, 1);
 
             float offsetX = (float)Math.Cos(angle) * height;
             float offsetY = (float)Math.Sin(partialTick * 360 > 180 ? -angle * 2 + MathHelper.Pi : angle * 2) * height * 0.5f;
@@ -418,11 +418,11 @@ namespace SharpCraft.render
             float itemBlockOffsetY = block.BoundingBox.Size.Y / 2 - 0.5f;
 
             Vector3 offset = new Vector3(1.35f + offsetX, -1.25f - itemBlockOffsetY + offsetY, 0.3f);
-            offset.Y -= Math.Clamp(partialMotion.Y, -0.35f, 0.35f) / 10f;
+            offset.Y -= MathHelper.Clamp(partialMotion.Y, -0.35f, 0.35f) / 10f;
 
-            float angle1 = Math.Clamp(partialAnimationTimer * 1.2f, 0, 10) / 10 * MathHelper.Pi;
-            float angle2 = Math.Clamp(partialAnimationTimer, 0, 10) / 10 * MathHelper.Pi;
-            float angle3 = Math.Clamp(partialAnimationTimer * 1.5f, 0, 10) / 10 * MathHelper.Pi;
+            float angle1 = MathHelper.Clamp(partialAnimationTimer * 1.2f, 0, 10) / 10 * MathHelper.Pi;
+            float angle2 = MathHelper.Clamp(partialAnimationTimer, 0, 10) / 10 * MathHelper.Pi;
+            float angle3 = MathHelper.Clamp(partialAnimationTimer * 1.5f, 0, 10) / 10 * MathHelper.Pi;
 
             float animationSine1 = (float)Math.Sin(angle1);
             float animationSine2 = (float)Math.Sin(angle2);
@@ -485,7 +485,7 @@ namespace SharpCraft.render
 
             float angle = partialTick * MathHelper.TwoPi * (SharpCraft.Instance.Player.IsRunning ? 7 : 5);
 
-            float height = 0.1f * Math.Clamp(partialMotion.Xz.Length * 5, 0, 1);
+            float height = 0.1f * MathHelper.Clamp(partialMotion.Xz.Length * 5, 0, 1);
 
             float offsetX = (float)Math.Cos(angle) * height;
             float offsetY = (float)Math.Sin(partialTick * 360 > 180 ? -angle * 2 + MathHelper.Pi : angle * 2) * height * 0.5f;
@@ -493,11 +493,11 @@ namespace SharpCraft.render
             Vector2 rotVec = new Vector2(-SharpCraft.Instance.Camera.Pitch, -SharpCraft.Instance.Camera.Yaw);
 
             Vector3 offset = new Vector3(0.85f + offsetX, -0.4f + offsetY, 1);
-            offset.Y -= Math.Clamp(partialMotion.Y, -0.35f, 0.35f) / 10f;
+            offset.Y -= MathHelper.Clamp(partialMotion.Y, -0.35f, 0.35f) / 10f;
 
-            float angle1 = Math.Clamp(partialAnimationTimer * 1.2f, 0, 10) / 10 * MathHelper.Pi;
-            float angle2 = Math.Clamp(partialAnimationTimer, 0, 10) / 10 * MathHelper.Pi;
-            float angle3 = Math.Clamp(partialAnimationTimer * 1.5f, 0, 10) / 10 * MathHelper.Pi;
+            float angle1 = MathHelper.Clamp(partialAnimationTimer * 1.2f, 0, 10) / 10 * MathHelper.Pi;
+            float angle2 = MathHelper.Clamp(partialAnimationTimer, 0, 10) / 10 * MathHelper.Pi;
+            float angle3 = MathHelper.Clamp(partialAnimationTimer * 1.5f, 0, 10) / 10 * MathHelper.Pi;
 
             float animationSine1 = (float)Math.Sin(angle1);
             float animationSine2 = (float)Math.Sin(angle2);

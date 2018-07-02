@@ -1,4 +1,14 @@
-﻿using OpenTK;
+﻿using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Drawing;
+using System.Drawing.Imaging;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Threading;
+using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Input;
@@ -12,20 +22,7 @@ using SharpCraft.render.shader;
 using SharpCraft.texture;
 using SharpCraft.util;
 using SharpCraft.world;
-using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Drawing;
-using System.Drawing.Imaging;
-using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Threading;
-using Bitmap = System.Drawing.Bitmap;
-using Point = OpenTK.Point;
-using Rectangle = System.Drawing.Rectangle;
-using Size = OpenTK.Size;
+using PixelFormat = System.Drawing.Imaging.PixelFormat;
 
 namespace SharpCraft
 {
@@ -69,9 +66,9 @@ namespace SharpCraft
         private FBO _frameBuffer;
 
         //public HashSet<Key> KeysDown = new HashSet<Key>();
-        public MouseOverObject MouseOverObject = new MouseOverObject();
+        public MouseOverObject MouseOverObject;
 
-        private MouseOverObject _lastMouseOverObject = new MouseOverObject();
+        private MouseOverObject _lastMouseOverObject;
 
         public EntityPlayerSp Player;
 
@@ -156,19 +153,19 @@ namespace SharpCraft
         private void GlSetup()
         {
             GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Fill);
-            
+
             GL.Enable(EnableCap.DepthTest);
             GL.Enable(EnableCap.DepthClamp);
             GL.Enable(EnableCap.CullFace);
             GL.Enable(EnableCap.Blend);
 
-            GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
+            GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
             GL.Hint(HintTarget.PerspectiveCorrectionHint, HintMode.Nicest);
-            
+
             GL.DepthMask(true);
-            
+
             GL.CullFace(CullFaceMode.Back);
-            
+
             GL.ActiveTexture(TextureUnit.Texture0);
 
             //_frameBuffer = new FBO(Width, Height, false, 4);
@@ -186,8 +183,12 @@ namespace SharpCraft
                         .SelectMany(t => t.GetTypes())
                         .Where(t => t.IsSubclassOf(typeof(ModMain)));
 
-                    if (modClassType.FirstOrDefault() is Type type && Activator.CreateInstance(type) is ModMain mm)
+                    Type type = modClassType.FirstOrDefault();
+
+                    if (type != null && type == typeof(ModMain))
                     {
+                        ModMain mm = (ModMain) Activator.CreateInstance(type);
+
                         if (mm.ModInfo.IsValid)
                         {
                             Console.WriteLine("registered mod '" + mm.ModInfo.Name + "'!");
@@ -316,7 +317,7 @@ namespace SharpCraft
             _blockRegistry.RegisterBlocksPost(loader);
             _itemRegistry.RegisterItemsPost(loader);
 
-            LangUtil.LoadLang(SettingsManager.GetString("lang"));//TODO - find a proper placement for this line
+            LangUtil.LoadLang(SettingsManager.GetString("lang")); //TODO - find a proper placement for this line
         }
 
         public void StartGame()
@@ -346,22 +347,31 @@ namespace SharpCraft
             {
                 Console.WriteLine("DEBUG: generating World");
 
-                BlockPos playerPos = new BlockPos(0, 10, 0);//MathUtil.NextFloat(-100, 100));
+                BlockPos playerPos = new BlockPos(0, 10, 0); //MathUtil.NextFloat(-100, 100));
 
-                World = new World("MyWorld", "Tomlow's Fuckaround", SettingsManager.GetString("worldseed").GetHashCode());
+                World = new World("MyWorld", "Tomlow's Fuckaround",
+                    SettingsManager.GetString("worldseed").GetHashCode());
 
                 Player = new EntityPlayerSp(World, playerPos.ToVec());
 
                 World.AddEntity(Player);
 
-                Player.SetItemStackInInventory(0, new ItemStack(ItemRegistry.GetItem(BlockRegistry.GetBlock<BlockCraftingTable>())));
-                Player.SetItemStackInInventory(1, new ItemStack(ItemRegistry.GetItem(BlockRegistry.GetBlock<BlockFurnace>())));
-                Player.SetItemStackInInventory(2, new ItemStack(ItemRegistry.GetItem(BlockRegistry.GetBlock<BlockCobbleStone>())));
-                Player.SetItemStackInInventory(3, new ItemStack(ItemRegistry.GetItem(BlockRegistry.GetBlock<BlockPlanks>())));
-                Player.SetItemStackInInventory(4, new ItemStack(ItemRegistry.GetItem(BlockRegistry.GetBlock<BlockGlass>())));
-                Player.SetItemStackInInventory(5, new ItemStack(ItemRegistry.GetItem(BlockRegistry.GetBlock<BlockCraftingTable>())));
-                Player.SetItemStackInInventory(7, new ItemStack(ItemRegistry.GetItem(BlockRegistry.GetBlock<BlockLadder>())));
-                Player.SetItemStackInInventory(8, new ItemStack(ItemRegistry.GetItem(BlockRegistry.GetBlock<BlockTallGrass>())));
+                Player.SetItemStackInInventory(0,
+                    new ItemStack(ItemRegistry.GetItem(BlockRegistry.GetBlock<BlockCraftingTable>())));
+                Player.SetItemStackInInventory(1,
+                    new ItemStack(ItemRegistry.GetItem(BlockRegistry.GetBlock<BlockFurnace>())));
+                Player.SetItemStackInInventory(2,
+                    new ItemStack(ItemRegistry.GetItem(BlockRegistry.GetBlock<BlockCobbleStone>())));
+                Player.SetItemStackInInventory(3,
+                    new ItemStack(ItemRegistry.GetItem(BlockRegistry.GetBlock<BlockPlanks>())));
+                Player.SetItemStackInInventory(4,
+                    new ItemStack(ItemRegistry.GetItem(BlockRegistry.GetBlock<BlockGlass>())));
+                Player.SetItemStackInInventory(5,
+                    new ItemStack(ItemRegistry.GetItem(BlockRegistry.GetBlock<BlockCraftingTable>())));
+                Player.SetItemStackInInventory(7,
+                    new ItemStack(ItemRegistry.GetItem(BlockRegistry.GetBlock<BlockLadder>())));
+                Player.SetItemStackInInventory(8,
+                    new ItemStack(ItemRegistry.GetItem(BlockRegistry.GetBlock<BlockTallGrass>())));
 
                 WorldLoader.SaveWorld(World); //TODO - this is really dirty
             }
@@ -372,7 +382,7 @@ namespace SharpCraft
 
             ResetMouse();
 
-            MouseState state = OpenTK.Input.Mouse.GetState();
+            MouseState state = Mouse.GetState();
             _mouseLast = new Point(state.X, state.Y);
         }
 
@@ -402,7 +412,8 @@ namespace SharpCraft
             if (GuiScreen == null && !Focused)
                 OpenGuiScreen(new GuiScreenIngameMenu());
 
-            float wheelValue = Mouse.WheelPrecise;
+            //TODO - this goes to MouseWheel event
+            float wheelValue = 0; //Mouse;
 
             if (Player != null)
             {
@@ -442,7 +453,9 @@ namespace SharpCraft
                                 }
                                 else
                                 {
-                                    progress.Progress += Player.GetEquippedItemStack() is ItemStack st && !st.IsEmpty ? st.Item.GetMiningSpeed(World?.GetBlockState(lastPos).Block.Material) : 1;
+                                    progress.Progress += Player.GetEquippedItemStack() is ItemStack st && !st.IsEmpty
+                                        ? st.Item.GetMiningSpeed(World?.GetBlockState(lastPos).Block.Material)
+                                        : 1;
                                 }
 
                                 if (progress.Destroyed)
@@ -578,7 +591,7 @@ namespace SharpCraft
         private void ResetMouse()
         {
             Point middle = PointToScreen(new Point(ClientSize.Width / 2, ClientSize.Height / 2));
-            OpenTK.Input.Mouse.SetPosition(middle.X, middle.Y);
+            Mouse.SetPosition(middle.X, middle.Y);
         }
 
         public void RunGlTasks()
@@ -641,7 +654,7 @@ namespace SharpCraft
             Point middle = new Point(ClientRectangle.Width / 2, ClientRectangle.Height / 2);
             middle = PointToScreen(middle);
 
-            OpenTK.Input.Mouse.SetPosition(middle.X, middle.Y);
+            Mouse.SetPosition(middle.X, middle.Y);
         }
 
         public void CloseGuiScreen()
@@ -661,7 +674,7 @@ namespace SharpCraft
         private void CaptureScreen()
         {
             Bitmap bmp = new Bitmap(ClientSize.Width, ClientSize.Height,
-                System.Drawing.Imaging.PixelFormat.Format32bppRgb);
+                PixelFormat.Format32bppRgb);
 
             using (bmp)
             {
@@ -712,7 +725,7 @@ namespace SharpCraft
 
             DateTime now = DateTime.Now;
 
-            _partialTicks = (float)(((now - _updateTimer).TotalSeconds + e.Time) / TargetUpdatePeriod);
+            _partialTicks = (float) (((now - _updateTimer).TotalSeconds + e.Time) / TargetUpdatePeriod);
 
             if ((now - _lastFpsDate).TotalMilliseconds >= 1000)
             {
@@ -805,7 +818,7 @@ namespace SharpCraft
                 }
                 else
                 {
-                    MouseState state = OpenTK.Input.Mouse.GetCursorState();
+                    MouseState state = Mouse.GetCursorState();
                     Point point = PointToClient(new Point(state.X, state.Y));
 
                     GuiScreen.OnMouseClick(point.X, point.Y, e.Button);
@@ -834,7 +847,7 @@ namespace SharpCraft
             {
                 case Key.P:
                     Player?.World?.AddWaypoint(new BlockPos(Player.Pos).Offset(FaceSides.Up),
-                        new OpenTK.Color(255, 0, 0, 127), "TEST");
+                        Color.FromArgb(255, 0, 0, 127), "TEST");
                     break;
 
                 case Key.Escape:

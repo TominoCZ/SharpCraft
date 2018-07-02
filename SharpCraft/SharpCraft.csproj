@@ -1,36 +1,305 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <RuntimeIdentifiers>win10-x64;ubuntu.16.10-x64</RuntimeIdentifiers>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
+    <ProjectGuid>{8369D9B9-6BCC-4773-895A-B18E7595B106}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net40</TargetFramework>
-    <ApplicationIcon />
-    <StartupObject>SharpCraft.Start</StartupObject>
+    <RootNamespace>SharpCraft</RootNamespace>
+    <AssemblyName>SharpCraft</AssemblyName>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <GenerateSerializationAssemblies>Auto</GenerateSerializationAssemblies>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
     <Optimize>false</Optimize>
+    <OutputPath>bin\Debug</OutputPath>
+    <DefineConstants>DEBUG;</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <ConsolePause>false</ConsolePause>
+    <PlatformTarget>x86</PlatformTarget>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+    <DebugType>full</DebugType>
     <Optimize>true</Optimize>
+    <OutputPath>bin\Release</OutputPath>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <ConsolePause>false</ConsolePause>
+    <PlatformTarget>x86</PlatformTarget>
   </PropertyGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
-    <Compile Remove="render/shader/uniforms/**" />
-    <Compile Remove="saves/**" />
-    <EmbeddedResource Remove="render/shader/uniforms/**" />
-    <EmbeddedResource Remove="saves/**" />
-    <None Remove="render/shader/uniforms/**" />
-    <None Remove="saves/**" />
+    <None Include="OpenTK.dll.config" />
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
-    <PackageReference Include="OpenTK.NETCore" Version="1.1.2749.6433" />
-    <PackageReference Include="System.Drawing.Common" Version="4.5.0-preview1-26216-02" />
-  </ItemGroup>
-  <ItemGroup>
-    <Reference Include="System.Design">
-      <HintPath>../../../../../../../Program Files (x86)/Reference Assemblies/Microsoft/Framework/.NETFramework/v4.7.1/System.Design.dll</HintPath>
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="Newtonsoft.Json, Version=11.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed">
+      <HintPath>..\packages\Newtonsoft.Json.11.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
+    <Reference Include="OpenTK">
+      <HintPath>..\packages\OpenTK.3.0.0\lib\net20\OpenTK.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Drawing.Design" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="block\Block.cs" />
+    <Compile Include="block\BlockAir.cs" />
+    <Compile Include="block\BlockBedrock.cs" />
+    <Compile Include="block\BlockCobbleStone.cs" />
+    <Compile Include="block\BlockCraftingTable.cs" />
+    <Compile Include="block\BlockDirt.cs" />
+    <Compile Include="block\BlockFurnace.cs" />
+    <Compile Include="block\BlockGlass.cs" />
+    <Compile Include="block\BlockGrass.cs" />
+    <Compile Include="block\BlockLadder.cs" />
+    <Compile Include="block\BlockLeaves.cs" />
+    <Compile Include="block\BlockLog.cs" />
+    <Compile Include="block\BlockPlanks.cs" />
+    <Compile Include="block\BlockPos.cs" />
+    <Compile Include="block\BlockRare.cs" />
+    <Compile Include="block\BlockRegistry.cs" />
+    <Compile Include="block\BlockSlab.cs" />
+    <Compile Include="block\BlockState.cs" />
+    <Compile Include="block\BlockStone.cs" />
+    <Compile Include="block\BlockTallGrass.cs" />
+    <Compile Include="block\FaceSides.cs" />
+    <Compile Include="block\Material.cs" />
+    <Compile Include="block\TileEntity.cs" />
+    <Compile Include="block\TileEntityCraftingGrid.cs" />
+    <Compile Include="entity\AxisAlignedBb.cs" />
+    <Compile Include="entity\Entity.cs" />
+    <Compile Include="entity\EntityItem.cs" />
+    <Compile Include="entity\EntityPlayerSP.cs" />
+    <Compile Include="entity\MouseOverObject.cs" />
+    <Compile Include="gui\FontManager.cs" />
+    <Compile Include="gui\FontMapCharacter.cs" />
+    <Compile Include="gui\FontMapCharacterNode.cs" />
+    <Compile Include="gui\Gui.cs" />
+    <Compile Include="gui\GuiButton.cs" />
+    <Compile Include="gui\GuiCrosshair.cs" />
+    <Compile Include="gui\GuiHUD.cs" />
+    <Compile Include="gui\GuiItemSlot.cs" />
+    <Compile Include="gui\GuiScreen.cs" />
+    <Compile Include="gui\GuiScreenCrafting.cs" />
+    <Compile Include="gui\GuiScreenIngameMenu.cs" />
+    <Compile Include="gui\GuiScreenInventory.cs" />
+    <Compile Include="gui\GuiScreenMainMenu.cs" />
+    <Compile Include="gui\GuiTexture.cs" />
+    <Compile Include="item\Item.cs" />
+    <Compile Include="item\ItemBlock.cs" />
+    <Compile Include="item\ItemPickaxe.cs" />
+    <Compile Include="item\ItemRegistry.cs" />
+    <Compile Include="item\ItemStack.cs" />
+    <Compile Include="item\RecipeRegistry.cs" />
+    <Compile Include="model\CubeModelBuilder.cs" />
+    <Compile Include="model\IModelBaked.cs" />
+    <Compile Include="model\IModelRaw.cs" />
+    <Compile Include="model\JsonCube.cs" />
+    <Compile Include="model\JsonCubeFaceUv.cs" />
+    <Compile Include="model\JsonModel.cs" />
+    <Compile Include="model\JsonModelLoader.cs" />
+    <Compile Include="model\JsonModelRotation.cs" />
+    <Compile Include="model\ModelBaked.cs" />
+    <Compile Include="model\ModelBlock.cs" />
+    <Compile Include="model\ModelBlockRaw.cs" />
+    <Compile Include="model\ModelChunk.cs" />
+    <Compile Include="model\ModelCubeOutline.cs" />
+    <Compile Include="model\ModelCustom.cs" />
+    <Compile Include="model\ModelGuiItem.cs" />
+    <Compile Include="model\ModelItem.cs" />
+    <Compile Include="model\ModelItemRaw.cs" />
+    <Compile Include="model\ModelManager.cs" />
+    <Compile Include="model\ModelParticle.cs" />
+    <Compile Include="model\ModelRaw.cs" />
+    <Compile Include="model\ModelRegistry.cs" />
+    <Compile Include="model\RotationAxis.cs" />
+    <Compile Include="ModInfo.cs" />
+    <Compile Include="ModMain.cs" />
+    <Compile Include="particle\Particle.cs" />
+    <Compile Include="particle\ParticleDigging.cs" />
+    <Compile Include="RegistryEventArgs.cs" />
+    <Compile Include="render\Camera.cs" />
+    <Compile Include="render\EntityRenderer.cs" />
+    <Compile Include="render\FBO.cs" />
+    <Compile Include="render\FontRenderer.cs" />
+    <Compile Include="render\GuiRenderer.cs" />
+    <Compile Include="render\ParticleRenderer.cs" />
+    <Compile Include="render\shader\module\ShaderModule.cs" />
+    <Compile Include="render\shader\module\ShaderModule3D.cs" />
+    <Compile Include="render\shader\Shader.cs" />
+    <Compile Include="render\shader\shaders\ShaderBlockOutline.cs" />
+    <Compile Include="render\shader\shaders\ShaderColor.cs" />
+    <Compile Include="render\shader\shaders\ShaderGui.cs" />
+    <Compile Include="render\shader\shaders\ShaderParticle.cs" />
+    <Compile Include="render\shader\shaders\ShaderText.cs" />
+    <Compile Include="render\shader\shaders\ShaderTexturedCube.cs" />
+    <Compile Include="render\shader\uniform\Uniform.cs" />
+    <Compile Include="render\shader\uniform\UniformFloat.cs" />
+    <Compile Include="render\shader\uniform\UniformMat4.cs" />
+    <Compile Include="render\shader\uniform\UniformVec2.cs" />
+    <Compile Include="render\shader\uniform\UniformVec3.cs" />
+    <Compile Include="render\shader\uniform\UniformVec4.cs" />
+    <Compile Include="render\SkyboxRenderer.cs" />
+    <Compile Include="render\WorldRenderer.cs" />
+    <Compile Include="SettingsManager.cs" />
+    <Compile Include="SharpCraft.cs" />
+    <Compile Include="Start.cs" />
+    <Compile Include="TestMod.cs" />
+    <Compile Include="texture\Facing.cs" />
+    <Compile Include="texture\TextureManager.cs" />
+    <Compile Include="texture\TextureMapElement.cs" />
+    <Compile Include="texture\TextureUVNode.cs" />
+    <Compile Include="util\ByteBufferReader.cs" />
+    <Compile Include="util\ByteBufferWriter.cs" />
+    <Compile Include="util\GameTimer.cs" />
+    <Compile Include="util\HitType.cs" />
+    <Compile Include="util\LangUtil.cs" />
+    <Compile Include="util\MathUtil.cs" />
+    <Compile Include="util\MatrixHelper.cs" />
+    <Compile Include="util\NoiseUtil.cs" />
+    <Compile Include="util\RayHelper.cs" />
+    <Compile Include="util\Texture.cs" />
+    <Compile Include="world\chunk\Chunk.cs" />
+    <Compile Include="world\chunk\ChunkLoadManager.cs" />
+    <Compile Include="world\chunk\ChunkPos.cs" />
+    <Compile Include="world\chunk\region\ChunkDataManager.cs" />
+    <Compile Include="world\chunk\region\IRegion.cs" />
+    <Compile Include="world\chunk\region\IRegionCord.cs" />
+    <Compile Include="world\chunk\region\RegionInfo.cs" />
+    <Compile Include="world\chunk\region\RegionPointerBlockImpl.cs" />
+    <Compile Include="world\chunk\region\RegionStaticImpl.cs" />
+    <Compile Include="world\chunk\region\StreamExtensions.cs" />
+    <Compile Include="world\chunk\SwapList.cs" />
+    <Compile Include="world\DestroyProgress.cs" />
+    <Compile Include="world\Waypoint.cs" />
+    <Compile Include="world\World.cs" />
+    <Compile Include="world\WorldDataNode.cs" />
+    <Compile Include="world\WorldLoader.cs" />
+    <Compile Include="world\WorldLut.cs" />
+    <Compile Include="world\WorldPlayerNode.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="FodyWeavers.xml" />
+    <Content Include="SharpCraft_Data\assets\sharpcraft\lang\en-US.lang" />
+    <Content Include="SharpCraft_Data\assets\sharpcraft\models\block\bedrock.json" />
+    <Content Include="SharpCraft_Data\assets\sharpcraft\models\block\cobblestone.json" />
+    <Content Include="SharpCraft_Data\assets\sharpcraft\models\block\crafting_table.json" />
+    <Content Include="SharpCraft_Data\assets\sharpcraft\models\block\crafting_table_bkp.json" />
+    <Content Include="SharpCraft_Data\assets\sharpcraft\models\block\dirt.json" />
+    <Content Include="SharpCraft_Data\assets\sharpcraft\models\block\furnace.json" />
+    <Content Include="SharpCraft_Data\assets\sharpcraft\models\block\furnace_bkp.json" />
+    <Content Include="SharpCraft_Data\assets\sharpcraft\models\block\furnace_bkp1.json" />
+    <Content Include="SharpCraft_Data\assets\sharpcraft\models\block\glass.json" />
+    <Content Include="SharpCraft_Data\assets\sharpcraft\models\block\grass.json" />
+    <Content Include="SharpCraft_Data\assets\sharpcraft\models\block\ladder.json" />
+    <Content Include="SharpCraft_Data\assets\sharpcraft\models\block\leaves.json" />
+    <Content Include="SharpCraft_Data\assets\sharpcraft\models\block\leaves_bkp.json" />
+    <Content Include="SharpCraft_Data\assets\sharpcraft\models\block\log.json" />
+    <Content Include="SharpCraft_Data\assets\sharpcraft\models\block\log_bkp.json" />
+    <Content Include="SharpCraft_Data\assets\sharpcraft\models\block\planks.json" />
+    <Content Include="SharpCraft_Data\assets\sharpcraft\models\block\planks_bkp.json" />
+    <Content Include="SharpCraft_Data\assets\sharpcraft\models\block\rare.json" />
+    <Content Include="SharpCraft_Data\assets\sharpcraft\models\block\slab.json" />
+    <Content Include="SharpCraft_Data\assets\sharpcraft\models\block\stone.json" />
+    <Content Include="SharpCraft_Data\assets\sharpcraft\models\block\sum_block.json" />
+    <Content Include="SharpCraft_Data\assets\sharpcraft\models\block\tallgrass.json" />
+    <Content Include="SharpCraft_Data\assets\sharpcraft\models\entity\player\arm.json" />
+    <Content Include="SharpCraft_Data\assets\sharpcraft\models\item\pick.json" />
+    <Content Include="SharpCraft_Data\assets\sharpcraft\models\item\pick_rare.json" />
+    <Content Include="SharpCraft_Data\assets\sharpcraft\models\item\pick_stone - Copy.json" />
+    <Content Include="SharpCraft_Data\assets\sharpcraft\models\item\pick_stone.json" />
+    <Content Include="SharpCraft_Data\assets\sharpcraft\models\item\pick_wood.json" />
+    <Content Include="SharpCraft_Data\assets\sharpcraft\shaders\block.fsh" />
+    <Content Include="SharpCraft_Data\assets\sharpcraft\shaders\block.vsh" />
+    <Content Include="SharpCraft_Data\assets\sharpcraft\shaders\block_unlit.fsh" />
+    <Content Include="SharpCraft_Data\assets\sharpcraft\shaders\block_unlit.vsh" />
+    <Content Include="SharpCraft_Data\assets\sharpcraft\shaders\color.fsh" />
+    <Content Include="SharpCraft_Data\assets\sharpcraft\shaders\color.vsh" />
+    <Content Include="SharpCraft_Data\assets\sharpcraft\shaders\color2D.fsh" />
+    <Content Include="SharpCraft_Data\assets\sharpcraft\shaders\color2D.vsh" />
+    <Content Include="SharpCraft_Data\assets\sharpcraft\shaders\destroy_progressd.vsh" />
+    <Content Include="SharpCraft_Data\assets\sharpcraft\shaders\destroy_progresss.fsh" />
+    <Content Include="SharpCraft_Data\assets\sharpcraft\shaders\entity_item.fsh" />
+    <Content Include="SharpCraft_Data\assets\sharpcraft\shaders\entity_item.vsh" />
+    <Content Include="SharpCraft_Data\assets\sharpcraft\shaders\gui.fsh" />
+    <Content Include="SharpCraft_Data\assets\sharpcraft\shaders\gui.vsh" />
+    <Content Include="SharpCraft_Data\assets\sharpcraft\shaders\gui_item.fsh" />
+    <Content Include="SharpCraft_Data\assets\sharpcraft\shaders\gui_item.vsh" />
+    <Content Include="SharpCraft_Data\assets\sharpcraft\shaders\gui_text.fsh" />
+    <Content Include="SharpCraft_Data\assets\sharpcraft\shaders\gui_text.vsh" />
+    <Content Include="SharpCraft_Data\assets\sharpcraft\shaders\particle.fsh" />
+    <Content Include="SharpCraft_Data\assets\sharpcraft\shaders\particle.vsh" />
+    <Content Include="SharpCraft_Data\assets\sharpcraft\shaders\skybox.fsh" />
+    <Content Include="SharpCraft_Data\assets\sharpcraft\shaders\skybox.vsh" />
+    <Content Include="SharpCraft_Data\assets\sharpcraft\shaders\textured_cube.fsh" />
+    <Content Include="SharpCraft_Data\assets\sharpcraft\shaders\textured_cube.vsh" />
+    <Content Include="SharpCraft_Data\assets\sharpcraft\textures\blocks\bedrock.png" />
+    <Content Include="SharpCraft_Data\assets\sharpcraft\textures\blocks\cobblestone.png" />
+    <Content Include="SharpCraft_Data\assets\sharpcraft\textures\blocks\crafting_table_side.png" />
+    <Content Include="SharpCraft_Data\assets\sharpcraft\textures\blocks\crafting_table_top.png" />
+    <Content Include="SharpCraft_Data\assets\sharpcraft\textures\blocks\destroy_progress.png" />
+    <Content Include="SharpCraft_Data\assets\sharpcraft\textures\blocks\dirt.png" />
+    <Content Include="SharpCraft_Data\assets\sharpcraft\textures\blocks\furnace_down.png" />
+    <Content Include="SharpCraft_Data\assets\sharpcraft\textures\blocks\furnace_side.png" />
+    <Content Include="SharpCraft_Data\assets\sharpcraft\textures\blocks\furnace_south.png" />
+    <Content Include="SharpCraft_Data\assets\sharpcraft\textures\blocks\furnace_top.png" />
+    <Content Include="SharpCraft_Data\assets\sharpcraft\textures\blocks\glass.png" />
+    <Content Include="SharpCraft_Data\assets\sharpcraft\textures\blocks\grass_side.png" />
+    <Content Include="SharpCraft_Data\assets\sharpcraft\textures\blocks\grass_top.png" />
+    <Content Include="SharpCraft_Data\assets\sharpcraft\textures\blocks\leaves.png" />
+    <Content Include="SharpCraft_Data\assets\sharpcraft\textures\blocks\log_side.png" />
+    <Content Include="SharpCraft_Data\assets\sharpcraft\textures\blocks\log_top.png" />
+    <Content Include="SharpCraft_Data\assets\sharpcraft\textures\blocks\planks.png" />
+    <Content Include="SharpCraft_Data\assets\sharpcraft\textures\blocks\rare.png" />
+    <Content Include="SharpCraft_Data\assets\sharpcraft\textures\blocks\stone.png" />
+    <Content Include="SharpCraft_Data\assets\sharpcraft\textures\blocks\xray.png" />
+    <Content Include="SharpCraft_Data\assets\sharpcraft\textures\entity\player\arm.png" />
+    <Content Include="SharpCraft_Data\assets\sharpcraft\textures\font\default.fnt" />
+    <Content Include="SharpCraft_Data\assets\sharpcraft\textures\font\default.png" />
+    <Content Include="SharpCraft_Data\assets\sharpcraft\textures\gui\bg.png" />
+    <Content Include="SharpCraft_Data\assets\sharpcraft\textures\gui\bg_transparent.png" />
+    <Content Include="SharpCraft_Data\assets\sharpcraft\textures\gui\crafting.png" />
+    <Content Include="SharpCraft_Data\assets\sharpcraft\textures\gui\cross.png" />
+    <Content Include="SharpCraft_Data\assets\sharpcraft\textures\gui\hearts.zip" />
+    <Content Include="SharpCraft_Data\assets\sharpcraft\textures\gui\heart_more_round.zip" />
+    <Content Include="SharpCraft_Data\assets\sharpcraft\textures\gui\inventory - Copy.png" />
+    <Content Include="SharpCraft_Data\assets\sharpcraft\textures\gui\inventory.png" />
+    <Content Include="SharpCraft_Data\assets\sharpcraft\textures\gui\inventory_bg.png" />
+    <Content Include="SharpCraft_Data\assets\sharpcraft\textures\gui\inventory_bg_big.png" />
+    <Content Include="SharpCraft_Data\assets\sharpcraft\textures\gui\title.png" />
+    <Content Include="SharpCraft_Data\assets\sharpcraft\textures\gui\titlet.png" />
+    <Content Include="SharpCraft_Data\assets\sharpcraft\textures\gui\widgets.png" />
+    <Content Include="SharpCraft_Data\assets\sharpcraft\textures\items\pick_rare.png" />
+    <Content Include="SharpCraft_Data\assets\sharpcraft\textures\items\pick_stone.png" />
+    <Content Include="SharpCraft_Data\assets\sharpcraft\textures\items\pick_wood.png" />
+    <Content Include="SharpCraft_Data\assets\sharpcraft\textures\skybox\old\sky_down.png" />
+    <Content Include="SharpCraft_Data\assets\sharpcraft\textures\skybox\old\sky_east.png" />
+    <Content Include="SharpCraft_Data\assets\sharpcraft\textures\skybox\old\sky_north.png" />
+    <Content Include="SharpCraft_Data\assets\sharpcraft\textures\skybox\old\sky_south.png" />
+    <Content Include="SharpCraft_Data\assets\sharpcraft\textures\skybox\old\sky_up.png" />
+    <Content Include="SharpCraft_Data\assets\sharpcraft\textures\skybox\old\sky_west.png" />
+    <Content Include="SharpCraft_Data\assets\sharpcraft\textures\skybox\sky_down.png" />
+    <Content Include="SharpCraft_Data\assets\sharpcraft\textures\skybox\sky_east.png" />
+    <Content Include="SharpCraft_Data\assets\sharpcraft\textures\skybox\sky_north.png" />
+    <Content Include="SharpCraft_Data\assets\sharpcraft\textures\skybox\sky_south.png" />
+    <Content Include="SharpCraft_Data\assets\sharpcraft\textures\skybox\sky_up.png" />
+    <Content Include="SharpCraft_Data\assets\sharpcraft\textures\skybox\sky_west.png" />
+    <Content Include="SharpCraft_Data\mods\SumMod\assets\sum_mod\lang\en-US.lang.txt" />
+    <Content Include="SharpCraft_Data\mods\SumMod\TheDll.dll.txt" />
+    <Content Include="SharpCraft_Data\saves\MyWorld\0\region\.reg_-1.-1.bin" />
+    <Content Include="SharpCraft_Data\saves\MyWorld\0\region\.reg_-1.0.bin" />
+    <Content Include="SharpCraft_Data\saves\MyWorld\0\region\.reg_0.-1.bin" />
+    <Content Include="SharpCraft_Data\saves\MyWorld\0\region\.reg_0.0.bin" />
+    <Content Include="SharpCraft_Data\saves\MyWorld\0\te\te_-1.42.10.te" />
+    <Content Include="SharpCraft_Data\saves\MyWorld\level.dat" />
+    <Content Include="SharpCraft_Data\saves\MyWorld\player.dat" />
+    <Content Include="SharpCraft_Data\screenshots\2018-7-2_14.1.49.png" />
+    <Content Include="SharpCraft_Data\screenshots\2018-7-2_14.37.46.png" />
+    <Content Include="SharpCraft_Data\settings.txt" />
   </ItemGroup>
 </Project>

@@ -93,10 +93,10 @@ namespace SharpCraft.model
 
                 if (modelTextureVariables.TryGetValue(textureNode.texture, out var textureNameForFace) && textureMap.TryGetValue(textureNameForFace, out var tme))
                 {
-                    var percentageU1 = Math.Clamp(textureNode.uv[0] / 16f, 0, 1);
-                    var percentageV1 = Math.Clamp(textureNode.uv[1] / 16f, 0, 1);
-                    var percentageU2 = Math.Clamp(textureNode.uv[2] / 16f, 0, 1);
-                    var percentageV2 = Math.Clamp(textureNode.uv[3] / 16f, 0, 1);
+                    var percentageU1 = MathHelper.Clamp(textureNode.uv[0] / 16f, 0, 1);
+                    var percentageV1 = MathHelper.Clamp(textureNode.uv[1] / 16f, 0, 1);
+                    var percentageU2 = MathHelper.Clamp(textureNode.uv[2] / 16f, 0, 1);
+                    var percentageV2 = MathHelper.Clamp(textureNode.uv[3] / 16f, 0, 1);
 
                     Vector2 size = tme.UVMax - tme.UVMin;
 
@@ -149,10 +149,10 @@ namespace SharpCraft.model
 
                 if (modelTextureVariables.TryGetValue(textureNode.texture, out var textureNameForFace) && textureMap.TryGetValue(textureNameForFace, out var tme))
                 {
-                    var percentageU1 = Math.Clamp(textureNode.uv[0] / 16f, 0, 1);
-                    var percentageV1 = Math.Clamp(textureNode.uv[1] / 16f, 0, 1);
-                    var percentageU2 = Math.Clamp(textureNode.uv[2] / 16f, 0, 1);
-                    var percentageV2 = Math.Clamp(textureNode.uv[3] / 16f, 0, 1);
+                    var percentageU1 = MathHelper.Clamp(textureNode.uv[0] / 16f, 0, 1);
+                    var percentageV1 = MathHelper.Clamp(textureNode.uv[1] / 16f, 0, 1);
+                    var percentageU2 = MathHelper.Clamp(textureNode.uv[2] / 16f, 0, 1);
+                    var percentageV2 = MathHelper.Clamp(textureNode.uv[3] / 16f, 0, 1);
 
                     Vector2 size = tme.UVMax - tme.UVMin;
 

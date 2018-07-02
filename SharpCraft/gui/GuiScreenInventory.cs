@@ -3,6 +3,7 @@ using OpenTK.Input;
 using SharpCraft.item;
 using SharpCraft.texture;
 using System;
+using System.Drawing;
 
 namespace SharpCraft.gui
 {
@@ -41,7 +42,7 @@ namespace SharpCraft.gui
         {
             DrawBackroundStretch();
 
-            guiScale = Math.Clamp((SharpCraft.Instance.ClientSize.Width / 640f + SharpCraft.Instance.ClientSize.Width / 480f) / 2, 1.75f, 2);
+            guiScale = MathHelper.Clamp((SharpCraft.Instance.ClientSize.Width / 640f + SharpCraft.Instance.ClientSize.Width / 480f) / 2, 1.75f, 2);
 
             space = 5 * guiScale / 2;
 

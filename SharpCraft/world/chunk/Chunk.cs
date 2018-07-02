@@ -10,6 +10,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using Buffer = System.Buffer;
+
 #pragma warning disable 618
 
 namespace SharpCraft.world.chunk
