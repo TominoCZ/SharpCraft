@@ -87,7 +87,7 @@ namespace SharpCraft.render
             cube.Shader.UpdateInstanceUniforms(mat, null);
 
             GL.BindTexture(TextureTarget.TextureCubeMap, texture);
-            cube.RawModel.Render(PrimitiveType.Triangles);
+            cube.RawModel.Render();
 
             cube.Unbind();
         }

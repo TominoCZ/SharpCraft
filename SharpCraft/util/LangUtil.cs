@@ -12,7 +12,7 @@ namespace SharpCraft.util
         //TODO - load language files from mods
         public static void LoadLang(string langName)
         {
-            var file = $"{SharpCraft.Instance.GameFolderDir}\\SharpCraft_Data\\assets\\lang\\{langName}.lang";
+            var file = $"{SharpCraft.Instance.GameFolderDir}/assets/sharpcraft/lang/{langName}.lang";
 
             if (!File.Exists(file))
             {

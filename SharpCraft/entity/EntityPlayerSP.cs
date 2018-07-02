@@ -498,9 +498,10 @@ namespace SharpCraft.entity
                 {
                     BlockState state = World.GetBlockState(moo.blockPos);
 
+                    var canPlace = state.Block.CanBlockBePlacedAtSide(World, moo.blockPos, moo.sideHit, this);
                     var activated = state.Block.OnActivated(SharpCraft.Instance.MouseOverObject, this);
 
-                    if (IsSneaking && !activated)
+                    if ((IsSneaking || !activated) && canPlace)
                         PlaceBlock();
                 }
                 else if (btn == MouseButton.Left)

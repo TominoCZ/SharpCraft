@@ -48,7 +48,7 @@ namespace SharpCraft.model
 
         public void LoadBlocks()
         {
-            string dir = $"{SharpCraft.Instance.GameFolderDir}\\SharpCraft_Data\\assets\\models\\block";
+            string dir = $"{SharpCraft.Instance.GameFolderDir}/assets/sharpcraft/models/block";
 
             if (!Directory.Exists(dir))
                 return;
@@ -63,7 +63,7 @@ namespace SharpCraft.model
             {
                 var unlocalizedLast = LangUtil.GetUnlocalizedNameLast(block.UnlocalizedName);
 
-                string file = $"{dir}\\{unlocalizedLast}.json";
+                string file = $"{dir}/{unlocalizedLast}.json";
 
                 JsonModel bjm;
 
@@ -120,9 +120,9 @@ namespace SharpCraft.model
                 string name = pair.Key;
                 JsonModel model = pair.Value;
 
-                float[] vertexes = new float[72 * model.cubes.Length];
-                float[] normals = new float[72 * model.cubes.Length];
-                float[] uvs = new float[48 * model.cubes.Length];
+                float[] vertexes = new float[108 * model.cubes.Length];
+                float[] normals = new float[108 * model.cubes.Length];
+                float[] uvs = new float[72 * model.cubes.Length];
 
                 for (var index = 0; index < model.cubes.Length; index++)
                 {
@@ -153,7 +153,7 @@ namespace SharpCraft.model
 
         public void LoadItems()
         {
-            string dir = $"{SharpCraft.Instance.GameFolderDir}\\SharpCraft_Data\\assets\\models\\item";
+            string dir = $"{SharpCraft.Instance.GameFolderDir}/assets/sharpcraft/models/item";
 
             var listOfItems = ItemRegistry.AllItems();
 
@@ -168,7 +168,7 @@ namespace SharpCraft.model
 
                 string unlocalizedLast = LangUtil.GetUnlocalizedNameLast(item.UnlocalizedName);
 
-                string file = $"{dir}\\{unlocalizedLast}.json";
+                string file = $"{dir}/{unlocalizedLast}.json";
 
                 var models = new List<JsonModel>();
 
@@ -202,7 +202,7 @@ namespace SharpCraft.model
 
                     while (models.Last() is JsonModel jm && !string.IsNullOrEmpty(jm.inherit))
                     {
-                        string inhertiedFile = $"{SharpCraft.Instance.GameFolderDir}\\SharpCraft_Data\\assets\\models\\{jm.inherit}.json";
+                        string inhertiedFile = $"{SharpCraft.Instance.GameFolderDir}/assets/sharpcraft/models/{jm.inherit}.json";
 
                         if (File.Exists(inhertiedFile))
                             models.Add(FixBlockJson(inhertiedFile));
@@ -283,9 +283,9 @@ namespace SharpCraft.model
             TextureItems = id;
         }
 
-        public static bool LoadModel(string path, Shader<ModelCustom> shader) //TODO
+        public static bool LoadModel(string path, Shader<ModelCustom> shader)
         {
-            string file = $"{SharpCraft.Instance.GameFolderDir}\\SharpCraft_Data\\assets\\models\\{path}.json";
+            string file = $"{SharpCraft.Instance.GameFolderDir}/assets/sharpcraft/models/{path}.json";
 
             if (!File.Exists(file))
                 return false;
@@ -296,7 +296,7 @@ namespace SharpCraft.model
 
             while (models.Last() is JsonModel jm && !string.IsNullOrEmpty(jm.inherit))
             {
-                string inhertiedFile = $"{SharpCraft.Instance.GameFolderDir}\\SharpCraft_Data\\assets\\models\\{jm.inherit}.json";
+                string inhertiedFile = $"{SharpCraft.Instance.GameFolderDir}/assets/sharpcraft/models/{jm.inherit}.json";
 
                 if (File.Exists(inhertiedFile))
                     models.Add(FixBlockJson(inhertiedFile));
@@ -349,24 +349,7 @@ namespace SharpCraft.model
             json = json.Replace("elements", "cubes").Replace("faceData", "faces").Replace("textureFacing", "texture").Replace("#", "");
 
             var parsed = JsonConvert.DeserializeObject<JsonModel>(json);
-
-            //TODO - optional
-            /*
-            foreach (var cube in parsed.cubes)
-            {
-                int faceIndex = 0;
-
-                foreach (var face in cube.faces.Values)
-                {
-                    face.uv[faceIndex] = Math.Clamp(face.uv[faceIndex], 0, 16);
-                    face.uv[faceIndex + 1] = Math.Clamp(face.uv[faceIndex + 1], 0, 16);
-                    face.uv[faceIndex + 2] = Math.Clamp(face.uv[faceIndex + 2], 0, 16);
-                    face.uv[faceIndex + 3] = Math.Clamp(face.uv[faceIndex + 3], 0, 16);
-
-                    faceIndex++;
-                }
-            }*/
-
+            
             json = JsonConvert.SerializeObject(parsed, Formatting.Indented);
 
             File.WriteAllText(file, json);
@@ -407,7 +390,7 @@ namespace SharpCraft.model
 
         private static void WriteBitmap(Bitmap textureMap, string texPath, int textureSize, ref int countX, ref int countY)
         {
-            var file = $"{SharpCraft.Instance.GameFolderDir}\\SharpCraft_Data\\assets\\textures\\{texPath}.png";
+            var file = $"{SharpCraft.Instance.GameFolderDir}/assets/sharpcraft/textures/{texPath}.png";
 
             Bitmap tex = (File.Exists(file)
                              ? new Bitmap(Image.FromFile(file), textureSize, textureSize)

@@ -53,10 +53,10 @@ namespace SharpCraft.item
         public bool ItemSame(ItemStack other)
         {
             if (other == null) return false;
-            return !IsEmpty && !other.IsEmpty && Meta == other.Meta && Item.UnlocalizedName == other.Item.UnlocalizedName; //TODO - REALLY BAD!!! (because rn the unlocalized names are 'dirt', 'stone', .. and not 'sharpcraft.blocks.dirt')
+            return !IsEmpty && !other.IsEmpty && Meta == other.Meta && Item == other.Item;
         }
 
-        public override string ToString() => Item != null ? LangUtil.GetLocalized(Item.UnlocalizedName) : ""; //TODO!!
+        public override string ToString() => Item != null ? LangUtil.GetLocalized(Item.UnlocalizedName) : "";
 
         public ItemStack Combine(ItemStack other)
         {
@@ -66,7 +66,7 @@ namespace SharpCraft.item
             if (Item == null)
             {
                 if (other.Item == null)
-                    return remainingStack; // error
+                    return null; // error
 
                 Item = other.Item;
             }

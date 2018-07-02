@@ -32,14 +32,14 @@ namespace SharpCraft.render
 
         private int _renderDistance;
 
-        private Vector3 lookVec;
-        private Vector3 lastLookVec;
+        private Vector3 _lookVec;
+        private Vector3 _lastLookVec;
 
-        private Vector3 motion;
-        private Vector3 lastMotion;
+        private Vector3 _motion;
+        private Vector3 _lastMotion;
 
-        private float fov;
-        private float lastFov;
+        private float _fov;
+        private float _lastFov;
         private int _ticks;
         private int _ticksLast;
         private float _animationTimer;
@@ -73,15 +73,15 @@ namespace SharpCraft.render
             JsonModelLoader.LoadModel("entity/player/arm", new Shader<ModelCustom>("block"));
 
             RenderDistance = 8;
-            lastFov = fov = SharpCraft.Instance.Camera.PartialFov;
+            _lastFov = _fov = SharpCraft.Instance.Camera.PartialFov;
         }
 
         public void Update()
         {
-            lastLookVec = lookVec;
+            _lastLookVec = _lookVec;
 
-            lastMotion = motion;
-            lastFov = fov;
+            _lastMotion = _motion;
+            _lastFov = _fov;
 
             _ticksLast = _ticks;
             _animationTimerLast = _animationTimer;
@@ -110,17 +110,17 @@ namespace SharpCraft.render
 
             if (SharpCraft.Instance.Player != null)
             {
-                motion = SharpCraft.Instance.Player.Motion;
+                _motion = SharpCraft.Instance.Player.Motion;
 
-                fov = SharpCraft.Instance.Player.Motion.Xz.LengthFast > 0.15f && SharpCraft.Instance.Player.IsRunning
-                    ? Math.Clamp(fov * 1.065f, 0, SharpCraft.Instance.Camera.TargetFov + 6)
-                    : Math.Clamp(fov * 0.965f, SharpCraft.Instance.Camera.TargetFov,
+                _fov = SharpCraft.Instance.Player.Motion.Xz.LengthFast > 0.15f && SharpCraft.Instance.Player.IsRunning
+                    ? Math.Clamp(_fov * 1.065f, 0, SharpCraft.Instance.Camera.TargetFov + 6)
+                    : Math.Clamp(_fov * 0.965f, SharpCraft.Instance.Camera.TargetFov,
                         SharpCraft.Instance.Camera.TargetFov + 6);
             }
 
             _selectionOutlineColor = MathUtil.Hue(_hue = (_hue + 5) % 360);
 
-            lookVec = SharpCraft.Instance.Camera.GetLookVec();
+            _lookVec = SharpCraft.Instance.Camera.GetLookVec();
 
             _armModel = JsonModelLoader.GetCustomModel("entity/player/arm");
         }
@@ -147,8 +147,8 @@ namespace SharpCraft.render
             RenderWorldWaypoints(world);
             RenderDestroyProgress(world);
 
-            float partialFov = lastFov + (fov - lastFov) * partialTicks;
-            Vector3 partialMotion = lastMotion + (motion - lastMotion) * partialTicks;
+            float partialFov = _lastFov + (_fov - _lastFov) * partialTicks;
+            Vector3 partialMotion = _lastMotion + (_motion - _lastMotion) * partialTicks;
 
             SharpCraft.Instance.Camera.PitchOffset = partialMotion.Y * 0.025f;
             SharpCraft.Instance.Camera.SetFov(partialFov);
@@ -190,7 +190,7 @@ namespace SharpCraft.render
                 model.Shader.UpdateModelUniforms(model.RawModel);
                 model.Shader.UpdateInstanceUniforms(MatrixHelper.CreateTransformationMatrix(wp.Pos.ToVec() + Vector3.One / 2 * (1 - size), new Vector3(45, 30, 35.264f), size), model);
 
-                model.RawModel.Render(PrimitiveType.Quads);
+                model.RawModel.Render();
             }
 
             model.Unbind();
@@ -227,7 +227,7 @@ namespace SharpCraft.render
 
                 _shaderTexturedCube.UpdateInstanceUniforms(mat);
                 _shaderTexturedCube.UpdateUVs(TextureManager.TEXTURE_DESTROY_PROGRESS, 0, 32 * (int)(pair.Value.PartialProgress * 8), 32);
-                _destroyProgressModel.Render(PrimitiveType.Quads);
+                _destroyProgressModel.Render();
             }
 
             GL.DisableVertexAttribArray(0);
@@ -250,13 +250,10 @@ namespace SharpCraft.render
             shader.UpdateGlobalUniforms();
             shader.UpdateModelUniforms(_selectionOutline.RawModel);
             shader.UpdateInstanceUniforms(MatrixHelper.CreateTransformationMatrix(ch.Pos, size), _selectionOutline);
-
-            GL.Disable(EnableCap.CullFace);
+            
             GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
+            GL.DrawArrays(PrimitiveType.Lines, 0, _selectionOutline.RawModel.VertexCount);
 
-            _selectionOutline.RawModel.Render(PrimitiveType.Quads);
-
-            GL.Enable(EnableCap.CullFace);
             GL.PolygonMode(MaterialFace.Front, PolygonMode.Fill);
 
             _selectionOutline.Unbind();
@@ -269,22 +266,33 @@ namespace SharpCraft.render
 
             if (bb == null)
                 return;
-
+            
+            GL.LineWidth(2);
+            GL.PointSize(5);
+            //GL.DepthRange(0, 0.1f);
+            
             _selectionOutline.Bind();
             _selectionOutline.SetColor(_selectionOutlineColor);
 
+            var mat = MatrixHelper.CreateTransformationMatrix(pos.ToVec() + bb.Min, bb.Size + Vector3.One * 0.001f);
+
             shader.UpdateGlobalUniforms();
             shader.UpdateModelUniforms(_selectionOutline.RawModel);
-            shader.UpdateInstanceUniforms(MatrixHelper.CreateTransformationMatrix(pos.ToVec() + bb.Min, bb.Size + Vector3.One * 0.0025f), _selectionOutline);
-
-            GL.LineWidth(2);
+            shader.UpdateInstanceUniforms(mat, _selectionOutline);
+            
             GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
+            GL.DrawArrays(PrimitiveType.Lines, 0, _selectionOutline.RawModel.VertexCount);
+            GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Point);
+            GL.DrawArrays(PrimitiveType.Points, 0, _selectionOutline.RawModel.VertexCount);
 
-            _selectionOutline.RawModel.Render(PrimitiveType.Quads);
-
-            GL.PolygonMode(MaterialFace.Front, PolygonMode.Fill);
+            _selectionOutline.RawModel.Render();
 
             _selectionOutline.Unbind();
+
+            //GL.DepthRange(0, 1f);
+            GL.PolygonMode(MaterialFace.Front, PolygonMode.Fill);
+            GL.LineWidth(1);
+            GL.PointSize(1);
         }
 
         private void RenderHand(float partialTicks)
@@ -318,10 +326,10 @@ namespace SharpCraft.render
             GL.DepthRange(0, 0.1f);
 
             if (!SharpCraft.Instance.Player.OnGround)
-                motion *= Vector3.UnitY;
+                _motion *= Vector3.UnitY;
 
-            Vector3 partialLookVec = lastLookVec + (lookVec - lastLookVec) * partialTicks;
-            Vector3 partialMotion = lastMotion + (motion - lastMotion) * partialTicks;
+            Vector3 partialLookVec = _lastLookVec + (_lookVec - _lastLookVec) * partialTicks;
+            Vector3 partialMotion = _lastMotion + (_motion - _lastMotion) * partialTicks;
 
             float partialTick = (_ticksLast + (_ticks - _ticksLast) * partialTicks) / 90f;
             float partialAnimationTimer = _animationTimerLast + (_animationTimer - _animationTimerLast) * partialTicks;
@@ -373,7 +381,7 @@ namespace SharpCraft.render
             _armModel.Shader.UpdateModelUniforms(_armModel.RawModel);
             _armModel.Shader.UpdateInstanceUniforms(mat, _armModel);
 
-            _armModel.RawModel.Render(PrimitiveType.Quads);
+            _armModel.RawModel.Render();
 
             _armModel.Unbind();
 
@@ -391,10 +399,10 @@ namespace SharpCraft.render
                 return;
 
             if (!SharpCraft.Instance.Player.OnGround)
-                motion *= Vector3.UnitY;
+                _motion *= Vector3.UnitY;
 
-            Vector3 partialLookVec = lastLookVec + (lookVec - lastLookVec) * partialTicks;
-            Vector3 partialMotion = lastMotion + (motion - lastMotion) * partialTicks;
+            Vector3 partialLookVec = _lastLookVec + (_lookVec - _lastLookVec) * partialTicks;
+            Vector3 partialMotion = _lastMotion + (_motion - _lastMotion) * partialTicks;
 
             float partialTick = (_ticksLast + (_ticks - _ticksLast) * partialTicks) / 90f;
             float partialAnimationTimer = _animationTimerLast + (_animationTimer - _animationTimerLast) * partialTicks;
@@ -447,7 +455,7 @@ namespace SharpCraft.render
             model.Shader.UpdateModelUniforms(model.RawModel);
             model.Shader.UpdateInstanceUniforms(mat, model);
 
-            model.RawModel.Render(PrimitiveType.Quads);
+            model.RawModel.Render();
 
             model.Unbind();
 
@@ -467,10 +475,10 @@ namespace SharpCraft.render
                 return;
 
             if (!SharpCraft.Instance.Player.OnGround)
-                motion *= Vector3.UnitY;
+                _motion *= Vector3.UnitY;
 
-            Vector3 partialLookVec = lastLookVec + (lookVec - lastLookVec) * partialTicks;
-            Vector3 partialMotion = lastMotion + (motion - lastMotion) * partialTicks;
+            Vector3 partialLookVec = _lastLookVec + (_lookVec - _lastLookVec) * partialTicks;
+            Vector3 partialMotion = _lastMotion + (_motion - _lastMotion) * partialTicks;
 
             float partialTick = (_ticksLast + (_ticks - _ticksLast) * partialTicks) / 90f;
             float partialAnimationTimer = _animationTimerLast + (_animationTimer - _animationTimerLast) * partialTicks;
@@ -521,7 +529,7 @@ namespace SharpCraft.render
             model.Shader.UpdateModelUniforms(model.RawModel);
             model.Shader.UpdateInstanceUniforms(mat, model);
 
-            model.RawModel.Render(PrimitiveType.Quads);
+            model.RawModel.Render();
 
             model.Unbind();
 

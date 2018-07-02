@@ -28,16 +28,15 @@ namespace SharpCraft.model
             normals.AddRange(_normals);
             uvs.AddRange(_uvs);
         }
-
-        //TODO - only use these when the block model is one 1x1x1 big cube
+        
         public void AppendVertexDataForSide(FaceSides side, List<float> vertexes, List<float> normals, List<float> uvs, BlockPos offset)
         {
             if (!FaceSides.Parse(side, out var parsed)) //FaceSides is a struct containing Vector2 values (normals)
                 return;
 
-            int faceIndex = (int)parsed * 12;
+            int faceIndex = (int)parsed * 18;
 
-            for (int i = 0; i < 12; i += 3)
+            for (int i = 0; i < 18; i += 3)
             {
                 vertexes.Add(_vertexes[faceIndex + i] + offset.X);
                 vertexes.Add(_vertexes[faceIndex + i + 1] + offset.Y);
@@ -48,9 +47,9 @@ namespace SharpCraft.model
                 normals.Add(_normals[faceIndex + i + 2]);
             }
 
-            faceIndex = (int)parsed * 8;
+            faceIndex = (int)parsed * 12;
 
-            for (int i = 0; i < 8; i += 2)
+            for (int i = 0; i < 12; i += 2)
             {
                 uvs.Add(_uvs[faceIndex + i]);
                 uvs.Add(_uvs[faceIndex + i + 1]);
@@ -72,9 +71,9 @@ namespace SharpCraft.model
             if (!FaceSides.Parse(side, out var parsed)) //FaceSides is a struct containing Vector2 values (normals)
                 return;
 
-            int faceIndex = (int)parsed * 12;
+            int faceIndex = (int)parsed * 18;
 
-            for (int i = 0; i < 12; i += 3)
+            for (int i = 0; i < 18; i += 3)
             {
                 vertexes.Add(_vertexes[faceIndex + i] + offset.X);
                 vertexes.Add(_vertexes[faceIndex + i + 1] + offset.Y);
@@ -88,9 +87,9 @@ namespace SharpCraft.model
             if (!FaceSides.Parse(side, out var parsed))
                 return;
 
-            int faceIndex = (int)parsed * 12;
+            int faceIndex = (int)parsed * 18;
 
-            for (int i = 0; i < 12; i += 3)
+            for (int i = 0; i < 18; i += 3)
             {
                 normals.Add(_normals[faceIndex + i]);
                 normals.Add(_normals[faceIndex + i + 1]);
@@ -103,9 +102,9 @@ namespace SharpCraft.model
             if (!FaceSides.Parse(side, out var parsed))
                 return;
 
-            int faceIndex = (int)parsed * 8;
+            int faceIndex = (int)parsed * 12;
 
-            for (int i = 0; i < 8; i += 2)
+            for (int i = 0; i < 12; i += 2)
             {
                 uvs.Add(_uvs[faceIndex + i]);
                 uvs.Add(_uvs[faceIndex + i + 1]);

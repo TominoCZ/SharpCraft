@@ -70,6 +70,11 @@ namespace SharpCraft.block
         {
             return false;
         }
+        
+        public virtual bool CanBlockBePlacedAtSide(World world, BlockPos blockPos, FaceSides sideHit, EntityPlayerSp placer)
+        {
+            return true;
+        }
 
         public virtual void OnPlaced(World world, BlockPos pos, EntityPlayerSp placer)
         {
@@ -83,12 +88,6 @@ namespace SharpCraft.block
         public virtual TileEntity CreateTileEntity(World world, BlockPos pos)
         {
             return null;
-        }
-
-        public override string ToString()
-        {
-            //TODO - localization
-            return UnlocalizedName;
         }
     }
 }

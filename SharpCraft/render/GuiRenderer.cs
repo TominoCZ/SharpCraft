@@ -19,8 +19,11 @@ namespace SharpCraft.render
             {
                 -1, 1,
                 -1, -1,
-                1, -1,
-                1, 1
+                1, 1,
+
+                1, 1,
+                -1, -1,
+                1, -1
             };
 
             GuiQuad = ModelManager.LoadModel2ToVao(vertexes);

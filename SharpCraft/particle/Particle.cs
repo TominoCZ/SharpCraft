@@ -78,7 +78,7 @@ namespace SharpCraft.particle
             model.Shader.UpdateInstanceUniforms(MatrixHelper.CreateTransformationMatrix(partialPos, Vector3.Zero, partialScale), this);
 
             GL.BindTexture(TextureTarget.Texture2D, textureID);
-            model.RawModel.Render(PrimitiveType.Quads);
+            model.RawModel.Render();
         }
 
         public float GetAlpha()

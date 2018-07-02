@@ -94,7 +94,7 @@ namespace SharpCraft.gui
                 else if (i < _totalOccupiedHearts)
                     u = 16;
 
-                RenderTexture(TextureManager.TEXTURE_GUI_WIDGETS, _hotbarX + (i * HeartsGap), y, u, 40, 16, 16);
+                RenderTexture(TextureManager.TEXTURE_GUI_WIDGETS, _hotbarX + i * HeartsGap, y, u, 40, 16, 16);
             }
         }
     }

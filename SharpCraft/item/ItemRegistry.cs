@@ -7,7 +7,7 @@ using SharpCraft.block;
 
 namespace SharpCraft.item
 {
-    internal class ItemRegistry //TODO
+    internal class ItemRegistry
     {
         private static readonly Dictionary<string, Item> Registry = new Dictionary<string, Item>();
 

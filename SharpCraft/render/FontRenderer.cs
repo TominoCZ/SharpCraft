@@ -115,7 +115,7 @@ namespace SharpCraft.render
 
                     Shader.UpdateInstanceUniforms(mat1, tuple.Item1.TextureUv);
 
-                    GL.DrawArrays(PrimitiveType.Quads, 0, 4);
+                    GL.DrawArrays(PrimitiveType.Triangles, 0, 6);
                 }
 
                 Matrix4 mat2 = MatrixHelper.CreateTransformationMatrix(
@@ -127,7 +127,7 @@ namespace SharpCraft.render
 
                 Shader.UpdateInstanceUniforms(mat2, tuple.Item1.TextureUv);
 
-                GL.DrawArrays(PrimitiveType.Quads, 0, 4);
+                GL.DrawArrays(PrimitiveType.Triangles, 0, 6);
 
                 positionX += width + (tuple.Item1.Character.OffsetX + spacing) * scale;
             }
