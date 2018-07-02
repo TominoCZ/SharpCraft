@@ -282,7 +282,7 @@ namespace SharpCraft.entity
 
                 Shader.Unbind();
                 GL.Enable(EnableCap.CullFace);
-                GL.PolygonMode(MaterialFace.Front, PolygonMode.Fill);
+                GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Fill);
             }
         }
     }

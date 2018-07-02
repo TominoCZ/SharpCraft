@@ -253,8 +253,7 @@ namespace SharpCraft.render
             
             GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
             GL.DrawArrays(PrimitiveType.Lines, 0, _selectionOutline.RawModel.VertexCount);
-
-            GL.PolygonMode(MaterialFace.Front, PolygonMode.Fill);
+            GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Fill);
 
             _selectionOutline.Unbind();
         }
@@ -290,7 +289,7 @@ namespace SharpCraft.render
             _selectionOutline.Unbind();
 
             //GL.DepthRange(0, 1f);
-            GL.PolygonMode(MaterialFace.Front, PolygonMode.Fill);
+            GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Fill);
             GL.LineWidth(1);
             GL.PointSize(1);
         }
@@ -535,7 +534,7 @@ namespace SharpCraft.render
 
             GL.DepthRange(0, 1);
             GL.Enable(EnableCap.CullFace);
-            GL.PolygonMode(MaterialFace.Front, PolygonMode.Fill);
+            GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Fill);
         }
     }
 }

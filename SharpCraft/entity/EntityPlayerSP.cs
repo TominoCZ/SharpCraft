@@ -9,6 +9,7 @@ using SharpCraft.world;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+// ReSharper disable AssignmentInConditionalExpression
 
 namespace SharpCraft.entity
 {
@@ -228,40 +229,41 @@ namespace SharpCraft.entity
 
             Vector3 offset = Vector3.Zero;
 
-            if (IsSneaking = state.IsKeyDown(Key.LShift))
-                offset = Vector3.UnitY * -0.2f;
-
-            if (state.IsKeyDown(Key.Space) && !_wasSpaceDown && OnGround)
+            if (SharpCraft.Instance.AllowIngameInput())
             {
-                _wasSpaceDown = true;
-                Motion.Y = 0.55F;
-            }
-            else if ((!state.IsKeyDown(Key.Space) || OnGround) && _wasSpaceDown)
-                _wasSpaceDown = false;
+                if (IsSneaking = state.IsKeyDown(Key.LShift))
+                    offset = Vector3.UnitY * -0.2f;
 
-            SharpCraft.Instance.Camera.Pos = interpolatedPos + Vector3.UnitY * EyeHeight + offset;
-
-            if (state.IsKeyDown(Key.W))
-            {
-                if (!_wasWalkDown)
+                if (state.IsKeyDown(Key.Space) && !_wasSpaceDown && OnGround)
                 {
-                    _wasWalkDown = true;
+                    _wasSpaceDown = true;
+                    Motion.Y = 0.55F;
+                }
+                else if ((!state.IsKeyDown(Key.Space) || OnGround) && _wasSpaceDown)
+                    _wasSpaceDown = false;
 
-                    if (_runTimer > 0)
-                        IsRunning = true;
-                    else
+                if (state.IsKeyDown(Key.W))
+                {
+                    if (!_wasWalkDown)
                     {
-                        IsRunning = false;
-                        _runTimer = 6;
-                    }
+                        _wasWalkDown = true;
 
-                    Console.WriteLine(_runTimer);
+                        if (_runTimer > 0)
+                            IsRunning = true;
+                        else
+                        {
+                            IsRunning = false;
+                            _runTimer = 6;
+                        }
+                    }
+                }
+                else
+                {
+                    _wasWalkDown = false;
                 }
             }
-            else
-            {
-                _wasWalkDown = false;
-            }
+            
+            SharpCraft.Instance.Camera.Pos = interpolatedPos + Vector3.UnitY * EyeHeight + offset;
         }
 
         private void FallDamage()

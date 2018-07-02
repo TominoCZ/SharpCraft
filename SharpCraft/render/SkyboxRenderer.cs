@@ -10,86 +10,86 @@ namespace SharpCraft.render
 {
     internal class SkyboxRenderer
     {
-        private static ModelBaked<object> cube;
-        private static int texture;
+        private static ModelBaked<object> _cube;
+        private static int _texture;
 
-        private long tick;
-        private long lastTick;
+        private long _tick;
+        private long _lastTick;
 
         public SkyboxRenderer()
         {
-            if (cube == null)
+            if (_cube == null)
             {
-                var SIZE = 500f;
+                var size = 500f;
 
-                cube = new ModelBaked<object>(ModelManager.LoadModel3ToVao(new[] {
-                    -SIZE,  SIZE, -SIZE,
-                    -SIZE, -SIZE, -SIZE,
-                    SIZE, -SIZE, -SIZE,
-                    SIZE, -SIZE, -SIZE,
-                    SIZE,  SIZE, -SIZE,
-                    -SIZE,  SIZE, -SIZE,
+                _cube = new ModelBaked<object>(ModelManager.LoadModel3ToVao(new[] {
+                    -size,  size, -size,
+                    -size, -size, -size,
+                    size, -size, -size,
+                    size, -size, -size,
+                    size,  size, -size,
+                    -size,  size, -size,
 
-                    -SIZE, -SIZE,  SIZE,
-                    -SIZE, -SIZE, -SIZE,
-                    -SIZE,  SIZE, -SIZE,
-                    -SIZE,  SIZE, -SIZE,
-                    -SIZE,  SIZE,  SIZE,
-                    -SIZE, -SIZE,  SIZE,
+                    -size, -size,  size,
+                    -size, -size, -size,
+                    -size,  size, -size,
+                    -size,  size, -size,
+                    -size,  size,  size,
+                    -size, -size,  size,
 
-                    SIZE, -SIZE, -SIZE,
-                    SIZE, -SIZE,  SIZE,
-                    SIZE,  SIZE,  SIZE,
-                    SIZE,  SIZE,  SIZE,
-                    SIZE,  SIZE, -SIZE,
-                    SIZE, -SIZE, -SIZE,
+                    size, -size, -size,
+                    size, -size,  size,
+                    size,  size,  size,
+                    size,  size,  size,
+                    size,  size, -size,
+                    size, -size, -size,
 
-                    -SIZE, -SIZE,  SIZE,
-                    -SIZE,  SIZE,  SIZE,
-                    SIZE,  SIZE,  SIZE,
-                    SIZE,  SIZE,  SIZE,
-                    SIZE, -SIZE,  SIZE,
-                    -SIZE, -SIZE,  SIZE,
+                    -size, -size,  size,
+                    -size,  size,  size,
+                    size,  size,  size,
+                    size,  size,  size,
+                    size, -size,  size,
+                    -size, -size,  size,
 
-                    -SIZE,  SIZE, -SIZE,
-                    SIZE,  SIZE, -SIZE,
-                    SIZE,  SIZE,  SIZE,
-                    SIZE,  SIZE,  SIZE,
-                    -SIZE,  SIZE,  SIZE,
-                    -SIZE,  SIZE, -SIZE,
+                    -size,  size, -size,
+                    size,  size, -size,
+                    size,  size,  size,
+                    size,  size,  size,
+                    -size,  size,  size,
+                    -size,  size, -size,
 
-                    -SIZE, -SIZE, -SIZE,
-                    -SIZE, -SIZE,  SIZE,
-                    SIZE, -SIZE, -SIZE,
-                    SIZE, -SIZE, -SIZE,
-                    -SIZE, -SIZE,  SIZE,
-                    SIZE, -SIZE,  SIZE
+                    -size, -size, -size,
+                    -size, -size,  size,
+                    size, -size, -size,
+                    size, -size, -size,
+                    -size, -size,  size,
+                    size, -size,  size
                 }), new Shader<object>("skybox"));
 
-                texture = TextureManager.LoadCubeMap();
+                _texture = TextureManager.LoadCubeMap();
             }
         }
 
         public void Update()
         {
-            lastTick = tick++;
+            _lastTick = _tick++;
         }
 
         public void Render(float partialTicks)
         {
-            float partialRot = lastTick + (tick - lastTick) * partialTicks;
+            float partialRot = _lastTick + (_tick - _lastTick) * partialTicks;
 
             Matrix4 mat = MatrixHelper.CreateTransformationMatrix(SharpCraft.Instance.Camera.Pos, Vector3.UnitY * partialRot / 10, 1);
 
-            cube.Bind();
-            cube.Shader.UpdateGlobalUniforms();
-            cube.Shader.UpdateModelUniforms(cube.RawModel);
-            cube.Shader.UpdateInstanceUniforms(mat, null);
+            _cube.Bind();
+            _cube.Shader.UpdateGlobalUniforms();
+            _cube.Shader.UpdateModelUniforms(_cube.RawModel);
+            _cube.Shader.UpdateInstanceUniforms(mat, null);
 
-            GL.BindTexture(TextureTarget.TextureCubeMap, texture);
-            cube.RawModel.Render();
+            GL.BindTexture(TextureTarget.TextureCubeMap, _texture);
+            _cube.RawModel.Render();
 
-            cube.Unbind();
+            _cube.Unbind();
         }
     }
 }

@@ -12,7 +12,6 @@ namespace SharpCraft.model
     public static class CubeModelBuilder
     {
         private static readonly Dictionary<FaceSides, float[]> _cubeTriangles = new Dictionary<FaceSides, float[]>();
-        private static readonly Dictionary<FaceSides, float[]> _cubeQuads = new Dictionary<FaceSides, float[]>();
 
         static CubeModelBuilder()
         {
@@ -71,49 +70,6 @@ namespace SharpCraft.model
                 1,0,1,
                 0,0,0,
                 1,0,0
-            });
-
-            _cubeQuads.Add(FaceSides.North, new float[]
-            {
-                1, 1, 0,
-                1, 0, 0,
-                0, 0, 0,
-                0, 1, 0
-            });
-            _cubeQuads.Add(FaceSides.South, new float[]
-            {
-                0, 1, 1,
-                0, 0, 1,
-                1, 0, 1,
-                1, 1, 1
-            });
-            _cubeQuads.Add(FaceSides.East, new float[]
-            {
-                1, 1, 1,
-                1, 0, 1,
-                1, 0, 0,
-                1, 1, 0
-            });
-            _cubeQuads.Add(FaceSides.West, new float[]
-            {
-                0, 1, 0,
-                0, 0, 0,
-                0, 0, 1,
-                0, 1, 1
-            });
-            _cubeQuads.Add(FaceSides.Up, new float[]
-            {
-                0, 1, 0,
-                0, 1, 1,
-                1, 1, 1,
-                1, 1, 0
-            });
-            _cubeQuads.Add(FaceSides.Down, new float[]
-            {
-                0, 0, 1,
-                0, 0, 0,
-                1, 0, 0,
-                1, 0, 1
             });
         }
 
@@ -314,43 +270,6 @@ namespace SharpCraft.model
             void AppendVertexes(Facing side)
             {
                 var face = _cubeTriangles[FaceSides.Parse(side)];
-
-                for (var index = 0; index < face.Length; index += 3)
-                {
-                    var x = face[index];
-                    var y = face[index + 1];
-                    var z = face[index + 2];
-
-                    if (centered)
-                    {
-                        x -= 0.5f;
-                        y -= 0.5f;
-                        z -= 0.5f;
-                    }
-
-                    vertexes.Add(x);
-                    vertexes.Add(y);
-                    vertexes.Add(z);
-                }
-            }
-
-            AppendVertexes(Facing.up);
-            AppendVertexes(Facing.down);
-            AppendVertexes(Facing.north);
-            AppendVertexes(Facing.south);
-            AppendVertexes(Facing.east);
-            AppendVertexes(Facing.west);
-
-            return vertexes.ToArray();
-        }
-
-        public static float[] CreateQuadCubeVertexes(bool centered = false)
-        {
-            List<float> vertexes = new List<float>();
-
-            void AppendVertexes(Facing side)
-            {
-                var face = _cubeQuads[FaceSides.Parse(side)];
 
                 for (var index = 0; index < face.Length; index += 3)
                 {

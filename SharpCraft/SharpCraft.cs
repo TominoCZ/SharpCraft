@@ -160,7 +160,7 @@ namespace SharpCraft
             GL.Enable(EnableCap.CullFace);
             GL.Enable(EnableCap.Blend);
             GL.CullFace(CullFaceMode.Back);
-            GL.PolygonMode(MaterialFace.Front, PolygonMode.Fill);
+            GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Fill);
             GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
 
             GL.ActiveTexture(TextureUnit.Texture0);
@@ -400,7 +400,7 @@ namespace SharpCraft
 
             if (Player != null)
             {
-                if (AllowInput())
+                if (AllowIngameInput())
                 {
                     if (wheelValue < _mouseWheelLast)
                         Player.SelectNextItem();
@@ -595,7 +595,7 @@ namespace SharpCraft
 
             Point point = new Point(state.X, state.Y);
 
-            if (AllowInput())
+            if (AllowIngameInput())
             {
                 Point delta = new Point(_mouseLast.X - point.X, _mouseLast.Y - point.Y);
 
@@ -614,7 +614,7 @@ namespace SharpCraft
             else _glContextQueue.Enqueue(a);
         }
 
-        private bool AllowInput()
+        public bool AllowIngameInput()
         {
             return GuiScreen == null && !(CursorVisible = !Focused);
         }
@@ -816,7 +816,7 @@ namespace SharpCraft
 
             _mouseButtonsDown.Remove(e.Button);
 
-            if (e.Button == MouseButton.Left && AllowInput())
+            if (e.Button == MouseButton.Left && AllowIngameInput())
                 ResetDestroyProgress(Player);
         }
 
@@ -871,7 +871,7 @@ namespace SharpCraft
                     break;
             }
 
-            if (AllowInput())
+            if (AllowIngameInput())
             {
                 switch (e.Key)
                 {
