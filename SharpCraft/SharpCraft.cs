@@ -155,17 +155,23 @@ namespace SharpCraft
 
         private void GlSetup()
         {
+            GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Fill);
+            
             GL.Enable(EnableCap.DepthTest);
             GL.Enable(EnableCap.DepthClamp);
             GL.Enable(EnableCap.CullFace);
             GL.Enable(EnableCap.Blend);
-            GL.CullFace(CullFaceMode.Back);
-            GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Fill);
-            GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
 
+            GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
+            GL.Hint(HintTarget.PerspectiveCorrectionHint, HintMode.Nicest);
+            
+            GL.DepthMask(true);
+            
+            GL.CullFace(CullFaceMode.Back);
+            
             GL.ActiveTexture(TextureUnit.Texture0);
 
-            _frameBuffer = new FBO(Width, Height, false, 4);
+            //_frameBuffer = new FBO(Width, Height, false, 4);
         }
 
         private void LoadMods()
@@ -602,7 +608,7 @@ namespace SharpCraft
                 Camera.Yaw -= delta.X / 1000f * _sensitivity;
                 Camera.Pitch -= delta.Y / 1000f * _sensitivity;
 
-                //ResetMouse();
+                ResetMouse();
             }
 
             _mouseLast = point;
@@ -723,10 +729,10 @@ namespace SharpCraft
             //RENDER SCREEN
             if (World != null)
             {
+                SkyboxRenderer?.Render(_partialTicks);
                 WorldRenderer?.Render(World, _partialTicks);
                 ParticleRenderer?.Render(_partialTicks);
                 EntityRenderer?.Render(_partialTicks);
-                SkyboxRenderer?.Render(_partialTicks);
             }
 
             //render other gui

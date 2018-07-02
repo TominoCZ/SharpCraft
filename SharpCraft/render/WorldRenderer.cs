@@ -466,6 +466,7 @@ namespace SharpCraft.render
             GL.BindTexture(TextureTarget.Texture2D, JsonModelLoader.TextureItems);
             GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Fill);
             GL.Disable(EnableCap.CullFace);
+            
             GL.DepthRange(0, 0.1f);
 
             ModelItem model = JsonModelLoader.GetModelForItem(item);
