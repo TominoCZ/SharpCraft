@@ -1,0 +1,4 @@
+sensitivity=1
+renderdistance=5
+worldseed=yeet
+lang=en-us

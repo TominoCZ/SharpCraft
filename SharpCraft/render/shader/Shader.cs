@@ -125,8 +125,8 @@ namespace SharpCraft.render.shader
         private void LoadShader(string shaderName)
         {
             //vertex and fragment shader code
-            string vshCode = File.ReadAllText($"SharpCraft_Data/assets/shaders/{shaderName}.vsh");
-            string fshCode = File.ReadAllText($"SharpCraft_Data/assets/shaders/{shaderName}.fsh");
+            string vshCode = File.ReadAllText($"{SharpCraft.Instance.GameFolderDir}/assets/sharpcraft/shaders/{shaderName}.vsh");
+            string fshCode = File.ReadAllText($"{SharpCraft.Instance.GameFolderDir}/assets/sharpcraft/shaders/{shaderName}.fsh");
 
             //create IDs for shaders
             vshID = GL.CreateShader(ShaderType.VertexShader);

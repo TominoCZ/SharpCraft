@@ -407,7 +407,7 @@ namespace SharpCraft.model
             return normals.ToArray();
         }
 
-        public static float[] CreateCubeUvs() //TODO - for particles
+        public static float[] CreateCubeUvs()
         {
             List<float> uvs = new List<float>();
 

@@ -269,7 +269,7 @@ namespace SharpCraft.render
             
             GL.LineWidth(2);
             GL.PointSize(5);
-            GL.DepthRange(0, 0.1f);
+            //GL.DepthRange(0, 0.1f);
             
             _selectionOutline.Bind();
             _selectionOutline.SetColor(_selectionOutlineColor);
@@ -289,7 +289,7 @@ namespace SharpCraft.render
 
             _selectionOutline.Unbind();
 
-            GL.DepthRange(0, 1f);
+            //GL.DepthRange(0, 1f);
             GL.PolygonMode(MaterialFace.Front, PolygonMode.Fill);
             GL.LineWidth(1);
             GL.PointSize(1);

@@ -131,7 +131,7 @@ namespace SharpCraft.world.chunk
             {
                 var worldPos = new BlockPos(localPos.ToVec() + Pos.ToVec());
 
-                var file = $"{World.SaveRoot}\\{World.Dimension}\\te\\te_{worldPos.X}.{worldPos.Y}.{worldPos.Z}.te";
+                var file = $"{World.SaveRoot}/{World.Dimension}/te/te_{worldPos.X}.{worldPos.Y}.{worldPos.Z}.te";
 
                 if (!File.Exists(file))
                     return;
@@ -153,7 +153,7 @@ namespace SharpCraft.world.chunk
 
             var worldPos = new BlockPos(Pos.ToVec() + localPos.ToVec());
 
-            var file = $"{World.SaveRoot}\\{World.Dimension}\\te\\te_{Pos.WorldSpaceX() + localPos.X}.{localPos.Y}.{Pos.WorldSpaceZ() + localPos.Z}.te";
+            var file = $"{World.SaveRoot}/{World.Dimension}/te/te_{Pos.WorldSpaceX() + localPos.X}.{localPos.Y}.{Pos.WorldSpaceZ() + localPos.Z}.te";
 
             if (File.Exists(file))
                 File.Delete(file);
@@ -184,13 +184,13 @@ namespace SharpCraft.world.chunk
             if (!_tileEntities.TryGetValue(localPos, out var te))
                 return;
 
-            var dir = $"{World.SaveRoot}\\{World.Dimension}\\te";
+            var dir = $"{World.SaveRoot}/{World.Dimension}/te";
 
             if (!Directory.Exists(dir))
                 Directory.CreateDirectory(dir);
 
             var file =
-                $"{dir}\\te_{Pos.WorldSpaceX() + localPos.X}.{localPos.Y}.{Pos.WorldSpaceZ() + localPos.Z}.te";
+                $"{dir}/te_{Pos.WorldSpaceX() + localPos.X}.{localPos.Y}.{Pos.WorldSpaceZ() + localPos.Z}.te";
 
             ByteBufferWriter bbw = new ByteBufferWriter(0);
 

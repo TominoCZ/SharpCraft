@@ -32,7 +32,7 @@ namespace SharpCraft
     internal class SharpCraft : GameWindow
     {
         //string _dir = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "/.sharpcraft";
-        private string _dir = "./";
+        private string _dir = "./SharpCraft_Data";
 
         public string GameFolderDir
         {
@@ -108,7 +108,6 @@ namespace SharpCraft
         private float _sensitivity = 1;
 
         private float _partialTicks;
-        private readonly string _glVersion;
 
         private static string _title;
 
@@ -121,8 +120,7 @@ namespace SharpCraft
             VSync = VSyncMode.Off;
             MakeCurrent();
 
-            _glVersion = GL.GetString(StringName.ShadingLanguageVersion);
-            Title = _title = $"SharpCraft Alpha 0.0.4 [GLSL {_glVersion}]";
+            Title = _title = $"SharpCraft Alpha 0.0.4 [GLSL {GL.GetString(StringName.ShadingLanguageVersion)}]";
 
             Console.WriteLine("DEBUG: stitching Textures");
             TextureManager.LoadTextures();
@@ -170,7 +168,7 @@ namespace SharpCraft
             _frameBuffer = new FBO(Width, Height, false, 4);
         }
 
-        private void LoadMods() //WHY THE FUCK IS THIS IMPLEMENTED RIGHT NOW IN THIS GAME PHASE???!
+        private void LoadMods()
         {
             if (Directory.Exists(_dir + "mods"))
             {
@@ -254,7 +252,7 @@ namespace SharpCraft
             };
             _recipeRegistry.RegisterRecipe(recipe, ItemRegistry.GetItem("sharpcraft", "pick_stone"));
 
-            recipe = new []
+            recipe = new[]
             {
                 rare, rare, rare,
                 null, wood, null,
@@ -320,9 +318,9 @@ namespace SharpCraft
             //load settings
             _sensitivity = SettingsManager.GetFloat("sensitivity");
             WorldRenderer.RenderDistance = SettingsManager.GetInt("renderdistance");
-            //World.setBlock(new BlockPos(player.Pos), EnumBlock.RARE, 1, true); //test of block metadata, works perfectly
 
-            LoadWorld("MyWorld"); //TODO don't create when doesn't exist //EDIT - now redundant comment?
+            LoadWorld("MyWorld");
+
             Player.OnPickup(new ItemStack(ItemRegistry.GetItem("sharpcraft", "pick_stone")));
             Player.OnPickup(new ItemStack(ItemRegistry.GetItem("sharpcraft", "pick_wood")));
             Player.OnPickup(new ItemStack(ItemRegistry.GetItem("sharpcraft", "pick_rare")));

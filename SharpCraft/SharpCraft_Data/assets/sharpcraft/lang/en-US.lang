@@ -6,5 +6,6 @@ sharpcraft.block.rare=Rare Ore
 sharpcraft.block.dirt=Dirt
 sharpcraft.block.furnace=Furnace
 sharpcraft.block.log=Log
-sharpcraft.block.planks=Wood Planks
+sharpcraft.block.planks=Planks
 sharpcraft.block.leaves=Leaves
+sharpcraft.block.crafting_table=Crafting Table

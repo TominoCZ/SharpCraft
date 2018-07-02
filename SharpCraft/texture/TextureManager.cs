@@ -41,158 +41,7 @@ namespace SharpCraft.texture
 
             FontManager.LoadCharacters(TEXTURE_TEXT, "font/default");
         }
-
-        /*
-        private static void StitchTextures()
-        {
-            Bitmap bmp = CreateTextureMap("blocks");
-            int id = LoadTexture(bmp);
-
-            TEXTURE_BLOCKS = new Texture(id, bmp.Size);
-
-            bmp.Dispose();
-        }
-
-        private static Bitmap CreateTextureMap(string folder)
-        {
-            Bitmap map = new Bitmap(256, 256);
-
-            Array blocks = Enum.GetValues(typeof(EnumBlock));
-
-            string dir = $"SharpCraft_Data/assets/textures/{folder}";
-
-            string[] files = new string[0];
-            if (Directory.Exists(dir))
-                files = Directory.GetFiles(dir, "*.png");
-
-            for (int i = 0; i < files.Length; i++)
-            {
-                files[i] = Path.GetFileNameWithoutExtension(files[i]).ToLower();
-            }
-
-            int countX = 0;
-            int countY = 0;
-
-            Vector2 size = new Vector2(16f / map.Size.Width, 16f / map.Size.Height);
-
-            using (map)
-            {
-                foreach (EnumBlock block in blocks)
-                {
-                    string texName = block.ToString().ToLower();
-                    TextureBlockUV uvs = new TextureBlockUV();
-
-                    if (block == EnumBlock.MISSING)
-                    {
-                        Vector2 pos = new Vector2(countX * size.X, countY * size.Y);
-                        Vector2 end = pos + size;
-
-                        uvs.fill(pos, end);
-
-                        DrawToBitmap(map, countX * 16, countY * 16, TEXTURE_MISSING);
-
-                        countX++;
-
-                        //check
-                        if (countX * 16 >= map.Size.Width)
-                        {
-                            countX = 0;
-                            countY++;
-                        }
-                    }
-                    else if (ContainsContaining(files, texName) > 0)
-                    {
-                        //found
-
-                        //found texture for all 6 sides
-                        if (files.Contains(texName))
-                        {
-                            Vector2 pos = new Vector2(countX * size.X, countY * size.Y);
-                            Vector2 end = pos + size;
-
-                            uvs.fill(pos, end);
-
-                            DrawToBitmap(map, countX * 16, countY * 16, $"{dir}/{texName}.png");
-
-                            countX++;
-
-                            //check
-                            if (countX * 16 >= map.Size.Width)
-                            {
-                                countX = 0;
-                                countY++;
-                            }
-                        }
-
-                        //found texture for the 4 sides
-                        if (files.Contains($"{texName}_side"))
-                        {
-                            Vector2 pos = new Vector2(countX * size.X, countY * size.Y);
-                            Vector2 end = pos + size;
-
-                            uvs.setUVForSide(FaceSides.North, pos, end);
-                            uvs.setUVForSide(FaceSides.East, pos, end);
-                            uvs.setUVForSide(FaceSides.South, pos, end);
-                            uvs.setUVForSide(FaceSides.West, pos, end);
-
-                            DrawToBitmap(map, countX * 16, countY * 16, $"{dir}/{texName}_side.png");
-
-                            countX++;
-
-                            //check
-                            if (countX * 16 >= map.Size.Width)
-                            {
-                                countX = 0;
-                                countY++;
-                            }
-                        }
-
-                        foreach (FaceSides face in FaceSides.AllSides)
-                        {
-                            string faceName = face.ToString().ToLower();
-
-                            if (files.Contains($"{texName}_{faceName}"))
-                            {
-                                Vector2 pos = new Vector2(countX * size.X, countY * size.Y);
-                                Vector2 end = pos + size;
-
-                                uvs.setUVForSide(face, pos, end);
-
-                                DrawToBitmap(map, countX * 16, countY * 16, $"{dir}/{texName}_{faceName}.png");
-
-                                countX++;
-
-                                //check
-                                if (countX * 16 >= map.Size.Width)
-                                {
-                                    countX = 0;
-                                    countY++;
-                                }
-                            }
-                        }
-                    }
-
-                    _blockUVs.Add(block, uvs);
-                }
-
-                TextureBlockUV missingUVs = GetUVsFromBlock(EnumBlock.MISSING);
-
-                foreach (KeyValuePair<EnumBlock, TextureBlockUV> uv in _blockUVs)
-                {
-                    if (uv.Key != EnumBlock.AIR)
-                        uv.Value.fillEmptySides(missingUVs.getUVForSide(FaceSides.Down));
-                }
-
-                map.Save("terrain_debug.png");
-
-                Bitmap clone = (Bitmap)map.Clone();
-
-                map.Dispose();
-
-                return clone;
-            }
-        }*/
-
+        
         private static Bitmap CreateMissingTexture()
         {
             Bitmap bmp = new Bitmap(16, 16);
@@ -237,7 +86,7 @@ namespace SharpCraft.texture
         {
             try
             {
-                Bitmap bmp = (Bitmap)Image.FromFile($"SharpCraft_Data/assets/textures/{textureName}.png");
+                Bitmap bmp = (Bitmap)Image.FromFile($"{SharpCraft.Instance.GameFolderDir}/assets/sharpcraft/textures/{textureName}.png");
 
                 int id = LoadTexture(bmp, smooth);
 
@@ -313,7 +162,7 @@ namespace SharpCraft.texture
 
             string[] files = new string[0];
 
-            string dir = "SharpCraft_Data/assets/textures/skybox";
+            string dir = SharpCraft.Instance.GameFolderDir + "/assets/sharpcraft/textures/skybox";
 
             if (Directory.Exists(dir))
                 files = Directory.GetFiles(dir, "*.png");

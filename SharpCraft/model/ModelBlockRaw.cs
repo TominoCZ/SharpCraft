@@ -28,8 +28,7 @@ namespace SharpCraft.model
             normals.AddRange(_normals);
             uvs.AddRange(_uvs);
         }
-
-        //TODO - only use these when the block model is one 1x1x1 big cube
+        
         public void AppendVertexDataForSide(FaceSides side, List<float> vertexes, List<float> normals, List<float> uvs, BlockPos offset)
         {
             if (!FaceSides.Parse(side, out var parsed)) //FaceSides is a struct containing Vector2 values (normals)
