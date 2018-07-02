@@ -120,9 +120,9 @@ namespace SharpCraft.model
                 string name = pair.Key;
                 JsonModel model = pair.Value;
 
-                float[] vertexes = new float[72 * model.cubes.Length];
-                float[] normals = new float[72 * model.cubes.Length];
-                float[] uvs = new float[48 * model.cubes.Length];
+                float[] vertexes = new float[108 * model.cubes.Length];
+                float[] normals = new float[108 * model.cubes.Length];
+                float[] uvs = new float[72 * model.cubes.Length];
 
                 for (var index = 0; index < model.cubes.Length; index++)
                 {

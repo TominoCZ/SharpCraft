@@ -29,6 +29,6 @@ namespace SharpCraft.model
 
         public bool HasLocalData() => true;
 
-        public void Render(PrimitiveType primitiveType) => GL.DrawArrays(primitiveType, 0, VertexCount);
+        public void Render() => GL.DrawArrays(PrimitiveType.Triangles, 0, VertexCount);
     }
 }

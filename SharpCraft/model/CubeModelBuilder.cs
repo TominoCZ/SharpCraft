@@ -2,52 +2,113 @@
 using SharpCraft.block;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices.ComTypes;
+using System.Text;
 
 namespace SharpCraft.model
 {
     public static class CubeModelBuilder
     {
-        private static readonly Dictionary<FaceSides, float[]> _cube = new Dictionary<FaceSides, float[]>();
+        private static readonly Dictionary<FaceSides, float[]> _cubeTriangles = new Dictionary<FaceSides, float[]>();
+        private static readonly Dictionary<FaceSides, float[]> _cubeQuads = new Dictionary<FaceSides, float[]>();
 
         static CubeModelBuilder()
         {
-            _cube.Add(FaceSides.North, new float[]
+            _cubeTriangles.Add(FaceSides.North, new float[]
+            {
+                1,1,0,
+                1,0,0,
+                0,1,0,
+
+                0,1,0,
+                1,0,0,
+                0,0,0
+            });
+            _cubeTriangles.Add(FaceSides.South, new float[]
+            {
+                0, 1, 1,
+                0, 0, 1,
+                1, 1, 1,
+
+                1, 1, 1,
+                0, 0, 1,
+                1, 0, 1
+            });
+            _cubeTriangles.Add(FaceSides.East, new float[]
+            {
+                1,1,1,
+                1,0,1,
+                1,1,0,
+                1,1,0,
+                1,0,1,
+                1,0,0
+            });
+            _cubeTriangles.Add(FaceSides.West, new float[]
+            {
+                0,1,0,
+                0,0,0,
+                0,1,1,
+                0,1,1,
+                0,0,0,
+                0,0,1
+            });
+            _cubeTriangles.Add(FaceSides.Up, new float[]
+            {
+                0,1,0,
+                0,1,1,
+                1,1,0,
+                1,1,0,
+                0,1,1,
+                1,1,1
+            });
+            _cubeTriangles.Add(FaceSides.Down, new float[]
+            {
+                0,0,1,
+                0,0,0,
+                1,0,1,
+                1,0,1,
+                0,0,0,
+                1,0,0
+            });
+
+            _cubeQuads.Add(FaceSides.North, new float[]
             {
                 1, 1, 0,
                 1, 0, 0,
                 0, 0, 0,
                 0, 1, 0
             });
-            _cube.Add(FaceSides.South, new float[]
+            _cubeQuads.Add(FaceSides.South, new float[]
             {
                 0, 1, 1,
                 0, 0, 1,
                 1, 0, 1,
                 1, 1, 1
             });
-            _cube.Add(FaceSides.East, new float[]
+            _cubeQuads.Add(FaceSides.East, new float[]
             {
                 1, 1, 1,
                 1, 0, 1,
                 1, 0, 0,
                 1, 1, 0
             });
-            _cube.Add(FaceSides.West, new float[]
+            _cubeQuads.Add(FaceSides.West, new float[]
             {
                 0, 1, 0,
                 0, 0, 0,
                 0, 0, 1,
                 0, 1, 1
             });
-            _cube.Add(FaceSides.Up, new float[]
+            _cubeQuads.Add(FaceSides.Up, new float[]
             {
                 0, 1, 0,
                 0, 1, 1,
                 1, 1, 1,
                 1, 1, 0
             });
-            _cube.Add(FaceSides.Down, new float[]
+            _cubeQuads.Add(FaceSides.Down, new float[]
             {
                 0, 0, 1,
                 0, 0, 0,
@@ -59,14 +120,14 @@ namespace SharpCraft.model
         [Obsolete]
         public static void AppendCubeModel(JsonCube cube, Dictionary<string, string> modelTextureVariables, Dictionary<string, TextureMapElement> textureMap, ref float[] vertexes, ref float[] normals, ref float[] uvs, int n)
         {
-            int startIndex2 = n * 48;
-            int startIndex3 = n * 72;
+            int startIndex2 = n * 72;
+            int startIndex3 = n * 108;
 
             int faceIndex = 0;
 
             foreach (var pair in cube.faces.OrderBy(p => (int)p.Key))
             {
-                int uvIndex = 8 * faceIndex;
+                int uvIndex = 12 * faceIndex;
 
                 Facing side = pair.Key;
                 JsonCubeFaceUv textureNode = pair.Value;
@@ -95,10 +156,16 @@ namespace SharpCraft.model
                     uvs[startIndex2 + uvIndex + 3] = maxV;
 
                     uvs[startIndex2 + uvIndex + 4] = maxU;
-                    uvs[startIndex2 + uvIndex + 5] = maxV;
+                    uvs[startIndex2 + uvIndex + 5] = minV;
 
                     uvs[startIndex2 + uvIndex + 6] = maxU;
                     uvs[startIndex2 + uvIndex + 7] = minV;
+
+                    uvs[startIndex2 + uvIndex + 8] = minU;
+                    uvs[startIndex2 + uvIndex + 9] = maxV;
+
+                    uvs[startIndex2 + uvIndex + 10] = maxU;
+                    uvs[startIndex2 + uvIndex + 11] = maxV;
                 }
 
                 Vector3 rot = Vector3.Zero;
@@ -111,7 +178,7 @@ namespace SharpCraft.model
                     rot[(int)cube.rotation.axis] = MathHelper.DegreesToRadians(cube.rotation.angle);
                 }
 
-                AppendFace(side, cube.from, cube.to, rot, ori, ref vertexes, ref normals, startIndex3 + 12 * faceIndex);
+                AppendFace(side, cube.from, cube.to, rot, ori, ref vertexes, ref normals, startIndex3 + 18 * faceIndex);
 
                 faceIndex++;
             }
@@ -145,10 +212,16 @@ namespace SharpCraft.model
                     uvs.Add(maxV);
 
                     uvs.Add(maxU);
-                    uvs.Add(maxV);
+                    uvs.Add(minV);
 
                     uvs.Add(maxU);
                     uvs.Add(minV);
+
+                    uvs.Add(minU);
+                    uvs.Add(maxV);
+
+                    uvs.Add(maxU);
+                    uvs.Add(maxV);
                 }
 
                 Vector3 rot = Vector3.Zero;
@@ -171,7 +244,7 @@ namespace SharpCraft.model
         {
             FaceSides faceSide = FaceSides.Parse(side); //TextureType parsed to FaceSides, also a normal of this face
             Vector3 normal = faceSide.ToVec();
-            float[] unitFace = _cube[faceSide]; //one side of the cube in unit size
+            float[] unitFace = _cubeTriangles[faceSide]; //one side of the cube in unit size
 
             float x = from[0] / 16f;
             float y = from[1] / 16f;
@@ -205,7 +278,7 @@ namespace SharpCraft.model
         {
             FaceSides faceSide = FaceSides.Parse(side); //TextureType parsed to FaceSides, also a normal of this face
             Vector3 normal = faceSide.ToVec();
-            float[] unitFace = _cube[faceSide]; //one side of the cube in unit size
+            float[] unitFace = _cubeTriangles[faceSide]; //one side of the cube in unit size
 
             float x = from[0] / 16f;
             float y = from[1] / 16f;
@@ -240,7 +313,44 @@ namespace SharpCraft.model
 
             void AppendVertexes(Facing side)
             {
-                var face = _cube[FaceSides.Parse(side)];
+                var face = _cubeTriangles[FaceSides.Parse(side)];
+
+                for (var index = 0; index < face.Length; index += 3)
+                {
+                    var x = face[index];
+                    var y = face[index + 1];
+                    var z = face[index + 2];
+
+                    if (centered)
+                    {
+                        x -= 0.5f;
+                        y -= 0.5f;
+                        z -= 0.5f;
+                    }
+
+                    vertexes.Add(x);
+                    vertexes.Add(y);
+                    vertexes.Add(z);
+                }
+            }
+
+            AppendVertexes(Facing.up);
+            AppendVertexes(Facing.down);
+            AppendVertexes(Facing.north);
+            AppendVertexes(Facing.south);
+            AppendVertexes(Facing.east);
+            AppendVertexes(Facing.west);
+
+            return vertexes.ToArray();
+        }
+
+        public static float[] CreateQuadCubeVertexes(bool centered = false)
+        {
+            List<float> vertexes = new List<float>();
+
+            void AppendVertexes(Facing side)
+            {
+                var face = _cubeQuads[FaceSides.Parse(side)];
 
                 for (var index = 0; index < face.Length; index += 3)
                 {
@@ -279,7 +389,7 @@ namespace SharpCraft.model
             {
                 var normal = FaceSides.Parse(side);
 
-                for (int i = 0; i < 4; i++)
+                for (int i = 0; i < 6; i++)
                 {
                     normals.Add(normal.x);
                     normals.Add(normal.y);
@@ -297,15 +407,18 @@ namespace SharpCraft.model
             return normals.ToArray();
         }
 
-        public static float[] CreateCubeUvs()
+        public static float[] CreateCubeUvs() //TODO - for particles
         {
             List<float> uvs = new List<float>();
 
             float[] faceUv =
             {
+                0, 1, 
                 0, 0,
-                0, 1,
                 1, 1,
+
+                1, 1,
+                0, 0,
                 1, 0
             };
 

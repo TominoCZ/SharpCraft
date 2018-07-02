@@ -138,7 +138,7 @@ namespace SharpCraft.block
                             model.Shader.UpdateGlobalUniforms();
                             model.Shader.UpdateInstanceUniforms(scale * mat, model);
                             model.Shader.UpdateModelUniforms();
-                            model.RawModel.Render(PrimitiveType.Quads);
+                            model.RawModel.Render();
                             model.Unbind();
                         }
                         else
@@ -155,7 +155,7 @@ namespace SharpCraft.block
                             model.Shader.UpdateGlobalUniforms();
                             model.Shader.UpdateInstanceUniforms(scale * mat, model);
                             model.Shader.UpdateModelUniforms();
-                            model.RawModel.Render(PrimitiveType.Quads);
+                            model.RawModel.Render();
                             model.Unbind();
                         }
                     }
@@ -180,7 +180,7 @@ namespace SharpCraft.block
                     model.Shader.UpdateGlobalUniforms();
                     model.Shader.UpdateInstanceUniforms(scale * rot * mat, model);
                     model.Shader.UpdateModelUniforms();
-                    model.RawModel.Render(PrimitiveType.Quads);
+                    model.RawModel.Render();
                     model.Unbind();
                 }
                 else
@@ -195,7 +195,7 @@ namespace SharpCraft.block
                     model.Shader.UpdateGlobalUniforms();
                     model.Shader.UpdateInstanceUniforms(scale * rot * mat, model);
                     model.Shader.UpdateModelUniforms();
-                    model.RawModel.Render(PrimitiveType.Quads);
+                    model.RawModel.Render();
                     model.Unbind();
                 }
             }

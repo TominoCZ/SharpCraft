@@ -249,7 +249,7 @@ namespace SharpCraft.world.chunk
             shader.UpdateModelUniforms();
             shader.UpdateInstanceUniforms(MatrixHelper.CreateTransformationMatrix(Pos), null);
 
-            _model.RawModel.Render(PrimitiveType.Quads);
+            _model.RawModel.Render();
 
             _model.Unbind();
 

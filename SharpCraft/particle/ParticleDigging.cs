@@ -30,26 +30,12 @@ namespace SharpCraft.particle
 
             ModelBlock model = JsonModelLoader.GetModelForBlock(state.Block);
 
-            if (model.RawModel is ModelBlockRaw mbr)
+            if (model.RawModel is ModelBlockRaw)
             {
-                Vector2 start;
-                Vector2 end;
+                var tex = model.ParticleTexture;
 
-                if (state.Block.IsFullCube)
-                {
-                    List<float> uvs = new List<float>(8);
-                    mbr.AppendUvsForSide(side, uvs);
-
-                    start = new Vector2(uvs[0], uvs[1]);
-                    end = new Vector2(uvs[4], uvs[5]); //4,5 because that's the 3. vertex and the local UV there is 1,1
-                }
-                else
-                {
-                    var tex = model.ParticleTexture;
-
-                    start = tex.UVMin;
-                    end = tex.UVMax;
-                }
+                Vector2 start = tex.UVMin;
+                Vector2 end = tex.UVMax;
 
                 Vector2 size = end - start;
 
@@ -122,7 +108,7 @@ namespace SharpCraft.particle
             model.Shader.UpdateInstanceUniforms(MatrixHelper.CreateTransformationMatrix(partialPos, partialRot, partialScale), this);
 
             GL.BindTexture(TextureTarget.Texture2D, textureID);
-            model.RawModel.Render(PrimitiveType.Quads);
+            model.RawModel.Render();
         }
     }
 }

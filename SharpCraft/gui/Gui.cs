@@ -144,7 +144,7 @@ namespace SharpCraft.gui
             Shader.UpdateInstanceUniforms(mat, model.SlotTexture.UVMin, model.SlotTexture.UVMax);
 
             GL.BindTexture(TextureTarget.Texture2D, JsonModelLoader.TextureBlocks);
-            _item.RawModel.Render(PrimitiveType.Triangles);
+            _item.RawModel.Render();
 
             _item.Unbind();
         }
@@ -180,7 +180,7 @@ namespace SharpCraft.gui
             Shader.UpdateInstanceUniforms(mat, model.SlotTexture.UVMin, model.SlotTexture.UVMax);
 
             GL.BindTexture(TextureTarget.Texture2D, JsonModelLoader.TextureItems);
-            _item.RawModel.Render(PrimitiveType.Triangles);
+            _item.RawModel.Render();
 
             _item.Unbind();
         }

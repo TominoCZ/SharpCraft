@@ -219,7 +219,7 @@ namespace SharpCraft.entity
                     Shader.UpdateGlobalUniforms();
                     Shader.UpdateModelUniforms(model.RawModel);
                     Shader.UpdateInstanceUniforms(mat, this);
-                    model.RawModel.Render(PrimitiveType.Quads);
+                    model.RawModel.Render();
                 }
 
                 GL.BindVertexArray(0);
@@ -271,7 +271,7 @@ namespace SharpCraft.entity
                     Shader.UpdateGlobalUniforms();
                     Shader.UpdateModelUniforms(model.RawModel);
                     Shader.UpdateInstanceUniforms(mat, this);
-                    model.RawModel.Render(PrimitiveType.Quads);
+                    model.RawModel.Render();
                 }
 
                 GL.BindVertexArray(0);

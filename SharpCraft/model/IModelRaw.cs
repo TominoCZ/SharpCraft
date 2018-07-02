@@ -10,6 +10,6 @@ namespace SharpCraft.model
 
         bool HasLocalData();
 
-        void Render(PrimitiveType shaderRenderType);
+        void Render();
     }
 }
