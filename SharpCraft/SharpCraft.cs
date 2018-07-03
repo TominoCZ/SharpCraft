@@ -109,7 +109,7 @@ namespace SharpCraft
 
         private static string _title;
 
-        public SharpCraft() : base(680, 480, new GraphicsMode(32, 32, 0, 1), _title, GameWindowFlags.Default, DisplayDevice.Default, 3, 3, GraphicsContextFlags.ForwardCompatible)
+        public SharpCraft() : base(680, 480, new GraphicsMode(32, 32, 0, 0), _title, GameWindowFlags.Default, DisplayDevice.Default, 3, 3, GraphicsContextFlags.ForwardCompatible)
         {
             Instance = this;
             Camera = new Camera();
@@ -162,7 +162,7 @@ namespace SharpCraft
 
             GL.ActiveTexture(TextureUnit.Texture0);
 
-            _frameBuffer = new FBO(Width, Height, false, 4);
+            _frameBuffer = new FBO(Width, Height);
         }
 
         private void LoadMods()
@@ -698,7 +698,7 @@ namespace SharpCraft
         {
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
-            _frameBuffer.Bind();//TODO
+            //_frameBuffer.Bind();//TODO
             //GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
             DateTime now = DateTime.Now;
@@ -747,9 +747,9 @@ namespace SharpCraft
                 CaptureScreen();
             }
 
-            _frameBuffer.BindDefault();
-            _frameBuffer.CopyColorToScreen();//TODO
-
+            //_frameBuffer.BindDefault();
+            //_frameBuffer.CopyColorToScreen();//TODO
+            
             SwapBuffers();
 
             _fpsCounter++;
@@ -936,7 +936,10 @@ namespace SharpCraft
             if (ClientSize.Height < 480)
                 ClientSize = new Size(ClientSize.Width, 480);
 
+            //_frameBuffer.SetSize(Width, Height);
+
             GL.Viewport(ClientRectangle);
+
             //GL.MatrixMode(MatrixMode.Projection);
             //GL.LoadIdentity();
             //GL.Ortho(0, ClientRectangle.Width, ClientRectangle.Height, 0, Camera.NearPlane, Camera.FarPlane);

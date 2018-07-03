@@ -17,7 +17,7 @@ namespace SharpCraft.render
 
         private int _colorBuffer = -1;
 
-        public FBO(int w, int h, bool isTextureBuffer, int samples)
+        public FBO(int w, int h, bool isTextureBuffer = false, int samples = 1)
         {
             _isTextureBuffer = isTextureBuffer;
             _samples = samples;
@@ -34,16 +34,18 @@ namespace SharpCraft.render
         {
             _frameBuffer = GL.GenFramebuffer();
             GL.BindFramebuffer(FramebufferTarget.Framebuffer, _frameBuffer);
-            //Now we need to create the texture which will contain the RGB output of our shader. This code is very classic :
 
             CreateTexture();
+
             CreateDepthBuffer();
 
-            // Set "renderedTexture" as our colour attachement #0
-            GL.FramebufferTexture(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0, _textureId, 0);
+            if (_isTextureBuffer)
+            {
+                // Set "renderedTexture" as our colour attachement #0
+                GL.FramebufferTexture(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0, _textureId, 0);
+            }
 
-            // Set the list of draw buffers.
-            GL.DrawBuffer(DrawBufferMode.ColorAttachment0); // "1" is the size of DrawBuffers
+            GL.DrawBuffer(DrawBufferMode.ColorAttachment0);
 
             // Always check that our framebuffer is ok
             var b = GL.CheckFramebufferStatus(FramebufferTarget.Framebuffer) == FramebufferErrorCode.FramebufferComplete;
@@ -114,10 +116,10 @@ namespace SharpCraft.render
             _colorBuffer = GL.GenRenderbuffer();
             GL.BindRenderbuffer(RenderbufferTarget.Renderbuffer, _colorBuffer);
 
-            if (_samples > 1)
-                GL.RenderbufferStorageMultisample(RenderbufferTarget.Renderbuffer, _samples, RenderbufferStorage.Rgba8, _width, _height);
-            else
-                GL.RenderbufferStorage(RenderbufferTarget.Renderbuffer, RenderbufferStorage.Rgba8, _width, _height);
+            //if (_samples > 1)
+            //GL.RenderbufferStorageMultisample(RenderbufferTarget.Renderbuffer, _samples, RenderbufferStorage.Rgb8, _width, _height);
+            //else
+            GL.RenderbufferStorage(RenderbufferTarget.Renderbuffer, RenderbufferStorage.Rgba8, _width, _height);
 
             GL.FramebufferRenderbuffer(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0, RenderbufferTarget.Renderbuffer, _colorBuffer);
         }
@@ -149,9 +151,12 @@ namespace SharpCraft.render
         public void Bind()
         {
             if (_isTextureBuffer)
+            {
                 GL.BindTexture(TextureTarget.Texture2D, 0);
+            }
 
             GL.BindFramebuffer(FramebufferTarget.Framebuffer, _frameBuffer);
+
             GL.Viewport(0, 0, _width, _height);
         }
 
@@ -161,6 +166,7 @@ namespace SharpCraft.render
                 GL.BindTexture(TextureTarget.Texture2D, 0);
 
             GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
+            GL.Viewport(0, 0, SharpCraft.Instance.Width, SharpCraft.Instance.Height);
         }
 
         public void Destroy()

@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using OpenTK.Graphics.OpenGL;
 using SharpCraft.util;
 using Bitmap = System.Drawing.Bitmap;
 using Image = System.Drawing.Image;
@@ -382,7 +383,7 @@ namespace SharpCraft.model
 
                 map.Save("debug.png");
 
-                id = TextureManager.LoadTexture(map);
+                id = TextureManager.LoadTextureWithMipMap(map);
             }
 
             return id;
