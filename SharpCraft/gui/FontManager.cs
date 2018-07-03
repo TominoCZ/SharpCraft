@@ -17,6 +17,12 @@ namespace SharpCraft.gui
 
             var file = $"{SharpCraft.Instance.GameFolderDir}/assets/sharpcraft/textures/{fntFileName}.fnt";
 
+            if (!File.Exists(file))
+            {
+                Console.WriteLine($"ERROR: Couldn't find .fnt file for font {fntFileName}");
+                return;
+            }
+
             var lines = File.ReadAllLines(file);
 
             foreach (var line in lines)

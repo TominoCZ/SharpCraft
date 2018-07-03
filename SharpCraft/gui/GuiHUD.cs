@@ -3,6 +3,7 @@ using SharpCraft.item;
 using SharpCraft.texture;
 using System;
 using System.Drawing;
+using Newtonsoft.Json.Serialization;
 
 namespace SharpCraft.gui
 {
@@ -75,8 +76,17 @@ namespace SharpCraft.gui
                 if (stack.Count > 1)
                     RenderText(stack.Count.ToString(), x + scaledWidth / 2f - 14, _hotbarY + scaledHeight / 2f + 14, 1, true, true);
             }
+            
+            var c = SharpCraft.Instance.Camera;
 
             RenderText(SharpCraft.Instance.GetFps() + " FPS", 5, 6, 1, Vector3.UnitY, false, true);
+
+            RenderText($"Pitch: {(int)Math.Round(MathHelper.RadiansToDegrees(c.Pitch))}", 5, 40, 1, Vector3.UnitY, false, true);
+            RenderText($"Yaw: {(int)Math.Round(MathHelper.RadiansToDegrees(c.Yaw))}", 5, 60, 1, Vector3.UnitY, false, true);
+
+            var dir = c.GetLookVec();
+            
+            RenderText($"Look Dir: {dir.X.ToString("F")}, {dir.Y.ToString("F")}, {dir.Z.ToString("F")}", 5, 100, 1, Vector3.UnitY, false, true);
         }
 
         private void DrawLives()

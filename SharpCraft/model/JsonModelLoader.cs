@@ -253,11 +253,11 @@ namespace SharpCraft.model
                         cubes.Add(cube);
                     }
 
-                    foreach (var pairtexture in model.textures)
+                    foreach (var pairtex in model.textures)
                     {
                         try
                         {
-                            textures.Add(pairtexture.Key, pairtexture.Value);
+                            textures.Add(pairtex.Key, pairtex.Value);
                         }
                         catch
                         {

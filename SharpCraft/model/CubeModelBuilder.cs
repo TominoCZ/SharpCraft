@@ -349,7 +349,7 @@ namespace SharpCraft.model
             return uvs.ToArray();
         }
 
-        private static Vector3 RotateVertex(Vector3 vertex, Vector3 rotation, Vector3 origin)
+        public static Vector3 RotateVertex(Vector3 vertex, Vector3 rotation, Vector3 origin)
         {
             if (!(rotation.Length > 0))
                 return vertex;

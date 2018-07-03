@@ -479,7 +479,7 @@ namespace SharpCraft.world
         public void AddWaypoint(BlockPos pos, Color color, string name)
         {
             if (!_waypoints.ContainsKey(pos))
-            _waypoints.Add(pos, new Waypoint(pos, color, name));
+                _waypoints.Add(pos, new Waypoint(pos, color, name));
         }
 
         public void RemoveWaypoint(BlockPos pos)

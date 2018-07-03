@@ -77,7 +77,6 @@ namespace SharpCraft.render
 
         public void Render(float partialTicks)
         {
-            GL.DepthMask(false);
             float partialRot = _lastTick + (_tick - _lastTick) * partialTicks;
 
             Matrix4 mat = MatrixHelper.CreateTransformationMatrix(SharpCraft.Instance.Camera.Pos, Vector3.UnitY * partialRot / 10, 1);
@@ -91,7 +90,6 @@ namespace SharpCraft.render
             _cube.RawModel.Render();
 
             _cube.Unbind();
-            GL.DepthMask(true);
         }
     }
 }

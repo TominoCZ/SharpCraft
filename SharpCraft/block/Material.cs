@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Runtime.Remoting.Channels;
 
 namespace SharpCraft.block
 {
@@ -19,7 +18,7 @@ namespace SharpCraft.block
 
         public static bool RegisterMaterial(Material mat)
         {
-            bool ok = !_materials.ContainsKey(mat.Name);
+            var ok = !_materials.ContainsKey(mat.Name);
 
             if (ok)
                 _materials.Add(mat.Name, mat);

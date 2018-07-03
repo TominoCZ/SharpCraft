@@ -68,7 +68,7 @@ namespace SharpCraft.render
 
         public Vector3 GetLookVec()
         {
-            return Vector3.Transform(Vector3.UnitX, new Quaternion(-Pitch, -_yaw + MathHelper.PiOver2, 0));
+            return Quaternion.FromEulerAngles(-_pitch, -_yaw + MathHelper.PiOver2, 0) * Vector3.UnitX;
         }
 
         public Vector2 Left

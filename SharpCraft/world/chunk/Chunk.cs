@@ -243,17 +243,18 @@ namespace SharpCraft.world.chunk
             //foreach (Shader<ModelBlock> shader in _model.fragmentPerShader.Keys)
             //{
             //ModelChunkFragment chunkFragmentModel = _model.getFragmentModelWithShader(shader);
-            
+
             var shader = Block.DefaultShader;
 
             _model.Bind();
             shader.UpdateGlobalUniforms();
             shader.UpdateModelUniforms();
             shader.UpdateInstanceUniforms(MatrixHelper.CreateTransformationMatrix(Pos), null);
+
             _model.RawModel.Render();
 
             _model.Unbind();
-            
+
             foreach (var tileEntity in _tileEntities)
             {
                 tileEntity.Value.Render(partialTicks);
