@@ -159,10 +159,10 @@ namespace SharpCraft
             GL.CullFace(CullFaceMode.Back);
             GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Fill);
             GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
-
+            GL.Enable(EnableCap.Multisample);
             GL.ActiveTexture(TextureUnit.Texture0);
 
-            _frameBuffer = new FBO(Width, Height);
+            _frameBuffer = new FBO(Width, Height, true);
         }
 
         private void LoadMods()
@@ -720,10 +720,10 @@ namespace SharpCraft
             //RENDER SCREEN
             if (World != null)
             {
+                SkyboxRenderer?.Render(_partialTicks);
                 WorldRenderer?.Render(World, _partialTicks);
                 ParticleRenderer?.Render(_partialTicks);
                 EntityRenderer?.Render(_partialTicks);
-                SkyboxRenderer?.Render(_partialTicks);
             }
 
             //render other gui
@@ -748,7 +748,7 @@ namespace SharpCraft
             }
 
             _frameBuffer.BindDefault();
-            _frameBuffer.CopyColorToScreen();//TODO
+            _frameBuffer.CopyToScreen();//TODO
             
             SwapBuffers();
 

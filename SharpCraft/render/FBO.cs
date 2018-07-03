@@ -37,7 +37,8 @@ namespace SharpCraft.render
 
             CreateTexture();
 
-            CreateDepthBuffer();
+            if (_samples <= 1)
+                CreateDepthBuffer();
 
             if (_isTextureBuffer)
             {
@@ -116,17 +117,17 @@ namespace SharpCraft.render
             _colorBuffer = GL.GenRenderbuffer();
             GL.BindRenderbuffer(RenderbufferTarget.Renderbuffer, _colorBuffer);
 
-            //if (_samples > 1)
-            //GL.RenderbufferStorageMultisample(RenderbufferTarget.Renderbuffer, _samples, RenderbufferStorage.Rgb8, _width, _height);
-            //else
-            GL.RenderbufferStorage(RenderbufferTarget.Renderbuffer, RenderbufferStorage.Rgba8, _width, _height);
+            if (_samples > 1)
+                GL.RenderbufferStorageMultisample(RenderbufferTarget.Renderbuffer, _samples, RenderbufferStorage.DepthComponent32, _width, _height);
+            else
+                GL.RenderbufferStorage(RenderbufferTarget.RenderbufferExt, RenderbufferStorage.Rgba8, _width, _height);
 
             GL.FramebufferRenderbuffer(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0, RenderbufferTarget.Renderbuffer, _colorBuffer);
         }
 
-        public void CopyColorToScreen()
+        public void CopyToScreen()
         {
-            CopyToScreen(ClearBufferMask.ColorBufferBit);
+            CopyToScreen(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
         }
 
         public void CopyToScreen(ClearBufferMask what)
