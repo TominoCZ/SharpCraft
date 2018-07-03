@@ -12,14 +12,14 @@ namespace SharpCraft.render
 
         private int _width, _height;
 
-        private readonly bool _texture;
+        private readonly bool _isTextureBuffer;
         private readonly int _samples;
 
         private int _colorBuffer = -1;
 
-        public FBO(int w, int h, bool texture, int samples)
+        public FBO(int w, int h, bool isTextureBuffer, int samples)
         {
-            _texture = texture;
+            _isTextureBuffer = isTextureBuffer;
             _samples = samples;
 
             SetSize(w, h);
@@ -68,7 +68,7 @@ namespace SharpCraft.render
 
         private void CreateTexture()
         {
-            if (!_texture)
+            if (!_isTextureBuffer)
             {
                 CreateRenderBuffer();
 
@@ -148,7 +148,7 @@ namespace SharpCraft.render
 
         public void Bind()
         {
-            if (_texture)
+            if (_isTextureBuffer)
                 GL.BindTexture(TextureTarget.Texture2D, 0);
 
             GL.BindFramebuffer(FramebufferTarget.Framebuffer, _frameBuffer);
@@ -157,7 +157,7 @@ namespace SharpCraft.render
 
         public void BindDefault()
         {
-            if (_texture)
+            if (_isTextureBuffer)
                 GL.BindTexture(TextureTarget.Texture2D, 0);
 
             GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);

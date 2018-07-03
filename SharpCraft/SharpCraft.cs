@@ -109,8 +109,7 @@ namespace SharpCraft
 
         private static string _title;
 
-        public SharpCraft() : base(680, 480, new GraphicsMode(32, 32, 0, 0), _title, GameWindowFlags.Default,
-            DisplayDevice.Default, 3, 3, GraphicsContextFlags.ForwardCompatible)
+        public SharpCraft() : base(680, 480, new GraphicsMode(32, 32, 0, 1), _title, GameWindowFlags.Default, DisplayDevice.Default, 3, 3, GraphicsContextFlags.ForwardCompatible)
         {
             Instance = this;
             Camera = new Camera();
@@ -159,7 +158,7 @@ namespace SharpCraft
             GL.Enable(EnableCap.Blend);
             GL.CullFace(CullFaceMode.Back);
             GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Fill);
-            GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
+            GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
 
             GL.ActiveTexture(TextureUnit.Texture0);
 
@@ -699,7 +698,7 @@ namespace SharpCraft
         {
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
-            //_frameBuffer.Bind();//TODO
+            _frameBuffer.Bind();//TODO
             //GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
             DateTime now = DateTime.Now;
@@ -748,8 +747,8 @@ namespace SharpCraft
                 CaptureScreen();
             }
 
-            //_frameBuffer.BindDefault();
-            //_frameBuffer.CopyColorToScreen();//TODO
+            _frameBuffer.BindDefault();
+            _frameBuffer.CopyColorToScreen();//TODO
 
             SwapBuffers();
 

@@ -205,7 +205,7 @@ namespace SharpCraft.render
                 return;
 
             GL.BindTexture(TextureTarget.Texture2D, TextureManager.TEXTURE_DESTROY_PROGRESS.ID);
-            GL.BlendFunc(BlendingFactorSrc.DstColor, BlendingFactorDest.Zero);
+            GL.BlendFunc(BlendingFactor.DstColor, BlendingFactor.Zero);
 
             GL.BindVertexArray(_destroyProgressModel.VaoID);
             GL.EnableVertexAttribArray(0);
@@ -233,7 +233,7 @@ namespace SharpCraft.render
             GL.DisableVertexAttribArray(0);
             GL.BindVertexArray(0);
 
-            GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
+            GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
 
             _shaderTexturedCube.Unbind();
         }

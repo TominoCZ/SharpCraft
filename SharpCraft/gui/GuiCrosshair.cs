@@ -18,9 +18,9 @@ namespace SharpCraft.gui
 
         public override void Render(int mouseX, int mouseY)
         {
-            GL.BlendFunc(BlendingFactorSrc.OneMinusDstColor, BlendingFactorDest.OneMinusSrcColor);
+            GL.BlendFunc(BlendingFactor.OneMinusDstColor, BlendingFactor.OneMinusSrcColor);
             RenderTexture(_texture, SharpCraft.Instance.ClientSize.Width / 2, SharpCraft.Instance.ClientSize.Height / 2, 0, 0, _texture.TextureSize.Width, _texture.TextureSize.Height, 1.25f, true);
-            GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
+            GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
         }
     }
 }

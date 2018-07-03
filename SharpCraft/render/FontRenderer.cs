@@ -142,7 +142,7 @@ namespace SharpCraft.render
                 positionX += width + (tuple.Item1.Character.OffsetX + spacing) * scale;
             }
 
-            GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
+            GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
             GL.DisableVertexAttribArray(0);
             GL.BindVertexArray(0);
 
