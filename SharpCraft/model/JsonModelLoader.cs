@@ -383,7 +383,9 @@ namespace SharpCraft.model
 
                 map.Save("debug.png");
 
-                id = TextureManager.LoadTextureWithMipMap(map);
+                var mipmaps = SettingsManager.GetBool("mipmap");
+
+                id = mipmaps ? TextureManager.LoadTextureWithMipMap(map) : TextureManager.LoadTexture(map);
             }
 
             return id;

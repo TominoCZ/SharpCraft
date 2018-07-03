@@ -1,18 +1,15 @@
-﻿using OpenTK;
-using OpenTK.Graphics.OpenGL;
-using SharpCraft.block;
-using SharpCraft.gui;
-using SharpCraft.util;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
-using Bitmap = System.Drawing.Bitmap;
-using Image = System.Drawing.Image;
-using Rectangle = System.Drawing.Rectangle;
-using Size = System.Drawing.Size;
+using OpenTK;
+using OpenTK.Graphics.OpenGL;
+using SharpCraft.block;
+using SharpCraft.gui;
+using SharpCraft.util;
+using PixelFormat = System.Drawing.Imaging.PixelFormat;
 
 namespace SharpCraft.texture
 {
@@ -46,7 +43,7 @@ namespace SharpCraft.texture
         {
             Bitmap bmp = new Bitmap(16, 16);
 
-            SolidBrush pink = new SolidBrush(System.Drawing.Color.FromArgb(228, 0, 228));
+            SolidBrush pink = new SolidBrush(Color.FromArgb(228, 0, 228));
 
             using (Graphics g = Graphics.FromImage(bmp))
             {
@@ -68,7 +65,7 @@ namespace SharpCraft.texture
             GL.BindTexture(TextureTarget.Texture2D, texID);
 
             BitmapData data = textureMap.LockBits(new Rectangle(0, 0, textureMap.Width, textureMap.Height),
-                ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppPArgb);
+                ImageLockMode.ReadOnly, PixelFormat.Format32bppPArgb);
 
             GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, data.Width, data.Height, 0,
                 OpenTK.Graphics.OpenGL.PixelFormat.Bgra, PixelType.UnsignedByte, data.Scan0);
@@ -90,10 +87,13 @@ namespace SharpCraft.texture
             GL.BindTexture(TextureTarget.Texture2D, texID);
 
             BitmapData data = textureMap.LockBits(new Rectangle(0, 0, textureMap.Width, textureMap.Height),
-                ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppPArgb);
+                ImageLockMode.ReadOnly,
+                PixelFormat.Format32bppPArgb);
 
-            GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, data.Width, data.Height, 0,
-                OpenTK.Graphics.OpenGL.PixelFormat.Bgra, PixelType.UnsignedByte, data.Scan0);
+            GL.TexImage2D(TextureTarget.Texture2D, 0, 
+                PixelInternalFormat.Rgba, data.Width, data.Height, 0,
+                OpenTK.Graphics.OpenGL.PixelFormat.Bgra,  PixelType.UnsignedByte, data.Scan0); 
+            
             textureMap.UnlockBits(data);
 
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.GenerateMipmap, (int)GenerateMipmapTarget.Texture2D);
@@ -149,7 +149,7 @@ namespace SharpCraft.texture
                 Size size = bmp.Size;
 
                 BitmapData data = bmp.LockBits(new Rectangle(0, 0, size.Width, size.Height),
-                    ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+                    ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
 
                 GL.TexImage2D(target, 0, PixelInternalFormat.Rgba, data.Width, data.Height, 0, OpenTK.Graphics.OpenGL.PixelFormat.Bgra,
                     PixelType.UnsignedByte, data.Scan0);
