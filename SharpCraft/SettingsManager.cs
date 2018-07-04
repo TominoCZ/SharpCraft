@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -28,19 +29,26 @@ namespace SharpCraft
 
                 foreach (string line in data)
                 {
-                    string parsed = line.Trim().Replace(" ", "").ToLower();
-                    string[] split = parsed.Split('=');
-
-                    if (split.Length < 2)
-                        continue;
-
-                    string variable = split[0];
-                    string value = split[1];
-
-                    if (_settings.ContainsKey(variable))
+                    try
                     {
-                        _settings.Remove(variable);
-                        _settings.Add(variable, value);
+                        string parsed = line.Trim();
+                        string[] split = parsed.Split('=');
+
+                        if (split.Length < 2)
+                            continue;
+
+                        string variable = split[0];
+                        string value = split[1];
+
+                        if (_settings.ContainsKey(variable))
+                        {
+                            _settings.Remove(variable);
+                            _settings.Add(variable, value);
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine($"ERROR: Failed parsing line '{line}' in settings.txt");
                     }
                 }
             }

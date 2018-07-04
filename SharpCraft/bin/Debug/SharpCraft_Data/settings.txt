@@ -1,5 +1,0 @@
-sensitivity=1
-renderdistance=5
-mipmap=false
-worldseed=yeet
-lang=en-us
