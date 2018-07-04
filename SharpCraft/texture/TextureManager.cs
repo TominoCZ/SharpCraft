@@ -103,6 +103,8 @@ namespace SharpCraft.texture
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMaxLevel, (int)Math.Floor(Math.Log(16) / Math.Log(2)));
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureLodBias, 0);
 
+            GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
+            
             return texID;
         }
 
