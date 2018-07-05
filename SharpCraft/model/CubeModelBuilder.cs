@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.ComTypes;
 using System.Text;
+using SharpCraft.util;
 
 namespace SharpCraft.model
 {
@@ -355,7 +356,7 @@ namespace SharpCraft.model
                 return vertex;
 
             vertex -= origin;
-            vertex = Vector3.Transform(vertex, new Quaternion(rotation.Z, rotation.Y, rotation.X));
+            vertex = MathUtil.Rotate(vertex, rotation.X, rotation.Y, rotation.Z);
             vertex += origin;
 
             return vertex;

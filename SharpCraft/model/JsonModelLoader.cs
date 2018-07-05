@@ -211,7 +211,7 @@ namespace SharpCraft.model
 
                     models.Reverse();
                 }
-                
+
                 itemModels.TryAdd(item.UnlocalizedName, models); //save what block is using what model
 
                 foreach (var jsonModel in models)
@@ -342,7 +342,7 @@ namespace SharpCraft.model
 
             return true;
         }
-        
+
         private static JsonModel FixBlockJson(string file)
         {
             var json = File.ReadAllText(file);
@@ -350,7 +350,7 @@ namespace SharpCraft.model
             json = json.Replace("elements", "cubes").Replace("faceData", "faces").Replace("textureFacing", "texture").Replace("#", "");
 
             var parsed = JsonConvert.DeserializeObject<JsonModel>(json);
-            
+
             json = JsonConvert.SerializeObject(parsed, Formatting.Indented);
 
             File.WriteAllText(file, json);
@@ -360,11 +360,9 @@ namespace SharpCraft.model
 
         private static int Stitch(string[] allTextures, int textureSize, Dictionary<string, TextureMapElement> sprites)
         {
-            Bitmap map = new Bitmap(256, 256);
-
             int id;
 
-            using (map)
+            using (var map = new Bitmap(256, 256))
             {
                 int countX = 0;
                 int countY = 0;
@@ -394,10 +392,20 @@ namespace SharpCraft.model
         private static void WriteBitmap(Bitmap textureMap, string texPath, int textureSize, ref int countX, ref int countY)
         {
             var file = $"{SharpCraft.Instance.GameFolderDir}/assets/sharpcraft/textures/{texPath}.png";
+            
+            Bitmap tex;
 
-            Bitmap tex = (File.Exists(file)
-                             ? new Bitmap(Image.FromFile(file), textureSize, textureSize)
-                             : null) ?? new Bitmap(TextureManager.TEXTURE_MISSING, textureSize, textureSize);
+            if (File.Exists(file))
+            {
+                using (var loaded = Image.FromFile(file))
+                {
+                    tex = new Bitmap(loaded, textureSize, textureSize);
+                }
+            }
+            else
+            {
+                tex = new Bitmap(TextureManager.TEXTURE_MISSING, textureSize, textureSize);
+            }
 
             using (tex)
             {

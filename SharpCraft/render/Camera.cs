@@ -1,5 +1,7 @@
 ﻿using OpenTK;
 using System;
+using SharpCraft.util;
+
 #pragma warning disable CS0675 // Bitwise-or operator used on a sign-extended operand
 
 namespace SharpCraft.render
@@ -68,7 +70,7 @@ namespace SharpCraft.render
 
         public Vector3 GetLookVec()
         {
-            return Quaternion.FromEulerAngles(-_pitch, -_yaw + MathHelper.PiOver2, 0) * Vector3.UnitX;
+            return MathUtil.Rotate(Vector3.UnitX, -_pitch, -_yaw + MathHelper.PiOver2, 0);
         }
 
         public Vector2 Left

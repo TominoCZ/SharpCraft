@@ -701,9 +701,14 @@ namespace SharpCraft
             _frameBuffer.Bind();//TODO
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
+            RunGlTasks();
+
+            HandleMouseMovement();
+            Camera.UpdateViewMatrix();
+            
             DateTime now = DateTime.Now;
 
-            _partialTicks = (float)(((now - _updateTimer).TotalSeconds + e.Time) / TargetUpdatePeriod);
+            _partialTicks = (float)MathHelper.Clamp(((now - _updateTimer).TotalSeconds + e.Time) / TargetUpdatePeriod, 0, 1);
 
             if ((now - _lastFpsDate).TotalMilliseconds >= 1000)
             {
@@ -711,11 +716,6 @@ namespace SharpCraft
                 _fpsCounter = 0;
                 _lastFpsDate = now;
             }
-
-            RunGlTasks();
-
-            HandleMouseMovement();
-            Camera.UpdateViewMatrix();
 
             //RENDER SCREEN
             if (World != null)
@@ -757,12 +757,16 @@ namespace SharpCraft
 
         protected override void OnUpdateFrame(FrameEventArgs e)
         {
-            _updateTimer = DateTime.Now;
+            var now = DateTime.Now;
 
             if (!IsDisposed && Visible)
                 GetMouseOverObject();
 
             GameLoop();
+
+            var timeTook = DateTime.Now - now;
+
+            _updateTimer = DateTime.Now - timeTook;
         }
 
         protected override void OnFocusedChanged(EventArgs e)

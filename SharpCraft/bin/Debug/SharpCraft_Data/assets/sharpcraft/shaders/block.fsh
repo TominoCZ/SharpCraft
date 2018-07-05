@@ -1,6 +1,8 @@
 #version 330
 
+in vec3 skycolor;
 in vec2 pass_uv;
+in float visibility;
 in float brightness;
 
 out vec4 out_Color;
@@ -14,5 +16,7 @@ void main(void){
 
 	vec3 diffuse = vec3(brightness);
 	
-	out_Color = vec4(diffuse, 1.0) * pixelColor;
+	vec4 color = vec4(diffuse, 1.0) * pixelColor;
+	
+	out_Color = mix(vec4(skycolor, 1.0), color, visibility);
 }
