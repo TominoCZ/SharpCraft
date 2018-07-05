@@ -27,6 +27,37 @@ namespace SharpCraft.util
             return vec;
         }
 
+        public static Vector3 Rotate(Vector3 vec, float pitch, float yaw, float roll)
+        {
+            yaw *= 0.5f;
+            pitch *= 0.5f;
+            roll *= 0.5f;
+            float num1 = (float) Math.Cos((double) yaw);
+            float num2 = (float) Math.Cos((double) pitch);
+            float num3 = (float) Math.Cos((double) roll);
+            float num4 = (float) Math.Sin((double) yaw);
+            float num5 = (float) Math.Sin((double) pitch);
+            float num6 = (float) Math.Sin((double) roll);
+
+            Vector3 xyz;
+            var w = (float) ((double) num1 * (double) num2 * (double) num3 - (double) num4 * (double) num5 * (double) num6);
+            xyz.X = (float) ((double) num4 * (double) num5 * (double) num3 + (double) num1 * (double) num2 * (double) num6);
+            xyz.Y = (float) ((double) num4 * (double) num2 * (double) num3 + (double) num1 * (double) num5 * (double) num6);
+            xyz.Z = (float) ((double) num1 * (double) num5 * (double) num3 - (double) num4 * (double) num2 * (double) num6);
+
+            Vector3 result;
+            Vector3 result1;
+            Vector3.Cross(ref xyz, ref vec, out result1);
+            Vector3 result2;
+            Vector3.Multiply(ref vec, w, out result2);
+            Vector3.Add(ref result1, ref result2, out result1);
+            Vector3.Cross(ref xyz, ref result1, out result1);
+            Vector3.Multiply(ref result1, 2f, out result1);
+            Vector3.Add(ref vec, ref result1, out result);
+
+            return result;
+        }
+
         public static float NextFloat(float min = 0, float max = 1)
         {
             float f = GetNext();

@@ -23,9 +23,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using Bitmap = System.Drawing.Bitmap;
-using Point = OpenTK.Point;
 using Rectangle = System.Drawing.Rectangle;
-using Size = OpenTK.Size;
 
 namespace SharpCraft
 {
@@ -111,8 +109,7 @@ namespace SharpCraft
 
         private static string _title;
 
-        public SharpCraft() : base(680, 480, new GraphicsMode(32, 32, 0, 0), _title, GameWindowFlags.Default,
-            DisplayDevice.Default, 3, 3, GraphicsContextFlags.ForwardCompatible)
+        public SharpCraft() : base(680, 480, new GraphicsMode(32, 32, 0, 0), _title, GameWindowFlags.Default, DisplayDevice.Default, 3, 3, GraphicsContextFlags.ForwardCompatible)
         {
             Instance = this;
             Camera = new Camera();
@@ -161,11 +158,11 @@ namespace SharpCraft
             GL.Enable(EnableCap.Blend);
             GL.CullFace(CullFaceMode.Back);
             GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Fill);
-            GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
-
+            GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
+            GL.Enable(EnableCap.Multisample);
             GL.ActiveTexture(TextureUnit.Texture0);
 
-            _frameBuffer = new FBO(Width, Height, false, 4);
+            _frameBuffer = new FBO(Width, Height, true);
         }
 
         private void LoadMods()
@@ -396,7 +393,7 @@ namespace SharpCraft
             if (GuiScreen == null && !Focused)
                 OpenGuiScreen(new GuiScreenIngameMenu());
 
-            float wheelValue = Mouse.WheelPrecise;
+            float wheelValue = 0;//Mouse.WheelPrecise;
 
             if (Player != null)
             {
@@ -701,12 +698,17 @@ namespace SharpCraft
         {
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
-            //_frameBuffer.Bind();//TODO
-            //GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+            _frameBuffer.Bind();//TODO
+            GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
+            RunGlTasks();
+
+            HandleMouseMovement();
+            Camera.UpdateViewMatrix();
+            
             DateTime now = DateTime.Now;
 
-            _partialTicks = (float)(((now - _updateTimer).TotalSeconds + e.Time) / TargetUpdatePeriod);
+            _partialTicks = (float)MathHelper.Clamp(((now - _updateTimer).TotalSeconds + e.Time) / TargetUpdatePeriod, 0, 1);
 
             if ((now - _lastFpsDate).TotalMilliseconds >= 1000)
             {
@@ -715,18 +717,13 @@ namespace SharpCraft
                 _lastFpsDate = now;
             }
 
-            RunGlTasks();
-
-            HandleMouseMovement();
-            Camera.UpdateViewMatrix();
-
             //RENDER SCREEN
             if (World != null)
             {
+                SkyboxRenderer?.Render(_partialTicks);
                 WorldRenderer?.Render(World, _partialTicks);
                 ParticleRenderer?.Render(_partialTicks);
                 EntityRenderer?.Render(_partialTicks);
-                SkyboxRenderer?.Render(_partialTicks);
             }
 
             //render other gui
@@ -750,9 +747,9 @@ namespace SharpCraft
                 CaptureScreen();
             }
 
-            //_frameBuffer.BindDefault();
-            //_frameBuffer.CopyColorToScreen();//TODO
-
+            _frameBuffer.BindDefault();
+            _frameBuffer.CopyToScreen();//TODO
+            
             SwapBuffers();
 
             _fpsCounter++;
@@ -760,12 +757,16 @@ namespace SharpCraft
 
         protected override void OnUpdateFrame(FrameEventArgs e)
         {
-            _updateTimer = DateTime.Now;
+            var now = DateTime.Now;
 
             if (!IsDisposed && Visible)
                 GetMouseOverObject();
 
             GameLoop();
+
+            var timeTook = DateTime.Now - now;
+
+            _updateTimer = DateTime.Now - timeTook;
         }
 
         protected override void OnFocusedChanged(EventArgs e)
@@ -828,7 +829,7 @@ namespace SharpCraft
             {
                 case Key.P:
                     Player?.World?.AddWaypoint(new BlockPos(Player.Pos).Offset(FaceSides.Up),
-                        new OpenTK.Color(255, 0, 0, 127), "TEST");
+                        Color.FromArgb(255, 0, 0, 127), "TEST");
                     break;
 
                 case Key.Escape:
@@ -939,7 +940,10 @@ namespace SharpCraft
             if (ClientSize.Height < 480)
                 ClientSize = new Size(ClientSize.Width, 480);
 
+            _frameBuffer.SetSize(Width, Height);
+
             GL.Viewport(ClientRectangle);
+
             //GL.MatrixMode(MatrixMode.Projection);
             //GL.LoadIdentity();
             //GL.Ortho(0, ClientRectangle.Width, ClientRectangle.Height, 0, Camera.NearPlane, Camera.FarPlane);

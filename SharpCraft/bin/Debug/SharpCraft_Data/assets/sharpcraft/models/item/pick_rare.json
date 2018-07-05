@@ -1,0 +1,8 @@
+{
+  "inherit": "item/pick",
+  "textures": {
+    "0": "blocks/rare",
+    "item": "items/pick_rare"
+  },
+  "cubes": []
+}

@@ -1,6 +1,7 @@
 ﻿using SharpCraft.block;
 using SharpCraft.entity;
 using System;
+using OpenTK;
 
 namespace SharpCraft.world
 {
@@ -17,7 +18,7 @@ namespace SharpCraft.world
             {
                 float partialTicks = SharpCraft.Instance.GetPartialTicksForRender();
 
-                return Math.Clamp((_lastProgress + (Progress - _lastProgress) * partialTicks) / _blockHardness, 0, _blockHardness);
+                return MathHelper.Clamp((_lastProgress + (Progress - _lastProgress) * partialTicks) / _blockHardness, 0, _blockHardness);
             }
         }
 

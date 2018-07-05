@@ -6,6 +6,7 @@ using SharpCraft.util;
 using SharpCraft.world;
 using System;
 using System.Collections.Generic;
+using OpenTK;
 using Vector2 = OpenTK.Vector2;
 using Vector3 = OpenTK.Vector3;
 
@@ -89,7 +90,7 @@ namespace SharpCraft.particle
             }
             else
             {
-                _rot += _rotStep * Math.Clamp((Motion.Xz * 5).LengthFast, OnGround ? 0 : 0.2f, 0.3f);
+                _rot += _rotStep * MathHelper.Clamp((Motion.Xz * 5).LengthFast, OnGround ? 0 : 0.2f, 0.3f);
             }
         }
 

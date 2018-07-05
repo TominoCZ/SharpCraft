@@ -1,18 +1,15 @@
-﻿using OpenTK;
-using OpenTK.Graphics.OpenGL;
-using SharpCraft.block;
-using SharpCraft.gui;
-using SharpCraft.util;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
-using Bitmap = System.Drawing.Bitmap;
-using Image = System.Drawing.Image;
-using Rectangle = System.Drawing.Rectangle;
-using Size = System.Drawing.Size;
+using OpenTK;
+using OpenTK.Graphics.OpenGL;
+using SharpCraft.block;
+using SharpCraft.gui;
+using SharpCraft.util;
+using PixelFormat = System.Drawing.Imaging.PixelFormat;
 
 namespace SharpCraft.texture
 {
@@ -41,12 +38,12 @@ namespace SharpCraft.texture
 
             FontManager.LoadCharacters(TEXTURE_TEXT, "font/default");
         }
-        
+
         private static Bitmap CreateMissingTexture()
         {
             Bitmap bmp = new Bitmap(16, 16);
 
-            SolidBrush pink = new SolidBrush(System.Drawing.Color.FromArgb(228, 0, 228));
+            SolidBrush pink = new SolidBrush(Color.FromArgb(228, 0, 228));
 
             using (Graphics g = Graphics.FromImage(bmp))
             {
@@ -68,16 +65,45 @@ namespace SharpCraft.texture
             GL.BindTexture(TextureTarget.Texture2D, texID);
 
             BitmapData data = textureMap.LockBits(new Rectangle(0, 0, textureMap.Width, textureMap.Height),
-                ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppPArgb);
+                ImageLockMode.ReadOnly, PixelFormat.Format32bppPArgb);
 
             GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, data.Width, data.Height, 0,
                 OpenTK.Graphics.OpenGL.PixelFormat.Bgra, PixelType.UnsignedByte, data.Scan0);
             textureMap.UnlockBits(data);
 
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)(smooth ? TextureMinFilter.Linear : TextureMinFilter.Nearest));
-            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)(smooth ? TextureMinFilter.Linear : TextureMinFilter.Nearest));
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)(smooth ? TextureMagFilter.Linear : TextureMagFilter.Nearest));//TODO correct this in the main branch
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge);
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge);
+
+            return texID;
+        }
+
+        public static int LoadTextureWithMipMap(Bitmap textureMap)
+        {
+            int texID = GL.GenTexture();
+            _allTextures.Add(texID);
+
+            GL.BindTexture(TextureTarget.Texture2D, texID);
+
+            BitmapData data = textureMap.LockBits(new Rectangle(0, 0, textureMap.Width, textureMap.Height),
+                ImageLockMode.ReadOnly,
+                PixelFormat.Format32bppPArgb);
+
+            GL.TexImage2D(TextureTarget.Texture2D, 0,
+                PixelInternalFormat.Rgba, data.Width, data.Height, 0,
+                OpenTK.Graphics.OpenGL.PixelFormat.Bgra, PixelType.UnsignedByte, data.Scan0);
+
+            textureMap.UnlockBits(data);
+
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.GenerateMipmap, (int)GenerateMipmapTarget.Texture2D);
+
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.NearestMipmapLinear);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMaxLevel, (int)Math.Floor(Math.Log(16) / Math.Log(2)));
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureLodBias, 0);
+
+            GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
 
             return texID;
         }
@@ -88,9 +114,12 @@ namespace SharpCraft.texture
             {
                 Bitmap bmp = (Bitmap)Image.FromFile($"{SharpCraft.Instance.GameFolderDir}/assets/sharpcraft/textures/{textureName}.png");
 
-                int id = LoadTexture(bmp, smooth);
+                using (bmp)
+                {
+                    int id = LoadTexture(bmp, smooth);
 
-                return new Texture(id, bmp.Size);
+                    return new Texture(id, bmp.Size);
+                }
             }
             catch
             {
@@ -121,16 +150,22 @@ namespace SharpCraft.texture
                 else if (dictValues.Key.y == 1) target = TextureTarget.TextureCubeMapPositiveY;
                 else if (dictValues.Key.y == -1) target = TextureTarget.TextureCubeMapNegativeY;
 
-                Bitmap bmp = (Bitmap)dictValues.Value.Clone();
-                Size size = bmp.Size;
+                using (dictValues.Value)
+                {
+                    using (var bmp = (Bitmap)dictValues.Value.Clone())
+                    {
+                        Size size = bmp.Size;
 
-                BitmapData data = bmp.LockBits(new Rectangle(0, 0, size.Width, size.Height),
-                    ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+                        BitmapData data = bmp.LockBits(new Rectangle(0, 0, size.Width, size.Height),
+                            ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
 
-                GL.TexImage2D(target, 0, PixelInternalFormat.Rgba, data.Width, data.Height, 0, OpenTK.Graphics.OpenGL.PixelFormat.Bgra,
-                    PixelType.UnsignedByte, data.Scan0);
+                        GL.TexImage2D(target, 0, PixelInternalFormat.Rgba, data.Width, data.Height, 0,
+                            OpenTK.Graphics.OpenGL.PixelFormat.Bgra,
+                            PixelType.UnsignedByte, data.Scan0);
 
-                bmp.UnlockBits(data);
+                        bmp.UnlockBits(data);
+                    }
+                }
             }
 
             GL.TexParameter(TextureTarget.TextureCubeMap, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
@@ -180,7 +215,7 @@ namespace SharpCraft.texture
                 {
                     string file = $"{dir}/sky_{sideName}.png";
 
-                    bitmaps.Add(side, (Bitmap)Image.FromFile(file));
+                    bitmaps.Add(side, (Bitmap) Image.FromFile(file));
                 }
                 else
                 {

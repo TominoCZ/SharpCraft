@@ -6,10 +6,10 @@ namespace SharpCraft.world.chunk
 {
     public class ChunkLoadManager
     {
-        private readonly ConcurrentQueue<Chunk> _importantChunkBuilds = new ConcurrentQueue<Chunk>();
+        private ConcurrentQueue<Chunk> _importantChunkBuilds = new ConcurrentQueue<Chunk>();
         private readonly object _buildLock = new object();
 
-        private readonly ConcurrentQueue<ChunkPos> _importantChunkLoads = new ConcurrentQueue<ChunkPos>();
+        private ConcurrentQueue<ChunkPos> _importantChunkLoads = new ConcurrentQueue<ChunkPos>();
         private readonly object _loadLock = new object();
 
         private readonly SwapList<Chunk> _chunkBuilds = new SwapList<Chunk>(
@@ -148,8 +148,8 @@ namespace SharpCraft.world.chunk
         {
             _chunkBuilds.Clear();
             _chunkLoads.Clear();
-            _importantChunkBuilds.Clear();
-            _importantChunkLoads.Clear();
+            _importantChunkBuilds = new ConcurrentQueue<Chunk>();
+            _importantChunkLoads = new ConcurrentQueue<ChunkPos>();
         }
     }
 }

@@ -24,7 +24,7 @@ namespace SharpCraft.render
 
         public void RenderText(string text, float x, float y, float scale, Vector3 color, float brightness = 1, bool centered = false, bool dropShadow = false, int spacing = 4) //#TODO
         {
-            brightness = Math.Clamp(brightness, 0, 1);
+            brightness = MathHelper.Clamp(brightness, 0, 1);
 
             scale *= 0.5f;
             x = (float)Math.Ceiling(x);
@@ -57,8 +57,18 @@ namespace SharpCraft.render
                 FontMapCharacter node = FontManager.GetCharacter(c);
                 if (node == null)
                     continue;
+                
+                Match first = null;
+                
+                foreach (Match m in matches)
+                {
+                    if (m.Index == index)
+                    {
+                        first = m;
+                        break;
+                    }
+                } 
 
-                Match first = matches.FirstOrDefault(match => match.Index == index);
                 if (first != null && first.Length > 0)
                 {
                     Color clr = ColorTranslator.FromHtml($"#{first.Value.Replace(@"\{", "").Replace("}", "")}");
@@ -132,7 +142,7 @@ namespace SharpCraft.render
                 positionX += width + (tuple.Item1.Character.OffsetX + spacing) * scale;
             }
 
-            GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
+            GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
             GL.DisableVertexAttribArray(0);
             GL.BindVertexArray(0);
 

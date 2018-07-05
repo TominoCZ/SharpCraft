@@ -1,4 +1,5 @@
-﻿using OpenTK;
+﻿using System.Drawing;
+using OpenTK;
 using OpenTK.Input;
 
 namespace SharpCraft.gui

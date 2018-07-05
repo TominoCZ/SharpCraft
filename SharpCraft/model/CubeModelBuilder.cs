@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.ComTypes;
 using System.Text;
+using SharpCraft.util;
 
 namespace SharpCraft.model
 {
@@ -93,10 +94,10 @@ namespace SharpCraft.model
 
                 if (modelTextureVariables.TryGetValue(textureNode.texture, out var textureNameForFace) && textureMap.TryGetValue(textureNameForFace, out var tme))
                 {
-                    var percentageU1 = Math.Clamp(textureNode.uv[0] / 16f, 0, 1);
-                    var percentageV1 = Math.Clamp(textureNode.uv[1] / 16f, 0, 1);
-                    var percentageU2 = Math.Clamp(textureNode.uv[2] / 16f, 0, 1);
-                    var percentageV2 = Math.Clamp(textureNode.uv[3] / 16f, 0, 1);
+                    var percentageU1 = MathHelper.Clamp(textureNode.uv[0] / 16f, 0, 1);
+                    var percentageV1 = MathHelper.Clamp(textureNode.uv[1] / 16f, 0, 1);
+                    var percentageU2 = MathHelper.Clamp(textureNode.uv[2] / 16f, 0, 1);
+                    var percentageV2 = MathHelper.Clamp(textureNode.uv[3] / 16f, 0, 1);
 
                     Vector2 size = tme.UVMax - tme.UVMin;
 
@@ -149,10 +150,10 @@ namespace SharpCraft.model
 
                 if (modelTextureVariables.TryGetValue(textureNode.texture, out var textureNameForFace) && textureMap.TryGetValue(textureNameForFace, out var tme))
                 {
-                    var percentageU1 = Math.Clamp(textureNode.uv[0] / 16f, 0, 1);
-                    var percentageV1 = Math.Clamp(textureNode.uv[1] / 16f, 0, 1);
-                    var percentageU2 = Math.Clamp(textureNode.uv[2] / 16f, 0, 1);
-                    var percentageV2 = Math.Clamp(textureNode.uv[3] / 16f, 0, 1);
+                    var percentageU1 = MathHelper.Clamp(textureNode.uv[0] / 16f, 0, 1);
+                    var percentageV1 = MathHelper.Clamp(textureNode.uv[1] / 16f, 0, 1);
+                    var percentageU2 = MathHelper.Clamp(textureNode.uv[2] / 16f, 0, 1);
+                    var percentageV2 = MathHelper.Clamp(textureNode.uv[3] / 16f, 0, 1);
 
                     Vector2 size = tme.UVMax - tme.UVMin;
 
@@ -349,13 +350,13 @@ namespace SharpCraft.model
             return uvs.ToArray();
         }
 
-        private static Vector3 RotateVertex(Vector3 vertex, Vector3 rotation, Vector3 origin)
+        public static Vector3 RotateVertex(Vector3 vertex, Vector3 rotation, Vector3 origin)
         {
             if (!(rotation.Length > 0))
                 return vertex;
 
             vertex -= origin;
-            vertex = Vector3.Transform(vertex, new Quaternion(rotation.Z, rotation.Y, rotation.X));
+            vertex = MathUtil.Rotate(vertex, rotation.X, rotation.Y, rotation.Z);
             vertex += origin;
 
             return vertex;
