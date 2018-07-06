@@ -9,6 +9,7 @@ using SharpCraft.world;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+
 // ReSharper disable AssignmentInConditionalExpression
 
 namespace SharpCraft.entity
@@ -85,50 +86,6 @@ namespace SharpCraft.entity
                 _runTimer--;
 
             base.Update();
-        }
-
-        private void UpdateCameraMovement()
-        {
-            if (SharpCraft.Instance.GuiScreen != null)
-                return;
-
-            KeyboardState state = SharpCraft.Instance.KeyboardState;
-
-            Vector2 dirVec = Vector2.Zero;
-
-            bool w = state.IsKeyDown(Key.W); //might use this later
-            bool s = state.IsKeyDown(Key.S);
-            bool a = state.IsKeyDown(Key.A);
-            bool d = state.IsKeyDown(Key.D);
-
-            if (w) dirVec += SharpCraft.Instance.Camera.Forward;
-            if (s) dirVec += -SharpCraft.Instance.Camera.Forward;
-            if (a) dirVec += SharpCraft.Instance.Camera.Left;
-            if (d) dirVec += -SharpCraft.Instance.Camera.Left;
-
-            float mult = 1;
-
-            if (IsRunning && !IsSneaking)
-                mult = 1.5f;
-            else if (IsSneaking)
-            {
-                IsRunning = false;
-                mult = 0.625f;
-            }
-
-            if (dirVec != Vector2.Zero)
-            {
-                _moveSpeedMult = MathHelper.Clamp(_moveSpeedMult + 0.085f, 1, 1.55f);
-
-                _moveSpeed = MathUtil.Clamp(_moveSpeed + dirVec.Normalized() * 0.1f * _moveSpeedMult, 0, _maxMoveSpeed);
-
-                Motion.Xz = _moveSpeed * mult;
-            }
-            else
-            {
-                _moveSpeed = Vector2.Zero;
-                _moveSpeedMult = 1;
-            }
         }
 
         public override void Move()
@@ -262,7 +219,7 @@ namespace SharpCraft.entity
                     _wasWalkDown = false;
                 }
             }
-            
+
             SharpCraft.Instance.Camera.Pos = interpolatedPos + Vector3.UnitY * EyeHeight + offset;
         }
 
@@ -331,47 +288,8 @@ namespace SharpCraft.entity
 
         private void UpdateCameraMovement()
         {
-            if (SharpCraft.Instance.GuiScreen != null)
-                return;
-                
-            KeyboardState state = SharpCraft.Instance.KeyboardState;
-
-            Vector2 dirVec = Vector2.Zero;
-
-            bool w = state.IsKeyDown(Key.W); //might use this later
-            bool s = state.IsKeyDown(Key.S);
-            bool a = state.IsKeyDown(Key.A);
-            bool d = state.IsKeyDown(Key.D);
-
-            if (w) dirVec += SharpCraft.Instance.Camera.forward;
-            if (s) dirVec += -SharpCraft.Instance.Camera.forward;
-            if (a) dirVec += SharpCraft.Instance.Camera.left;
-            if (d) dirVec += -SharpCraft.Instance.Camera.left;
-
-            float mult = 1;
-
-            if (IsRunning = state.IsKeyDown(Key.LShift))
-                mult = 1.5f;
-
-            if (dirVec != Vector2.Zero)
-            {
-                moveSpeedMult = MathHelper.Clamp(moveSpeedMult + 0.085f, 1, 1.55f);
-
-                moveSpeed = MathUtil.Clamp(moveSpeed + dirVec.Normalized() * 0.1f * moveSpeedMult, 0, maxMoveSpeed);
-
-                Motion.Xz = moveSpeed * mult;
-            }
-            else
-            {
-                moveSpeed = Vector2.Zero;
-                moveSpeedMult = 1;
-            }
-        }
-
-        private void UpdateCameraMovement()
-        {
             if (SharpCraft.Instance.GuiScreen != null
-                || (SharpCraft.Instance.guiChat != null && SharpCraft.Instance.guiChat.visible == true))
+                || (SharpCraft.Instance.GuiChat != null && SharpCraft.Instance.GuiChat.visible == true))
                 return;
 
             KeyboardState state = SharpCraft.Instance.KeyboardState;
@@ -383,28 +301,33 @@ namespace SharpCraft.entity
             bool a = state.IsKeyDown(Key.A);
             bool d = state.IsKeyDown(Key.D);
 
-            if (w) dirVec += SharpCraft.Instance.Camera.forward;
-            if (s) dirVec += -SharpCraft.Instance.Camera.forward;
-            if (a) dirVec += SharpCraft.Instance.Camera.left;
-            if (d) dirVec += -SharpCraft.Instance.Camera.left;
+            if (w) dirVec += SharpCraft.Instance.Camera.Forward;
+            if (s) dirVec += -SharpCraft.Instance.Camera.Forward;
+            if (a) dirVec += SharpCraft.Instance.Camera.Left;
+            if (d) dirVec += -SharpCraft.Instance.Camera.Left;
 
             float mult = 1;
 
-            if (IsRunning = state.IsKeyDown(Key.LShift))
+            if (IsRunning && !IsSneaking)
                 mult = 1.5f;
+            else if (IsSneaking)
+            {
+                IsRunning = false;
+                mult = 0.625f;
+            }
 
             if (dirVec != Vector2.Zero)
             {
-                moveSpeedMult = MathHelper.Clamp(moveSpeedMult + 0.085f, 1, 1.55f);
+                _moveSpeedMult = MathHelper.Clamp(_moveSpeedMult + 0.085f, 1, 1.55f);
 
-                moveSpeed = MathUtil.Clamp(moveSpeed + dirVec.Normalized() * 0.1f * moveSpeedMult, 0, maxMoveSpeed);
+                _moveSpeed = MathUtil.Clamp(_moveSpeed + dirVec.Normalized() * 0.1f * _moveSpeedMult, 0, _maxMoveSpeed);
 
-                Motion.Xz = moveSpeed * mult;
+                Motion.Xz = _moveSpeed * mult;
             }
             else
             {
-                moveSpeed = Vector2.Zero;
-                moveSpeedMult = 1;
+                _moveSpeed = Vector2.Zero;
+                _moveSpeedMult = 1;
             }
         }
 
@@ -627,8 +550,6 @@ namespace SharpCraft.entity
 
             ItemStack stack = GetEquippedItemStack();
 
-            BlockState clickedState = World.GetBlockState(moo.blockPos);
-
             if (!(stack?.Item is ItemBlock itemBlock))
                 return;
 
@@ -636,7 +557,6 @@ namespace SharpCraft.entity
             Block glass = BlockRegistry.GetBlock<BlockGlass>();
             Block grass = BlockRegistry.GetBlock<BlockGrass>();
             Block dirt = BlockRegistry.GetBlock<BlockDirt>();
-
 
             BlockState clickedState = World.GetBlockState(moo.blockPos);
 

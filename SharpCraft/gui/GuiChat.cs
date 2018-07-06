@@ -8,59 +8,59 @@ namespace SharpCraft.gui
     internal class GuiChat : GuiScreen
     {
         
-        private bool allowTyping = false;
-        private bool isCaps = true;
+        private readonly bool _allowTyping;
+        private bool _isCaps = true;
 
-        private System.Collections.Generic.Queue<Text> historyQueue = new System.Collections.Generic.Queue<Text>();
+        private readonly System.Collections.Generic.Queue<Text> _historyQueue = new System.Collections.Generic.Queue<Text>();
 
-        private int currentHistoryIdx = 0;
+        private int _currentHistoryIdx;
 
 
         public GuiChat()
         {
-            allowTyping = true;
+            _allowTyping = true;
 
-            isCaps = Keyboard.GetState().IsKeyDown(Key.CapsLock);
+            _isCaps = Keyboard.GetState().IsKeyDown(Key.CapsLock);
            // isCaps = false;
         }
 
         public override void Init()
         {
-            currentHistoryIdx = historyQueue.Count;
+            _currentHistoryIdx = _historyQueue.Count;
 
             base.Init();
         }
 
         // TODO: History for unique commands
-        public void ShowHistoryUP()
+        public void ShowHistoryUp()
         {
-            if (historyQueue.Count <= 0)
+            if (_historyQueue.Count <= 0)
                 return;
 
-            if(currentHistoryIdx - 1 >= 0)
-                currentHistoryIdx--;
+            if(_currentHistoryIdx - 1 >= 0)
+                _currentHistoryIdx--;
             
-            currentInputText = historyQueue.ToArray()[currentHistoryIdx];
+            currentInputText = _historyQueue.ToArray()[_currentHistoryIdx];
         }
-        public void ShowHistoryDOWN()
+        public void ShowHistoryDown()
         {
-            if (historyQueue.Count <= 0)
+            if (_historyQueue.Count <= 0)
                 return;
 
-            if (currentHistoryIdx + 1 <= historyQueue.Count - 1)
-                currentHistoryIdx++;
+            if (_currentHistoryIdx + 1 <= _historyQueue.Count - 1)
+                _currentHistoryIdx++;
 
-            currentInputText = historyQueue.ToArray()[currentHistoryIdx];
+            currentInputText = _historyQueue.ToArray()[_currentHistoryIdx];
         }
 
         public override void InputText(Key key)
         {
-            if (!allowTyping)
+            if (!_allowTyping)
                 return;
 
             string character = "";
             string keyString = key.ToString();
-            if (isCaps == false)
+            if (_isCaps == false)
                 keyString = keyString.ToLower();
 
             if (((int)key >= 83 && (int)key <= 108))
@@ -87,7 +87,7 @@ namespace SharpCraft.gui
                         break;
 
                     case Key.CapsLock:
-                        isCaps = !isCaps;
+                        _isCaps = !_isCaps;
                         break;
 
                     case Key.Space:
@@ -111,8 +111,8 @@ namespace SharpCraft.gui
             if (currentInputText.text.Length <= 0)
                 return;
 
-            if(historyQueue.Count >= 6)
-            historyQueue.Dequeue();
+            if(_historyQueue.Count >= 6)
+            _historyQueue.Dequeue();
 
             // COMMAND
             bool incorrectComand = true;
@@ -174,20 +174,22 @@ namespace SharpCraft.gui
                 incorrectComand = false;
             }
 
-            historyQueue.Enqueue(currentInputText);
+            _historyQueue.Enqueue(currentInputText);
 
             base.Init();
 
 
             if (incorrectComand)
             {
-                if (historyQueue.Count >= 6)
-                    historyQueue.Dequeue();
+                if (_historyQueue.Count >= 6)
+                    _historyQueue.Dequeue();
 
-                Text incorrectText = new Text();
-                incorrectText.text = "INCORRECT COMMAND";
-                incorrectText.colour = new Vector3(255, 0, 0);
-                historyQueue.Enqueue(incorrectText);
+                Text incorrectText = new Text
+                {
+                    text = "INCORRECT COMMAND",
+                    colour = new Vector3(255, 0, 0)
+                };
+                _historyQueue.Enqueue(incorrectText);
             }
         }
 
@@ -204,10 +206,10 @@ namespace SharpCraft.gui
 
             RenderText(">" + currentInputText.text, 5, yPos  - 15, 1, currentInputText.colour);
 
-            for(int i = historyQueue.Count - 1, j = 0; i >= 0; i--,j++)
+            for(int i = _historyQueue.Count - 1, j = 0; i >= 0; i--,j++)
             {
-                RenderText(historyQueue.ToArray()[i].text.ToString(), 5, (yPos - 16) - (18 * (j + 1)), 1,
-                    historyQueue.ToArray()[i].colour);
+                RenderText(_historyQueue.ToArray()[i].text.ToString(), 5, (yPos - 16) - (18 * (j + 1)), 1,
+                    _historyQueue.ToArray()[i].colour);
             }
 
             base.Render(mouseX, mouseY);

@@ -40,8 +40,8 @@ namespace SharpCraft.util
 
         private CellularDistanceFunction m_cellularDistanceFunction = CellularDistanceFunction.Euclidean;
         private CellularReturnType m_cellularReturnType = CellularReturnType.CellValue;
-        private NoiseUtil _mCellularNoiseUtilLookup = null;
-        private int m_cellularDistanceIndex0 = 0;
+        private NoiseUtil _mCellularNoiseUtilLookup;
+        private int m_cellularDistanceIndex0;
         private int m_cellularDistanceIndex1 = 1;
         private float m_cellularJitter = 0.45f;
 

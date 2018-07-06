@@ -35,6 +35,7 @@
     <ApplicationIcon>Icon.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="gui\GuiChat.cs" />
     <Compile Include="ModInfo.cs" />
     <Compile Include="ModMain.cs" />
     <Compile Include="RegistryEventArgs.cs" />

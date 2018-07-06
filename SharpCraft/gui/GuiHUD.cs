@@ -14,8 +14,8 @@ namespace SharpCraft.gui
 
         private const int HeartsGap = 19;
         private static int _fullHearts = 10;
-        private static double _halfHearts = 0.0;
-        private static double _totalOccupiedHearts = 0.0;
+        private static double _halfHearts;
+        private static double _totalOccupiedHearts;
 
         public static void UpdateLivesUi(float health)
         {

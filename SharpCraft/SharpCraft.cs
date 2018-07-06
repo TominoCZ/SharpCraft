@@ -67,9 +67,9 @@ namespace SharpCraft
         private FBO _frameBuffer;
 
         //public HashSet<Key> KeysDown = new HashSet<Key>();
-        public MouseOverObject MouseOverObject = new MouseOverObject();
+        public MouseOverObject MouseOverObject;
 
-        private MouseOverObject _lastMouseOverObject = new MouseOverObject();
+        private MouseOverObject _lastMouseOverObject;
 
         public EntityPlayerSp Player;
 
@@ -92,13 +92,13 @@ namespace SharpCraft
         public Camera Camera;
 
         public GuiScreen GuiScreen { get; private set; }
-        public GuiChat guiChat { get; private set; } = null;
+        public GuiChat GuiChat { get; private set; }
 
         private Point _mouseLast;
         private float _mouseWheelLast;
 
         public bool IsPaused { get; private set; }
-        public bool IsLocal { get; private set; } = true;
+        public bool IsLocal { get; } = true;
 
         private bool _takeScreenshot;
         private int _fpsCounter;
@@ -613,7 +613,7 @@ namespace SharpCraft
 
         public bool AllowIngameInput()
         {
-            return GuiScreen == null && !(CursorVisible = !Focused) && (guiChat == null || guiChat.visible == false);
+            return GuiScreen == null && !(CursorVisible = !Focused) && (GuiChat == null || GuiChat.visible == false);
         }
 
         public void OpenGuiScreen(GuiScreen guiScreen)
@@ -734,9 +734,9 @@ namespace SharpCraft
             }
 
             //render gui chat
-            if (guiChat != null)
+            if (GuiChat != null)
             {
-                GuiRenderer?.Render(guiChat);
+                GuiRenderer?.Render(GuiChat);
             }
 
             //render gui screen
@@ -849,9 +849,9 @@ namespace SharpCraft
             base.OnKeyDown(e);
 
             // If chat add to text
-            if (guiChat != null && guiChat.visible == true)
+            if (GuiChat != null && GuiChat.visible == true)
             {
-                guiChat.InputText(e.Key);
+                GuiChat.InputText(e.Key);
             }
 
             switch (e.Key)
@@ -875,7 +875,7 @@ namespace SharpCraft
                     if (KeyboardState.IsKeyDown(Key.E))
                         return;
 
-                    if (guiChat != null && guiChat.visible)
+                    if (GuiChat != null && GuiChat.visible)
                         return;
 
                     if (GuiScreen is GuiScreenInventory)
@@ -893,11 +893,11 @@ namespace SharpCraft
                     if (KeyboardState.IsKeyDown(Key.Up))
                         return;
 
-                    if(guiChat != null)
+                    if(GuiChat != null)
                     {
-                        if(guiChat.visible == true)
+                        if(GuiChat.visible == true)
                         {
-                            guiChat.ShowHistoryUP();
+                            GuiChat.ShowHistoryUp();
                         }
                     }
 
@@ -908,11 +908,11 @@ namespace SharpCraft
                     if (KeyboardState.IsKeyDown(Key.Down))
                         return;
 
-                    if (guiChat != null)
+                    if (GuiChat != null)
                     {
-                        if (guiChat.visible == true)
+                        if (GuiChat.visible == true)
                         {
-                            guiChat.ShowHistoryDOWN();
+                            GuiChat.ShowHistoryDown();
                         }
                     }
 
@@ -922,15 +922,15 @@ namespace SharpCraft
                     if (KeyboardState.IsKeyDown(Key.Enter))
                         return;
                     
-                    if (guiChat == null)
+                    if (GuiChat == null)
                     {
-                        guiChat = new GuiChat();
+                        GuiChat = new GuiChat();
                         return;
                     }
                     else
                     {
-                        guiChat.Init();
-                        guiChat.ToggleVisibillity();
+                        GuiChat.Init();
+                        GuiChat.ToggleVisibillity();
                     }
 
                     break;
