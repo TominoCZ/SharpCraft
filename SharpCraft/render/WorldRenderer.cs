@@ -181,7 +181,7 @@ namespace SharpCraft.render
 
             float size = 0.25f;
 
-            GL.DepthRange(0, 0.1f);
+            GL.DepthRange(0, Camera.NearPlane);
             model.Bind();
 
             foreach (Waypoint wp in wps)
@@ -205,7 +205,7 @@ namespace SharpCraft.render
                 return;
 
             GL.BindTexture(TextureTarget.Texture2D, TextureManager.TEXTURE_DESTROY_PROGRESS.ID);
-            GL.BlendFunc(BlendingFactorSrc.DstColor, BlendingFactorDest.Zero);
+            GL.BlendFunc(BlendingFactor.DstColor, BlendingFactor.Zero);
 
             GL.BindVertexArray(_destroyProgressModel.VaoID);
             GL.EnableVertexAttribArray(0);
@@ -233,7 +233,7 @@ namespace SharpCraft.render
             GL.DisableVertexAttribArray(0);
             GL.BindVertexArray(0);
 
-            GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
+            GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
 
             _shaderTexturedCube.Unbind();
         }
@@ -322,7 +322,7 @@ namespace SharpCraft.render
             if (_armModel == null)
                 return;
 
-            GL.DepthRange(0, 0.1f);
+            GL.DepthRange(0, Camera.NearPlane);
 
             if (!SharpCraft.Instance.Player.OnGround)
                 _motion *= Vector3.UnitY;
@@ -390,7 +390,7 @@ namespace SharpCraft.render
         private void RenderBlockInHand(Block block, float partialTicks)
         {
             GL.BindTexture(TextureTarget.Texture2D, JsonModelLoader.TextureBlocks);
-            GL.DepthRange(0, 0.1f);
+            GL.DepthRange(0, Camera.NearPlane);
 
             ModelBlock model = JsonModelLoader.GetModelForBlock(block);
 
@@ -466,7 +466,7 @@ namespace SharpCraft.render
             GL.BindTexture(TextureTarget.Texture2D, JsonModelLoader.TextureItems);
             GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Fill);
             GL.Disable(EnableCap.CullFace);
-            GL.DepthRange(0, 0.1f);
+            GL.DepthRange(0, Camera.NearPlane);
 
             ModelItem model = JsonModelLoader.GetModelForItem(item);
 

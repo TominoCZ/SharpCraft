@@ -46,14 +46,15 @@ namespace SharpCraft.util
             xyz.Z = (float) ((double) num1 * (double) num5 * (double) num3 - (double) num4 * (double) num2 * (double) num6);
 
             Vector3 result;
-            Vector3 result1;
-            Vector3.Cross(ref xyz, ref vec, out result1);
-            Vector3 result2;
-            Vector3.Multiply(ref vec, w, out result2);
-            Vector3.Add(ref result1, ref result2, out result1);
-            Vector3.Cross(ref xyz, ref result1, out result1);
-            Vector3.Multiply(ref result1, 2f, out result1);
-            Vector3.Add(ref vec, ref result1, out result);
+
+            //2.0
+            Vector3 temp, temp2;
+            Vector3.Cross(ref xyz, ref vec, out temp);
+            Vector3.Multiply(ref vec, w, out temp2);
+            Vector3.Add(ref temp, ref temp2, out temp);
+            Vector3.Cross(ref xyz, ref temp, out temp2);
+            Vector3.Multiply(ref temp2, 2f, out temp2);
+            Vector3.Add(ref vec, ref temp2, out result);
 
             return result;
         }

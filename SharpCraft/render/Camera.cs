@@ -8,7 +8,7 @@ namespace SharpCraft.render
 {
     public class Camera
     {
-        public const float NearPlane = 0.1f;
+        public const float NearPlane = 0.15f;
         public const float FarPlane = 1000f;
 
         public float TargetFov { get; }
@@ -16,8 +16,6 @@ namespace SharpCraft.render
         public float PartialFov { get; private set; }
 
         private float _pitch;
-        private float _yaw = MathHelper.PiOver2;
-
         public Vector3 Pos;
 
         public float PitchOffset;
@@ -29,12 +27,7 @@ namespace SharpCraft.render
             set => _pitch = MathHelper.Clamp(value, -MathHelper.PiOver2 + MathHelper.DegreesToRadians(0.1f), MathHelper.PiOver2 - MathHelper.DegreesToRadians(0.1f));
         }
 
-        public float Yaw
-        {
-            get => _yaw;
-
-            set => _yaw = value;
-        }
+        public float Yaw { get; set; } = MathHelper.PiOver2;
 
         public Camera()
         {
@@ -70,15 +63,15 @@ namespace SharpCraft.render
 
         public Vector3 GetLookVec()
         {
-            return MathUtil.Rotate(Vector3.UnitX, -_pitch, -_yaw + MathHelper.PiOver2, 0);
+            return MathUtil.Rotate(Vector3.UnitX, -_pitch, -Yaw + MathHelper.PiOver2, 0);
         }
 
         public Vector2 Left
         {
             get
             {
-                float s = (float)Math.Sin(-(_yaw + MathHelper.PiOver2));
-                float c = (float)Math.Cos(_yaw + MathHelper.PiOver2);
+                float s = (float)Math.Sin(-(Yaw + MathHelper.PiOver2));
+                float c = (float)Math.Cos(Yaw + MathHelper.PiOver2);
 
                 return new Vector2(s, c).Normalized();
             }
@@ -88,8 +81,8 @@ namespace SharpCraft.render
         {
             get
             {
-                float s = -(float)Math.Sin(-_yaw);
-                float c = -(float)Math.Cos(_yaw);
+                float s = -(float)Math.Sin(-Yaw);
+                float c = -(float)Math.Cos(Yaw);
 
                 return new Vector2(s, c).Normalized();
             }

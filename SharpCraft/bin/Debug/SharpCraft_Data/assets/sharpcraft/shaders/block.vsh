@@ -1,7 +1,7 @@
 #version 330
 
 const float density = 0.05;
-const float gradient = 1.75;
+const float gradient = 4;
 
 in vec3 position;
 in vec2 textureCoords;
