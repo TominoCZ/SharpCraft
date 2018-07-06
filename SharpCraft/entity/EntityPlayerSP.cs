@@ -147,7 +147,8 @@ namespace SharpCraft.entity
 
         private void UpdateCameraMovement()
         {
-            if (SharpCraft.Instance.GuiScreen != null)
+            if (SharpCraft.Instance.GuiScreen != null
+                || (SharpCraft.Instance.guiChat != null && SharpCraft.Instance.guiChat.visible == true))
                 return;
 
             KeyboardState state = SharpCraft.Instance.KeyboardState;
@@ -409,6 +410,7 @@ namespace SharpCraft.entity
             Block glass = BlockRegistry.GetBlock<BlockGlass>();
             Block grass = BlockRegistry.GetBlock<BlockGrass>();
             Block dirt = BlockRegistry.GetBlock<BlockDirt>();
+
 
             BlockState clickedState = World.GetBlockState(moo.blockPos);
 
