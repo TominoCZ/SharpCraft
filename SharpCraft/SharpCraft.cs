@@ -92,6 +92,7 @@ namespace SharpCraft
         public Camera Camera;
 
         public GuiScreen GuiScreen { get; private set; }
+        public GuiChat guiChat { get; private set; } = null;
 
         private Point _mouseLast;
         private float _mouseWheelLast;
@@ -612,7 +613,7 @@ namespace SharpCraft
 
         public bool AllowIngameInput()
         {
-            return GuiScreen == null && !(CursorVisible = !Focused);
+            return GuiScreen == null && !(CursorVisible = !Focused) && (guiChat == null || guiChat.visible == false);
         }
 
         public void OpenGuiScreen(GuiScreen guiScreen)
@@ -732,6 +733,12 @@ namespace SharpCraft
                 GuiRenderer?.RenderHUD();
             }
 
+            //render gui chat
+            if (guiChat != null)
+            {
+                GuiRenderer?.Render(guiChat);
+            }
+
             //render gui screen
             if (GuiScreen != null)
             {
@@ -820,9 +827,32 @@ namespace SharpCraft
                 ResetDestroyProgress(Player);
         }
 
+        public void CommandTeleport(float x, float y, float z)
+        {
+            Player.TeleportTo(new Vector3(x, y, z));
+        }
+
+        public void CommandGive(string item, int amount)
+        {
+            Block blockReg = BlockRegistry.GetBlock(item);
+
+            if (blockReg == null)
+                return;
+            
+            // does it work for max stack??
+            ItemStack itemStack = new ItemStack(new ItemBlock(blockReg), amount);
+            Player.OnPickup(itemStack);
+        }
+
         protected override void OnKeyDown(KeyboardKeyEventArgs e)
         {
             base.OnKeyDown(e);
+
+            // If chat add to text
+            if (guiChat != null && guiChat.visible == true)
+            {
+                guiChat.InputText(e.Key);
+            }
 
             switch (e.Key)
             {
@@ -845,6 +875,9 @@ namespace SharpCraft
                     if (KeyboardState.IsKeyDown(Key.E))
                         return;
 
+                    if (guiChat != null && guiChat.visible)
+                        return;
+
                     if (GuiScreen is GuiScreenInventory)
                     {
                         CloseGuiScreen();
@@ -853,6 +886,53 @@ namespace SharpCraft
 
                     if (GuiScreen == null)
                         OpenGuiScreen(new GuiScreenInventory());
+                    break;
+
+                case Key.Up:
+
+                    if (KeyboardState.IsKeyDown(Key.Up))
+                        return;
+
+                    if(guiChat != null)
+                    {
+                        if(guiChat.visible == true)
+                        {
+                            guiChat.ShowHistoryUP();
+                        }
+                    }
+
+                    break;
+
+                case Key.Down:
+
+                    if (KeyboardState.IsKeyDown(Key.Down))
+                        return;
+
+                    if (guiChat != null)
+                    {
+                        if (guiChat.visible == true)
+                        {
+                            guiChat.ShowHistoryDOWN();
+                        }
+                    }
+
+                    break;
+
+                case Key.Enter:
+                    if (KeyboardState.IsKeyDown(Key.Enter))
+                        return;
+                    
+                    if (guiChat == null)
+                    {
+                        guiChat = new GuiChat();
+                        return;
+                    }
+                    else
+                    {
+                        guiChat.Init();
+                        guiChat.ToggleVisibillity();
+                    }
+
                     break;
 
                 case Key.F2:

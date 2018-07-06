@@ -329,6 +329,85 @@ namespace SharpCraft.entity
             Health += 0.06f; // 0.5 heart in 4 seconds
         }
 
+        private void UpdateCameraMovement()
+        {
+            if (SharpCraft.Instance.GuiScreen != null)
+                return;
+                
+            KeyboardState state = SharpCraft.Instance.KeyboardState;
+
+            Vector2 dirVec = Vector2.Zero;
+
+            bool w = state.IsKeyDown(Key.W); //might use this later
+            bool s = state.IsKeyDown(Key.S);
+            bool a = state.IsKeyDown(Key.A);
+            bool d = state.IsKeyDown(Key.D);
+
+            if (w) dirVec += SharpCraft.Instance.Camera.forward;
+            if (s) dirVec += -SharpCraft.Instance.Camera.forward;
+            if (a) dirVec += SharpCraft.Instance.Camera.left;
+            if (d) dirVec += -SharpCraft.Instance.Camera.left;
+
+            float mult = 1;
+
+            if (IsRunning = state.IsKeyDown(Key.LShift))
+                mult = 1.5f;
+
+            if (dirVec != Vector2.Zero)
+            {
+                moveSpeedMult = MathHelper.Clamp(moveSpeedMult + 0.085f, 1, 1.55f);
+
+                moveSpeed = MathUtil.Clamp(moveSpeed + dirVec.Normalized() * 0.1f * moveSpeedMult, 0, maxMoveSpeed);
+
+                Motion.Xz = moveSpeed * mult;
+            }
+            else
+            {
+                moveSpeed = Vector2.Zero;
+                moveSpeedMult = 1;
+            }
+        }
+
+        private void UpdateCameraMovement()
+        {
+            if (SharpCraft.Instance.GuiScreen != null
+                || (SharpCraft.Instance.guiChat != null && SharpCraft.Instance.guiChat.visible == true))
+                return;
+
+            KeyboardState state = SharpCraft.Instance.KeyboardState;
+
+            Vector2 dirVec = Vector2.Zero;
+
+            bool w = state.IsKeyDown(Key.W); //might use this later
+            bool s = state.IsKeyDown(Key.S);
+            bool a = state.IsKeyDown(Key.A);
+            bool d = state.IsKeyDown(Key.D);
+
+            if (w) dirVec += SharpCraft.Instance.Camera.forward;
+            if (s) dirVec += -SharpCraft.Instance.Camera.forward;
+            if (a) dirVec += SharpCraft.Instance.Camera.left;
+            if (d) dirVec += -SharpCraft.Instance.Camera.left;
+
+            float mult = 1;
+
+            if (IsRunning = state.IsKeyDown(Key.LShift))
+                mult = 1.5f;
+
+            if (dirVec != Vector2.Zero)
+            {
+                moveSpeedMult = MathHelper.Clamp(moveSpeedMult + 0.085f, 1, 1.55f);
+
+                moveSpeed = MathUtil.Clamp(moveSpeed + dirVec.Normalized() * 0.1f * moveSpeedMult, 0, maxMoveSpeed);
+
+                Motion.Xz = moveSpeed * mult;
+            }
+            else
+            {
+                moveSpeed = Vector2.Zero;
+                moveSpeedMult = 1;
+            }
+        }
+
         public void FastMoveStack(int index)
         {
             ItemStack stack = GetItemStackInInventory(index);
@@ -557,6 +636,9 @@ namespace SharpCraft.entity
             Block glass = BlockRegistry.GetBlock<BlockGlass>();
             Block grass = BlockRegistry.GetBlock<BlockGrass>();
             Block dirt = BlockRegistry.GetBlock<BlockDirt>();
+
+
+            BlockState clickedState = World.GetBlockState(moo.blockPos);
 
             bool replacing;
 
