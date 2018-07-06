@@ -393,17 +393,10 @@ namespace SharpCraft
             if (GuiScreen == null && !Focused)
                 OpenGuiScreen(new GuiScreenIngameMenu());
 
-            float wheelValue = 0;//Mouse.WheelPrecise;
-
             if (Player != null)
             {
                 if (AllowIngameInput())
                 {
-                    if (wheelValue < _mouseWheelLast)
-                        Player.SelectNextItem();
-                    else if (wheelValue > _mouseWheelLast)
-                        Player.SelectPreviousItem();
-
                     if (World?.GetChunk(new BlockPos(Player.Pos).ChunkPos()) == null)
                         Player.Motion = Vector3.Zero;
 
@@ -461,8 +454,6 @@ namespace SharpCraft
                 else
                     ResetDestroyProgress(Player);
             }
-
-            _mouseWheelLast = wheelValue;
 
             World?.Update(Player, WorldRenderer.RenderDistance);
 
@@ -592,8 +583,15 @@ namespace SharpCraft
 
             Point point = new Point(state.X, state.Y);
 
+            var wheelValue = (int)Math.Ceiling(Mouse.GetState().WheelPrecise);
+
             if (AllowIngameInput())
             {
+                if (wheelValue < _mouseWheelLast)
+                    Player.SelectNextItem();
+                else if (wheelValue > _mouseWheelLast)
+                    Player.SelectPreviousItem();
+
                 Point delta = new Point(_mouseLast.X - point.X, _mouseLast.Y - point.Y);
 
                 Camera.Yaw -= delta.X / 1000f * _sensitivity;
@@ -602,6 +600,7 @@ namespace SharpCraft
                 //ResetMouse();
             }
 
+            _mouseWheelLast = wheelValue;
             _mouseLast = point;
         }
 

@@ -88,7 +88,7 @@ namespace SharpCraft.render
                 Vector3 pos = new Vector3(f0, f1, f2) + moo.normal * 0.1f;
 
                 Vector3 motion = moo.normal * MathUtil.NextFloat(0.0075f, 0.03f);
-                float mult = 0.75f / (MathUtil.Distance(pos, moo.hitVec) + 0.01f);
+                float mult = 0.75f / (Vector3.Distance(pos, moo.hitVec) + 0.01f);
                 motion.Xz *= mult;
 
                 motion.Y += 0.02f;

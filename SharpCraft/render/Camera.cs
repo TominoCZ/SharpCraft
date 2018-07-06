@@ -63,7 +63,7 @@ namespace SharpCraft.render
 
         public Vector3 GetLookVec()
         {
-            return MathUtil.Rotate(Vector3.UnitX, -_pitch, -Yaw + MathHelper.PiOver2, 0);
+            return new Quaternion(0, -Yaw + MathHelper.PiOver2, -_pitch) * Vector3.UnitX;//MathUtil.Rotate(Vector3.UnitX, -_pitch, -Yaw + MathHelper.PiOver2, 0);
         }
 
         public Vector2 Left

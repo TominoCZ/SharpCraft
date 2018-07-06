@@ -6,12 +6,14 @@ namespace SharpCraft.util
 {
     internal static class MathUtil
     {
-        private static readonly RandomNumberGenerator _rand = RandomNumberGenerator.Create();
+        private static readonly RandomNumberGenerator Rand = RandomNumberGenerator.Create();
+
+        private static Vector3 _xyz, _result, _temp, _temp2;
 
         public static float GetNext()
         {
             byte[] bytes = new byte[8];
-            _rand.GetBytes(bytes);
+            Rand.GetBytes(bytes);
 
             ulong ul = BitConverter.ToUInt64(bytes, 0) / (1 << 11);
             double d = ul / (double)(1UL << 53);
@@ -26,39 +28,7 @@ namespace SharpCraft.util
 
             return vec;
         }
-
-        public static Vector3 Rotate(Vector3 vec, float pitch, float yaw, float roll)
-        {
-            yaw *= 0.5f;
-            pitch *= 0.5f;
-            roll *= 0.5f;
-            float num1 = (float) Math.Cos((double) yaw);
-            float num2 = (float) Math.Cos((double) pitch);
-            float num3 = (float) Math.Cos((double) roll);
-            float num4 = (float) Math.Sin((double) yaw);
-            float num5 = (float) Math.Sin((double) pitch);
-            float num6 = (float) Math.Sin((double) roll);
-
-            Vector3 xyz;
-            var w = (float) ((double) num1 * (double) num2 * (double) num3 - (double) num4 * (double) num5 * (double) num6);
-            xyz.X = (float) ((double) num4 * (double) num5 * (double) num3 + (double) num1 * (double) num2 * (double) num6);
-            xyz.Y = (float) ((double) num4 * (double) num2 * (double) num3 + (double) num1 * (double) num5 * (double) num6);
-            xyz.Z = (float) ((double) num1 * (double) num5 * (double) num3 - (double) num4 * (double) num2 * (double) num6);
-
-            Vector3 result;
-
-            //2.0
-            Vector3 temp, temp2;
-            Vector3.Cross(ref xyz, ref vec, out temp);
-            Vector3.Multiply(ref vec, w, out temp2);
-            Vector3.Add(ref temp, ref temp2, out temp);
-            Vector3.Cross(ref xyz, ref temp, out temp2);
-            Vector3.Multiply(ref temp2, 2f, out temp2);
-            Vector3.Add(ref vec, ref temp2, out result);
-
-            return result;
-        }
-
+        
         public static float NextFloat(float min = 0, float max = 1)
         {
             float f = GetNext();
@@ -84,16 +54,6 @@ namespace SharpCraft.util
                 max = Math.Max(max, f);
 
             return max;
-        }
-
-        public static float Distance(Vector2 v1, Vector2 v2)
-        {
-            return (v1 - v2).LengthFast;
-        }
-
-        public static float Distance(Vector3 v1, Vector3 v2)
-        {
-            return (v1 - v2).LengthFast;
         }
 
         public static float Remap(float value, float from1, float to1, float from2, float to2)

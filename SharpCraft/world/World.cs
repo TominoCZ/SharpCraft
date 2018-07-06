@@ -422,7 +422,7 @@ namespace SharpCraft.world
 
                                     Vector3 vec = new Vector3(i, j, k);
 
-                                    if (MathUtil.Distance(vec, Vector3.Zero) <= 2.5f)
+                                    if (Vector3.Distance(vec, Vector3.Zero) <= 2.5f)
                                         SetBlock(pX, pY, pZ, leaves);
                                 }
                             }

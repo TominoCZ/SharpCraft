@@ -139,8 +139,8 @@ namespace SharpCraft.entity
 
             //TODO change this for multiplayer
             IEnumerable<EntityPlayerSp> players = World.Entities.OfType<EntityPlayerSp>()
-                               .OrderBy(entity => MathUtil.Distance(entity.Pos, Pos))
-                               .Where(e => MathUtil.Distance(e.Pos, Pos) <= attractionRange);
+                               .OrderBy(entity => Vector3.Distance(entity.Pos, Pos))
+                               .Where(e => Vector3.Distance(e.Pos, Pos) <= attractionRange);
 
             foreach (EntityPlayerSp player in players)
             {

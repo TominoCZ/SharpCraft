@@ -31,10 +31,18 @@
     <PlatformTarget>x86</PlatformTarget>
     <LangVersion>Default</LangVersion>
   </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>Icon.ico</ApplicationIcon>
+  </PropertyGroup>
   <ItemGroup>
     <Compile Include="ModInfo.cs" />
     <Compile Include="ModMain.cs" />
     <Compile Include="RegistryEventArgs.cs" />
+    <Compile Include="Resource.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resource.resx</DependentUpon>
+    </Compile>
     <Compile Include="SettingsManager.cs" />
     <Compile Include="SharpCraft.cs" />
     <Compile Include="Start.cs" />
@@ -279,6 +287,21 @@
     <None Include="SharpCraft_Data\mods\SumMod\TheDll.dll.txt" />
     <None Include="SharpCraft_Data\mods\SumMod\assets\sum_mod\lang\en-US.lang.txt" />
     <None Include="FodyWeavers.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Icon.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resource.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resource.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="System.Drawing" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Icon.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ProjectExtensions>

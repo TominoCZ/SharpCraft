@@ -1692,9 +1692,9 @@ namespace SharpCraft.util
             int y3 = y1 + 2;
             int z3 = z1 + 2;
 
-            float xs = x - (FN_DECIMAL)x1;
-            float ys = y - (FN_DECIMAL)y1;
-            float zs = z - (FN_DECIMAL)z1;
+            float xs = x - x1;
+            float ys = y - y1;
+            float zs = z - z1;
 
             return CubicLerp(
                 CubicLerp(
@@ -1824,8 +1824,8 @@ namespace SharpCraft.util
             int x3 = x1 + 2;
             int y3 = y1 + 2;
 
-            float xs = x - (FN_DECIMAL)x1;
-            float ys = y - (FN_DECIMAL)y1;
+            float xs = x - x1;
+            float ys = y - y1;
 
             return CubicLerp(
                        CubicLerp(ValCoord2D(seed, x0, y0), ValCoord2D(seed, x1, y0), ValCoord2D(seed, x2, y0), ValCoord2D(seed, x3, y0),

@@ -356,7 +356,7 @@ namespace SharpCraft.model
                 return vertex;
 
             vertex -= origin;
-            vertex = MathUtil.Rotate(vertex, rotation.Z, rotation.Y, rotation.X);
+            vertex = Vector3.Transform(vertex, new Quaternion(rotation.X, rotation.Y, rotation.Z));
             vertex += origin;
 
             return vertex;
