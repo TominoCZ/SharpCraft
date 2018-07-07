@@ -50,6 +50,7 @@
     </Compile>
     <Compile Include="SettingsManager.cs" />
     <Compile Include="SharpCraft.cs" />
+    <Compile Include="sound\SoundEngine.cs" />
     <Compile Include="Start.cs" />
     <Compile Include="TestMod.cs" />
     <Compile Include="block\Block.cs" />

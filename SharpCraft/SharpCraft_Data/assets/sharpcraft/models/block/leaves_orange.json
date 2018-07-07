@@ -1,0 +1,7 @@
+{
+  "inherit": "block/leaves",
+  "textures": {
+    "block": "blocks/leaves_orange"
+  },
+  "cubes": []
+}

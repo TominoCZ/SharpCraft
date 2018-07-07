@@ -13,7 +13,9 @@ namespace SharpCraft
             using (SharpCraft game = new SharpCraft())
             {
                 game.Icon = Resource.Icon;
-                game.Run(20);
+                game.TargetUpdateFrequency = 20;
+                game.TargetRenderFrequency = 60;
+                game.Run();
             }
         }
     }

@@ -26,14 +26,6 @@ namespace SharpCraft.util
             return s * t;
         }
 
-        public static Matrix4 CreateTransformationMatrix(float translationX, float translationY, float scale)
-        {
-            Matrix4 s = Matrix4.CreateScale(scale);
-            Matrix4 t = Matrix4.CreateTranslation(translationX, translationY, 0);
-
-            return s * t;
-        }
-
         public static Matrix4 CreateTransformationMatrix(Vector3 translation, Vector3 scale)
         {
             Matrix4 s = Matrix4.CreateScale(scale.X, scale.Y, scale.Z);
@@ -41,15 +33,7 @@ namespace SharpCraft.util
 
             return s * t;
         }
-
-        public static Matrix4 CreateTransformationMatrix(BlockPos translation, Vector3 scale)
-        {
-            Matrix4 s = Matrix4.CreateScale(scale.X, scale.Y, scale.Z);
-            Matrix4 t = Matrix4.CreateTranslation(translation.X, translation.Y, translation.Z);
-
-            return s * t;
-        }
-
+        
         public static Matrix4 CreateTransformationMatrix(ChunkPos translation, Vector3 scale)
         {
             Matrix4 s = Matrix4.CreateScale(scale.X, scale.Y, scale.Z);
@@ -57,17 +41,7 @@ namespace SharpCraft.util
 
             return s * t;
         }
-
-        public static Matrix4 CreateTransformationMatrix(Vector3 translation)
-        {
-            return Matrix4.CreateTranslation(translation);
-        }
-
-        public static Matrix4 CreateTransformationMatrix(BlockPos translation)
-        {
-            return Matrix4.CreateTranslation(translation.X, translation.Y, translation.Z);
-        }
-
+        
         public static Matrix4 CreateTransformationMatrix(ChunkPos translation)
         {
             return Matrix4.CreateTranslation(translation.x * Chunk.ChunkSize, 0, translation.z * Chunk.ChunkSize);

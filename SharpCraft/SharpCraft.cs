@@ -23,6 +23,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using SharpCraft.json;
+using SharpCraft.sound;
 using Bitmap = System.Drawing.Bitmap;
 using Rectangle = System.Drawing.Rectangle;
 
@@ -89,10 +90,11 @@ namespace SharpCraft
         private DateTime _lastFpsDate = DateTime.Now;
         private WindowState _lastWindowState;
         private readonly Thread _renderThread = Thread.CurrentThread;
+        private SpinWait _spinner = new SpinWait();
 
         public static SharpCraft Instance { get; private set; }
 
-        public Camera Camera;
+        public Camera Camera { get; }
 
         public GuiScreen GuiScreen { get; private set; }
 
@@ -101,6 +103,7 @@ namespace SharpCraft
 
         public bool IsPaused { get; private set; }
         public bool IsLocal { get; } = true;
+        public long GameTicks { get; private set; }
 
         private bool _takeScreenshot;
         private int _fpsCounter;
@@ -141,7 +144,7 @@ namespace SharpCraft
 
             LoadMods();
 
-            RegisterItemsAndBlocks();
+            GameRegistry();
 
             WorldRenderer = new WorldRenderer();
             EntityRenderer = new EntityRenderer();
@@ -197,8 +200,13 @@ namespace SharpCraft
             }
         }
 
-        private void RegisterItemsAndBlocks()
+        private void GameRegistry()
         {
+            for (int i = 1; i < 6; i++)
+            {
+                SoundEngine.RegisterSound($"block/grass/walk{i}");
+            }
+
             //register materails
             Material.RegisterMaterial(new Material("air", true));
             Material.RegisterMaterial(new Material("tallgrass", true));
@@ -390,13 +398,16 @@ namespace SharpCraft
 
         private void GameLoop()
         {
-            TargetRenderFrequency = Focused ? 0 : 60;
-
             if (GuiScreen == null && !Focused)
                 OpenGuiScreen(new GuiScreenIngameMenu());
 
             if (Player != null)
             {
+                if (GameTicks % 5 == 0)
+                {
+                    SoundEngine.PlaySound($"block/grass/walk{MathUtil.NextInt(1, 6)}");
+                }
+
                 if (AllowIngameInput())
                 {
                     if (World?.GetChunk(new BlockPos(Player.Pos).ChunkPos()) == null)
@@ -473,6 +484,8 @@ namespace SharpCraft
             WorldRenderer?.Update();
             SkyboxRenderer?.Update();
             ParticleRenderer?.TickParticles();
+
+            GameTicks++;
         }
 
         public void GetMouseOverObject()
@@ -707,21 +720,14 @@ namespace SharpCraft
         }
 
         protected override void OnRenderFrame(FrameEventArgs e)
-        {
+        { 
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
             _frameBuffer.Bind();//TODO
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
-
-            RunGlTasks();
-
-            HandleMouseMovement();
-            Camera.UpdateViewMatrix();
-
+            
             DateTime now = DateTime.Now;
-
-            _partialTicks = (float)MathHelper.Clamp(((now - _updateTimer).TotalSeconds + e.Time) / TargetUpdatePeriod, 0, 1);
-
+            _partialTicks = (now - _updateTimer).Milliseconds / 50f;
             if ((now - _lastFpsDate).TotalMilliseconds >= 1000)
             {
                 _fpsCounterLast = _fpsCounter;
@@ -729,6 +735,11 @@ namespace SharpCraft
                 _lastFpsDate = now;
             }
 
+            RunGlTasks();
+
+            HandleMouseMovement();
+            Camera.UpdateViewMatrix();
+            
             //RENDER SCREEN
             if (World != null)
             {
@@ -765,20 +776,17 @@ namespace SharpCraft
             SwapBuffers();
 
             _fpsCounter++;
+            _spinner.SpinOnce();
         }
 
         protected override void OnUpdateFrame(FrameEventArgs e)
         {
-            var now = DateTime.Now;
-
             if (!IsDisposed && Visible)
                 GetMouseOverObject();
 
             GameLoop();
-
-            var timeTook = DateTime.Now - now;
-
-            _updateTimer = DateTime.Now - timeTook;
+            
+            _updateTimer = DateTime.Now;
         }
 
         protected override void OnFocusedChanged(EventArgs e)
@@ -962,6 +970,7 @@ namespace SharpCraft
                         Shader.ReloadAll();
                         SettingsManager.Load();
                         TextureManager.Reload();
+                        SoundEngine.Reload();
                         LangUtil.Reload();
 
                         WorldRenderer.RenderDistance = SettingsManager.GetInt("renderdistance");
@@ -1026,6 +1035,7 @@ namespace SharpCraft
             Shader.DestroyAll();
             ModelManager.Cleanup();
             TextureManager.Destroy();
+            SoundEngine.Destroy();
 
             if (World != null)
                 WorldLoader.SaveWorld(World);

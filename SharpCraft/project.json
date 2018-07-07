@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "Microsoft.CSharp": "4.0.0.0",
+    "NAudio.Vorbis": "1.0.0",
     "Newtonsoft.Json": "11.0.2",
     "OpenTK": "3.0.1",
     "System": "4.0.0.0",

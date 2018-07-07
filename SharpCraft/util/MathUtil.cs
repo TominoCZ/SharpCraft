@@ -22,6 +22,11 @@ namespace SharpCraft.util
             return (float)(min + d * (max - min));
         }
 
+        public static int NextInt(int min, int max)
+        {
+            return _rand.Next(min, max);
+        }
+
         public static float Min(params float[] values)
         {
             float min = float.MaxValue;
