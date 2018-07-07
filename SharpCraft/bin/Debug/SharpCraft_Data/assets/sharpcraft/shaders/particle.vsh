@@ -1,8 +1,8 @@
 #version 330
 
 in vec3 position;
-in vec2 textureCoords;
 in vec3 normal;
+in vec2 textureCoords;
 
 out vec2 pass_uv;
 out float brightness;
@@ -27,7 +27,7 @@ void main(void)
 {
 	vec4 worldPos = transformationMatrix * vec4(position, 1);
 	gl_Position = projectionMatrix * viewMatrix * worldPos;
-
+	
 	int i = gl_VertexID % 6;
 
 	if (i == 0) {

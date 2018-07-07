@@ -1,6 +1,4 @@
-﻿using System.Runtime.InteropServices.ComTypes;
-using SharpCraft.entity;
-using SharpCraft.item;
+﻿using SharpCraft.entity;
 using SharpCraft.world;
 
 namespace SharpCraft.block

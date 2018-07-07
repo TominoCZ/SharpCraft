@@ -3,12 +3,12 @@ using SharpCraft.render.shader;
 
 namespace SharpCraft.model
 {
-    public class ModelBaked<T> : IModelBaked<T>
+    public class ModelBaked : IModelBaked
     {
         public IModelRaw RawModel { get; protected set; }
-        public Shader<T> Shader { get; }
+        public Shader Shader { get; }
 
-        public ModelBaked(IModelRaw rawModel, Shader<T> shader)
+        public ModelBaked(IModelRaw rawModel, Shader shader)
         {
             RawModel = rawModel;
             Shader = shader;

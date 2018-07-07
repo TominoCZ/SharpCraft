@@ -9,9 +9,9 @@ namespace SharpCraft.gui
 
         public GuiScreenMainMenu()
         {
-            buttons.Add(new GuiButton(0, 0, -45, 2, @"\{66FF00}SINGLEPLAYER") { CenteredX = true, CenteredY = true });
-            buttons.Add(new GuiButton(1, 0, 0, 2, @"\{DD6600}MULTIPLAYER") { CenteredX = true, CenteredY = true, Enabled = false });
-            buttons.Add(new GuiButton(2, 0, 45, 2, @"\{FF0000}EXIT") { CenteredX = true, CenteredY = true });
+            Buttons.Add(new GuiButton(0, 0, -45, 2, @"\{66FF00}SINGLEPLAYER") { CenteredX = true, CenteredY = true });
+            Buttons.Add(new GuiButton(1, 0, 0, 2, @"\{DD6600}MULTIPLAYER") { CenteredX = true, CenteredY = true, Enabled = false });
+            Buttons.Add(new GuiButton(2, 0, 45, 2, @"\{FF0000}EXIT") { CenteredX = true, CenteredY = true });
 
             var titleTextgure = TextureManager.LoadTexture("gui/title");
 

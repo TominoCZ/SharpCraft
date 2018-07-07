@@ -1,25 +1,11 @@
 ﻿using OpenTK;
 using System;
-using System.Security.Cryptography;
 
 namespace SharpCraft.util
 {
     internal static class MathUtil
     {
-        private static readonly RandomNumberGenerator Rand = RandomNumberGenerator.Create();
-
-        private static Vector3 _xyz, _result, _temp, _temp2;
-
-        public static float GetNext()
-        {
-            byte[] bytes = new byte[8];
-            Rand.GetBytes(bytes);
-
-            ulong ul = BitConverter.ToUInt64(bytes, 0) / (1 << 11);
-            double d = ul / (double)(1UL << 53);
-
-            return (float)d;
-        }
+        private static readonly Random _rand = new Random();
 
         public static Vector2 Ceiling(this Vector2 vec)
         {
@@ -31,9 +17,9 @@ namespace SharpCraft.util
         
         public static float NextFloat(float min = 0, float max = 1)
         {
-            float f = GetNext();
+            double d = _rand.NextDouble();
 
-            return min + f * (max - min);
+            return (float)(min + d * (max - min));
         }
 
         public static float Min(params float[] values)

@@ -14,7 +14,7 @@ namespace SharpCraft.entity
 {
     public class EntityItem : Entity
     {
-        private static readonly Shader<EntityItem> Shader;
+        private static readonly Shader Shader;
 
         private readonly ItemStack _stack;
 
@@ -25,7 +25,7 @@ namespace SharpCraft.entity
 
         static EntityItem()
         {
-            Shader = new Shader<EntityItem>("entity_item");
+            Shader = new Shader("entity_item");
         }
 
         public EntityItem(World world, Vector3 pos, Vector3 motion, ItemStack stack, bool noDelay = false) : base(world, pos, motion)
@@ -215,10 +215,9 @@ namespace SharpCraft.entity
                     Matrix4 t3 = Matrix4.CreateTranslation(posO);
 
                     Matrix4 mat = t3 * t2 * (rot * s) * t;
+                    
+                    Shader.SetMatrix4("transformationMatrix", mat);
 
-                    Shader.UpdateGlobalUniforms();
-                    Shader.UpdateModelUniforms(model.RawModel);
-                    Shader.UpdateInstanceUniforms(mat, this);
                     model.RawModel.Render();
                 }
 
@@ -267,10 +266,8 @@ namespace SharpCraft.entity
                     Matrix4 t3 = Matrix4.CreateTranslation(posO);
 
                     Matrix4 mat = t3 * t2 * (rot * s) * t;
-
-                    Shader.UpdateGlobalUniforms();
-                    Shader.UpdateModelUniforms(model.RawModel);
-                    Shader.UpdateInstanceUniforms(mat, this);
+                    
+                    Shader.SetMatrix4("transformationMatrix", mat);
                     model.RawModel.Render();
                 }
 

@@ -10,52 +10,52 @@ namespace SharpCraft.particle
 {
     public class Particle : Entity
     {
-        public float particleScale;
+        public float ParticleScale;
 
-        public int particleAge;
-        public int particleMaxAge;
+        public int ParticleAge;
+        public int ParticleMaxAge;
 
-        protected float particleAlpha = 1;
+        protected float ParticleAlpha = 1;
 
-        protected float lastParticleScale;
-        protected float lastParticleAlpha = 1;
+        protected float LastParticleScale;
+        protected float LastParticleAlpha = 1;
 
-        protected int textureID;
+        protected int TextureId;
 
         public Vector2 UVmin;
         public Vector2 UVmax;
 
-        protected Particle(World world, Vector3 pos, Vector3 motion, float particleScale, int textureID) : this(world, pos, motion, particleScale, textureID, Vector2.Zero, Vector2.Zero)
+        protected Particle(World world, Vector3 pos, Vector3 motion, float particleScale, int textureId) : this(world, pos, motion, particleScale, textureId, Vector2.Zero, Vector2.Zero)
         {
         }
 
-        protected Particle(World world, Vector3 pos, Vector3 motion, float scale, int textureID, Vector2 UVmin, Vector2 UVmax) : base(world, pos, motion)
+        protected Particle(World world, Vector3 pos, Vector3 motion, float scale, int textureId, Vector2 uVmin, Vector2 uVmax) : base(world, pos, motion)
         {
-            lastParticleScale = particleScale = scale / 10;
+            LastParticleScale = ParticleScale = scale / 10;
 
-            this.textureID = textureID;
-            this.UVmin = UVmin;
-            this.UVmax = UVmax;
+            TextureId = textureId;
+            UVmin = uVmin;
+            UVmax = uVmax;
 
-            CollisionBoundingBox = new AxisAlignedBb(particleScale);
+            CollisionBoundingBox = new AxisAlignedBb(ParticleScale);
             BoundingBox = CollisionBoundingBox.Offset(pos - (Vector3.UnitX * CollisionBoundingBox.Size.X / 2 + Vector3.UnitZ * CollisionBoundingBox.Size.Z / 2));
 
-            particleMaxAge = (int)MathUtil.NextFloat(10, 50);
+            ParticleMaxAge = (int)MathUtil.NextFloat(10, 50);
 
             Gravity = 0.9f;
         }
 
         public override void Update()
         {
-            lastParticleScale = particleScale;
-            lastParticleAlpha = particleAlpha;
+            LastParticleScale = ParticleScale;
+            LastParticleAlpha = ParticleAlpha;
 
-            if (particleAge++ >= particleMaxAge)
+            if (ParticleAge++ >= ParticleMaxAge)
             {
-                if (particleAlpha >= 0.0015f)
+                if (ParticleAlpha >= 0.0015f)
                 {
-                    particleAlpha *= 0.575f;
-                    particleScale *= 0.725f;
+                    ParticleAlpha *= 0.575f;
+                    ParticleScale *= 0.725f;
                 }
                 else
                     SetDead();
@@ -67,23 +67,21 @@ namespace SharpCraft.particle
         public override void Render(float partialTicks)
         {
             Vector3 partialPos = Vector3.Lerp(LastPos, Pos, partialTicks);
-            float partialScale = lastParticleScale + (particleScale - lastParticleScale) * partialTicks;
+            float partialScale = LastParticleScale + (ParticleScale - LastParticleScale) * partialTicks;
 
             partialPos.Y += partialScale / 2;
 
-            ModelBaked<Particle> model = ParticleRenderer.ParticleModel;
+            ModelBaked model = ParticleRenderer.ParticleModel;
+            
+            model.Shader.SetMatrix4("transformationMatrix", MatrixHelper.CreateTransformationMatrix(partialPos, Vector3.Zero, partialScale));
 
-            model.Shader.UpdateGlobalUniforms();
-            model.Shader.UpdateModelUniforms();
-            model.Shader.UpdateInstanceUniforms(MatrixHelper.CreateTransformationMatrix(partialPos, Vector3.Zero, partialScale), this);
-
-            GL.BindTexture(TextureTarget.Texture2D, textureID);
+            GL.BindTexture(TextureTarget.Texture2D, TextureId);
             model.RawModel.Render();
         }
 
         public float GetAlpha()
         {
-            return lastParticleAlpha + (particleAlpha - lastParticleAlpha) * SharpCraft.Instance.GetPartialTicksForRender();
+            return LastParticleAlpha + (ParticleAlpha - LastParticleAlpha) * SharpCraft.Instance.GetPartialTicksForRender();
         }
     }
 }

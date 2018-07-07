@@ -1,6 +1,4 @@
-﻿using OpenTK.Graphics.OpenGL;
-
-namespace SharpCraft.model
+﻿namespace SharpCraft.model
 {
     public interface IModelRaw
     {

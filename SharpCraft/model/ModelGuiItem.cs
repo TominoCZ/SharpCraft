@@ -2,9 +2,9 @@
 
 namespace SharpCraft.model
 {
-    internal class ModelGuiItem : ModelBaked<object>
+    internal class ModelGuiItem : ModelBaked
     {
-        public ModelGuiItem(Shader<object> shader) : base(null, shader)
+        public ModelGuiItem(Shader shader) : base(null, shader)
         {
             float[] vertexes =
             {

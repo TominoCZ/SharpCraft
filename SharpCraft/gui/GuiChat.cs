@@ -1,126 +1,161 @@
-﻿using OpenTK;
+﻿using System.Collections.Generic;
+using System.Linq;
+using OpenTK;
 using OpenTK.Input;
-using SharpCraft.texture;
-using SharpCraft.util;
+using SharpCraft.item;
+#pragma warning disable 618
 
 namespace SharpCraft.gui
 {
     internal class GuiChat : GuiScreen
     {
-        
-        private readonly bool _allowTyping;
-        private bool _isCaps = true;
+        private readonly bool _isCaps;
 
-        private readonly System.Collections.Generic.Queue<Text> _historyQueue = new System.Collections.Generic.Queue<Text>();
+        private static readonly List<string> HistoryQueue = new List<string>();
 
         private int _currentHistoryIdx;
-
+        private string _currentInputText = "";
 
         public GuiChat()
         {
-            _allowTyping = true;
+            DoesGuiPauseGame = true;
 
             _isCaps = Keyboard.GetState().IsKeyDown(Key.CapsLock);
-           // isCaps = false;
+            _currentHistoryIdx = HistoryQueue.Count - 1;
+
+            SharpCraft.Instance.KeyDown += OnKeyDown;
         }
 
-        public override void Init()
+        private void OnKeyDown(object sender, KeyboardKeyEventArgs e)
         {
-            _currentHistoryIdx = _historyQueue.Count;
-
-            base.Init();
+            switch (e.Key)
+            {
+                case Key.BackSpace:
+                    if (_currentInputText.Length > 0)
+                        _currentInputText = _currentInputText.Substring(0, _currentInputText.Length - 1);
+                    break;
+                case Key.Up:
+                    ShowHistoryUp();
+                    break;
+                case Key.Down:
+                    ShowHistoryDown();
+                    break;
+            }
         }
 
         // TODO: History for unique commands
         public void ShowHistoryUp()
         {
-            if (_historyQueue.Count <= 0)
+            if (HistoryQueue.Count <= 0)
                 return;
 
-            if(_currentHistoryIdx - 1 >= 0)
+            if (_currentHistoryIdx - 1 > 0)
                 _currentHistoryIdx--;
-            
-            currentInputText = _historyQueue.ToArray()[_currentHistoryIdx];
+
+            _currentInputText = HistoryQueue[_currentHistoryIdx];
         }
+
         public void ShowHistoryDown()
         {
-            if (_historyQueue.Count <= 0)
+            if (HistoryQueue.Count <= 0)
                 return;
 
-            if (_currentHistoryIdx + 1 <= _historyQueue.Count - 1)
+            if (_currentHistoryIdx + 1 <= HistoryQueue.Count - 1)
                 _currentHistoryIdx++;
 
-            currentInputText = _historyQueue.ToArray()[_currentHistoryIdx];
+            _currentInputText = HistoryQueue[_currentHistoryIdx];
         }
 
-        public override void InputText(Key key)
+        public void SendMessage()
         {
-            if (!_allowTyping)
-                return;
+            string msg = _currentInputText.Trim();
 
-            string character = "";
-            string keyString = key.ToString();
-            if (_isCaps == false)
-                keyString = keyString.ToLower();
+            if (msg.Length > 0)
+            {
+                bool isCommand = msg[0] == '/';
 
-            if (((int)key >= 83 && (int)key <= 108))
-            {
-                character += keyString;
-            }
-            // numbers
-            else if((int)key >= 109 && (int)key <= 118)
-            {
-                character = keyString.Remove(0, 6);
-            }
-            else
-            {
-                switch (key)
+                if (!HistoryQueue.Contains(msg))
+                    HistoryQueue.Add(msg);
+
+                if (!isCommand)
+                    return;
+
+                try
                 {
-                    case Key.Enter:
-                        FinishTyping();
-                        return;
+                    msg = msg.Substring(1, msg.Length - 1);
 
-                    case Key.BackSpace:
-                        if (currentInputText.text.Length > 0)
-                            currentInputText.text = currentInputText.text.Remove(currentInputText.text.Length - 1, 1);
+                    string[] split = msg.Split(' ');
 
-                        break;
+                    var cmd = split[0];
 
-                    case Key.CapsLock:
-                        _isCaps = !_isCaps;
-                        break;
+                    switch (cmd)
+                    {
+                        case "tp":
+                            Vector3 position = Vector3.Zero;
+                            Vector3 playerPos = SharpCraft.Instance.Player.Pos;
 
-                    case Key.Space:
-                        character = " ";
-                        break;
+                            for (int i = 0; i < 3; i++)
+                            {
+                                string arg = split[1 + i];
 
-                    case Key.Slash:
-                        character = "/";
-                        break;
+                                float value;
+
+                                if (arg[0] == '~')
+                                {
+                                    value = int.Parse("0" + arg.Substring(1, arg.Length - 1)) + playerPos[i];
+                                }
+                                else
+                                {
+                                    value = int.Parse(arg);
+                                }
+
+                                position[i] = value;
+                            }
+
+                            SharpCraft.Instance.Player.TeleportTo(position);
+                            break;
+                        case "give":
+                            string itemName = split[1];
+                            int ammount = 1;
+
+                            if (split.Length > 2)
+                                ammount = int.Parse(split[2]);
+
+                            if (ItemRegistry.GetItem(itemName) is Item item)
+                                SharpCraft.Instance.Player.OnPickup(new ItemStack(item, ammount));
+
+                            break;
+                    }
+                }
+                catch
+                {
 
                 }
             }
-           
-            currentInputText.text += character;
-
-            base.InputText(key);
         }
 
+        public void InputText(char c, bool shift)
+        {
+            string character = _isCaps || shift ? c.ToString().ToUpper() : c.ToString().ToLower();
+
+            _currentInputText += character;
+        }
+        /*
         private void FinishTyping()
         {
-            if (currentInputText.text.Length <= 0)
+            if (_currentInputText.Message.Length <= 0)
                 return;
 
-            if(_historyQueue.Count >= 6)
-            _historyQueue.Dequeue();
+            if (_historyQueue.Count >= 6)
+                _historyQueue.Dequeue();
 
             // COMMAND
             bool incorrectComand = true;
-            if (currentInputText.text[0] == '/')
+            if (CurrentInputText.Message[0] == '/')
             {
-                string[] blocks = currentInputText.text.Remove(0, 1).Split(' ');
-          
-                switch(blocks[0])
+                string[] blocks = CurrentInputText.Message.Remove(0, 1).Split(' ');
+
+                switch (blocks[0])
                 {
                     case "kill":
 
@@ -167,14 +202,14 @@ namespace SharpCraft.gui
                         break;
                 }
 
-               
+
             }
             else
             {
                 incorrectComand = false;
             }
 
-            _historyQueue.Enqueue(currentInputText);
+            _historyQueue.Enqueue(CurrentInputText);
 
             base.Init();
 
@@ -184,36 +219,41 @@ namespace SharpCraft.gui
                 if (_historyQueue.Count >= 6)
                     _historyQueue.Dequeue();
 
-                Text incorrectText = new Text
+                MediaTypeNames.Text incorrectText = new MediaTypeNames.Text
                 {
-                    text = "INCORRECT COMMAND",
-                    colour = new Vector3(255, 0, 0)
+                    Message = "INCORRECT COMMAND",
+                    Colour = new Vector3(255, 0, 0)
                 };
                 _historyQueue.Enqueue(incorrectText);
             }
         }
+        */
 
         public override void Render(int mouseX, int mouseY)
         {
-            if (visible == false)
-                return;
-    
             const int xCount = 3;
             const int yCount = 2;
-            float yPos = SharpCraft.Instance.ClientSize.Height - (background.TextureSize.Height * yCount) - 60;
+            float yPos = SharpCraft.Instance.ClientSize.Height - (Background.TextureSize.Height * yCount) - 60;
 
             DrawBackground(xCount, yCount, 0, yPos);
 
-            RenderText(">" + currentInputText.text, 5, yPos  - 15, 1, currentInputText.colour);
+            RenderText(">" + _currentInputText + "_", 5, yPos - 15, 1);
 
-            for(int i = _historyQueue.Count - 1, j = 0; i >= 0; i--,j++)
+            var messages = HistoryQueue.Where(msg => msg.First() != '/').ToArray();
+
+            for (int i = messages.Length - 1, j = 0; i >= 0; i--, j++)
             {
-                RenderText(_historyQueue.ToArray()[i].text.ToString(), 5, (yPos - 16) - (18 * (j + 1)), 1,
-                    _historyQueue.ToArray()[i].colour);
+                RenderText(messages[i], 5, yPos - 16 - 18 * (j + 1), 1);
             }
 
             base.Render(mouseX, mouseY);
         }
 
+        public override void OnClose()
+        {
+            base.OnClose();
+
+            SharpCraft.Instance.KeyDown -= OnKeyDown;
+        }
     }
 }

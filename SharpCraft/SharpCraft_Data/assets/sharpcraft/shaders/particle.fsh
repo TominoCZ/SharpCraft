@@ -9,12 +9,12 @@ uniform sampler2D textureSampler;
 uniform float alpha;
 
 void main(void){
-	vec4 pixelColor = texture(textureSampler, pass_uv);
+	vec4 texturePixelColor = texture(textureSampler, pass_uv);
 	
-	if(pixelColor.a == 0)discard;
+	if(texturePixelColor.a == 0)discard;
 	
-	pixelColor.a *= alpha;
-	pixelColor.xyz *= brightness;
+	texturePixelColor.a *= alpha;
+	texturePixelColor.xyz *= brightness;
 	
-	out_Color = pixelColor;
+	out_Color = texturePixelColor;
 }

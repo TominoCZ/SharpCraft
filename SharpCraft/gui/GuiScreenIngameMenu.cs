@@ -1,5 +1,4 @@
 ﻿using System.Drawing;
-using OpenTK;
 using OpenTK.Input;
 
 namespace SharpCraft.gui
@@ -8,9 +7,9 @@ namespace SharpCraft.gui
     {
         public GuiScreenIngameMenu()
         {
-            buttons.Add(new GuiButton(0, 0, -45, 2, @"\{66FF00}RESUME") { CenteredX = true, CenteredY = true });
-            buttons.Add(new GuiButton(1, 0, 0, 2, @"\{66FF00}RETURN  TO  MENU") { CenteredX = true, CenteredY = true });
-            buttons.Add(new GuiButton(2, 0, 45, 2, @"\{FF0000}EXIT") { CenteredX = true, CenteredY = true });
+            Buttons.Add(new GuiButton(0, 0, -45, 2, @"\{66FF00}RESUME") { CenteredX = true, CenteredY = true });
+            Buttons.Add(new GuiButton(1, 0, 0, 2, @"\{66FF00}RETURN  TO  MENU") { CenteredX = true, CenteredY = true });
+            Buttons.Add(new GuiButton(2, 0, 45, 2, @"\{FF0000}EXIT") { CenteredX = true, CenteredY = true });
         }
 
         public override void Render(int mouseX, int mouseY)

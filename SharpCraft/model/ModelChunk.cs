@@ -2,11 +2,11 @@
 
 namespace SharpCraft.model
 {
-    internal class ModelChunk : ModelBaked<ModelBlock>
+    internal class ModelChunk : ModelBaked
     {
         public bool IsGenerated { get; private set; }
 
-        public ModelChunk(float[] vertexes, float[] normals, float[] uvs, Shader<ModelBlock> shader) : base(null, shader)
+        public ModelChunk(float[] vertexes, float[] normals, float[] uvs, Shader shader) : base(null, shader)
         {
             IsGenerated = vertexes.Length > 0;
             RawModel = ModelManager.LoadModel3ToVao(vertexes, normals, uvs);

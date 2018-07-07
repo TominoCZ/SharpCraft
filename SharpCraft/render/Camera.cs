@@ -1,6 +1,6 @@
 ﻿using OpenTK;
 using System;
-using SharpCraft.util;
+using SharpCraft.render.shader;
 
 #pragma warning disable CS0675 // Bitwise-or operator used on a sign-extended operand
 
@@ -52,6 +52,8 @@ namespace SharpCraft.render
             Matrix4 t = Matrix4.CreateTranslation(-Pos);
 
             View = t * y * x;
+
+            Shader.SetViewMatrix(View);
         }
 
         public void UpdateProjectionMatrix()
@@ -59,6 +61,8 @@ namespace SharpCraft.render
             float aspectRatio = (float)SharpCraft.Instance.Width / SharpCraft.Instance.Height;
 
             Projection = Matrix4.CreatePerspectiveFieldOfView(MathHelper.DegreesToRadians(PartialFov), aspectRatio, NearPlane, FarPlane);
+
+            Shader.SetProjectionMatrix(Projection);
         }
 
         public Vector3 GetLookVec()

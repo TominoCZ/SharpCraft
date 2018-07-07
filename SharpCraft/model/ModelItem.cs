@@ -2,11 +2,11 @@
 
 namespace SharpCraft.model
 {
-    public class ModelItem : ModelBaked<ModelItem>
+    public class ModelItem : ModelBaked
     {
         public TextureMapElement SlotTexture { get; }
 
-        public ModelItem(TextureMapElement texture, Shader<ModelItem> shader, ModelItemRaw rawModel) : base(rawModel, shader)
+        public ModelItem(TextureMapElement texture, Shader shader, ModelItemRaw rawModel) : base(rawModel, shader)
         {
             SlotTexture = texture;
         }

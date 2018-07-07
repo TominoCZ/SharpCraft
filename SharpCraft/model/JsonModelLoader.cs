@@ -10,7 +10,6 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
-using OpenTK.Graphics.OpenGL;
 using SharpCraft.util;
 using Bitmap = System.Drawing.Bitmap;
 using Image = System.Drawing.Image;
@@ -33,10 +32,10 @@ namespace SharpCraft.model
 
         private static Vector3 _v2, _v3, _v4, _normal;
 
-        private static Shader<ModelBlock> _blockShader;
-        private static Shader<ModelItem> _itemShader;
+        private static Shader _blockShader;
+        private static Shader _itemShader;
 
-        public JsonModelLoader(Shader<ModelBlock> blockShader, Shader<ModelItem> itemShader)
+        public JsonModelLoader(Shader blockShader, Shader itemShader)
         {
             if (_instance != null)
                 throw new Exception("There can only be one instance of the JsonModelLoader class!");
@@ -284,7 +283,7 @@ namespace SharpCraft.model
             TextureItems = id;
         }
 
-        public static bool LoadModel(string path, Shader<ModelCustom> shader)
+        public static bool LoadModel(string path, Shader shader)
         {
             string file = $"{SharpCraft.Instance.GameFolderDir}/assets/sharpcraft/models/{path}.json";
 
@@ -521,7 +520,7 @@ namespace SharpCraft.model
 
             foreach (var pair in bkp)
             {
-                LoadModel(pair.Key, new Shader<ModelCustom>(pair.Value.Shader.ShaderName));
+                LoadModel(pair.Key, new Shader(pair.Value.Shader.ShaderName));
             }
         }
 

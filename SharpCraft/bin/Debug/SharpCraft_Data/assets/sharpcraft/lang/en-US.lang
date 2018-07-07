@@ -1,7 +1,10 @@
 sharpcraft.block.grass=Grass Block
 sharpcraft.block.tallgrass=Grass
+sharpcraft.block.glass=Glass
 sharpcraft.block.stone=Stone
 sharpcraft.block.cobblestone=Cobblestone
+sharpcraft.block.ladder=Ladder
+sharpcraft.block.bedrock=Bedrock
 sharpcraft.block.rare=Rare Ore
 sharpcraft.block.dirt=Dirt
 sharpcraft.block.furnace=Furnace
@@ -9,3 +12,6 @@ sharpcraft.block.log=Log
 sharpcraft.block.planks=Planks
 sharpcraft.block.leaves=Leaves
 sharpcraft.block.crafting_table=Crafting Table
+sharpcraft.item.pick_wood=Wood Pickaxe
+sharpcraft.item.pick_stone=Stone Pickaxe
+sharpcraft.item.pick_rare=Rare Pickaxe

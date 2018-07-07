@@ -8,56 +8,21 @@ namespace SharpCraft.gui
 {
     internal class GuiScreen : Gui
     {
-        private static GuiTexture background_default;
-        protected static GuiTexture background;
+        private static GuiTexture _backgroundDefault;
+        protected static GuiTexture Background;
 
-        protected List<GuiButton> buttons = new List<GuiButton>();
-
-        protected struct Text
-        {
-            public string text;
-            public Vector3 colour;
-        };
-        protected Text currentInputText;
+        protected List<GuiButton> Buttons = new List<GuiButton>();
 
         public bool DoesGuiPauseGame { get; protected set; } = true;
-        public bool visible { get; protected set; } = true;
-
+        //public bool Visible { get; protected set; } = true;
 
         public GuiScreen()
         {
-            background_default = new GuiTexture(TextureManager.LoadTexture("gui/bg"), Vector2.Zero, Vector2.One * 16, 8);
-            background = new GuiTexture(TextureManager.LoadTexture("gui/bg_transparent"), Vector2.Zero, Vector2.One * 16, 8);
-            visible = true;
+            _backgroundDefault = new GuiTexture(TextureManager.LoadTexture("gui/bg"), Vector2.Zero, Vector2.One * 16, 8);
+            Background = new GuiTexture(TextureManager.LoadTexture("gui/bg_transparent"), Vector2.Zero, Vector2.One * 16, 8);
+            //Visible = true;
 
-            Init();
-        }
-
-        public virtual void Init()
-        {
-            currentInputText = new Text();
-            currentInputText.colour = new Vector3(255, 255, 255);
-            currentInputText.text = "";
-        }
-        
-        public void ToggleVisibillity()
-        {
-            visible = !visible;
-        }
-
-        public void Show()
-        {
-            visible = true;
-        }
-
-        public void Hide()
-        {
-            visible = false;
-        }
-
-        public virtual void InputText(OpenTK.Input.Key key)
-        {
-
+            DoesGuiPauseGame = true;
         }
 
         public override void Render(int mouseX, int mouseY)
@@ -65,11 +30,11 @@ namespace SharpCraft.gui
             //if (visible == false)
               //  return;
 
-            for (int i = 0; i < buttons.Count; i++)
+            for (int i = 0; i < Buttons.Count; i++)
             {
                 //GuiButton btn = buttons[i];
 
-                buttons[i].Render(mouseX, mouseY);
+                Buttons[i].Render(mouseX, mouseY);
                 //hovered? HoverColor : Vector3.One
                 //if (btn is GuiItemSlot slot && !slot.stack?.IsEmpty == true && slot.stack.Count > 1)
                 //RenderText(slot.stack.Count.ToString(), slot.PosX + 32 * slot.Scale / 2f, slot.PosY + 32 * slot.Scale / 2f + 14, 1, true);
@@ -79,8 +44,8 @@ namespace SharpCraft.gui
 
         protected virtual void DrawBackground()
         {
-            float sizeX = background.TextureSize.Width * background.Scale;
-            float sizeY = background.TextureSize.Height * background.Scale;
+            float sizeX = Background.TextureSize.Width * Background.Scale;
+            float sizeY = Background.TextureSize.Height * Background.Scale;
 
             double countX = Math.Ceiling(SharpCraft.Instance.ClientSize.Width / sizeX);
             double countY = Math.Ceiling(SharpCraft.Instance.ClientSize.Height / sizeY);
@@ -89,21 +54,21 @@ namespace SharpCraft.gui
             {
                 for (int y = 0; y <= countY; y++)
                 {
-                    RenderTexture(background, (int)(x * sizeX), (int)(y * sizeY));
+                    RenderTexture(Background, (int)(x * sizeX), (int)(y * sizeY));
                 }
             }
         }
 
         protected virtual void DrawBackground(float countX, float countY, float offsetX = 0, float offsetY = 0)
         {
-            float sizeX = background.TextureSize.Width * background.Scale;
-            float sizeY = background.TextureSize.Height * background.Scale;
+            float sizeX = Background.TextureSize.Width * Background.Scale;
+            float sizeY = Background.TextureSize.Height * Background.Scale;
 
             for (int x = 0; x <= countX; x++)
             {
                 for (int y = 0; y <= countY; y++)
                 {
-                    RenderTexture(background, (int)(offsetX + (x * sizeX)), (int)(offsetY + (y - sizeY)));
+                    RenderTexture(Background, (int)(offsetX + (x * sizeX)), (int)(offsetY + (y - sizeY)));
                 }
             }
         }
@@ -111,13 +76,13 @@ namespace SharpCraft.gui
         // Draws background to screen, stretching it to the screen size
         protected virtual void DrawBackroundStretch()
         {
-            RenderTextureStretchToScreen(background);
+            RenderTextureStretchToScreen(Background);
         }
 
         protected virtual void DrawDefaultBackground()
         {
-            float sizeX = background_default.TextureSize.Width * background_default.Scale;
-            float sizeY = background_default.TextureSize.Height * background_default.Scale;
+            float sizeX = _backgroundDefault.TextureSize.Width * _backgroundDefault.Scale;
+            float sizeY = _backgroundDefault.TextureSize.Height * _backgroundDefault.Scale;
 
             double countX = Math.Ceiling(SharpCraft.Instance.ClientSize.Width / sizeX);
             double countY = Math.Ceiling(SharpCraft.Instance.ClientSize.Height / sizeY);
@@ -126,16 +91,16 @@ namespace SharpCraft.gui
             {
                 for (int y = 0; y <= countY; y++)
                 {
-                    RenderTexture(background_default, x * sizeX, y * sizeY);
+                    RenderTexture(_backgroundDefault, x * sizeX, y * sizeY);
                 }
             }
         }
 
         public virtual void OnMouseClick(int x, int y, MouseButton button)
         {
-            for (int i = buttons.Count - 1; i >= 0; i--)
+            for (int i = Buttons.Count - 1; i >= 0; i--)
             {
-                GuiButton btn = buttons[i];
+                GuiButton btn = Buttons[i];
 
                 if (btn.Enabled && btn.IsMouseOver(x, y))
                 {

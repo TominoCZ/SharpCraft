@@ -1,53 +1,58 @@
-﻿using OpenTK;
-using SharpCraft.block;
+﻿using System.Collections.Generic;
+using OpenTK;
 using SharpCraft.entity;
 using SharpCraft.item;
-using System;
+using Newtonsoft.Json;
+// ReSharper disable InconsistentNaming
+
 #pragma warning disable 618
 
 namespace SharpCraft.world
 {
-    [Serializable]
     internal class WorldPlayerNode
     {
-        private readonly float _pitch;
-        private readonly float _yaw;
+        [JsonProperty] private readonly float pitch;
+        [JsonProperty] private readonly float yaw;
+        [JsonProperty] private readonly float x;
+        [JsonProperty] private readonly float y;
+        [JsonProperty] private readonly float z;
+        [JsonProperty] private readonly Dictionary<int, ItemStackNode> hotbar = new Dictionary<int, ItemStackNode>();
+        [JsonProperty] private readonly Dictionary<int, ItemStackNode> inventory = new Dictionary<int, ItemStackNode>();
+        [JsonProperty] private readonly float health;
 
-        private readonly Vector3 _pos;
-
-        private readonly ItemStackNode[] _hotbar;
-        private readonly ItemStackNode[] _inventory;
-
-        private readonly float _healthPercentage;
+        public WorldPlayerNode()
+        {
+            
+        }
 
         public WorldPlayerNode(EntityPlayerSp player)
         {
-            _pitch = SharpCraft.Instance.Camera.Pitch;
-            _yaw = SharpCraft.Instance.Camera.Yaw;
-            _pos = player.Pos;
+            pitch = SharpCraft.Instance.Camera.Pitch;
+            yaw = SharpCraft.Instance.Camera.Yaw;
 
-            _hotbar = new ItemStackNode[player.Hotbar.Length];
-            _inventory = new ItemStackNode[player.Inventory.Length];
+            x = player.Pos.X;
+            y = player.Pos.Y;
+            z = player.Pos.Z;
 
             for (var i = 0; i < player.Hotbar.Length; i++)
             {
                 ItemStack stack = player.Hotbar[i];
 
-                if (TryParseStack(player, stack, out var node))
-                    _hotbar[i] = node;
+                if (TryParseStack(stack, out var node))
+                    hotbar.Add(i, node);
             }
             for (var i = 0; i < player.Inventory.Length; i++)
             {
                 ItemStack stack = player.Inventory[i];
 
-                if (TryParseStack(player, stack, out var node))
-                    _inventory[i] = node;
+                if (TryParseStack(stack, out var node))
+                    inventory.Add(i, node);
             }
 
-            _healthPercentage = player.Health;
+            health = player.Health;
         }
 
-        private bool TryParseStack(EntityPlayerSp player, ItemStack stack, out ItemStackNode node)
+        private bool TryParseStack(ItemStack stack, out ItemStackNode node)
         {
             if (stack == null || stack.IsEmpty)
             {
@@ -55,27 +60,17 @@ namespace SharpCraft.world
                 return false;
             }
 
-            node = new ItemStackNode();
-
-            if (stack.Item is ItemBlock itemBlock)
+            node = new ItemStackNode
             {
-                node.IsBlock = true;
-                node.LocalItemId = player.World.GetLocalBlockId(itemBlock.Block.UnlocalizedName);
-                node.Count = stack.Count;
-                node.Meta = stack.Meta;
-            }
-            else
-            {
-                //TODO - saving items
-                //node.LocalItemId = player.World.GetLocalItemId(stack.Item.UnlocalizedName); //TODO
-                //node.Count = stack.Count;
-                //node.Meta = stack.Meta;
-            }
+                id = stack.Item.UnlocalizedName,
+                count = stack.Count,
+                meta = stack.Meta
+            };
 
             return true;
         }
 
-        private bool TryParseStack(World world, ItemStackNode node, out ItemStack stack)
+        private bool TryParseStack(ItemStackNode node, out ItemStack stack)
         {
             if (node == null)
             {
@@ -83,48 +78,45 @@ namespace SharpCraft.world
                 return false;
             }
 
-            Item item = null;
+            Item item = ItemRegistry.GetItem(node.id);
 
-            if (node.IsBlock)
-                item = ItemRegistry.GetItem(BlockRegistry.GetBlock(world.GetLocalBlockName(node.LocalItemId)));
-            //else
-                //item = ItemRegistry.GetItem(ItemRegistry.GetItem(world.GetLocalItemName(node.LocalItemId))); //TODO
-
-            stack = new ItemStack(item, node.Count, node.Meta);
+            stack = new ItemStack(item, node.count, node.meta);
 
             return true;
         }
 
         public EntityPlayerSp GetPlayer(World world)
         {
-            EntityPlayerSp player = new EntityPlayerSp(world, _pos);
-            SharpCraft.Instance.Camera.Pitch = _pitch;
-            SharpCraft.Instance.Camera.Yaw = _yaw;
+            EntityPlayerSp player = new EntityPlayerSp(world, new Vector3(x, y, z));
 
-            for (int i = 0; i < _hotbar.Length; i++)
+            SharpCraft.Instance.Camera.Pitch = pitch;
+            SharpCraft.Instance.Camera.Yaw = yaw;
+
+            foreach (var pair in hotbar)
             {
-                if (TryParseStack(world, _hotbar[i], out var stack))
-                    player.Hotbar[i] = stack;
+                if (TryParseStack(pair.Value, out var stack))
+                    player.Hotbar[pair.Key] = stack;
             }
 
-            for (int i = 0; i < _inventory.Length; i++)
+            foreach (var pair in inventory)
             {
-                if (TryParseStack(world, _inventory[i], out var stack))
-                    player.Inventory[i] = stack;
+                if (TryParseStack(pair.Value, out var stack))
+                    player.Inventory[pair.Key] = stack;
             }
 
-            player.Health = _healthPercentage;
+            player.Health = health;
 
             return player;
         }
 
-        [Serializable]
         private class ItemStackNode
         {
-            public bool IsBlock;
-            public short LocalItemId;
-            public int Count;
-            public short Meta;
+            [JsonProperty]
+            public string id;
+            [JsonProperty]
+            public int count;
+            [JsonProperty]
+            public short meta;
         }
     }
 }

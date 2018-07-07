@@ -18,7 +18,7 @@ namespace SharpCraft.world
 
         public List<Entity> Entities = new List<Entity>();
 
-        public readonly int Seed;
+        public readonly string Seed;
         public readonly string LevelName;
 
         private readonly NoiseUtil _noiseUtil;
@@ -36,9 +36,9 @@ namespace SharpCraft.world
 
         private readonly WorldLut _worldLut;
 
-        public World(string saveName, string levelName, int seed)
+        public World(string saveName, string levelName, string seed)
         {
-            _noiseUtil = new NoiseUtil(Seed = seed);
+            _noiseUtil = new NoiseUtil((Seed = seed).GetHashCode());
             _noiseUtil.SetFractalType(NoiseUtil.FractalType.FBM);
 
             LevelName = levelName;

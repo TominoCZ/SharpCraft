@@ -3,11 +3,11 @@ using SharpCraft.block;
 using SharpCraft.entity;
 using SharpCraft.model;
 using SharpCraft.particle;
-using SharpCraft.render.shader.shaders;
 using SharpCraft.util;
 using SharpCraft.world;
 using System;
 using System.Collections.Generic;
+using SharpCraft.render.shader;
 
 namespace SharpCraft.render
 {
@@ -15,11 +15,11 @@ namespace SharpCraft.render
     {
         private readonly List<Particle> _particles;
 
-        public static ModelBaked<Particle> ParticleModel;
+        public static ModelBaked ParticleModel;
 
         static ParticleRenderer()
         {
-            ParticleModel = new ModelParticle(new ShaderParticle());
+            ParticleModel = new ModelParticle(new Shader("particle", "UVmin", "UVmax", "alpha"));
         }
 
         public ParticleRenderer()

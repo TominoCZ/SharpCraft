@@ -10,7 +10,7 @@ namespace SharpCraft.render
 {
     internal class SkyboxRenderer
     {
-        private static ModelBaked<object> _cube;
+        private static ModelBaked _cube;
         private static int _texture;
 
         private long _tick;
@@ -22,7 +22,7 @@ namespace SharpCraft.render
             {
                 var size = 500f;
 
-                _cube = new ModelBaked<object>(ModelManager.LoadModel3ToVao(new[] {
+                _cube = new ModelBaked(ModelManager.LoadModel3ToVao(new[] {
                     -size,  size, -size,
                     -size, -size, -size,
                     size, -size, -size,
@@ -64,7 +64,7 @@ namespace SharpCraft.render
                     size, -size, -size,
                     -size, -size,  size,
                     size, -size,  size
-                }), new Shader<object>("skybox"));
+                }), new Shader("skybox"));
 
                 _texture = TextureManager.LoadCubeMap();
             }
@@ -82,9 +82,7 @@ namespace SharpCraft.render
             Matrix4 mat = MatrixHelper.CreateTransformationMatrix(SharpCraft.Instance.Camera.Pos, Vector3.UnitY * partialRot / 10, 1);
 
             _cube.Bind();
-            _cube.Shader.UpdateGlobalUniforms();
-            _cube.Shader.UpdateModelUniforms(_cube.RawModel);
-            _cube.Shader.UpdateInstanceUniforms(mat, null);
+            _cube.Shader.SetMatrix4("transformationMatrix", mat);
 
             GL.BindTexture(TextureTarget.TextureCubeMap, _texture);
             _cube.RawModel.Render();

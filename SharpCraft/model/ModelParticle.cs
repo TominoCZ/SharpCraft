@@ -1,11 +1,10 @@
-﻿using SharpCraft.particle;
-using SharpCraft.render.shader.shaders;
+﻿using SharpCraft.render.shader;
 
 namespace SharpCraft.model
 {
-    internal class ModelParticle : ModelBaked<Particle>
+    internal class ModelParticle : ModelBaked
     {
-        public ModelParticle(ShaderParticle shader) : base(null, shader)
+        public ModelParticle(Shader shader) : base(null, shader)
         {
             var vertexes = CubeModelBuilder.CreateCubeVertexes(true);
             var normals = CubeModelBuilder.CreateCubeNormals();

@@ -135,9 +135,7 @@ namespace SharpCraft.block
                             GL.BindTexture(TextureTarget.Texture2D, JsonModelLoader.TextureBlocks);
 
                             model.Bind();
-                            model.Shader.UpdateGlobalUniforms();
-                            model.Shader.UpdateInstanceUniforms(scale * mat, model);
-                            model.Shader.UpdateModelUniforms();
+                            model.Shader.SetMatrix4("transformationMatrix", scale * mat);
                             model.RawModel.Render();
                             model.Unbind();
                         }
@@ -152,9 +150,7 @@ namespace SharpCraft.block
                             GL.BindTexture(TextureTarget.Texture2D, JsonModelLoader.TextureItems);
 
                             model.Bind();
-                            model.Shader.UpdateGlobalUniforms();
-                            model.Shader.UpdateInstanceUniforms(scale * mat, model);
-                            model.Shader.UpdateModelUniforms();
+                            model.Shader.SetMatrix4("transformationMatrix", scale * mat);
                             model.RawModel.Render();
                             model.Unbind();
                         }
@@ -177,9 +173,7 @@ namespace SharpCraft.block
                     GL.BindTexture(TextureTarget.Texture2D, JsonModelLoader.TextureBlocks);
 
                     model.Bind();
-                    model.Shader.UpdateGlobalUniforms();
-                    model.Shader.UpdateInstanceUniforms(scale * rot * mat, model);
-                    model.Shader.UpdateModelUniforms();
+                    model.Shader.SetMatrix4("transformationMatrix", scale * rot * mat);
                     model.RawModel.Render();
                     model.Unbind();
                 }
@@ -192,9 +186,7 @@ namespace SharpCraft.block
                     GL.BindTexture(TextureTarget.Texture2D, JsonModelLoader.TextureItems);
 
                     model.Bind();
-                    model.Shader.UpdateGlobalUniforms();
-                    model.Shader.UpdateInstanceUniforms(scale * rot * mat, model);
-                    model.Shader.UpdateModelUniforms();
+                    model.Shader.SetMatrix4("transformationMatrix", scale * rot * mat);
                     model.RawModel.Render();
                     model.Unbind();
                 }
@@ -241,9 +233,6 @@ namespace SharpCraft.block
                 return;
 
             _placeDelay[indexX, indexY] = 6;
-
-            Console.WriteLine((hitVec.X < 0) + "," + (hitVec.Z < 0));
-            Console.WriteLine(indexX + "," + indexY);
 
             var item = _grid[indexX, indexY];
 

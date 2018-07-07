@@ -6,7 +6,6 @@ using SharpCraft.entity;
 using SharpCraft.item;
 using SharpCraft.model;
 using SharpCraft.render.shader;
-using SharpCraft.render.shader.shaders;
 using SharpCraft.texture;
 using SharpCraft.util;
 using SharpCraft.world;
@@ -22,7 +21,7 @@ namespace SharpCraft.render
     {
         private readonly ModelCubeOutline _selectionOutline;
 
-        private readonly ShaderTexturedCube _shaderTexturedCube;
+        private readonly Shader _shaderTexturedCube;
         private readonly ModelRaw _destroyProgressModel;
         private ModelCustom _armModel;
 
@@ -65,12 +64,12 @@ namespace SharpCraft.render
             SharpCraft.Instance.MouseUp += (o, e) => { if (e.Button == MouseButton.Left) _buttonDown = false; };
 
             _selectionOutline = new ModelCubeOutline();
-            _shaderTexturedCube = new ShaderTexturedCube();
+            _shaderTexturedCube = new Shader("textured_cube", "UVmin", "UVmax");
 
             var cube = CubeModelBuilder.CreateCubeVertexes();
 
             _destroyProgressModel = ModelManager.LoadModel3ToVao(cube);
-            JsonModelLoader.LoadModel("entity/player/arm", new Shader<ModelCustom>("block"));
+            JsonModelLoader.LoadModel("entity/player/arm", Block.DefaultShader);
 
             RenderDistance = 8;
             _lastFov = _fov = SharpCraft.Instance.Camera.PartialFov;
@@ -186,9 +185,9 @@ namespace SharpCraft.render
 
             foreach (Waypoint wp in wps)
             {
-                model.Shader.UpdateGlobalUniforms();
-                model.Shader.UpdateModelUniforms(model.RawModel);
-                model.Shader.UpdateInstanceUniforms(MatrixHelper.CreateTransformationMatrix(wp.Pos.ToVec() + Vector3.One / 2 * (1 - size), new Vector3(45, 30, 35.264f), size), model);
+                var mat = MatrixHelper.CreateTransformationMatrix(wp.Pos.ToVec() + Vector3.One / 2 * (1 - size),
+                    new Vector3(45, 30, 35.264f), size);
+                model.Shader.SetMatrix4("transformationMatrix", mat);
 
                 model.RawModel.Render();
             }
@@ -211,8 +210,6 @@ namespace SharpCraft.render
             GL.EnableVertexAttribArray(0);
 
             _shaderTexturedCube.Bind();
-            _shaderTexturedCube.UpdateGlobalUniforms();
-            _shaderTexturedCube.UpdateModelUniforms(_destroyProgressModel);
 
             Vector3 sizeO = Vector3.One * 0.0045f;
 
@@ -225,8 +222,17 @@ namespace SharpCraft.render
 
                 Matrix4 mat = MatrixHelper.CreateTransformationMatrix(pair.Key.ToVec() - sizeO / 2 + state.Block.BoundingBox.Min, state.Block.BoundingBox.Size + sizeO);
 
-                _shaderTexturedCube.UpdateInstanceUniforms(mat);
-                _shaderTexturedCube.UpdateUVs(TextureManager.TEXTURE_DESTROY_PROGRESS, 0, 32 * (int)(pair.Value.PartialProgress * 8), 32);
+                var tex = TextureManager.TEXTURE_DESTROY_PROGRESS;
+
+                Vector2 pixel = new Vector2(1f / tex.TextureSize.Width, 1f / tex.TextureSize.Height);
+
+                Vector2 min = new Vector2(0, 32 * (int)(pair.Value.PartialProgress * 8)) * pixel;
+                Vector2 max = min + 32 * pixel;
+
+                _shaderTexturedCube.SetMatrix4("transformationMatrix", mat);
+                _shaderTexturedCube.SetVector2("UVmin", min);
+                _shaderTexturedCube.SetVector2("UVmax" , max);
+                //TODO "colorIn"
                 _destroyProgressModel.Render();
             }
 
@@ -240,16 +246,14 @@ namespace SharpCraft.render
 
         private void RenderChunkOutline(Chunk ch)
         {
-            Shader<ModelCubeOutline> shader = _selectionOutline.Shader;
+            Shader shader = _selectionOutline.Shader;
 
             Vector3 size = new Vector3(Chunk.ChunkSize, Chunk.ChunkHeight, Chunk.ChunkSize);
 
             _selectionOutline.Bind();
             _selectionOutline.SetColor(Vector4.One);
-
-            shader.UpdateGlobalUniforms();
-            shader.UpdateModelUniforms(_selectionOutline.RawModel);
-            shader.UpdateInstanceUniforms(MatrixHelper.CreateTransformationMatrix(ch.Pos, size), _selectionOutline);
+            
+            shader.SetMatrix4("transformationMatrix", MatrixHelper.CreateTransformationMatrix(ch.Pos, size));
             
             GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
             GL.DrawArrays(PrimitiveType.Lines, 0, _selectionOutline.RawModel.VertexCount);
@@ -274,11 +278,9 @@ namespace SharpCraft.render
             _selectionOutline.SetColor(_selectionOutlineColor);
 
             var mat = MatrixHelper.CreateTransformationMatrix(pos.ToVec() + bb.Min, bb.Size + Vector3.One * 0.001f);
-
-            shader.UpdateGlobalUniforms();
-            shader.UpdateModelUniforms(_selectionOutline.RawModel);
-            shader.UpdateInstanceUniforms(mat, _selectionOutline);
             
+            shader.SetMatrix4("transformationMatrix", mat);
+
             GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
             GL.DrawArrays(PrimitiveType.Lines, 0, _selectionOutline.RawModel.VertexCount);
             GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Point);
@@ -376,9 +378,7 @@ namespace SharpCraft.render
             GL.BindTexture(TextureTarget.Texture2D, _armModel.TextureID);
 
             _armModel.Bind();
-            _armModel.Shader.UpdateGlobalUniforms();
-            _armModel.Shader.UpdateModelUniforms(_armModel.RawModel);
-            _armModel.Shader.UpdateInstanceUniforms(mat, _armModel);
+            _armModel.Shader.SetMatrix4("transformationMatrix", mat);
 
             _armModel.RawModel.Render();
 
@@ -449,10 +449,8 @@ namespace SharpCraft.render
             Matrix4 mat = t0 * r1 * animationMatrix * tFinal * r2 * s * t1;
 
             model.Bind();
-
-            model.Shader.UpdateGlobalUniforms();
-            model.Shader.UpdateModelUniforms(model.RawModel);
-            model.Shader.UpdateInstanceUniforms(mat, model);
+            
+            model.Shader.SetMatrix4("transformationMatrix", mat);
 
             model.RawModel.Render();
 
@@ -523,10 +521,8 @@ namespace SharpCraft.render
             Matrix4 mat = t0 * r1 * animationMatrix * tFinal * r2 * s * t1;
 
             model.Bind();
-
-            model.Shader.UpdateGlobalUniforms();
-            model.Shader.UpdateModelUniforms(model.RawModel);
-            model.Shader.UpdateInstanceUniforms(mat, model);
+            
+            model.Shader.SetMatrix4("transformationMatrix", mat);
 
             model.RawModel.Render();
 

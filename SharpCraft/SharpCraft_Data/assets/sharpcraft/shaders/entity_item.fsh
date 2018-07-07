@@ -8,11 +8,11 @@ out vec4 out_Color;
 uniform sampler2D textureSampler;
 
 void main(void){
-	vec4 pixelColor = texture(textureSampler, pass_uv);
+	vec4 texturePixelColor = texture(textureSampler, pass_uv);
 	
-	if(pixelColor.a == 0)discard;
+	if(texturePixelColor.a == 0)discard;
 	
-	vec3 diffuse = vec3(brightness*2);
+	texturePixelColor.xyz *= brightness * 2;
 	
-	out_Color = vec4(diffuse, 1.0) * pixelColor;
+	out_Color = texturePixelColor;
 }

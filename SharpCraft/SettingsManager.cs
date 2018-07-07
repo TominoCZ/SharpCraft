@@ -46,7 +46,7 @@ namespace SharpCraft
                             _settings.Add(variable, value);
                         }
                     }
-                    catch (Exception e)
+                    catch
                     {
                         Console.WriteLine($"ERROR: Failed parsing line '{line}' in settings.txt");
                     }

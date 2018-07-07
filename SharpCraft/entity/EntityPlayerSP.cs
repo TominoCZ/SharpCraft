@@ -19,7 +19,7 @@ namespace SharpCraft.entity
         private readonly float _maxMoveSpeed = 0.22f;
         private float _moveSpeedMult = 1;
 
-        public float EyeHeight = 1.625f;
+        public float EyeHeight = 1.675f;
 
         private Vector2 _moveSpeed;
 
@@ -29,7 +29,7 @@ namespace SharpCraft.entity
 
         public float Health
         {
-            get { return _health; }
+            get => _health;
             set
             {
                 _health = value;
@@ -37,10 +37,12 @@ namespace SharpCraft.entity
             }
         }
 
+        public GameMode GameMode { get; private set; }
         public bool IsRunning { get; private set; }
         public bool IsSneaking { get; private set; }
 
         public int HotbarIndex { get; private set; }
+    
 
         public ItemStack[] Hotbar { get; }
         public ItemStack[] Inventory { get; }
@@ -57,17 +59,19 @@ namespace SharpCraft.entity
 
         private BlockPos _sneakPos;
 
-        public bool HasFullInventory => Hotbar.All(stack => stack != null && !stack.IsEmpty) && Inventory.All(stack => stack != null && !stack.IsEmpty);
+        //public bool HasFullInventory => Hotbar.All(stack => stack != null && !stack.IsEmpty) && Inventory.All(stack => stack != null && !stack.IsEmpty);
 
         public EntityPlayerSp(World world, Vector3 pos = new Vector3()) : base(world, pos)
         {
             SharpCraft.Instance.Camera.Pos = pos + Vector3.UnitY * 1.625f;
 
-            CollisionBoundingBox = new AxisAlignedBb(new Vector3(0.6f, 1.65f, 0.6f));
+            CollisionBoundingBox = new AxisAlignedBb(new Vector3(0.6f, EyeHeight + 0.1f, 0.6f));
             BoundingBox = CollisionBoundingBox.Offset(pos - (Vector3.UnitX * CollisionBoundingBox.Size.X / 2 + Vector3.UnitZ * CollisionBoundingBox.Size.Z / 2));
 
             Hotbar = new ItemStack[9];
             Inventory = new ItemStack[27];
+
+            GameMode = GameMode.Survival;
         }
 
         public override void Update()
@@ -225,6 +229,9 @@ namespace SharpCraft.entity
 
         private void FallDamage()
         {
+            if (GameMode == GameMode.Creative)
+                return;
+
             // 1 block is 1 distance unit
 
             // Falling
@@ -240,7 +247,7 @@ namespace SharpCraft.entity
             else
             {
                 // hit the ground
-                if (_isFalling == true)
+                if (_isFalling)
                 {
                     // final condition
                     _fallDistance = _fallYPosition - Pos.Y;
@@ -288,9 +295,11 @@ namespace SharpCraft.entity
 
         private void UpdateCameraMovement()
         {
-            if (SharpCraft.Instance.GuiScreen != null
-                || (SharpCraft.Instance.GuiChat != null && SharpCraft.Instance.GuiChat.visible == true))
+            if (SharpCraft.Instance.GuiScreen != null)
                 return;
+
+            //if (SharpCraft.Instance.GuiScreen is GuiChat guiChat && guiChat.Visible)
+                //return; TODO - not needed?
 
             KeyboardState state = SharpCraft.Instance.KeyboardState;
 
@@ -535,9 +544,13 @@ namespace SharpCraft.entity
 
             Vector3 motion = new Vector3(MathUtil.NextFloat(-0.15f, 0.15f), 0.3f, MathUtil.NextFloat(-0.15f, 0.15f));
 
-            EntityItem entityDrop = new EntityItem(World, moo.blockPos.ToVec() + Vector3.One * 0.5f, motion, new ItemStack(ItemRegistry.GetItem(state.Block), 1, state.Block.GetMetaFromState(state)));
+            if (GameMode == GameMode.Survival) //TODO - set this by a server rule
+            {
+                EntityItem entityDrop = new EntityItem(World, moo.blockPos.ToVec() + Vector3.One * 0.5f, motion,
+                    new ItemStack(ItemRegistry.GetItem(state.Block), 1, state.Block.GetMetaFromState(state)));
 
-            World.AddEntity(entityDrop);
+                World.AddEntity(entityDrop);
+            }
 
             SharpCraft.Instance.GetMouseOverObject();
         }
@@ -599,6 +612,9 @@ namespace SharpCraft.entity
 
         public void PickBlock()
         {
+            if (GameMode == GameMode.Survival)
+                return;
+
             MouseOverObject moo = SharpCraft.Instance.MouseOverObject;
 
             if (moo.hit == HitType.Block)
@@ -689,5 +705,11 @@ namespace SharpCraft.entity
             else
                 HotbarIndex = HotbarIndex - 1;
         }
+    }
+
+    public enum GameMode
+    {
+        Survival,
+        Creative
     }
 }

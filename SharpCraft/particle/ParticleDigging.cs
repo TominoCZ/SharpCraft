@@ -5,7 +5,6 @@ using SharpCraft.render;
 using SharpCraft.util;
 using SharpCraft.world;
 using System;
-using System.Collections.Generic;
 using OpenTK;
 using Vector2 = OpenTK.Vector2;
 using Vector3 = OpenTK.Vector3;
@@ -59,17 +58,17 @@ namespace SharpCraft.particle
             LastPos = Pos;
             _lastRot = _rot;
 
-            lastParticleScale = particleScale;
-            lastParticleAlpha = particleAlpha;
+            LastParticleScale = ParticleScale;
+            LastParticleAlpha = ParticleAlpha;
 
             if (!IsAlive) return;
 
-            if (particleAge++ >= particleMaxAge)
+            if (ParticleAge++ >= ParticleMaxAge)
             {
-                if (particleAlpha >= 0.0015f)
+                if (ParticleAlpha >= 0.0015f)
                 {
-                    particleAlpha *= 0.525f;
-                    particleScale *= 0.525f;
+                    ParticleAlpha *= 0.525f;
+                    ParticleScale *= 0.525f;
                 }
                 else
                     SetDead();
@@ -99,16 +98,18 @@ namespace SharpCraft.particle
             Vector3 partialPos = Vector3.Lerp(LastPos, Pos, partialTicks);
             Vector3 partialRot = Vector3.Lerp(_lastRot, _rot, partialTicks);
 
-            float partialScale = lastParticleScale + (particleScale - lastParticleScale) * partialTicks;
+            float partialScale = LastParticleScale + (ParticleScale - LastParticleScale) * partialTicks;
+            float partialAlpha = LastParticleAlpha + (ParticleAlpha - LastParticleAlpha) * partialTicks;
 
             partialPos.Y += partialScale / 2.0f;
 
-            ModelBaked<Particle> model = ParticleRenderer.ParticleModel;
-            model.Shader.UpdateGlobalUniforms();
-            model.Shader.UpdateModelUniforms();
-            model.Shader.UpdateInstanceUniforms(MatrixHelper.CreateTransformationMatrix(partialPos, partialRot, partialScale), this);
+            ModelBaked model = ParticleRenderer.ParticleModel;
+            model.Shader.SetMatrix4("transformationMatrix", MatrixHelper.CreateTransformationMatrix(partialPos, partialRot, partialScale));
+            model.Shader.SetVector2("UVmin", UVmin);
+            model.Shader.SetVector2("UVmax", UVmax);
+            model.Shader.SetFloat("alpha", partialAlpha);
 
-            GL.BindTexture(TextureTarget.Texture2D, textureID);
+            GL.BindTexture(TextureTarget.Texture2D, TextureId);
             model.RawModel.Render();
         }
     }

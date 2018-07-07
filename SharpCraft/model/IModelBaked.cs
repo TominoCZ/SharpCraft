@@ -2,10 +2,11 @@
 
 namespace SharpCraft.model
 {
-    internal interface IModelBaked<T>
+    internal interface IModelBaked
     {
         IModelRaw RawModel { get; }
-        Shader<T> Shader { get; }
+
+        Shader Shader { get; }
 
         void Bind();
 

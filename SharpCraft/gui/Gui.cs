@@ -5,7 +5,6 @@ using SharpCraft.item;
 using SharpCraft.model;
 using SharpCraft.render;
 using SharpCraft.render.shader;
-using SharpCraft.render.shader.shaders;
 using SharpCraft.util;
 using System;
 #pragma warning disable 618
@@ -16,13 +15,13 @@ namespace SharpCraft.gui
     {
         private static readonly ModelGuiItem _item;
 
-        public static ShaderGui Shader { get; }
+        public static Shader Shader { get; }
 
         static Gui()
         {
-            _item = new ModelGuiItem(new Shader<object>("gui_item"));
+            _item = new ModelGuiItem(new Shader("gui_item"));
 
-            Shader = new ShaderGui();
+            Shader = new Shader("gui", "UVmin", "UVmax");
         }
 
         protected void RenderText(string text, float x, float y, float scale, bool centered = false, bool dropShadow = false)
@@ -71,12 +70,11 @@ namespace SharpCraft.gui
             Matrix4 mat = MatrixHelper.CreateTransformationMatrix(pos.Ceiling() * unit * 2 + Vector2.UnitY - Vector2.UnitX, ratio);
 
             Shader.Bind();
+            Shader.SetMatrix4("transformationMatrix", mat);
+            Shader.SetVector2("UVmin", tex.UVmin);
+            Shader.SetVector2("UVmax", tex.UVmax);
 
             GL.BindVertexArray(GuiRenderer.GuiQuad.VaoID);
-
-            Shader.UpdateGlobalUniforms();
-            Shader.UpdateModelUniforms();
-            Shader.UpdateInstanceUniforms(mat, tex);
 
             GL.EnableVertexAttribArray(0);
 
@@ -97,10 +95,9 @@ namespace SharpCraft.gui
             Shader.Bind();
 
             GL.BindVertexArray(GuiRenderer.GuiQuad.VaoID);
-
-            Shader.UpdateGlobalUniforms();
-            Shader.UpdateModelUniforms();
-            Shader.UpdateInstanceUniforms(Matrix4.Identity, tex);
+            Shader.SetMatrix4("transformationMatrix", Matrix4.Identity);
+            Shader.SetVector2("UVmin", tex.UVmin);
+            Shader.SetVector2("UVmax", tex.UVmax);
 
             GL.EnableVertexAttribArray(0);
 
@@ -139,9 +136,9 @@ namespace SharpCraft.gui
             _item.Bind();
 
             Shader.Bind();
-            Shader.UpdateGlobalUniforms();
-            Shader.UpdateModelUniforms();
-            Shader.UpdateInstanceUniforms(mat, model.SlotTexture.UVMin, model.SlotTexture.UVMax);
+            Shader.SetMatrix4("transformationMatrix", mat);
+            Shader.SetVector2("UVmin", model.SlotTexture.UVMin);
+            Shader.SetVector2("UVmax", model.SlotTexture.UVMax);
 
             GL.BindTexture(TextureTarget.Texture2D, JsonModelLoader.TextureBlocks);
             _item.RawModel.Render();
@@ -175,9 +172,9 @@ namespace SharpCraft.gui
             _item.Bind();
 
             Shader.Bind();
-            Shader.UpdateGlobalUniforms();
-            Shader.UpdateModelUniforms();
-            Shader.UpdateInstanceUniforms(mat, model.SlotTexture.UVMin, model.SlotTexture.UVMax);
+            Shader.SetMatrix4("transformationMatrix", mat);
+            Shader.SetVector2("UVmin", model.SlotTexture.UVMin);
+            Shader.SetVector2("UVmax", model.SlotTexture.UVMax);
 
             GL.BindTexture(TextureTarget.Texture2D, JsonModelLoader.TextureItems);
             _item.RawModel.Render();

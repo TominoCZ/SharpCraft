@@ -7,7 +7,6 @@ in vec3 position;
 in vec2 textureCoords;
 in vec3 normal;
 
-out vec3 skycolor;
 out vec2 pass_uv;
 out float visibility;
 out float brightness;
@@ -15,17 +14,15 @@ out float brightness;
 uniform mat4 transformationMatrix;
 uniform mat4 projectionMatrix;
 uniform mat4 viewMatrix;
-uniform float fogDistance = 8;
+uniform float fogDistance;
 
 void main(void) {
 	vec4 worldPos = transformationMatrix * vec4(position, 1.0);
 	gl_Position = projectionMatrix * viewMatrix * worldPos;
 	
-	skycolor = vec3(0, 0.815, 1);
-	
     vec4 positionRelativeToCam = viewMatrix * worldPos;
 	
-	float distance = length(positionRelativeToCam.xyz) * 2 / fogDistance;
+	float distance = length(positionRelativeToCam.xyz) * 2.5f / fogDistance;
     visibility = exp(-pow((distance*density), gradient));
     visibility = clamp(visibility, 0.0, 1.0);
 	

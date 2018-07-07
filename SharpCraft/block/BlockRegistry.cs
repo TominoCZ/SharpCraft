@@ -1,5 +1,4 @@
 ﻿using SharpCraft.model;
-using SharpCraft.render.shader;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,8 +20,6 @@ namespace SharpCraft.block
 
         public void RegisterBlocksPost(JsonModelLoader loader)
         {
-            Block.SetDefaultShader(new Shader<ModelBlock>("block"));
-
             foreach (var block in _registry.Values)
             {
                 block.RegisterState(loader, new BlockState(block, JsonModelLoader.GetModelForBlock(block)));

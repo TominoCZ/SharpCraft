@@ -234,34 +234,26 @@ namespace SharpCraft.world.chunk
 
         public void Render(float partialTicks)
         {
+            GL.BindTexture(TextureTarget.Texture2D, JsonModelLoader.TextureBlocks);
+
             if (_model == null)
             {
                 BuildChunkModel();
                 return;
             }
-
-            //foreach (Shader<ModelBlock> shader in _model.fragmentPerShader.Keys)
-            //{
-            //ModelChunkFragment chunkFragmentModel = _model.getFragmentModelWithShader(shader);
-
-            var shader = Block.DefaultShader;
-
+            
             _model.Bind();
-            shader.UpdateGlobalUniforms();
-            shader.UpdateModelUniforms();
-            shader.UpdateInstanceUniforms(MatrixHelper.CreateTransformationMatrix(Pos), null);
+
+            Block.DefaultShader.SetMatrix4("transformationMatrix", MatrixHelper.CreateTransformationMatrix(Pos));
+            Block.DefaultShader.SetFloat("fogDistance", SharpCraft.Instance.WorldRenderer.RenderDistance);
 
             _model.RawModel.Render();
-
             _model.Unbind();
 
             foreach (var tileEntity in _tileEntities)
             {
                 tileEntity.Value.Render(partialTicks);
             }
-
-            GL.BindTexture(TextureTarget.Texture2D, JsonModelLoader.TextureBlocks);
-            //}
         }
 
         public void BuildChunkModel()

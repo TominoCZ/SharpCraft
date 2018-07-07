@@ -1,5 +1,4 @@
 ﻿using System.Drawing;
-using OpenTK;
 using SharpCraft.block;
 
 namespace SharpCraft.world

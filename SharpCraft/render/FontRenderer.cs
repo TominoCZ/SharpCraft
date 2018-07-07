@@ -1,25 +1,24 @@
 ﻿using OpenTK;
 using OpenTK.Graphics.OpenGL;
 using SharpCraft.gui;
-using SharpCraft.render.shader.shaders;
 using SharpCraft.texture;
 using SharpCraft.util;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
 using System.Text.RegularExpressions;
+using SharpCraft.render.shader;
 using Color = System.Drawing.Color;
 
 namespace SharpCraft.render
 {
     internal class FontRenderer
     {
-        public static ShaderText Shader { get; private set; }
+        public static Shader Shader { get; private set; }
 
         public FontRenderer()
         {
-            Shader = new ShaderText();
+            Shader = new Shader("gui_text", "UVmin", "UVmax", "colorIn");
         }
 
         public void RenderText(string text, float x, float y, float scale, Vector3 color, float brightness = 1, bool centered = false, bool dropShadow = false, int spacing = 4) //#TODO
@@ -39,9 +38,6 @@ namespace SharpCraft.render
 
             GL.BindTexture(TextureTarget.Texture2D, tex.ID);
 
-            Shader.UpdateGlobalUniforms();
-            Shader.UpdateModelUniforms();
-
             Vector2 totalSize = Vector2.Zero;
 
             Queue<Tuple<FontMapCharacter, Vector3>> present = new Queue<Tuple<FontMapCharacter, Vector3>>();
@@ -57,9 +53,9 @@ namespace SharpCraft.render
                 FontMapCharacter node = FontManager.GetCharacter(c);
                 if (node == null)
                     continue;
-                
+
                 Match first = null;
-                
+
                 foreach (Match m in matches)
                 {
                     if (m.Index == index)
@@ -67,18 +63,25 @@ namespace SharpCraft.render
                         first = m;
                         break;
                     }
-                } 
+                }
 
                 if (first != null && first.Length > 0)
                 {
-                    Color clr = ColorTranslator.FromHtml($"#{first.Value.Replace(@"\{", "").Replace("}", "")}");
+                    try
+                    {
+                        Color clr = ColorTranslator.FromHtml($"#{first.Value.Replace(@"\{", "").Replace("}", "")}");
 
-                    currentColor.X = clr.R / 255f;
-                    currentColor.Y = clr.G / 255f;
-                    currentColor.Z = clr.B / 255f;
+                        currentColor.X = clr.R / 255f;
+                        currentColor.Y = clr.G / 255f;
+                        currentColor.Z = clr.B / 255f;
 
-                    index += first.Length - 1;
-                    continue;
+                        index += first.Length - 1;
+                        continue;
+                    }
+                    catch
+                    {
+
+                    }
                 }
 
                 totalSize.X += node.Character.W + node.Character.OffsetX;
@@ -121,9 +124,11 @@ namespace SharpCraft.render
                         Vector2.UnitY - Vector2.UnitX,
                         ratio);
 
-                    Shader.SetColor(Vector3.One * 0.1f);
+                    Shader.SetVector3("colorIn", Vector3.One * 0.1f);
 
-                    Shader.UpdateInstanceUniforms(mat1, tuple.Item1.TextureUv);
+                    Shader.SetMatrix4("transformationMatrix", mat1);//mat1);
+                    Shader.SetVector2("UVmin", tuple.Item1.TextureUv.start);
+                    Shader.SetVector2("UVmax", tuple.Item1.TextureUv.end);
 
                     GL.DrawArrays(PrimitiveType.Triangles, 0, 6);
                 }
@@ -133,9 +138,11 @@ namespace SharpCraft.render
                     Vector2.UnitY - Vector2.UnitX,
                     ratio);
 
-                Shader.SetColor(tuple.Item2 == Vector3.One ? color : tuple.Item2);
+                Shader.SetVector3("colorIn", tuple.Item2 == Vector3.One ? color : tuple.Item2);
 
-                Shader.UpdateInstanceUniforms(mat2, tuple.Item1.TextureUv);
+                Shader.SetMatrix4("transformationMatrix", mat2);
+                Shader.SetVector2("UVmin", tuple.Item1.TextureUv.start);
+                Shader.SetVector2("UVmax", tuple.Item1.TextureUv.end);
 
                 GL.DrawArrays(PrimitiveType.Triangles, 0, 6);
 

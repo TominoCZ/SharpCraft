@@ -1,8 +1,11 @@
 ﻿using SharpCraft.block;
 using SharpCraft.entity;
 using System;
+using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
-using System.Runtime.Serialization.Formatters.Binary;
+using Newtonsoft.Json;
+// ReSharper disable InconsistentNaming
 
 namespace SharpCraft.world
 {
@@ -13,19 +16,15 @@ namespace SharpCraft.world
             if (w == null)
                 return;
 
-            BinaryFormatter bf = new BinaryFormatter();
-
             w.SaveAllChunks();
 
             try
             {
                 WorldPlayerNode wpn = new WorldPlayerNode(SharpCraft.Instance.Player);
-                using (FileStream fs = File.OpenWrite(w.SaveRoot + "/player.dat"))
-                {
-                    fs.SetLength(0);
-                    fs.Position = 0;
-                    bf.Serialize(fs, wpn);
-                }
+
+                var json = JsonConvert.SerializeObject(wpn, Formatting.Indented);
+
+                File.WriteAllText(w.SaveRoot + "/player.dat", json);
             }
             catch (Exception e)
             {
@@ -35,12 +34,21 @@ namespace SharpCraft.world
             try
             {
                 WorldDataNode wdn = new WorldDataNode(w);
-                using (FileStream fs = File.OpenWrite(w.SaveRoot + "/level.dat"))
-                {
-                    fs.SetLength(0);
-                    fs.Position = 0;
-                    bf.Serialize(fs, wdn);
-                }
+                var json = JsonConvert.SerializeObject(wdn, Formatting.Indented);
+
+                File.WriteAllText(w.SaveRoot + "/level.dat", json);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.StackTrace);
+            }
+            
+            try
+            {
+                WorldWaypointNode wwn = new WorldWaypointNode(w);
+                var json = JsonConvert.SerializeObject(wwn, Formatting.Indented);
+
+                File.WriteAllText(w.SaveRoot + "/waypoints.dat", json);
             }
             catch (Exception e)
             {
@@ -50,9 +58,7 @@ namespace SharpCraft.world
 
         public static World LoadWorld(string saveName)
         {
-            BinaryFormatter bf = new BinaryFormatter();
-
-            string dir = $"{SharpCraft.Instance.GameFolderDir}saves/{saveName}";
+            string dir = $"{SharpCraft.Instance.GameFolderDir}/saves/{saveName}";
 
             if (!Directory.Exists(dir))
                 return null;
@@ -62,11 +68,8 @@ namespace SharpCraft.world
 
             try
             {
-                using (FileStream fs = File.OpenRead(dir + "/player.dat"))
-                {
-                    fs.Position = 0;
-                    wpn = (WorldPlayerNode)bf.Deserialize(fs);
-                }
+                string json = File.ReadAllText(dir + "/player.dat");
+                wpn = JsonConvert.DeserializeObject<WorldPlayerNode>(json);
             }
             catch (Exception e)
             {
@@ -75,11 +78,8 @@ namespace SharpCraft.world
 
             try
             {
-                using (FileStream fs = File.OpenRead(dir + "/level.dat"))
-                {
-                    fs.Position = 0;
-                    wdn = (WorldDataNode)bf.Deserialize(fs);
-                }
+                string json = File.ReadAllText(dir + "/level.dat");
+                wdn = JsonConvert.DeserializeObject<WorldDataNode>(json);
             }
             catch (Exception e)
             {
@@ -87,6 +87,20 @@ namespace SharpCraft.world
             }
 
             var world = wdn?.GetWorld(saveName);
+
+            if (world != null)
+            {
+                try
+                {
+                    string json = File.ReadAllText(dir + "/waypoints.dat");
+                    var wwn = JsonConvert.DeserializeObject<WorldWaypointNode>(json);
+                    wwn.Load(world);
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e.StackTrace);
+                }
+            }
 
             EntityPlayerSp player = wpn?.GetPlayer(world);
 
@@ -99,6 +113,60 @@ namespace SharpCraft.world
             }
 
             return world;
+        }
+    }
+
+    class WorldWaypointNode
+    {
+        [JsonProperty] private List<WaypointNode> waypoints = new List<WaypointNode>();
+
+        public WorldWaypointNode()
+        {
+
+        }
+
+        public WorldWaypointNode(World w)
+        {
+            foreach (var waypoint in w.GetWaypoints())
+            {
+                var wn = new WaypointNode
+                {
+                    name = waypoint.Name,
+                    x = waypoint.Pos.X,
+                    y = waypoint.Pos.Y,
+                    z = waypoint.Pos.Z,
+                    r = waypoint.Color.R,
+                    g = waypoint.Color.G,
+                    b = waypoint.Color.B
+                };
+
+                waypoints.Add(wn);
+            }
+        }
+
+        public void Load(World w)
+        {
+            foreach (var node in waypoints)
+            {
+                string name = node.name;
+                BlockPos pos = new BlockPos(node.x, node.y, node.z);
+                Color color = Color.FromArgb(node.r, node.g, node.b);
+
+                w.AddWaypoint(pos, color, name);
+            }
+        }
+
+        class WaypointNode
+        {
+            [JsonProperty] public int x;
+            [JsonProperty] public int y;
+            [JsonProperty] public int z;
+
+            [JsonProperty] public int r;
+            [JsonProperty] public int g;
+            [JsonProperty] public int b;
+
+            [JsonProperty] public string name;
         }
     }
 }

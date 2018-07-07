@@ -8,7 +8,7 @@ namespace SharpCraft.block
 {
     public abstract class Block
     {
-        public static Shader<ModelBlock> DefaultShader { get; private set; } = new Shader<ModelBlock>("block");
+        public static Shader DefaultShader { get; private set; }
 
         private readonly List<BlockState> _states = new List<BlockState>();
 
@@ -55,7 +55,7 @@ namespace SharpCraft.block
             return (short)_states.IndexOf(state);
         }
 
-        public static void SetDefaultShader(Shader<ModelBlock> shader)
+        public static void SetDefaultShader(Shader shader)
         {
             DefaultShader = shader;
         }

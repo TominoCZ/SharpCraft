@@ -1,22 +1,27 @@
-using System;
+using Newtonsoft.Json;
+// ReSharper disable InconsistentNaming
 
 namespace SharpCraft.world
 {
-    [Serializable]
-    internal class WorldDataNode
+    public class WorldDataNode
     {
-        public int Seed { get; }
-        public string LevelName { get; }
+        [JsonProperty] public readonly string seed;
+        [JsonProperty] public readonly string levelName;
+
+        public WorldDataNode()
+        {
+
+        }
 
         public WorldDataNode(World w)
         {
-            LevelName = w.LevelName;
-            Seed = w.Seed;
+            levelName = w.LevelName;
+            seed = w.Seed;
         }
 
         public World GetWorld(string saveName)
         {
-            return new World(saveName, LevelName, Seed);
+            return new World(saveName, levelName, seed);
         }
     }
 }

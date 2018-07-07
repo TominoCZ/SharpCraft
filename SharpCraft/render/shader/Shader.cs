@@ -1,62 +1,34 @@
-﻿using OpenTK;
+﻿using System;
+using OpenTK;
 using OpenTK.Graphics.OpenGL;
-using SharpCraft.model;
-using SharpCraft.render.shader.module;
-using SharpCraft.render.shader.uniform;
 using System.Collections.Generic;
 using System.IO;
 
 namespace SharpCraft.render.shader
 {
-    public class Shader
+    public sealed class Shader
     {
-        private static readonly List<dynamic> _shaders = new List<dynamic>();
+        private static readonly List<Shader> Shaders = new List<Shader>();
 
-        public static void Register(dynamic shader)
-        {
-            _shaders.Add(shader);
-        }
+        private int _vsh;
+        private int _fsh;
 
-        public static void ReloadAll()
-        {
-            for (int index = 0; index < _shaders.Count; index++)
-            {
-                dynamic shader = _shaders[index];
-
-                shader.Reload(); //WARNING: keep this name of the function the same
-            }
-        }
-
-        public static void DestroyAll()
-        {
-            for (int index = 0; index < _shaders.Count; index++)
-            {
-                dynamic shader = _shaders[index];
-
-                shader.Destroy(); //keep this name of the function the same
-            }
-        }
-    }
-
-    public class Shader<TRenderable>
-    {
-        private readonly List<ShaderModule<TRenderable>> _modules = new List<ShaderModule<TRenderable>>();
-
-        private int program;
-
-        private int vshID;
-        private int fshID;
-
+        private int _program;
+        private bool _registered;
         public readonly string ShaderName;
 
-        public Shader(string shaderName)
+        private readonly Dictionary<string, int> _uniforms = new Dictionary<string, int>();
+
+        public Shader(string shaderName, params string[] uniforms)
         {
             ShaderName = shaderName;
 
-            _modules.Add(new ShaderModule3D<TRenderable>(this));//todo auto detect
-
             Init();
-            Shader.Register(this);
+
+            RegisterUniformsSilent("transformationMatrix", "projectionMatrix", "viewMatrix");
+            RegisterUniforms(uniforms);
+
+            Shaders.Add(this);
         }
 
         private void Init()
@@ -64,62 +36,154 @@ namespace SharpCraft.render.shader
             LoadShader(ShaderName);
 
             //creates and ID for this program
-            program = GL.CreateProgram();
+            _program = GL.CreateProgram();
 
             //attaches shaders to this program
-            GL.AttachShader(program, vshID);
-            GL.AttachShader(program, fshID);
+            GL.AttachShader(_program, _vsh);
+            GL.AttachShader(_program, _fsh);
 
             BindAttributes();
 
-            GL.LinkProgram(program);
-            GL.ValidateProgram(program);
-
-            RegisterUniforms();
+            GL.LinkProgram(_program);
+            GL.ValidateProgram(_program);
         }
 
-        protected void BindAttributes()
+        private void BindAttributes()
         {
             BindAttribute(0, "position");
             BindAttribute(1, "textureCoords");
             BindAttribute(2, "normal");
         }
 
-        protected virtual void RegisterUniforms()
+        private int GetUniformLocation(string uniform)
         {
-            foreach (ShaderModule<TRenderable> m in _modules)
-            {
-                m.InitUniforms();
-            }
-        }
+            if (_uniforms.TryGetValue(uniform, out var loc))
+                return loc;
 
-        public virtual void UpdateGlobalUniforms()
-        {
-            foreach (ShaderModule<TRenderable> m in _modules)
-            {
-                m.UpdateGlobalUniforms();
-            }
+            return -1;
         }
-
-        public virtual void UpdateModelUniforms(IModelRaw model = null)
+        /*
+        protected void BindAttributes()
         {
-            foreach (ShaderModule<TRenderable> m in _modules)
-            {
-                m.UpdateModelUniforms(model);
-            }
-        }
-
-        public virtual void UpdateInstanceUniforms(Matrix4 transform, TRenderable renderable)
-        {
-            foreach (ShaderModule<TRenderable> m in _modules)
-            {
-                m.UpdateInstanceUniforms(transform, renderable);
-            }
         }
 
         protected void BindAttribute(int attrib, string variable)
         {
-            GL.BindAttribLocation(program, attrib, variable);
+            GL.BindAttribLocation(_program, attrib, variable);
+        }*/
+
+        private void RegisterUniforms(params string[] uniforms)
+        {
+            if (_registered)
+                throw new Exception("Can't register uniforms twice, they need to be registered only once.");
+
+            _registered = true;
+
+            Bind();
+            foreach (var uniform in uniforms)
+            {
+                if (_uniforms.ContainsKey(uniform))
+                {
+                    Console.WriteLine($"Attemted to register uniform '{uniform}' in shader '{ShaderName}' twice");
+                    continue;
+                }
+
+                var loc = GL.GetUniformLocation(_program, uniform);
+
+                if (loc == -1)
+                {
+                    Console.WriteLine($"Could not find uniform '{uniform}' in shader '{ShaderName}'");
+                    continue;
+                }
+
+                _uniforms.Add(uniform, loc);
+            }
+            Unbind();
+        }
+
+        private void RegisterUniformsSilent(params string[] uniforms)
+        {
+            Bind();
+            foreach (var uniform in uniforms)
+            {
+                if (_uniforms.ContainsKey(uniform))
+                    continue;
+
+                var loc = GL.GetUniformLocation(_program, uniform);
+
+                if (loc == -1)
+                    continue;
+
+                _uniforms.Add(uniform, loc);
+            }
+            Unbind();
+        }
+
+        public void SetFloat(string uniform, float f)
+        {
+            var loc = GetUniformLocation(uniform);
+
+            if (loc != -1)
+                GL.Uniform1(loc, f);
+        }
+
+        public void SetVector2(string uniform, Vector2 vec)
+        {
+            var loc = GetUniformLocation(uniform);
+
+            if (loc != -1)
+                GL.Uniform2(loc, vec);
+        }
+
+        public void SetVector3(string uniform, Vector3 vec)
+        {
+            var loc = GetUniformLocation(uniform);
+
+            if (loc != -1)
+                GL.Uniform3(loc, vec);
+        }
+
+        public void SetVector4(string uniform, Vector4 vec)
+        {
+            var loc = GetUniformLocation(uniform);
+
+            if (loc != -1)
+                GL.Uniform4(loc, vec);
+        }
+
+        public void SetMatrix4(string uniform, Matrix4 mat)
+        {
+            var loc = GetUniformLocation(uniform);
+
+            if (loc != -1)
+                GL.UniformMatrix4(loc, false, ref mat);
+        }
+
+        public static void SetProjectionMatrix(Matrix4 mat)
+        {
+            for (var index = 0; index < Shaders.Count; index++)
+            {
+                var shader = Shaders[index];
+                shader.Bind();
+                shader.SetMatrix4("projectionMatrix", mat);
+                shader.Unbind();
+            }
+        }
+
+        public static void SetViewMatrix(Matrix4 mat)
+        {
+            for (var index = 0; index < Shaders.Count; index++)
+            {
+                var shader = Shaders[index];
+                shader.Bind();
+                shader.SetMatrix4("viewMatrix", mat); 
+                shader.Unbind();
+            }
+        }
+
+        private void BindAttribute(int attrib, string variable)
+        {
+            GL.BindAttribLocation(_program, attrib, variable);
         }
 
         private void LoadShader(string shaderName)
@@ -129,21 +193,21 @@ namespace SharpCraft.render.shader
             string fshCode = File.ReadAllText($"{SharpCraft.Instance.GameFolderDir}/assets/sharpcraft/shaders/{shaderName}.fsh");
 
             //create IDs for shaders
-            vshID = GL.CreateShader(ShaderType.VertexShader);
-            fshID = GL.CreateShader(ShaderType.FragmentShader);
+            _vsh = GL.CreateShader(ShaderType.VertexShader);
+            _fsh = GL.CreateShader(ShaderType.FragmentShader);
 
             //load shader codes into memory
-            GL.ShaderSource(vshID, vshCode);
-            GL.ShaderSource(fshID, fshCode);
+            GL.ShaderSource(_vsh, vshCode);
+            GL.ShaderSource(_fsh, fshCode);
 
             //compile shaders
-            GL.CompileShader(vshID);
-            GL.CompileShader(fshID);
+            GL.CompileShader(_vsh);
+            GL.CompileShader(_fsh);
         }
 
         public void Bind()
         {
-            GL.UseProgram(program);
+            GL.UseProgram(_program);
         }
 
         public void Unbind()
@@ -162,53 +226,33 @@ namespace SharpCraft.render.shader
         {
             Unbind();
 
-            GL.DetachShader(program, vshID);
-            GL.DetachShader(program, fshID);
+            GL.DetachShader(_program, _vsh);
+            GL.DetachShader(_program, _fsh);
 
-            GL.DeleteShader(vshID);
-            GL.DeleteShader(fshID);
+            GL.DeleteShader(_vsh);
+            GL.DeleteShader(_fsh);
 
-            GL.DeleteProgram(program);
+            GL.DeleteProgram(_program);
         }
 
-        private int GetUniformId(string name)
+        public static void ReloadAll()
         {
-            return GL.GetUniformLocation(program, name);
+            for (int index = 0; index < Shaders.Count; index++)
+            {
+                var shader = Shaders[index];
+
+                shader.Reload(); //WARNING: keep this name of the function the same
+            }
         }
 
-        public UniformMat4 GetUniformMat4(string name)
+        public static void DestroyAll()
         {
-            int id = GetUniformId(name);
+            for (int index = 0; index < Shaders.Count; index++)
+            {
+                var shader = Shaders[index];
 
-            return id != -1 ? new UniformMat4(id) : null;
-        }
-
-        public UniformVec4 GetUniformVec4(string name)
-        {
-            int id = GetUniformId(name);
-
-            return id != -1 ? new UniformVec4(id) : null;
-        }
-
-        public UniformVec3 GetUniformVec3(string name)
-        {
-            int id = GetUniformId(name);
-
-            return id != -1 ? new UniformVec3(id) : null;
-        }
-
-        public UniformVec2 GetUniformVec2(string name)
-        {
-            int id = GetUniformId(name);
-
-            return id != -1 ? new UniformVec2(id) : null;
-        }
-
-        public UniformFloat GetUniformFloat(string name)
-        {
-            int id = GetUniformId(name);
-
-            return id != -1 ? new UniformFloat(id) : null;
+                shader.Destroy(); //keep this name of the function the same
+            }
         }
     }
 }

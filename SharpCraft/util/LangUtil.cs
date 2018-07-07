@@ -9,9 +9,13 @@ namespace SharpCraft.util
     {
         private static Dictionary<string, string> _dictionary = new Dictionary<string, string>();
 
+        private static string _lastLang;
+
         //TODO - load language files from mods
         public static void LoadLang(string langName)
         {
+            _lastLang = langName;
+
             var file = $"{SharpCraft.Instance.GameFolderDir}/assets/sharpcraft/lang/{langName}.lang";
 
             if (!File.Exists(file))
@@ -19,8 +23,6 @@ namespace SharpCraft.util
                 Console.WriteLine($"ERROR: Could not find file for language '{langName}'");
                 return;
             }
-
-            _dictionary.Clear();
 
             var dict = File.ReadAllLines(file);
 
@@ -49,6 +51,13 @@ namespace SharpCraft.util
         public static string GetUnlocalizedNameLast(string unlocalizedName)
         {
             return unlocalizedName.Split(new []{'.'}, StringSplitOptions.RemoveEmptyEntries).LastOrDefault();
+        }
+
+        public static void Reload()
+        {
+            _dictionary.Clear();
+
+            LoadLang(_lastLang);
         }
     }
 }

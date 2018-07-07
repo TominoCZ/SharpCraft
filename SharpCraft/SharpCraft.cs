@@ -24,6 +24,7 @@ using System.Reflection;
 using System.Threading;
 using Bitmap = System.Drawing.Bitmap;
 using Rectangle = System.Drawing.Rectangle;
+#pragma warning disable 618
 
 namespace SharpCraft
 {
@@ -92,7 +93,6 @@ namespace SharpCraft
         public Camera Camera;
 
         public GuiScreen GuiScreen { get; private set; }
-        public GuiChat GuiChat { get; private set; }
 
         private Point _mouseLast;
         private float _mouseWheelLast;
@@ -137,16 +137,16 @@ namespace SharpCraft
             _blockRegistry = new BlockRegistry();
             _recipeRegistry = new RecipeRegistry();
 
+            LoadMods();
+
+            RegisterItemsAndBlocks();
+
             WorldRenderer = new WorldRenderer();
             EntityRenderer = new EntityRenderer();
             GuiRenderer = new GuiRenderer();
             FontRenderer = new FontRenderer();
 
             SettingsManager.Load();
-
-            LoadMods();
-
-            RegisterItemsAndBlocks();
 
             OpenGuiScreen(new GuiScreenMainMenu());
         }
@@ -298,12 +298,22 @@ namespace SharpCraft
             };
             _recipeRegistry.RegisterRecipe(recipe, wood);
 
+            recipe = new[]
+            {
+                wood, wood, wood,
+                null, wood, null,
+                wood, wood, wood
+            };
+            _recipeRegistry.RegisterRecipe(recipe, ItemRegistry.GetItem("sharpcraft", "ladder"));
+
             foreach (ModMain mod in _installedMods)
             {
                 mod.OnRecipeRegistry(new RecipeRegistryEventArgs(_recipeRegistry));
             }
 
-            JsonModelLoader loader = new JsonModelLoader(Block.DefaultShader, new Shader<ModelItem>("block"));
+            Block.SetDefaultShader(new Shader("block", "fogDistance"));
+
+            JsonModelLoader loader = new JsonModelLoader(Block.DefaultShader, Block.DefaultShader); //TODO - the second argument is the shader for items, which in this case can be the same as the block shader
 
             _blockRegistry.RegisterBlocksPost(loader);
             _itemRegistry.RegisterItemsPost(loader);
@@ -318,10 +328,6 @@ namespace SharpCraft
             WorldRenderer.RenderDistance = SettingsManager.GetInt("renderdistance");
 
             LoadWorld("MyWorld");
-
-            Player.OnPickup(new ItemStack(ItemRegistry.GetItem("sharpcraft", "pick_stone")));
-            Player.OnPickup(new ItemStack(ItemRegistry.GetItem("sharpcraft", "pick_wood")));
-            Player.OnPickup(new ItemStack(ItemRegistry.GetItem("sharpcraft", "pick_rare")));
         }
 
         public void LoadWorld(string saveName)
@@ -340,22 +346,13 @@ namespace SharpCraft
 
                 BlockPos playerPos = new BlockPos(0, 10, 0);//MathUtil.NextFloat(-100, 100));
 
-                World = new World("MyWorld", "Tomlow's Fuckaround", SettingsManager.GetString("worldseed").GetHashCode());
+                World = new World("MyWorld", "Tomlow's Fuckaround", SettingsManager.GetString("worldseed"));
 
                 Player = new EntityPlayerSp(World, playerPos.ToVec());
 
                 World.AddEntity(Player);
 
                 Player.SetItemStackInInventory(0, new ItemStack(ItemRegistry.GetItem(BlockRegistry.GetBlock<BlockCraftingTable>())));
-                Player.SetItemStackInInventory(1, new ItemStack(ItemRegistry.GetItem(BlockRegistry.GetBlock<BlockFurnace>())));
-                Player.SetItemStackInInventory(2, new ItemStack(ItemRegistry.GetItem(BlockRegistry.GetBlock<BlockCobbleStone>())));
-                Player.SetItemStackInInventory(3, new ItemStack(ItemRegistry.GetItem(BlockRegistry.GetBlock<BlockPlanks>())));
-                Player.SetItemStackInInventory(4, new ItemStack(ItemRegistry.GetItem(BlockRegistry.GetBlock<BlockGlass>())));
-                Player.SetItemStackInInventory(5, new ItemStack(ItemRegistry.GetItem(BlockRegistry.GetBlock<BlockCraftingTable>())));
-                Player.SetItemStackInInventory(7, new ItemStack(ItemRegistry.GetItem(BlockRegistry.GetBlock<BlockLadder>())));
-                Player.SetItemStackInInventory(8, new ItemStack(ItemRegistry.GetItem(BlockRegistry.GetBlock<BlockTallGrass>())));
-
-                WorldLoader.SaveWorld(World); //TODO - this is really dirty
             }
             else
             {
@@ -364,7 +361,7 @@ namespace SharpCraft
 
             ResetMouse();
 
-            MouseState state = OpenTK.Input.Mouse.GetState();
+            MouseState state = Mouse.GetState();
             _mouseLast = new Point(state.X, state.Y);
         }
 
@@ -412,28 +409,39 @@ namespace SharpCraft
 
                         if (lmb && _lastMouseOverObject.hit == HitType.Block)
                         {
-                            ParticleRenderer.SpawnDiggingParticle(_lastMouseOverObject);
-
-                            if (_lastMouseOverObject.hit == MouseOverObject.hit && lastPos == MouseOverObject.blockPos)
+                            if (Player.GameMode == GameMode.Creative)
                             {
-                                if (!DestroyProgresses.TryGetValue(lastPos, out DestroyProgress progress))
-                                {
-                                    if (World?.GetBlockState(lastPos).Block.Hardness != -1)
-                                    {
-                                        DestroyProgresses.TryAdd(lastPos,
-                                            progress = new DestroyProgress(lastPos, Player));
-                                        progress.Progress = 0;
-                                    }
-                                }
-                                else
-                                {
-                                    progress.Progress += Player.GetEquippedItemStack() is ItemStack st && !st.IsEmpty ? st.Item.GetMiningSpeed(World?.GetBlockState(lastPos).Block.Material) : 1;
-                                }
-
-                                if (progress.Destroyed)
-                                    DestroyProgresses.TryRemove(progress.Pos, out DestroyProgress removed);
+                                Player.BreakBlock();
                             }
-                            else ResetDestroyProgress(Player);
+                            else
+                            {
+                                ParticleRenderer.SpawnDiggingParticle(_lastMouseOverObject);
+
+                                if (_lastMouseOverObject.hit == MouseOverObject.hit &&
+                                    lastPos == MouseOverObject.blockPos)
+                                {
+                                    if (!DestroyProgresses.TryGetValue(lastPos, out DestroyProgress progress))
+                                    {
+                                        if (World?.GetBlockState(lastPos).Block.Hardness != -1)
+                                        {
+                                            DestroyProgresses.TryAdd(lastPos,
+                                                progress = new DestroyProgress(lastPos, Player));
+                                            progress.Progress = 0;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        progress.Progress +=
+                                            Player.GetEquippedItemStack() is ItemStack st && !st.IsEmpty
+                                                ? st.Item.GetMiningSpeed(World?.GetBlockState(lastPos).Block.Material)
+                                                : 1;
+                                    }
+
+                                    if (progress.Destroyed)
+                                        DestroyProgresses.TryRemove(progress.Pos, out DestroyProgress removed);
+                                }
+                                else ResetDestroyProgress(Player);
+                            }
                         }
 
                         _lastMouseOverObject = MouseOverObject;
@@ -561,7 +569,7 @@ namespace SharpCraft
         private void ResetMouse()
         {
             Point middle = PointToScreen(new Point(ClientSize.Width / 2, ClientSize.Height / 2));
-            OpenTK.Input.Mouse.SetPosition(middle.X, middle.Y);
+            Mouse.SetPosition(middle.X, middle.Y);
         }
 
         public void RunGlTasks()
@@ -613,7 +621,7 @@ namespace SharpCraft
 
         public bool AllowIngameInput()
         {
-            return GuiScreen == null && !(CursorVisible = !Focused) && (GuiChat == null || GuiChat.visible == false);
+            return GuiScreen == null && !(CursorVisible = !Focused);
         }
 
         public void OpenGuiScreen(GuiScreen guiScreen)
@@ -632,7 +640,7 @@ namespace SharpCraft
             Point middle = new Point(ClientRectangle.Width / 2, ClientRectangle.Height / 2);
             middle = PointToScreen(middle);
 
-            OpenTK.Input.Mouse.SetPosition(middle.X, middle.Y);
+            Mouse.SetPosition(middle.X, middle.Y);
         }
 
         public void CloseGuiScreen()
@@ -705,7 +713,7 @@ namespace SharpCraft
 
             HandleMouseMovement();
             Camera.UpdateViewMatrix();
-            
+
             DateTime now = DateTime.Now;
 
             _partialTicks = (float)MathHelper.Clamp(((now - _updateTimer).TotalSeconds + e.Time) / TargetUpdatePeriod, 0, 1);
@@ -733,12 +741,6 @@ namespace SharpCraft
                 GuiRenderer?.RenderHUD();
             }
 
-            //render gui chat
-            if (GuiChat != null)
-            {
-                GuiRenderer?.Render(GuiChat);
-            }
-
             //render gui screen
             if (GuiScreen != null)
             {
@@ -755,7 +757,7 @@ namespace SharpCraft
 
             _frameBuffer.BindDefault();
             _frameBuffer.CopyToScreen();//TODO
-            
+
             SwapBuffers();
 
             _fpsCounter++;
@@ -806,7 +808,7 @@ namespace SharpCraft
                 }
                 else
                 {
-                    MouseState state = OpenTK.Input.Mouse.GetCursorState();
+                    MouseState state = Mouse.GetCursorState();
                     Point point = PointToClient(new Point(state.X, state.Y));
 
                     GuiScreen.OnMouseClick(point.X, point.Y, e.Button);
@@ -832,33 +834,39 @@ namespace SharpCraft
             Player.TeleportTo(new Vector3(x, y, z));
         }
 
-        public void CommandGive(string item, int amount)
+        public void CommandGive(string itemName, int amount)
         {
-            Block blockReg = BlockRegistry.GetBlock(item);
+            Item item = ItemRegistry.GetItem(itemName);
 
-            if (blockReg == null)
+            if (item == null)
                 return;
-            
+
             // does it work for max stack??
-            ItemStack itemStack = new ItemStack(new ItemBlock(blockReg), amount);
+            ItemStack itemStack = new ItemStack(item, amount);
             Player.OnPickup(itemStack);
+        }
+
+        protected override void OnKeyPress(KeyPressEventArgs e)
+        {
+            // If chat add to text
+            if (GuiScreen is GuiChat gc)
+            {
+                gc.InputText(e.KeyChar, KeyboardState.IsKeyDown(Key.ShiftLeft));
+            }
         }
 
         protected override void OnKeyDown(KeyboardKeyEventArgs e)
         {
             base.OnKeyDown(e);
 
-            // If chat add to text
-            if (GuiChat != null && GuiChat.visible == true)
-            {
-                GuiChat.InputText(e.Key);
-            }
-
             switch (e.Key)
             {
                 case Key.P:
-                    Player?.World?.AddWaypoint(new BlockPos(Player.Pos).Offset(FaceSides.Up),
-                        Color.FromArgb(255, 0, 0, 127), "TEST");
+                    if (AllowIngameInput())
+                    {
+                        Player?.World?.AddWaypoint(new BlockPos(Player.Pos).Offset(FaceSides.Up),
+                            Color.FromArgb(255, 0, 0, 127), "TEST");
+                    }
                     break;
 
                 case Key.Escape:
@@ -873,9 +881,6 @@ namespace SharpCraft
 
                 case Key.E:
                     if (KeyboardState.IsKeyDown(Key.E))
-                        return;
-
-                    if (GuiChat != null && GuiChat.visible)
                         return;
 
                     if (GuiScreen is GuiScreenInventory)
@@ -893,14 +898,6 @@ namespace SharpCraft
                     if (KeyboardState.IsKeyDown(Key.Up))
                         return;
 
-                    if(GuiChat != null)
-                    {
-                        if(GuiChat.visible == true)
-                        {
-                            GuiChat.ShowHistoryUp();
-                        }
-                    }
-
                     break;
 
                 case Key.Down:
@@ -908,30 +905,19 @@ namespace SharpCraft
                     if (KeyboardState.IsKeyDown(Key.Down))
                         return;
 
-                    if (GuiChat != null)
-                    {
-                        if (GuiChat.visible == true)
-                        {
-                            GuiChat.ShowHistoryDown();
-                        }
-                    }
-
                     break;
 
                 case Key.Enter:
                     if (KeyboardState.IsKeyDown(Key.Enter))
                         return;
-                    
-                    if (GuiChat == null)
+
+                    if (GuiScreen is GuiChat gc)
                     {
-                        GuiChat = new GuiChat();
-                        return;
+                        gc.SendMessage();
+                        Instance.CloseGuiScreen();
                     }
                     else
-                    {
-                        GuiChat.Init();
-                        GuiChat.ToggleVisibillity();
-                    }
+                        OpenGuiScreen(new GuiChat());
 
                     break;
 
@@ -972,6 +958,7 @@ namespace SharpCraft
                         Shader.ReloadAll();
                         SettingsManager.Load();
                         TextureManager.Reload();
+                        LangUtil.Reload();
 
                         WorldRenderer.RenderDistance = SettingsManager.GetInt("renderdistance");
                         _sensitivity = SettingsManager.GetFloat("sensitivity");
