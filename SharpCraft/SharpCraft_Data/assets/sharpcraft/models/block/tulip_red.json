@@ -1,0 +1,9 @@
+{
+  "inherit": "block/tulip",
+  "textures": {
+    "block": "blocks/tulip_red",
+    "stigma": "blocks/sponge",
+    "particle": "blocks/tulip_red"
+  },
+  "cubes": []
+}

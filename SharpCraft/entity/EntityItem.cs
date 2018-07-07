@@ -25,7 +25,7 @@ namespace SharpCraft.entity
 
         static EntityItem()
         {
-            Shader = new Shader("entity_item");
+            Shader = new Shader("entity_item", "fogDistance");
         }
 
         public EntityItem(World world, Vector3 pos, Vector3 motion, ItemStack stack, bool noDelay = false) : base(world, pos, motion)
@@ -187,6 +187,7 @@ namespace SharpCraft.entity
                     return;
 
                 Shader.Bind();
+                Shader.SetFloat("fogDistance", SharpCraft.Instance.WorldRenderer.RenderDistance);
 
                 GL.BindVertexArray(model.RawModel.VaoID);
 

@@ -1,6 +1,9 @@
 #version 330
 
+const vec3 skycolor = vec3(0, 0.815, 1);
+
 in vec2 pass_uv;
+in float visibility;
 in float brightness;
 
 out vec4 out_Color;
@@ -12,7 +15,7 @@ void main(void){
 	
 	if(texturePixelColor.a == 0)discard;
 	
-	texturePixelColor.xyz *= brightness * 2;
+	texturePixelColor.rgb *= brightness * 2;
 	
-	out_Color = texturePixelColor;
+	out_Color = mix(vec4(skycolor, 1.0), texturePixelColor, visibility);
 }

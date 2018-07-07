@@ -4,8 +4,8 @@ const float density = 0.05;
 const float gradient = 4;
 
 in vec3 position;
-in vec2 textureCoords;
 in vec3 normal;
+in vec2 textureCoords;
 
 out vec2 pass_uv;
 out float visibility;

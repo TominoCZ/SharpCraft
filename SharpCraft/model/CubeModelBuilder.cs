@@ -144,6 +144,11 @@ namespace SharpCraft.model
                 Facing side = pair.Key;
                 JsonCubeFaceUv textureNode = pair.Value;
 
+                float minU = 0;
+                float minV = 0;
+                float maxU = 1;
+                float maxV = 1;
+
                 if (modelTextureVariables.TryGetValue(textureNode.texture, out var textureNameForFace) && textureMap.TryGetValue(textureNameForFace, out var tme))
                 {
                     var percentageU1 = MathHelper.Clamp(textureNode.uv[0] / 16f, 0, 1);
@@ -153,29 +158,29 @@ namespace SharpCraft.model
 
                     Vector2 size = tme.UVMax - tme.UVMin;
 
-                    var minU = tme.UVMin.X + size.X * percentageU1;
-                    var minV = tme.UVMin.Y + size.Y * percentageV1;
-                    var maxU = tme.UVMin.X + size.X * percentageU2;
-                    var maxV = tme.UVMin.Y + size.Y * percentageV2;
-
-                    uvs.Add(minU);
-                    uvs.Add(minV);
-
-                    uvs.Add(minU);
-                    uvs.Add(maxV);
-
-                    uvs.Add(maxU);
-                    uvs.Add(minV);
-
-                    uvs.Add(maxU);
-                    uvs.Add(minV);
-
-                    uvs.Add(minU);
-                    uvs.Add(maxV);
-
-                    uvs.Add(maxU);
-                    uvs.Add(maxV);
+                    minU = tme.UVMin.X + size.X * percentageU1;
+                    minV = tme.UVMin.Y + size.Y * percentageV1;
+                    maxU = tme.UVMin.X + size.X * percentageU2;
+                    maxV = tme.UVMin.Y + size.Y * percentageV2;
                 }
+
+                uvs.Add(minU);
+                uvs.Add(minV);
+
+                uvs.Add(minU);
+                uvs.Add(maxV);
+
+                uvs.Add(maxU);
+                uvs.Add(minV);
+
+                uvs.Add(maxU);
+                uvs.Add(minV);
+
+                uvs.Add(minU);
+                uvs.Add(maxV);
+
+                uvs.Add(maxU);
+                uvs.Add(maxV);
 
                 Vector3 rot = Vector3.Zero;
                 Vector3 ori = Vector3.Zero;
@@ -329,7 +334,7 @@ namespace SharpCraft.model
 
             float[] faceUv =
             {
-                0, 1, 
+                0, 1,
                 0, 0,
                 1, 1,
 

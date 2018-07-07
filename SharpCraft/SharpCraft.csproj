@@ -35,6 +35,8 @@
     <ApplicationIcon>Icon.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="block\BlockTulipOrange.cs" />
+    <Compile Include="block\BlockTulipRed.cs" />
     <Compile Include="gui\GuiChat.cs" />
     <Compile Include="ModInfo.cs" />
     <Compile Include="ModMain.cs" />
@@ -286,7 +288,6 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System.Drawing" />
-    <Reference Include="System.Windows.Forms" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Icon.ico" />

@@ -325,6 +325,8 @@ namespace SharpCraft.world
             var rare = BlockRegistry.GetBlock<BlockRare>().GetState();
             var bedrock = BlockRegistry.GetBlock<BlockBedrock>().GetState();
             var tallgrass = BlockRegistry.GetBlock<BlockTallGrass>().GetState();
+            var tulipRed = BlockRegistry.GetBlock<BlockTulipRed>().GetState();
+            var tulipOrange = BlockRegistry.GetBlock<BlockTulipOrange>().GetState();
 
             short airId = GetLocalBlockId(air.Block.UnlocalizedName);
 
@@ -369,7 +371,16 @@ namespace SharpCraft.world
 
                             //set tallgrass above
                             if (IsAir(x, y + 1, z) && grassSeed >= 0.3f)
-                                SetBlock(x, y + 1, z, tallgrass);
+                            {
+                                var random = MathUtil.NextFloat();
+
+                                if (random >= 0 && random <= 0.6666)
+                                    SetBlock(x, y + 1, z, tallgrass);
+                                else
+                                {
+                                    SetBlock(x, y + 1, z, random <= 0.83325D ? tulipRed : tulipOrange);
+                                }
+                            }
                         }
                         else if (y > 0 && peakY - y > 0 && peakY - y < 3)
                         {

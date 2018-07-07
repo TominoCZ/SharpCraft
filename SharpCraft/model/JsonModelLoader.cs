@@ -50,27 +50,24 @@ namespace SharpCraft.model
         {
             string dir = $"{SharpCraft.Instance.GameFolderDir}/assets/sharpcraft/models/block";
 
-            if (!Directory.Exists(dir))
-                return;
-
             var listOfBlocks = BlockRegistry.AllBlocks();
 
             List<string> nonDuplicateTextures = new List<string>();
 
-            var blockModels = new ConcurrentDictionary<string, JsonModel>();
+            var blockModels = new ConcurrentDictionary<string, List<JsonModel>>();
 
             foreach (var block in listOfBlocks)
             {
-                var unlocalizedLast = LangUtil.GetUnlocalizedNameLast(block.UnlocalizedName);
+                string unlocalizedLast = LangUtil.GetUnlocalizedNameLast(block.UnlocalizedName);
 
                 string file = $"{dir}/{unlocalizedLast}.json";
 
-                JsonModel bjm;
+                var models = new List<JsonModel>();
 
                 if (!File.Exists(file))
                 {
                     var cube = new JsonCube();
-                    var uv = new JsonCubeFaceUv { texture = "item" };
+                    var uv = new JsonCubeFaceUv { texture = "particle" };
 
                     cube.faces = new Dictionary<Facing, JsonCubeFaceUv>
                     {
@@ -85,65 +82,108 @@ namespace SharpCraft.model
                     cube.from = new[] { 0f, 0, 0 };
                     cube.to = new[] { 16f, 16, 16 };
 
-                    bjm = new JsonModel
+                    var bjm = new JsonModel
                     {
                         cubes = new[]
                         {
                             cube
                         },
-                        textures = new Dictionary<string, string> { { "item", "" } }
+                        textures = new Dictionary<string, string> { { "particle", unlocalizedLast } }
                     };
+
+                    models.Add(bjm);
                 }
                 else
                 {
-                    bjm = FixBlockJson(file);
+                    models.Add(FixBlockJson(file));
+
+                    while (models.Last() is JsonModel jm && !string.IsNullOrEmpty(jm.inherit))
+                    {
+                        string inhertiedFile = $"{SharpCraft.Instance.GameFolderDir}/assets/sharpcraft/models/{jm.inherit}.json";
+
+                        if (File.Exists(inhertiedFile))
+                            models.Add(FixBlockJson(inhertiedFile));
+                    }
+
+                    models.Reverse();
                 }
 
-                blockModels.TryAdd(block.UnlocalizedName, bjm); //save what block is using what model
+                blockModels.TryAdd(block.UnlocalizedName, models); //save what block is using what model
 
-                foreach (var pair in bjm.textures) //iterating over the textureMap in the Json model
+                foreach (var jsonModel in models)
                 {
-                    if (!nonDuplicateTextures.Contains(pair.Value))
+                    if (jsonModel.textures == null)
+                        continue;
+
+                    foreach (var pair in jsonModel.textures) //iterating over the textureMap in the Json model
                     {
-                        nonDuplicateTextures.Add(pair.Value); //add the current texture name to a list of all textureMap if isn't already there
+                        if (!nonDuplicateTextures.Contains(pair.Value))
+                        {
+                            nonDuplicateTextures
+                                .Add(pair
+                                    .Value); //add the current texture name to a list of all textureMap if isn't already there
+                        }
                     }
                 }
             }
 
-            var textureMapElements = new Dictionary<string, TextureMapElement>(); //each texture name has it's UV values TODO - maybe make a TextureMap class where this could be used
-
-            var id = Stitch(nonDuplicateTextures.ToArray(), 16, textureMapElements); // stitch all textureMap, return the texture ID of the registered texture in VRAM
+            //each texture name has it's UV values TODO - maybe make a TextureMap class where this could be used
+            var id = Stitch(nonDuplicateTextures.ToArray(), 16, out var textureMapElements); // stitch all textureMap, return the texture ID of the registered texture in VRAM
 
             //TODO - if json doesn't contain cube model, assume it's a full cube
-            foreach (var pair in blockModels) //one model per registered block
+            foreach (var pair in blockModels) //one model per registered item
             {
                 string name = pair.Key;
-                JsonModel model = pair.Value;
+                
+                List<float> vertexes = new List<float>();
+                List<float> normals = new List<float>();
+                List<float> uvs = new List<float>();
 
-                float[] vertexes = new float[108 * model.cubes.Length];
-                float[] normals = new float[108 * model.cubes.Length];
-                float[] uvs = new float[72 * model.cubes.Length];
+                List<JsonCube> cubes = new List<JsonCube>();
 
-                for (var index = 0; index < model.cubes.Length; index++)
+                Dictionary<string, string> textures = new Dictionary<string, string>();
+
+                foreach (var model in pair.Value)
                 {
-                    var cube = model.cubes[index];
+                    foreach (var cube in model.cubes)
+                    {
+                        cubes.Add(cube);
+                    }
 
-                    CubeModelBuilder.AppendCubeModel(cube, model.textures, textureMapElements, ref vertexes,
-                        ref normals, ref uvs, index);
+                    if (model.textures == null)
+                        continue;
+                    
+                    foreach (var pairtex in model.textures)
+                    {
+                        try
+                        {
+                            textures.Add(pairtex.Key, pairtex.Value);
+                        }
+                        catch
+                        {
+                            Console.WriteLine("ERROR: Found duplicate texture names in inhertied models!");
+                        }
+                    }
                 }
 
-                if (!model.textures.TryGetValue("particle", out var particleTexture))
-                    particleTexture = model.textures.Values.ToArray()[SharpCraft.Instance.Random.Next(0, model.textures.Count)];
-                if (!model.textures.TryGetValue("item", out var slotTexture))
+                foreach (var cube in cubes)
                 {
-                    if (model.cubes.Length > 0 && model.cubes[0].faces.TryGetValue(Facing.south, out var uv))
-                        slotTexture = model.textures[uv.texture];
+                    CubeModelBuilder.AppendCubeModel(cube, textures, textureMapElements, ref vertexes,
+                        ref normals, ref uvs);
+                }
+
+                if (!textures.TryGetValue("particle", out var particleTexture))
+                    particleTexture = textures.Values.ToArray()[SharpCraft.Instance.Random.Next(0, textures.Count)];
+                if (!textures.TryGetValue("item", out var slotTexture))
+                {
+                    if (cubes.Count > 0 && cubes[0].faces.TryGetValue(Facing.south, out var uv))
+                        slotTexture = textures[uv.texture];
                 }
 
                 var particleTme = textureMapElements[particleTexture];
-                var slotTme = textureMapElements[slotTexture];
+                var slotTme = textureMapElements.TryGetValue(slotTexture ?? "", out var result) ? result : particleTme;
 
-                ModelBlock mb = new ModelBlock(slotTme, particleTme, _blockShader, ModelManager.LoadBlockModelToVao(vertexes, normals, uvs));
+                ModelBlock mb = new ModelBlock(slotTme, particleTme, _blockShader, ModelManager.LoadBlockModelToVao(vertexes.ToArray(), normals.ToArray(), uvs.ToArray()));
 
                 BlockModels.TryAdd(name, mb);
             }
@@ -215,6 +255,9 @@ namespace SharpCraft.model
 
                 foreach (var jsonModel in models)
                 {
+                    if (jsonModel.textures == null)
+                        continue;
+
                     foreach (var pair in jsonModel.textures) //iterating over the textureMap in the Json model
                     {
                         if (!nonDuplicateTextures.Contains(pair.Value))
@@ -227,12 +270,11 @@ namespace SharpCraft.model
                 }
             }
 
-            var textureMapElements = new Dictionary<string, TextureMapElement>(); //each texture name has it's UV values TODO - maybe make a TextureMap class where this could be used
-
-            var id = Stitch(nonDuplicateTextures.ToArray(), 16, textureMapElements); // stitch all textureMap, return the texture ID of the registered texture in VRAM
+            //each texture name has it's UV values TODO - maybe make a TextureMap class where this could be used
+            var id = Stitch(nonDuplicateTextures.ToArray(), 16, out var textureMapElements); // stitch all textureMap, return the texture ID of the registered texture in VRAM
 
             //TODO - if json doesn't contain cube model, assume it's a full cube
-            foreach (var pair in itemModels) //one model per registered block
+            foreach (var pair in itemModels) //one model per registered item
             {
                 string name = pair.Key;
 
@@ -317,10 +359,8 @@ namespace SharpCraft.model
                 }
             }
 
-            var textureMapElements = new Dictionary<string, TextureMapElement>(); //each texture name has it's UV values TODO - maybe make a TextureMap class where this could be used
-
-            var id = Stitch(nonDuplicateTextures.ToArray(), 16,
-                    textureMapElements); //TODO - make the texture size variable
+            //each texture name has it's UV values TODO - maybe make a TextureMap class where this could be used
+            var id = Stitch(nonDuplicateTextures.ToArray(), 16, out var textureMapElements); //TODO - make the texture size variable
 
             List<float> vertexes = new List<float>();
             List<float> normals = new List<float>();
@@ -357,9 +397,11 @@ namespace SharpCraft.model
             return parsed;
         }
 
-        private static int Stitch(string[] allTextures, int textureSize, Dictionary<string, TextureMapElement> sprites)
+        private static int Stitch(string[] allTextures, int textureSize, out Dictionary<string, TextureMapElement> sprites)
         {
             int id;
+
+            sprites = new Dictionary<string, TextureMapElement>();
 
             using (var map = new Bitmap(256, 256))
             {
@@ -391,7 +433,7 @@ namespace SharpCraft.model
         private static void WriteBitmap(Bitmap textureMap, string texPath, int textureSize, ref int countX, ref int countY)
         {
             var file = $"{SharpCraft.Instance.GameFolderDir}/assets/sharpcraft/textures/{texPath}.png";
-            
+
             Bitmap tex;
 
             if (File.Exists(file))
@@ -520,7 +562,7 @@ namespace SharpCraft.model
 
             foreach (var pair in bkp)
             {
-                LoadModel(pair.Key, new Shader(pair.Value.Shader.ShaderName));
+                LoadModel(pair.Key, pair.Value.Shader.Reloaded());
             }
         }
 

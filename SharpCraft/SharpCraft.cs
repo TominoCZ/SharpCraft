@@ -221,6 +221,8 @@ namespace SharpCraft
             _blockRegistry.Put(new BlockRare());
             _blockRegistry.Put(new BlockLadder());
             _blockRegistry.Put(new BlockTallGrass());
+            _blockRegistry.Put(new BlockTulipRed());
+            _blockRegistry.Put(new BlockTulipOrange());
 
             //POST - MOD Blocks and Items
             foreach (ModMain mod in _installedMods)

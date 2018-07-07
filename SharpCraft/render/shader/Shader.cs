@@ -3,6 +3,7 @@ using OpenTK;
 using OpenTK.Graphics.OpenGL;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace SharpCraft.render.shader
 {
@@ -253,6 +254,12 @@ namespace SharpCraft.render.shader
 
                 shader.Destroy(); //keep this name of the function the same
             }
+        }
+
+        public Shader Reloaded()
+        {
+            Reload();
+            return this;
         }
     }
 }
