@@ -3,12 +3,12 @@ using SharpCraft.entity;
 
 namespace SharpCraft.block
 {
-    public class BlockTulipOrange: Block
+    public class BlockTulipOrange : Block
     {
         public BlockTulipOrange() : base(Material.GetMaterial("tallgrass"))
         {
             SetUnlocalizedName("sharpcraft", "tulip_orange");
-            
+
             IsFullCube = false;
             IsReplaceable = true;
 

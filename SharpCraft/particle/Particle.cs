@@ -72,7 +72,7 @@ namespace SharpCraft.particle
             partialPos.Y += partialScale / 2;
 
             ModelBaked model = ParticleRenderer.ParticleModel;
-            
+
             model.Shader.SetMatrix4("transformationMatrix", MatrixHelper.CreateTransformationMatrix(partialPos, Vector3.Zero, partialScale));
 
             GL.BindTexture(TextureTarget.Texture2D, TextureId);

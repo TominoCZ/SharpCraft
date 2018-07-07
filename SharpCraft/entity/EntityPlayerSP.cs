@@ -42,7 +42,6 @@ namespace SharpCraft.entity
         public bool IsSneaking { get; private set; }
 
         public int HotbarIndex { get; private set; }
-    
 
         public ItemStack[] Hotbar { get; }
         public ItemStack[] Inventory { get; }
@@ -299,7 +298,7 @@ namespace SharpCraft.entity
                 return;
 
             //if (SharpCraft.Instance.GuiScreen is GuiChat guiChat && guiChat.Visible)
-                //return; TODO - not needed?
+            //return; TODO - not needed?
 
             KeyboardState state = SharpCraft.Instance.KeyboardState;
 

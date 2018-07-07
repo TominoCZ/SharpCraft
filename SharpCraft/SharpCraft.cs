@@ -24,6 +24,7 @@ using System.Reflection;
 using System.Threading;
 using Bitmap = System.Drawing.Bitmap;
 using Rectangle = System.Drawing.Rectangle;
+
 #pragma warning disable 618
 
 namespace SharpCraft

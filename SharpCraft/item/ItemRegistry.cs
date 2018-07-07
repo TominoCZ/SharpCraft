@@ -38,10 +38,15 @@ namespace SharpCraft.item
         {
             return GetItem(modid + ".item." + name);
         }
-        
+
         public static ItemBlock GetItem(Block block)
         {
             return GetItem(block.UnlocalizedName) is ItemBlock ib ? ib : null;
+        }
+
+        public static ItemStack GetItemStack(BlockState state)
+        {
+            return GetItem(state.Block.UnlocalizedName) is ItemBlock ib ? new ItemStack(ib, 1, state.Block.GetMetaFromState(state)) : null;
         }
     }
 }

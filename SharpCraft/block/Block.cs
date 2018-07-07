@@ -21,7 +21,7 @@ namespace SharpCraft.block
         public int StateCount => _states.Count;
 
         public int Hardness { get; protected set; } = 8;
-        
+
         public bool IsOpaque { get; protected set; } = true;
         public bool HasTransparency { get; protected set; }
 
@@ -70,7 +70,7 @@ namespace SharpCraft.block
         {
             return false;
         }
-        
+
         public virtual bool CanBlockBePlacedAtSide(World world, BlockPos blockPos, FaceSides sideHit, EntityPlayerSp placer)
         {
             return true;
@@ -84,7 +84,7 @@ namespace SharpCraft.block
         {
             player.World.RemoveTileEntity(pos);
         }
-        
+
         public virtual TileEntity CreateTileEntity(World world, BlockPos pos)
         {
             return null;

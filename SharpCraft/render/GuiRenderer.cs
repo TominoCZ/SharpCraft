@@ -1,8 +1,8 @@
-﻿using System.Drawing;
-using OpenTK.Graphics.OpenGL;
+﻿using OpenTK.Graphics.OpenGL;
 using OpenTK.Input;
 using SharpCraft.gui;
 using SharpCraft.model;
+using System.Drawing;
 
 namespace SharpCraft.render
 {

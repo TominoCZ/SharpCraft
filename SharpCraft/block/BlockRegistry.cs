@@ -7,20 +7,20 @@ namespace SharpCraft.block
 {
     internal class BlockRegistry
     {
-        private static readonly Dictionary<string, Block> _registry = new Dictionary<string, Block>();
-        private static readonly Dictionary<Type, string> _typeRegistry = new Dictionary<Type, string>();
+        private static readonly Dictionary<string, Block> Registry = new Dictionary<string, Block>();
+        private static readonly Dictionary<Type, string> TypeRegistry = new Dictionary<Type, string>();
 
         public void Put(Block b)
         {
             var s = b.UnlocalizedName;
 
-            _registry.Add(s, b);
-            _typeRegistry.Add(b.GetType(), s);
+            Registry.Add(s, b);
+            TypeRegistry.Add(b.GetType(), s);
         }
 
         public void RegisterBlocksPost(JsonModelLoader loader)
         {
-            foreach (var block in _registry.Values)
+            foreach (var block in Registry.Values)
             {
                 block.RegisterState(loader, new BlockState(block, JsonModelLoader.GetModelForBlock(block)));
             }
@@ -30,18 +30,18 @@ namespace SharpCraft.block
 
         public static List<Block> AllBlocks()
         {
-            return _registry.Values.ToList();
+            return Registry.Values.ToList();
         }
 
         public static Block GetBlock<TBlock>() where TBlock : Block
         {
-            return _registry[_typeRegistry[typeof(TBlock)]];
+            return Registry[TypeRegistry[typeof(TBlock)]];
         }
 
         [Obsolete("Please use GetBlock<T:Block>")]
         public static Block GetBlock(string unlocalizedName)
         {
-            if (_registry.TryGetValue(unlocalizedName, out var block))
+            if (Registry.TryGetValue(unlocalizedName, out var block))
                 return block;
 
             return GetBlock<BlockAir>();

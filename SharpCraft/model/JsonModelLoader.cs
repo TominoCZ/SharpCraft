@@ -4,15 +4,16 @@ using SharpCraft.block;
 using SharpCraft.item;
 using SharpCraft.render.shader;
 using SharpCraft.texture;
+using SharpCraft.util;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
-using SharpCraft.util;
 using Bitmap = System.Drawing.Bitmap;
 using Image = System.Drawing.Image;
+
 #pragma warning disable 618
 
 #pragma warning disable 612
@@ -134,7 +135,7 @@ namespace SharpCraft.model
             foreach (var pair in blockModels) //one model per registered item
             {
                 string name = pair.Key;
-                
+
                 List<float> vertexes = new List<float>();
                 List<float> normals = new List<float>();
                 List<float> uvs = new List<float>();
@@ -152,7 +153,7 @@ namespace SharpCraft.model
 
                     if (model.textures == null)
                         continue;
-                    
+
                     foreach (var pairtex in model.textures)
                     {
                         try

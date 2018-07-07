@@ -1,6 +1,6 @@
-﻿using SharpCraft.block;
+﻿using OpenTK;
+using SharpCraft.block;
 using SharpCraft.entity;
-using OpenTK;
 
 namespace SharpCraft.world
 {

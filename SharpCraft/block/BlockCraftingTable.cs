@@ -23,9 +23,9 @@ namespace SharpCraft.block
             //var wasEmpty = tecg.IsEmpty();
 
             tecg.OnRightClicked(clicked.World, moo.hitVec, clicked.GetEquippedItemStack(), clicked);
- 
+
             //if (wasEmpty)
-                //return true;
+            //return true;
 
             return false;
         }

@@ -1,8 +1,9 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using OpenTK;
+﻿using OpenTK;
 using OpenTK.Input;
 using SharpCraft.item;
+using System.Collections.Generic;
+using System.Linq;
+
 #pragma warning disable 618
 
 namespace SharpCraft.gui
@@ -34,9 +35,11 @@ namespace SharpCraft.gui
                     if (_currentInputText.Length > 0)
                         _currentInputText = _currentInputText.Substring(0, _currentInputText.Length - 1);
                     break;
+
                 case Key.Up:
                     ShowHistoryUp();
                     break;
+
                 case Key.Down:
                     ShowHistoryDown();
                     break;
@@ -114,6 +117,7 @@ namespace SharpCraft.gui
 
                             SharpCraft.Instance.Player.TeleportTo(position);
                             break;
+
                         case "give":
                             string itemName = split[1];
                             int ammount = 1;
@@ -129,7 +133,6 @@ namespace SharpCraft.gui
                 }
                 catch
                 {
-
                 }
             }
         }
@@ -140,6 +143,7 @@ namespace SharpCraft.gui
 
             _currentInputText += character;
         }
+
         /*
         private void FinishTyping()
         {
@@ -201,8 +205,6 @@ namespace SharpCraft.gui
 
                         break;
                 }
-
-
             }
             else
             {
@@ -212,7 +214,6 @@ namespace SharpCraft.gui
             _historyQueue.Enqueue(CurrentInputText);
 
             base.Init();
-
 
             if (incorrectComand)
             {

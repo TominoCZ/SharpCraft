@@ -1,10 +1,11 @@
-﻿using SharpCraft.block;
+﻿using Newtonsoft.Json;
+using SharpCraft.block;
 using SharpCraft.entity;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
-using Newtonsoft.Json;
+
 // ReSharper disable InconsistentNaming
 
 namespace SharpCraft.world
@@ -42,7 +43,7 @@ namespace SharpCraft.world
             {
                 Console.WriteLine(e.StackTrace);
             }
-            
+
             try
             {
                 WorldWaypointNode wwn = new WorldWaypointNode(w);
@@ -116,13 +117,12 @@ namespace SharpCraft.world
         }
     }
 
-    class WorldWaypointNode
+    internal class WorldWaypointNode
     {
         [JsonProperty] private List<WaypointNode> waypoints = new List<WaypointNode>();
 
         public WorldWaypointNode()
         {
-
         }
 
         public WorldWaypointNode(World w)
@@ -156,7 +156,7 @@ namespace SharpCraft.world
             }
         }
 
-        class WaypointNode
+        private class WaypointNode
         {
             [JsonProperty] public int x;
             [JsonProperty] public int y;

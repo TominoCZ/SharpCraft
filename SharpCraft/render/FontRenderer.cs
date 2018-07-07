@@ -1,13 +1,13 @@
 ﻿using OpenTK;
 using OpenTK.Graphics.OpenGL;
 using SharpCraft.gui;
+using SharpCraft.render.shader;
 using SharpCraft.texture;
 using SharpCraft.util;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Text.RegularExpressions;
-using SharpCraft.render.shader;
 using Color = System.Drawing.Color;
 
 namespace SharpCraft.render
@@ -80,7 +80,6 @@ namespace SharpCraft.render
                     }
                     catch
                     {
-
                     }
                 }
 

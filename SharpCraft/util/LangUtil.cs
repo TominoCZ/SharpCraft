@@ -28,7 +28,7 @@ namespace SharpCraft.util
 
             foreach (var line in dict)
             {
-                var split = line.Split(new []{'='}, StringSplitOptions.RemoveEmptyEntries);
+                var split = line.Split(new[] { '=' }, StringSplitOptions.RemoveEmptyEntries);
 
                 if (split.Length != 2)
                     continue;
@@ -50,7 +50,7 @@ namespace SharpCraft.util
 
         public static string GetUnlocalizedNameLast(string unlocalizedName)
         {
-            return unlocalizedName.Split(new []{'.'}, StringSplitOptions.RemoveEmptyEntries).LastOrDefault();
+            return unlocalizedName.Split(new[] { '.' }, StringSplitOptions.RemoveEmptyEntries).LastOrDefault();
         }
 
         public static void Reload()

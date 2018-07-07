@@ -241,7 +241,7 @@ namespace SharpCraft.world.chunk
                 BuildChunkModel();
                 return;
             }
-            
+
             _model.Bind();
 
             Block.DefaultShader.SetMatrix4("transformationMatrix", MatrixHelper.CreateTransformationMatrix(Pos));

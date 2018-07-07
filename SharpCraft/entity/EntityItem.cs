@@ -216,7 +216,7 @@ namespace SharpCraft.entity
                     Matrix4 t3 = Matrix4.CreateTranslation(posO);
 
                     Matrix4 mat = t3 * t2 * (rot * s) * t;
-                    
+
                     Shader.SetMatrix4("transformationMatrix", mat);
 
                     model.RawModel.Render();
@@ -267,7 +267,7 @@ namespace SharpCraft.entity
                     Matrix4 t3 = Matrix4.CreateTranslation(posO);
 
                     Matrix4 mat = t3 * t2 * (rot * s) * t;
-                    
+
                     Shader.SetMatrix4("transformationMatrix", mat);
                     model.RawModel.Render();
                 }

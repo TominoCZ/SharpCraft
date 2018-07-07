@@ -231,7 +231,7 @@ namespace SharpCraft.render
 
                 _shaderTexturedCube.SetMatrix4("transformationMatrix", mat);
                 _shaderTexturedCube.SetVector2("UVmin", min);
-                _shaderTexturedCube.SetVector2("UVmax" , max);
+                _shaderTexturedCube.SetVector2("UVmax", max);
                 //TODO "colorIn"
                 _destroyProgressModel.Render();
             }
@@ -252,9 +252,9 @@ namespace SharpCraft.render
 
             _selectionOutline.Bind();
             _selectionOutline.SetColor(Vector4.One);
-            
+
             shader.SetMatrix4("transformationMatrix", MatrixHelper.CreateTransformationMatrix(ch.Pos, size));
-            
+
             GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
             GL.DrawArrays(PrimitiveType.Lines, 0, _selectionOutline.RawModel.VertexCount);
             GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Fill);
@@ -269,16 +269,16 @@ namespace SharpCraft.render
 
             if (bb == null)
                 return;
-            
+
             GL.LineWidth(2);
             GL.PointSize(5);
             //GL.DepthRange(0, 0.1f);
-            
+
             _selectionOutline.Bind();
             _selectionOutline.SetColor(_selectionOutlineColor);
 
             var mat = MatrixHelper.CreateTransformationMatrix(pos.ToVec() + bb.Min, bb.Size + Vector3.One * 0.001f);
-            
+
             shader.SetMatrix4("transformationMatrix", mat);
 
             GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
@@ -449,7 +449,7 @@ namespace SharpCraft.render
             Matrix4 mat = t0 * r1 * animationMatrix * tFinal * r2 * s * t1;
 
             model.Bind();
-            
+
             model.Shader.SetMatrix4("transformationMatrix", mat);
 
             model.RawModel.Render();
@@ -521,7 +521,7 @@ namespace SharpCraft.render
             Matrix4 mat = t0 * r1 * animationMatrix * tFinal * r2 * s * t1;
 
             model.Bind();
-            
+
             model.Shader.SetMatrix4("transformationMatrix", mat);
 
             model.RawModel.Render();

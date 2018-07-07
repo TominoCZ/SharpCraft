@@ -3,11 +3,11 @@ using SharpCraft.block;
 using SharpCraft.entity;
 using SharpCraft.model;
 using SharpCraft.particle;
+using SharpCraft.render.shader;
 using SharpCraft.util;
 using SharpCraft.world;
 using System;
 using System.Collections.Generic;
-using SharpCraft.render.shader;
 
 namespace SharpCraft.render
 {

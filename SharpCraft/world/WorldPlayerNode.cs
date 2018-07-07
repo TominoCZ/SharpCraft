@@ -1,8 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using Newtonsoft.Json;
 using OpenTK;
 using SharpCraft.entity;
 using SharpCraft.item;
-using Newtonsoft.Json;
+using System.Collections.Generic;
+
 // ReSharper disable InconsistentNaming
 
 #pragma warning disable 618
@@ -22,7 +23,6 @@ namespace SharpCraft.world
 
         public WorldPlayerNode()
         {
-            
         }
 
         public WorldPlayerNode(EntityPlayerSp player)
@@ -113,8 +113,10 @@ namespace SharpCraft.world
         {
             [JsonProperty]
             public string id;
+
             [JsonProperty]
             public int count;
+
             [JsonProperty]
             public short meta;
         }

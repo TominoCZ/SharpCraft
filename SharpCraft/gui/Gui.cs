@@ -7,6 +7,7 @@ using SharpCraft.render;
 using SharpCraft.render.shader;
 using SharpCraft.util;
 using System;
+
 #pragma warning disable 618
 
 namespace SharpCraft.gui

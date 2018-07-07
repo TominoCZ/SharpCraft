@@ -1,4 +1,5 @@
 using Newtonsoft.Json;
+
 // ReSharper disable InconsistentNaming
 
 namespace SharpCraft.world
@@ -10,7 +11,6 @@ namespace SharpCraft.world
 
         public WorldDataNode()
         {
-
         }
 
         public WorldDataNode(World w)

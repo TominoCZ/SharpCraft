@@ -1,9 +1,8 @@
-﻿using System;
-using OpenTK;
+﻿using OpenTK;
 using OpenTK.Graphics.OpenGL;
+using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 
 namespace SharpCraft.render.shader
 {
@@ -63,6 +62,7 @@ namespace SharpCraft.render.shader
 
             return -1;
         }
+
         /*
         protected void BindAttributes()
         {
@@ -177,7 +177,7 @@ namespace SharpCraft.render.shader
             {
                 var shader = Shaders[index];
                 shader.Bind();
-                shader.SetMatrix4("viewMatrix", mat); 
+                shader.SetMatrix4("viewMatrix", mat);
                 shader.Unbind();
             }
         }

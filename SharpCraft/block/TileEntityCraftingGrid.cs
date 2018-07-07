@@ -6,6 +6,7 @@ using SharpCraft.model;
 using SharpCraft.util;
 using SharpCraft.world;
 using System;
+
 #pragma warning disable 618
 
 namespace SharpCraft.block

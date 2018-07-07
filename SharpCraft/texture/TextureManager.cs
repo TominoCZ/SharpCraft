@@ -1,14 +1,14 @@
-﻿using System;
+﻿using OpenTK;
+using OpenTK.Graphics.OpenGL;
+using SharpCraft.block;
+using SharpCraft.gui;
+using SharpCraft.util;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
-using OpenTK;
-using OpenTK.Graphics.OpenGL;
-using SharpCraft.block;
-using SharpCraft.gui;
-using SharpCraft.util;
 using PixelFormat = System.Drawing.Imaging.PixelFormat;
 
 namespace SharpCraft.texture
@@ -215,7 +215,7 @@ namespace SharpCraft.texture
                 {
                     string file = $"{dir}/sky_{sideName}.png";
 
-                    bitmaps.Add(side, (Bitmap) Image.FromFile(file));
+                    bitmaps.Add(side, (Bitmap)Image.FromFile(file));
                 }
                 else
                 {
