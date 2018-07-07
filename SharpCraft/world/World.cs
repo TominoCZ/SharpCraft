@@ -73,13 +73,6 @@ namespace SharpCraft.world
                 Entities.Add(e);
         }
 
-        public void AddTileEntity(BlockPos pos, TileEntity te)
-        {
-            var chp = pos.ChunkPos();
-
-            GetChunk(chp)?.AddTileEntity(ChunkPos.ToChunkLocal(pos), te);
-        }
-
         public void RemoveTileEntity(BlockPos pos)
         {
             GetChunk(pos.ChunkPos())?.RemoveTileEntity(ChunkPos.ToChunkLocal(pos));
@@ -440,11 +433,11 @@ namespace SharpCraft.world
 
                                     BlockState leaves = leavesGreen;
                                         
-                                    if (leavesSeed > 0.1f && leavesSeed <= 0.2f)
+                                    if (leavesSeed > 0.2f && leavesSeed <= 0.4f)
                                         leaves = leavesYellow;
-                                    else if (leavesSeed > 0.2f && leavesSeed <= 0.3f)
+                                    else if (leavesSeed > 0.4f && leavesSeed <= 0.55f)
                                         leaves = leavesOrange;
-                                    else if (leavesSeed > 0.3f)
+                                    else if (leavesSeed > 0.65f)
                                         leaves = leavesRed;
 
                                     if (Vector3.Distance(vec, Vector3.Zero) <= 2.5f)

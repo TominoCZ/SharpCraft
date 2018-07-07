@@ -27,13 +27,11 @@ namespace SharpCraft.block
 
             foreach (var block in Registry.Values)
             {
-                var models = JsonModelLoader.GetModels(block);
-                if (models == null)
-                    continue;
+                var count = JsonModelLoader.GetModelCount(block);
 
-                foreach (var modelBlock in models)
+                for (var index = 0; index < count; index++)
                 {
-                    var state = new BlockState(block, modelBlock);
+                    var state = new BlockState(block, (short)index);
                     block.RegisterState(loader, state);
                 }
             }

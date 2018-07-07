@@ -508,38 +508,38 @@ namespace SharpCraft.json
         /// </summary>
         /// <param name="unlocalizedName"></param>
         /// <returns></returns>
-        //[Obsolete("Use GetModelForBlock(Block)")]
-        //public static ModelBlock GetModelForBlock(string unlocalizedName, short state = 0)
-        //{
-        //if (BlockStateModels.TryGetValue(unlocalizedName, out var blockStates))
-        // {
-        //if (state < blockStates.Count)
-        //{
-        //return blockStates[state < 0 ? 0 : state];
-        //}
-        //}
+        [Obsolete("Use GetModelForBlock(Block)")]
+        public static ModelBlock GetModelForBlock(string unlocalizedName, short state = 0)
+        {
+            if (BlockStateModels.TryGetValue(unlocalizedName, out var blockStates))
+            {
+                if (state < blockStates.Count)
+                {
+                    return blockStates[state > blockStates.Count ? blockStates.Count - 1 : (state < 0 ? 0 : state)];
+                }
+            }
 
-        //return null;
-        //}
+            return null;
+        }
 
         /// <summary>
         /// Returns null if block is not registered
         /// </summary>
         /// <param name="block"></param>
         /// <returns></returns>
-        //public static ModelBlock GetModelForBlock(Block block, short state = 0)
-        //{
-        //return GetModelForBlock(block.UnlocalizedName, state);
-        //}
+        public static ModelBlock GetModelForBlock(Block block, short state = 0)
+        {
+            return GetModelForBlock(block.UnlocalizedName, state);
+        }
 
-        public static List<ModelBlock> GetModels(Block block)
+        public static int GetModelCount(Block block)
         {
             if (BlockStateModels.TryGetValue(block.UnlocalizedName, out var states))
             {
-                return new List<ModelBlock>(states);
+                return states.Count;
             }
 
-            return null;
+            return 0;
         }
 
         /// <summary>
