@@ -2,15 +2,17 @@
 
 namespace SharpCraft.gui
 {
-    internal class FontMapCharacter
+    public struct FontMapCharacter
     {
         public readonly FontMapCharacterNode Character;
-        public readonly TextureUVNode TextureUv;
+        public readonly TextureUvNode TextureUv;
+        public readonly bool HasValue;
 
-        public FontMapCharacter(FontMapCharacterNode character, TextureUVNode textureUv)
+        public FontMapCharacter(FontMapCharacterNode character, TextureUvNode textureUv)
         {
             Character = character;
             TextureUv = textureUv;
+            HasValue = true;
         }
     }
 }

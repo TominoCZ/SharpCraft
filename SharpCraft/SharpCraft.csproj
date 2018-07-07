@@ -39,6 +39,7 @@
     <Compile Include="ModInfo.cs" />
     <Compile Include="ModMain.cs" />
     <Compile Include="RegistryEventArgs.cs" />
+    <Compile Include="render\FontRenderer.cs" />
     <Compile Include="Resource.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -124,7 +125,6 @@
     <Compile Include="render\Camera.cs" />
     <Compile Include="render\EntityRenderer.cs" />
     <Compile Include="render\FBO.cs" />
-    <Compile Include="render\FontRenderer.cs" />
     <Compile Include="render\GuiRenderer.cs" />
     <Compile Include="render\ParticleRenderer.cs" />
     <Compile Include="render\SkyboxRenderer.cs" />
@@ -286,6 +286,7 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Icon.ico" />

@@ -1,6 +1,6 @@
 ﻿namespace SharpCraft.gui
 {
-    internal class FontMapCharacterNode
+    public struct FontMapCharacterNode
     {
         public readonly char Char;
         public readonly int X;
@@ -12,6 +12,8 @@
         public readonly int OffsetX;
         public readonly int OffsetY;
 
+        public readonly bool HasValue;
+
         public FontMapCharacterNode(char c, int x, int y, int w, int h, int oX, int oY)
         {
             Char = c;
@@ -22,6 +24,8 @@
 
             OffsetX = oX;
             OffsetY = oY;
+
+            HasValue = true;
         }
     }
 }

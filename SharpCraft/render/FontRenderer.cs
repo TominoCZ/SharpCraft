@@ -40,7 +40,7 @@ namespace SharpCraft.render
 
             Vector2 totalSize = Vector2.Zero;
 
-            Queue<Tuple<FontMapCharacter, Vector3>> present = new Queue<Tuple<FontMapCharacter, Vector3>>();
+            Queue<ValueTuple<FontMapCharacter, Vector3>> present = new Queue<ValueTuple<FontMapCharacter, Vector3>>();
 
             MatchCollection matches = Regex.Matches(text, @"\\{(.*?)\}");
 
@@ -51,7 +51,7 @@ namespace SharpCraft.render
                 char c = text[index];
 
                 FontMapCharacter node = FontManager.GetCharacter(c);
-                if (node == null)
+                if (!node.HasValue)
                     continue;
 
                 Match first = null;
@@ -87,7 +87,7 @@ namespace SharpCraft.render
                 totalSize.X += node.Character.W + node.Character.OffsetX;
                 totalSize.Y += node.Character.H + node.Character.OffsetY;
 
-                present.Enqueue(new Tuple<FontMapCharacter, Vector3>(node, currentColor * brightness));
+                present.Enqueue(new ValueTuple<FontMapCharacter, Vector3>(node, currentColor * brightness));
             }
 
             totalSize.X += (present.Count - 1) * spacing;
@@ -98,7 +98,7 @@ namespace SharpCraft.render
 
             float positionX = 0f;
 
-            foreach (Tuple<FontMapCharacter, Vector3> tuple in present)
+            foreach (ValueTuple<FontMapCharacter, Vector3> tuple in present)
             {
                 float width = tuple.Item1.Character.W * scale;
                 float height = tuple.Item1.Character.H * scale;
@@ -127,8 +127,8 @@ namespace SharpCraft.render
                     Shader.SetVector3("colorIn", Vector3.One * 0.1f);
 
                     Shader.SetMatrix4("transformationMatrix", mat1);//mat1);
-                    Shader.SetVector2("UVmin", tuple.Item1.TextureUv.start);
-                    Shader.SetVector2("UVmax", tuple.Item1.TextureUv.end);
+                    Shader.SetVector2("UVmin", tuple.Item1.TextureUv.Start);
+                    Shader.SetVector2("UVmax", tuple.Item1.TextureUv.End);
 
                     GL.DrawArrays(PrimitiveType.Triangles, 0, 6);
                 }
@@ -141,8 +141,8 @@ namespace SharpCraft.render
                 Shader.SetVector3("colorIn", tuple.Item2 == Vector3.One ? color : tuple.Item2);
 
                 Shader.SetMatrix4("transformationMatrix", mat2);
-                Shader.SetVector2("UVmin", tuple.Item1.TextureUv.start);
-                Shader.SetVector2("UVmax", tuple.Item1.TextureUv.end);
+                Shader.SetVector2("UVmin", tuple.Item1.TextureUv.Start);
+                Shader.SetVector2("UVmax", tuple.Item1.TextureUv.End);
 
                 GL.DrawArrays(PrimitiveType.Triangles, 0, 6);
 

@@ -177,7 +177,7 @@ namespace SharpCraft.texture
             return texID;
         }
 
-        public static TextureUVNode GetUV(int textureSizeX, int textureSizeY, int x, int y, int sizeX, int sizeY) //TODO i might move this to TextureManager or TextureHelper
+        public static TextureUvNode GetUV(int textureSizeX, int textureSizeY, int x, int y, int sizeX, int sizeY) //TODO i might move this to TextureManager or TextureHelper
         {
             var mapSize = new Vector2(textureSizeX, textureSizeY);
             var sampleSize = new Vector2(sizeX, sizeY);
@@ -188,7 +188,7 @@ namespace SharpCraft.texture
             var start = Vector2.Divide(pos_start, mapSize);
             var end = Vector2.Divide(pos_end, mapSize);
 
-            return new TextureUVNode(start, end);
+            return new TextureUvNode(start, end);
         }
 
         private static Dictionary<FaceSides, Bitmap> LoadSkyboxTextures()

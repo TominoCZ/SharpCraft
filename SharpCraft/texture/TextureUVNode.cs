@@ -2,15 +2,15 @@
 
 namespace SharpCraft.texture
 {
-    internal class TextureUVNode
+    public class TextureUvNode
     {
-        public Vector2 start;
-        public Vector2 end;
+        public readonly Vector2 Start;
+        public readonly Vector2 End;
 
-        public TextureUVNode(Vector2 start, Vector2 end)
+        public TextureUvNode(Vector2 start, Vector2 end)
         {
-            this.start = start;
-            this.end = end;
+            Start = start;
+            End = end;
         }
     }
 }

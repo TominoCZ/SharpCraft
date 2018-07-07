@@ -29,7 +29,7 @@ namespace SharpCraft.gui
             {
                 var parsed = ParseFntCharLine(line);
 
-                if (parsed == null)
+                if (!parsed.HasValue)
                     continue;
 
                 var uv = TextureManager.GetUV(tex.TextureSize.Width, tex.TextureSize.Height, parsed.X, parsed.Y, parsed.W, parsed.H);
@@ -51,7 +51,7 @@ namespace SharpCraft.gui
             line = Regex.Replace(line, @"\s+", " ");
 
             if (!line.Contains("char id="))
-                return null;
+                return new FontMapCharacterNode();
 
             var startIndex = line.IndexOf("id=", StringComparison.Ordinal);
 
