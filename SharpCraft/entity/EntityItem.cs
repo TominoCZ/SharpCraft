@@ -9,6 +9,7 @@ using SharpCraft.world;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using SharpCraft.json;
 
 namespace SharpCraft.entity
 {
@@ -181,7 +182,7 @@ namespace SharpCraft.entity
 
             if (_stack.Item is ItemBlock itemBlock)
             {
-                ModelBlock model = JsonModelLoader.GetModelForBlock(itemBlock.Block);
+                ModelBlock model = itemBlock.Block.GetState(_stack.Meta).Model;
 
                 if (model?.RawModel == null)
                     return;

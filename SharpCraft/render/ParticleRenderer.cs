@@ -62,7 +62,7 @@ namespace SharpCraft.render
             {
                 var state = SharpCraft.Instance.World.GetBlockState(moo.blockPos);
 
-                if (JsonModelLoader.GetModelForBlock(state.Block) == null)
+                if (state.Model == null)
                     return;
 
                 float f0 = moo.hitVec.X

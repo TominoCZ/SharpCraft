@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace SharpCraft.model
+namespace SharpCraft.json
 {
     public class JsonCubeFaceUv
     {

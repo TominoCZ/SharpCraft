@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using SharpCraft.json;
 using Buffer = System.Buffer;
 
 #pragma warning disable 618
@@ -305,9 +306,8 @@ namespace SharpCraft.world.chunk
                             continue;
 
                         BlockPos localPos = new BlockPos(x, y, z);
-
-                        ModelBlock model = JsonModelLoader.GetModelForBlock(state.Block);
-                        ModelBlockRaw mbr = (ModelBlockRaw)model?.RawModel;
+                        
+                        ModelBlockRaw mbr = (ModelBlockRaw)state.Model?.RawModel;
 
                         if (mbr == null)
                             continue;

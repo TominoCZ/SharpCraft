@@ -1,4 +1,5 @@
 ﻿using SharpCraft.render.shader;
+using SharpCraft.texture;
 
 namespace SharpCraft.model
 {

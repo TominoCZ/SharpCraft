@@ -37,6 +37,7 @@
   <ItemGroup>
     <Compile Include="block\BlockTulipOrange.cs" />
     <Compile Include="block\BlockTulipRed.cs" />
+    <Compile Include="json\JsonBlockStates.cs" />
     <Compile Include="gui\GuiChat.cs" />
     <Compile Include="ModInfo.cs" />
     <Compile Include="ModMain.cs" />
@@ -103,11 +104,11 @@
     <Compile Include="model\CubeModelBuilder.cs" />
     <Compile Include="model\IModelBaked.cs" />
     <Compile Include="model\IModelRaw.cs" />
-    <Compile Include="model\JsonCube.cs" />
-    <Compile Include="model\JsonCubeFaceUv.cs" />
-    <Compile Include="model\JsonModel.cs" />
-    <Compile Include="model\JsonModelLoader.cs" />
-    <Compile Include="model\JsonModelRotation.cs" />
+    <Compile Include="json\JsonCube.cs" />
+    <Compile Include="json\JsonCubeFaceUv.cs" />
+    <Compile Include="json\JsonModel.cs" />
+    <Compile Include="json\JsonModelLoader.cs" />
+    <Compile Include="json\JsonModelRotation.cs" />
     <Compile Include="model\ModelBaked.cs" />
     <Compile Include="model\ModelBlock.cs" />
     <Compile Include="model\ModelBlockRaw.cs" />

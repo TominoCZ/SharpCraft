@@ -12,6 +12,7 @@ using SharpCraft.world;
 using SharpCraft.world.chunk;
 using System;
 using System.Collections.Generic;
+using SharpCraft.json;
 using GL = OpenTK.Graphics.OpenGL.GL;
 using TextureTarget = OpenTK.Graphics.OpenGL.TextureTarget;
 
@@ -69,7 +70,7 @@ namespace SharpCraft.render
             var cube = CubeModelBuilder.CreateCubeVertexes();
 
             _destroyProgressModel = ModelManager.LoadModel3ToVao(cube);
-            JsonModelLoader.LoadModel("entity/player/arm", Block.DefaultShader);
+            JsonModelLoader.LoadCustomModel("entity/player/arm", Block.DefaultShader);
 
             RenderDistance = 8;
             _lastFov = _fov = SharpCraft.Instance.Camera.PartialFov;
@@ -176,7 +177,7 @@ namespace SharpCraft.render
 
             GL.BindTexture(TextureTarget.Texture2D, JsonModelLoader.TextureBlocks);
 
-            ModelBlock model = JsonModelLoader.GetModelForBlock(BlockRegistry.GetBlock<BlockRare>());
+            ModelBlock model = BlockRegistry.GetBlock<BlockRare>().GetState().Model;
 
             float size = 0.25f;
 
@@ -311,7 +312,7 @@ namespace SharpCraft.render
 
             if (stack.Item is ItemBlock itemBlock)
             {
-                RenderBlockInHand(itemBlock.Block, partialTicks);
+                RenderBlockInHand(itemBlock.Block, stack.Meta, partialTicks);
             }
             else if (stack.Item != null)
             {
@@ -387,12 +388,12 @@ namespace SharpCraft.render
             GL.DepthRange(0, 1);
         }
 
-        private void RenderBlockInHand(Block block, float partialTicks)
+        private void RenderBlockInHand(Block block, short meta, float partialTicks)
         {
             GL.BindTexture(TextureTarget.Texture2D, JsonModelLoader.TextureBlocks);
             GL.DepthRange(0, Camera.NearPlane);
 
-            ModelBlock model = JsonModelLoader.GetModelForBlock(block);
+            ModelBlock model = block.GetState(meta).Model;
 
             if (model == null)
                 return;

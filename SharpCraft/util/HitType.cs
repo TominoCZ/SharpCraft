@@ -1,4 +1,4 @@
-﻿namespace SharpCraft
+﻿namespace SharpCraft.util
 {
     public enum HitType
     {

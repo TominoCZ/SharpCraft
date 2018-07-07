@@ -1,0 +1,14 @@
+{
+  "states":
+  [
+    {
+		"model": "block/leaves_yellow"
+	},
+	{
+		"model": "block/leaves_orange"
+	},
+	{
+		"model": "block/leaves_red"
+	}
+  ]
+}

@@ -1,7 +1,8 @@
-﻿using Newtonsoft.Json;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using Newtonsoft.Json;
+using SharpCraft.texture;
 
-namespace SharpCraft.model
+namespace SharpCraft.json
 {
     public class JsonCube
     {

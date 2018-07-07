@@ -1,7 +1,10 @@
 ﻿using SharpCraft.model;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using SharpCraft.json;
+using SharpCraft.util;
 
 namespace SharpCraft.block
 {
@@ -20,12 +23,20 @@ namespace SharpCraft.block
 
         public void RegisterBlocksPost(JsonModelLoader loader)
         {
+            loader.LoadBlockModels();
+
             foreach (var block in Registry.Values)
             {
-                block.RegisterState(loader, new BlockState(block, JsonModelLoader.GetModelForBlock(block)));
-            }
+                var models = JsonModelLoader.GetModels(block);
+                if (models == null)
+                    continue;
 
-            loader.LoadBlocks();
+                foreach (var modelBlock in models)
+                {
+                    var state = new BlockState(block, modelBlock);
+                    block.RegisterState(loader, state);
+                }
+            }
         }
 
         public static List<Block> AllBlocks()

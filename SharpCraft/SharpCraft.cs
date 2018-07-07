@@ -22,6 +22,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
+using SharpCraft.json;
 using Bitmap = System.Drawing.Bitmap;
 using Rectangle = System.Drawing.Rectangle;
 

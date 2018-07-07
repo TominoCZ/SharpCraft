@@ -531,7 +531,7 @@ namespace SharpCraft.entity
 
             BlockState state = World.GetBlockState(moo.blockPos);
 
-            if (JsonModelLoader.GetModelForBlock(state.Block) != null)
+            if (state.Model != null)
                 SharpCraft.Instance.ParticleRenderer.SpawnDestroyParticles(moo.blockPos, state);
 
             World.SetBlockState(moo.blockPos, BlockRegistry.GetBlock<BlockAir>().GetState());

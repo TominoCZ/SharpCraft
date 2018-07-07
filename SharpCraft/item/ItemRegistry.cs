@@ -3,6 +3,8 @@ using SharpCraft.model;
 using System.Collections.Generic;
 using System.Linq;
 using SharpCraft.block;
+using SharpCraft.json;
+
 #pragma warning disable 618
 
 namespace SharpCraft.item
@@ -18,7 +20,7 @@ namespace SharpCraft.item
 
         public void RegisterItemsPost(JsonModelLoader loader)
         {
-            loader.LoadItems();
+            loader.LoadItemModels();
         }
 
         public static List<Item> AllItems()

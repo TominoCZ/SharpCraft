@@ -7,6 +7,7 @@ using SharpCraft.render;
 using SharpCraft.render.shader;
 using SharpCraft.util;
 using System;
+using SharpCraft.json;
 
 #pragma warning disable 618
 
@@ -112,9 +113,9 @@ namespace SharpCraft.gui
         }
 
         [Obsolete("Use RenderStack() instead")]
-        protected virtual void RenderBlock(Block block, float x, float y, float scale)
+        protected virtual void RenderBlock(Block block, short meta, float x, float y, float scale)
         {
-            var model = JsonModelLoader.GetModelForBlock(block);
+            var model = block.GetState(meta).Model;
 
             if (model == null)
                 return;
@@ -186,7 +187,7 @@ namespace SharpCraft.gui
         protected void RenderStack(ItemStack stack, float x, float y, float scale)
         {
             if (stack.Item is ItemBlock itemBlock)
-                RenderBlock(itemBlock.Block, x, y, scale);
+                RenderBlock(itemBlock.Block, stack.Meta, x, y, scale);
             else
                 RenderItem(stack.Item, x, y, scale);
         }

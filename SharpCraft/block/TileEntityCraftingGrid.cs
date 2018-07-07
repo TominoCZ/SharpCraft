@@ -6,6 +6,7 @@ using SharpCraft.model;
 using SharpCraft.util;
 using SharpCraft.world;
 using System;
+using SharpCraft.json;
 
 #pragma warning disable 618
 
@@ -128,7 +129,7 @@ namespace SharpCraft.block
                     {
                         if (stack.Item is ItemBlock ib)
                         {
-                            var model = JsonModelLoader.GetModelForBlock(ib.Block);
+                            var model = ib.Block.GetState(stack.Meta).Model;//JsonModelLoader.GetModelForBlock(ib.Block));
 
                             var mat = Matrix4.CreateTranslation(_pos.X + offX + offsetX, _pos.Y + 1, _pos.Z + offZ + offsetY);
                             var scale = Matrix4.CreateScale(grid);
@@ -169,7 +170,7 @@ namespace SharpCraft.block
                 {
                     var mat = Matrix4.CreateTranslation(_pos.X + 0.5f, _pos.Y + 1.5f + offY, _pos.Z + 0.5f);
                     var scale = Matrix4.CreateTranslation(Vector3.One * -0.5f) * Matrix4.CreateScale(0.35f);
-                    var model = JsonModelLoader.GetModelForBlock(ib.Block);
+                    var model = ib.Block.GetState(_product.Meta).Model;
 
                     GL.BindTexture(TextureTarget.Texture2D, JsonModelLoader.TextureBlocks);
 

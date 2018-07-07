@@ -3,6 +3,7 @@ using SharpCraft.model;
 using SharpCraft.render.shader;
 using SharpCraft.world;
 using System.Collections.Generic;
+using SharpCraft.json;
 
 namespace SharpCraft.block
 {
@@ -47,7 +48,7 @@ namespace SharpCraft.block
 
         public BlockState GetState(short meta = 0)
         {
-            return _states[meta > 0 ? meta : 0];
+            return _states[meta >= _states.Count ? _states.Count - 1 : (meta < 0 ? 0 : meta)];
         }
 
         public short GetMetaFromState(BlockState state)

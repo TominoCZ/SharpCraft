@@ -316,7 +316,10 @@ namespace SharpCraft.world
 
             var air = BlockRegistry.GetBlock<BlockAir>().GetState();
 
-            var leaves = BlockRegistry.GetBlock<BlockLeaves>().GetState();
+            var leavesGreen = BlockRegistry.GetBlock<BlockLeaves>().GetState();
+            var leavesYellow = BlockRegistry.GetBlock<BlockLeaves>().GetState(1);
+            var leavesOrange = BlockRegistry.GetBlock<BlockLeaves>().GetState(2);
+            var leavesRed = BlockRegistry.GetBlock<BlockLeaves>().GetState(3);
 
             var log = BlockRegistry.GetBlock<BlockLog>().GetState();
             var grass = BlockRegistry.GetBlock<BlockGrass>().GetState();
@@ -433,8 +436,21 @@ namespace SharpCraft.world
 
                                     Vector3 vec = new Vector3(i, j, k);
 
+                                    float leavesSeed = (peakY - 32) / 32f;
+
+                                    BlockState leaves = leavesGreen;
+                                        
+                                    if (leavesSeed > 0.1f && leavesSeed <= 0.2f)
+                                        leaves = leavesYellow;
+                                    else if (leavesSeed > 0.2f && leavesSeed <= 0.3f)
+                                        leaves = leavesOrange;
+                                    else if (leavesSeed > 0.3f)
+                                        leaves = leavesRed;
+
                                     if (Vector3.Distance(vec, Vector3.Zero) <= 2.5f)
+                                    {
                                         SetBlock(pX, pY, pZ, leaves);
+                                    }
                                 }
                             }
                         }
