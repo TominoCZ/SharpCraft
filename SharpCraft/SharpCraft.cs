@@ -153,6 +153,8 @@ namespace SharpCraft
 
             SettingsManager.Load();
 
+            Camera.SetTargetFov(SettingsManager.GetFloat("fov"));
+
             OpenGuiScreen(new GuiScreenMainMenu());
         }
 
@@ -233,6 +235,7 @@ namespace SharpCraft
             _blockRegistry.Put(new BlockTallGrass());
             _blockRegistry.Put(new BlockTulipRed());
             _blockRegistry.Put(new BlockTulipOrange());
+            _blockRegistry.Put(new BlockTNT());
 
             //POST - MOD Blocks and Items
             foreach (ModMain mod in _installedMods)
@@ -245,9 +248,12 @@ namespace SharpCraft
                 _itemRegistry.Put(new ItemBlock(block));
             }
 
+            Item stick = new ItemStick();
+
             _itemRegistry.Put(new ItemPickaxe("wood"));
             _itemRegistry.Put(new ItemPickaxe("stone"));
             _itemRegistry.Put(new ItemPickaxe("rare"));
+            _itemRegistry.Put(stick);
 
             var log = ItemRegistry.GetItem(BlockRegistry.GetBlock<BlockLog>());
             var wood = ItemRegistry.GetItem(BlockRegistry.GetBlock<BlockPlanks>());
@@ -257,24 +263,24 @@ namespace SharpCraft
             Item[] recipe =
             {
                 cobble, cobble, cobble,
-                null, wood, null,
-                null, wood, null
+                null, stick, null,
+                null, stick, null
             };
             _recipeRegistry.RegisterRecipe(recipe, ItemRegistry.GetItem("sharpcraft", "pick_stone"));
 
             recipe = new[]
             {
                 rare, rare, rare,
-                null, wood, null,
-                null, wood, null
+                null, stick, null,
+                null, stick, null
             };
             _recipeRegistry.RegisterRecipe(recipe, ItemRegistry.GetItem("sharpcraft", "pick_rare"));
 
             recipe = new[]
             {
                 wood, wood, wood,
-                null, wood, null,
-                null, wood, null
+                null, stick, null,
+                null, stick, null
             };
             _recipeRegistry.RegisterRecipe(recipe, ItemRegistry.GetItem("sharpcraft", "pick_wood"));
 
@@ -308,7 +314,7 @@ namespace SharpCraft
                 wood, null, null,
                 null, null, null
             };
-            _recipeRegistry.RegisterRecipe(recipe, wood);
+            _recipeRegistry.RegisterRecipe(recipe, new ItemStack(stick, 4));
 
             recipe = new[]
             {
@@ -340,6 +346,8 @@ namespace SharpCraft
             WorldRenderer.RenderDistance = SettingsManager.GetInt("renderdistance");
 
             LoadWorld("MyWorld");
+
+            Player?.OnPickup(ItemRegistry.GetItemStack(BlockRegistry.GetBlock<BlockTNT>().GetState()));
         }
 
         public void LoadWorld(string saveName)
@@ -720,14 +728,26 @@ namespace SharpCraft
         }
 
         protected override void OnRenderFrame(FrameEventArgs e)
-        { 
+        {
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
             _frameBuffer.Bind();//TODO
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
-            
+
+            //gt.updateTimer();
+            //Console.WriteLine(gt.renderPartialTicks);
+
             DateTime now = DateTime.Now;
-            _partialTicks = (now - _updateTimer).Milliseconds / 50f;
+            _partialTicks = (float)MathHelper.Clamp((now - _updateTimer).TotalSeconds / TargetUpdatePeriod, 0, 1);
+
+            if (_ticked)
+            {
+                _ticked = false;
+
+                //Console.WriteLine(_partialTicks);
+                _partialTicks %= 1f;
+            }
+
             if ((now - _lastFpsDate).TotalMilliseconds >= 1000)
             {
                 _fpsCounterLast = _fpsCounter;
@@ -739,7 +759,7 @@ namespace SharpCraft
 
             HandleMouseMovement();
             Camera.UpdateViewMatrix();
-            
+
             //RENDER SCREEN
             if (World != null)
             {
@@ -779,13 +799,16 @@ namespace SharpCraft
             _spinner.SpinOnce();
         }
 
+        private bool _ticked;
         protected override void OnUpdateFrame(FrameEventArgs e)
         {
+            _ticked = true;
+
             if (!IsDisposed && Visible)
                 GetMouseOverObject();
 
             GameLoop();
-            
+
             _updateTimer = DateTime.Now;
         }
 
@@ -972,6 +995,8 @@ namespace SharpCraft
                         TextureManager.Reload();
                         SoundEngine.Reload();
                         LangUtil.Reload();
+
+                        Camera.SetTargetFov(SettingsManager.GetFloat("fov"));
 
                         WorldRenderer.RenderDistance = SettingsManager.GetInt("renderdistance");
                         _sensitivity = SettingsManager.GetFloat("sensitivity");

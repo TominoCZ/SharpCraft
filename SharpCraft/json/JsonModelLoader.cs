@@ -224,7 +224,7 @@ namespace SharpCraft.json
                         {
                             cube
                         },
-                        textures = new Dictionary<string, string> { { "item", unlocalizedLast } }
+                        textures = new Dictionary<string, string> { { "item", "items/" + unlocalizedLast } }
                     };
 
                     models.Add(bjm);
@@ -239,6 +239,7 @@ namespace SharpCraft.json
 
                         if (File.Exists(inhertiedFile))
                             models.Add(FixBlockJson(inhertiedFile));
+                        else break;
                     }
 
                     models.Reverse();

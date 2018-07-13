@@ -81,9 +81,9 @@ namespace SharpCraft.block
         {
         }
 
-        public virtual void OnDestroyed(BlockPos pos, BlockState oldState, EntityPlayerSp player)
+        public virtual void OnDestroyed(World world, BlockPos pos, BlockState oldState, EntityPlayerSp destroyer)
         {
-            player.World.RemoveTileEntity(pos);
+            world.RemoveTileEntity(pos);
         }
 
         public virtual TileEntity CreateTileEntity(World world, BlockPos pos)

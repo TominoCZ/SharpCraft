@@ -134,7 +134,7 @@ namespace SharpCraft.model
                 GL.DeleteVertexArray(vao);
 
             foreach (int vbo in VbOs)
-                GL.DeleteVertexArray(vbo);
+                GL.DeleteBuffer(vbo);
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using OpenTK;
+﻿using System;
+using OpenTK;
 using SharpCraft.block;
 using SharpCraft.world.chunk;
 
@@ -45,6 +46,15 @@ namespace SharpCraft.util
         public static Matrix4 CreateTransformationMatrix(ChunkPos translation)
         {
             return Matrix4.CreateTranslation(translation.x * Chunk.ChunkSize, 0, translation.z * Chunk.ChunkSize);
+        }
+
+        public static Matrix4 CreatePerspectiveFieldOfView(float fovy, float aspect, float zNear, float zFar)
+        {
+            float top = zNear * (float)Math.Tan(0.5 * (double)fovy);
+            float bottom = -top;
+            Matrix4.CreatePerspectiveOffCenter(bottom * aspect, top * aspect, bottom, top, zNear, zFar, out var result);
+
+            return result;
         }
     }
 }

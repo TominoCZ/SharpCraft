@@ -14,6 +14,7 @@ namespace SharpCraft
         {
             _settings.Add("sensitivity", "1");
             _settings.Add("renderdistance", "8");
+            _settings.Add("fov", "90");
             _settings.Add("mipmap", "true");
             _settings.Add("worldseed", "yeet");
             _settings.Add("lang", "en-US");

@@ -536,7 +536,7 @@ namespace SharpCraft.entity
 
             World.SetBlockState(moo.blockPos, BlockRegistry.GetBlock<BlockAir>().GetState());
 
-            state.Block.OnDestroyed(moo.blockPos, state, this);
+            state.Block.OnDestroyed(World, moo.blockPos, state, this);
 
             if (state.Block == BlockRegistry.GetBlock<BlockStone>())
                 state = BlockRegistry.GetBlock<BlockCobbleStone>().GetState();

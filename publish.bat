@@ -5,3 +5,5 @@ dotnet publish .\SharpCraft.sln --runtime win10-x64 -c release -o "..\build\Shar
 
 md ".\build\SharpCraft_win10-x64\SharpCraft_Data">nul
 xcopy ".\SharpCraft\SharpCraft_Data" ".\build\SharpCraft_win10-x64\SharpCraft_Data" /s/h/e/k/f/c>nul
+
+pause

@@ -1,6 +1,7 @@
 ﻿using OpenTK;
 using SharpCraft.render.shader;
 using System;
+using SharpCraft.util;
 
 #pragma warning disable CS0675 // Bitwise-or operator used on a sign-extended operand
 
@@ -11,7 +12,7 @@ namespace SharpCraft.render
         public const float NearPlane = 0.15f;
         public const float FarPlane = 1000f;
 
-        public float TargetFov { get; }
+        public float TargetFov { get; private set; }
 
         public float PartialFov { get; private set; }
 
@@ -31,7 +32,7 @@ namespace SharpCraft.render
 
         public Camera()
         {
-            PartialFov = TargetFov = 70;
+            PartialFov = TargetFov = SettingsManager.GetFloat("fov");
 
             UpdateViewMatrix();
             UpdateProjectionMatrix();
@@ -40,6 +41,13 @@ namespace SharpCraft.render
         public void SetFov(float fov)
         {
             PartialFov = fov;
+
+            UpdateProjectionMatrix();
+        }
+
+        public void SetTargetFov(float fov)
+        {
+            TargetFov = PartialFov = fov;
 
             UpdateProjectionMatrix();
         }
@@ -60,7 +68,7 @@ namespace SharpCraft.render
         {
             float aspectRatio = (float)SharpCraft.Instance.Width / SharpCraft.Instance.Height;
 
-            Projection = Matrix4.CreatePerspectiveFieldOfView(MathHelper.DegreesToRadians(PartialFov), aspectRatio, NearPlane, FarPlane);
+            Projection = MatrixHelper.CreatePerspectiveFieldOfView(MathHelper.DegreesToRadians(PartialFov), aspectRatio, NearPlane, FarPlane);
 
             Shader.SetProjectionMatrix(Projection);
         }

@@ -84,7 +84,7 @@ namespace SharpCraft.world.chunk
             if (localPos.Z >= ChunkSize) throw new IndexOutOfRangeException($"Block Pos z({localPos.Z}) is bigger or equal to ChunkSize");
         }
 
-        public void SetBlockState(BlockPos localPos, BlockState state)
+        public void SetBlockState(BlockPos localPos, BlockState state, bool rebuild = true)
         {
             CheckPos(localPos);
 
@@ -99,7 +99,7 @@ namespace SharpCraft.world.chunk
             {
                 _chunkBlocks[localPos.X, localPos.Y, localPos.Z] = value;
 
-                if (ModelBuilding || !QueuedForModelBuild) //this is so that we prevent double chunk build calls and invisible placed blocks(if the model is already generating, there is a chance that the block on this position was already processed, so the rebuild is queued again)
+                if (rebuild) //this is so that we prevent double chunk build calls and invisible placed blocks(if the model is already generating, there is a chance that the block on this position was already processed, so the rebuild is queued again)
                 {
                     //BuildChunkModel(); TODO - make this run on another thread
                     NotifyModelChange(localPos);
@@ -207,16 +207,20 @@ namespace SharpCraft.world.chunk
             return GetBlockState(pos).Block == BlockRegistry.GetBlock<BlockAir>();
         }
 
-        private void NotifyModelChange(BlockPos localPos)
+        public void NotifyModelChange(BlockPos blockChanged)
         {
+            if (!ModelBuilding && QueuedForModelBuild)
+                return;
+
             MarkDirty();
-            if (localPos.X == 0)
+
+            if (blockChanged.X == 0)
                 World.GetChunk(Pos + FaceSides.West).MarkDirty();
-            if (localPos.X == ChunkSize - 1)
+            if (blockChanged.X == ChunkSize - 1)
                 World.GetChunk(Pos + FaceSides.East).MarkDirty();
-            if (localPos.Z == 0)
+            if (blockChanged.Z == 0)
                 World.GetChunk(Pos + FaceSides.North).MarkDirty();
-            if (localPos.Z == ChunkSize - 1)
+            if (blockChanged.Z == ChunkSize - 1)
                 World.GetChunk(Pos + FaceSides.South).MarkDirty();
         }
 
@@ -306,7 +310,7 @@ namespace SharpCraft.world.chunk
                             continue;
 
                         BlockPos localPos = new BlockPos(x, y, z);
-                        
+
                         ModelBlockRaw mbr = (ModelBlockRaw)state.Model?.RawModel;
 
                         if (mbr == null)

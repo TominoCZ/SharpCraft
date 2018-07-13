@@ -161,7 +161,7 @@ namespace SharpCraft.world
             return chunk.GetBlockState(ChunkPos.ToChunkLocal(pos));
         }
 
-        public void SetBlockState(BlockPos pos, BlockState state)
+        public void SetBlockState(BlockPos pos, BlockState state, bool rebuild = true)
         {
             Chunk chunk = GetChunk(ChunkPos.FromWorldSpace(pos));
             if (chunk == null || !chunk.HasData)
@@ -171,7 +171,7 @@ namespace SharpCraft.world
 
             var localPos = ChunkPos.ToChunkLocal(pos);
 
-            chunk.SetBlockState(localPos, state);
+            chunk.SetBlockState(localPos, state, rebuild);
 
             if (state.Block.CreateTileEntity(this, pos) is TileEntity te)
             {

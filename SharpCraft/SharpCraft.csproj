@@ -35,8 +35,11 @@
     <ApplicationIcon>Icon.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="block\BlockTNT.cs" />
     <Compile Include="block\BlockTulipOrange.cs" />
     <Compile Include="block\BlockTulipRed.cs" />
+    <Compile Include="GameTimer.cs" />
+    <Compile Include="item\ItemStick.cs" />
     <Compile Include="json\JsonBlockStates.cs" />
     <Compile Include="gui\GuiChat.cs" />
     <Compile Include="ModInfo.cs" />
