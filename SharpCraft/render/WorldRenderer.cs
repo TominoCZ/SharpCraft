@@ -366,7 +366,7 @@ namespace SharpCraft.render
                                       * Matrix4.CreateRotationZ(animationSine1 * MathHelper.PiOver6 / 1.35f)
                                       * Matrix4.CreateTranslation(0, 0.5f, 0);
 
-            Matrix4 r1 = Matrix4.CreateRotationX(MathHelper.DegreesToRadians(45)) * Matrix4.CreateRotationZ(MathHelper.DegreesToRadians(-40)) * Matrix4.CreateRotationY(MathHelper.DegreesToRadians(5));
+            Matrix4 r1 = Matrix4.CreateRotationZ(MathHelper.PiOver2) * Matrix4.CreateRotationX(MathHelper.DegreesToRadians(45)) * Matrix4.CreateRotationZ(MathHelper.DegreesToRadians(-40)) * Matrix4.CreateRotationY(MathHelper.DegreesToRadians(5));
             Matrix4 r2 = Matrix4.CreateRotationX(rotVec.X - SharpCraft.Instance.Camera.PitchOffset) * Matrix4.CreateRotationY(rotVec.Y);
 
             Matrix4 s = Matrix4.CreateScale(1.5f);

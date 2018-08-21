@@ -206,7 +206,7 @@ namespace SharpCraft
         {
             for (int i = 1; i < 6; i++)
             {
-                SoundEngine.RegisterSound($"block/grass/walk{i}");
+                //SoundEngine.RegisterSound($"block/grass/walk{i}");
             }
 
             //register materails

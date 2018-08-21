@@ -1,5 +1,5 @@
 sensitivity=1
-renderdistance=4
+renderdistance=6
 fov=70
 mipmap=true
 worldseed=yeet
