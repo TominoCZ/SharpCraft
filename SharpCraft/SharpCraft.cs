@@ -115,13 +115,12 @@ namespace SharpCraft
 
         private static string _title;
 
-        public SharpCraft() : base(680, 480, new GraphicsMode(32, 32, 0, 0), _title, GameWindowFlags.Default, DisplayDevice.Default, 3, 3, GraphicsContextFlags.ForwardCompatible)
+        public SharpCraft() : base(680, 480, new GraphicsMode(32, 32, 0, 1), _title, GameWindowFlags.Default, DisplayDevice.Default, 3, 3, GraphicsContextFlags.ForwardCompatible)
         {
             Instance = this;
             Camera = new Camera();
 
             VSync = VSyncMode.Off;
-            MakeCurrent();
 
             Title = _title = $"SharpCraft Alpha 0.0.4 [GLSL {GL.GetString(StringName.ShadingLanguageVersion)}]";
 
@@ -165,6 +164,7 @@ namespace SharpCraft
             GL.Enable(EnableCap.CullFace);
             GL.Enable(EnableCap.Blend);
             GL.CullFace(CullFaceMode.Back);
+
             GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Fill);
             GL.BlendFunc(BlendingFactor.SrcAlpha, BlendingFactor.OneMinusSrcAlpha);
             GL.Enable(EnableCap.Multisample);
@@ -796,7 +796,7 @@ namespace SharpCraft
             SwapBuffers();
 
             _fpsCounter++;
-            _spinner.SpinOnce();
+            //_spinner.SpinOnce();
         }
 
         private bool _ticked;

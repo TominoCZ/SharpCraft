@@ -79,8 +79,7 @@ namespace SharpCraft.gui
             GL.BindVertexArray(GuiRenderer.GuiQuad.VaoID);
 
             GL.EnableVertexAttribArray(0);
-
-            GL.ActiveTexture(TextureUnit.Texture0);
+            
             GL.BindTexture(TextureTarget.Texture2D, tex.ID);
             GL.DrawArrays(PrimitiveType.Triangles, 0, 6);
 

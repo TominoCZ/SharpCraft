@@ -19,6 +19,7 @@ namespace SharpCraft.model
                 VertexCount += quad.vertices.Length / valuesPerVertice;
         }*/
 
+        //buffer IDs must be in this order and step: 0;1;2;3; ...
         public ModelRaw(int vaoID, int vertexCount, params int[] bufferIDs)
         {
             VaoID = vaoID;

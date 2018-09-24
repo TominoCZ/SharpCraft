@@ -1,4 +1,5 @@
-﻿using OpenTK;
+﻿using System;
+using OpenTK;
 using OpenTK.Graphics.OpenGL;
 using SharpCraft.model;
 using SharpCraft.render.shader;
@@ -85,6 +86,7 @@ namespace SharpCraft.render
             _cube.Shader.SetMatrix4("transformationMatrix", mat);
 
             GL.BindTexture(TextureTarget.TextureCubeMap, _texture);
+
             _cube.RawModel.Render();
 
             _cube.Unbind();
