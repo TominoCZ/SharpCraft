@@ -8,6 +8,7 @@
     "ubuntu.16.04-x64": {}
   },
   "dependencies": {
+    "InvertedTomato.Feather2.Net": "0.3.0",
     "Microsoft.CSharp": "4.0.0.0",
     "NAudio.Vorbis": "1.0.0",
     "Newtonsoft.Json": "11.0.2",

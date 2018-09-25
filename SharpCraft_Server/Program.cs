@@ -3,6 +3,7 @@ using InvertedTomato.Net.Feather;
 using System;
 using System.Collections.Concurrent;
 using System.Diagnostics;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Numerics;
@@ -13,11 +14,21 @@ namespace SharpCraft_Server
 {
     class Program
     {
-        static ConcurrentDictionary<EndPoint, Entity> _entities = new ConcurrentDictionary<EndPoint, Entity>();
-
-        static FeatherTcpServer<GenericMessage> _server;
+        private static ServerHandler _serverHandler;
 
         static void Main(string[] args)
+        {
+            _serverHandler = new ServerHandler();
+        }
+    }
+
+    class ServerHandler
+    {
+        ConcurrentDictionary<EndPoint, Entity> _entities = new ConcurrentDictionary<EndPoint, Entity>();
+
+        FeatherTcpServer<GenericMessage> _server;
+
+        public ServerHandler()
         {
             Thread tickThread = new Thread(TickThread);
             tickThread.Start();
@@ -80,9 +91,9 @@ namespace SharpCraft_Server
             _server.Dispose();
         }
 
-        static TimeSpan TickTime = TimeSpan.FromMilliseconds(50);
+        TimeSpan TickTime = TimeSpan.FromMilliseconds(50);
 
-        static void TickThread()
+        void TickThread()
         {
             while (true)
             {
@@ -98,14 +109,14 @@ namespace SharpCraft_Server
             }
         }
 
-        static void Tick()
+        void Tick()
         {
             RequestPlayerData();
 
-
+            SendEntities();
         }
 
-        static void RequestPlayerData()
+        void RequestPlayerData()
         {
             foreach (var endPoint in _server.RemoteEndPoints)
             {
@@ -117,7 +128,7 @@ namespace SharpCraft_Server
             }
         }
 
-        static void ProcessPlayerData(Entity e, GenericMessage msg)
+        void ProcessPlayerData(Entity e, GenericMessage msg)
         {
             var x = msg.ReadFloat();
             var y = msg.ReadFloat();
@@ -132,6 +143,31 @@ namespace SharpCraft_Server
             var dir = new Vector3(x, y, z);
 
             e.Update(pos, dir);
+        }
+
+        void SendEntities()
+        {
+            var msg = new GenericMessage();
+            msg.WriteUnsignedInteger(2);
+            msg.WriteUnsignedInteger((ulong)_entities.Count);
+
+            foreach (var entity in _entities.Values)
+            {
+                msg.WriteGuid(entity.ID);
+
+                msg.WriteFloat(entity.Pos.X);
+                msg.WriteFloat(entity.Pos.Y);
+                msg.WriteFloat(entity.Pos.Z);
+
+                msg.WriteFloat(entity.LookVec.X);
+                msg.WriteFloat(entity.LookVec.Y);
+                msg.WriteFloat(entity.LookVec.Z);
+            }
+
+            foreach (var ep in _server.RemoteEndPoints)
+            {
+                _server.SendToAsync(ep, msg);
+            }
         }
     }
 

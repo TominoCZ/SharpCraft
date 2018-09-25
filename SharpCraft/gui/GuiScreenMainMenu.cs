@@ -1,4 +1,6 @@
-﻿using OpenTK.Input;
+﻿using System.Net;
+using OpenTK.Input;
+using SharpCraft.entity;
 using SharpCraft.texture;
 
 namespace SharpCraft.gui
@@ -10,7 +12,7 @@ namespace SharpCraft.gui
         public GuiScreenMainMenu()
         {
             Buttons.Add(new GuiButton(0, 0, -45, 2, @"\{66FF00}SINGLEPLAYER") { CenteredX = true, CenteredY = true });
-            Buttons.Add(new GuiButton(1, 0, 0, 2, @"\{DD6600}MULTIPLAYER") { CenteredX = true, CenteredY = true, Enabled = false });
+            Buttons.Add(new GuiButton(1, 0, 0, 2, @"\{DD6600}MULTIPLAYER") { CenteredX = true, CenteredY = true });
             Buttons.Add(new GuiButton(2, 0, 45, 2, @"\{FF0000}EXIT") { CenteredX = true, CenteredY = true });
 
             var titleTextgure = TextureManager.LoadTexture("gui/title");
@@ -39,7 +41,11 @@ namespace SharpCraft.gui
                     SharpCraft.Instance.CloseGuiScreen();
                     SharpCraft.Instance.StartGame();
                     break;
-
+                case 1:
+                    SharpCraft.Instance.CloseGuiScreen();
+                    SharpCraft.Instance.StartGame();
+                    SharpCraft.Instance.ConnectToServer("127.0.0.1", 25566);
+                    break;
                 case 2:
                     SharpCraft.Instance.Close();
                     break;

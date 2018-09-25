@@ -26,6 +26,8 @@ using SharpCraft.json;
 using SharpCraft.sound;
 using Bitmap = System.Drawing.Bitmap;
 using Rectangle = System.Drawing.Rectangle;
+using InvertedTomato.Net.Feather;
+using InvertedTomato.IO.Messages;
 
 #pragma warning disable 618
 
@@ -79,6 +81,8 @@ namespace SharpCraft
 
         public World World;
 
+        public ServerHander ServerHandler;
+
         public ConcurrentDictionary<BlockPos, DestroyProgress> DestroyProgresses =
             new ConcurrentDictionary<BlockPos, DestroyProgress>();
 
@@ -119,6 +123,7 @@ namespace SharpCraft
         {
             Instance = this;
             Camera = new Camera();
+            ServerHandler = new ServerHander();
 
             VSync = VSyncMode.Off;
 
@@ -383,6 +388,11 @@ namespace SharpCraft
 
             MouseState state = Mouse.GetState();
             _mouseLast = new Point(state.X, state.Y);
+        }
+
+        public void ConnectToServer(string ip, int port)
+        {
+            ServerHandler.Connect(ip, port);
         }
 
         public void Disconnect()
@@ -1066,6 +1076,92 @@ namespace SharpCraft
                 WorldLoader.SaveWorld(World);
 
             base.OnClosing(e);
+        }
+    }
+
+    class ServerHander
+    {
+        private FeatherTcpClient<GenericMessage> client;
+
+        private Guid ClientID;
+
+        public void Connect(string ip, int port)
+        {
+            client = new FeatherTcpClient<GenericMessage>();
+
+            client.OnDisconnected += (endPoint) =>
+            {
+                Console.WriteLine($"{endPoint} disconnected.");
+                OnDisconnect();
+            };
+
+            client.OnMessageReceived += (msg) =>
+            {
+                var id = msg.ReadUnsignedInteger();
+
+                if (id == 0)
+                {
+                    ClientID = msg.ReadGuid();
+                }
+
+                if (id == 1)
+                {
+                    if (SharpCraft.Instance.Player != null)
+                    {
+                        var m = new GenericMessage();
+                        m.WriteUnsignedInteger(1);
+
+                        var pos = SharpCraft.Instance.Player.Pos;
+                        var dir = SharpCraft.Instance.Camera.GetLookVec();
+
+                        m.WriteFloat(pos.X);
+                        m.WriteFloat(pos.Y);
+                        m.WriteFloat(pos.Z);
+
+                        m.WriteFloat(dir.X);
+                        m.WriteFloat(dir.Y);
+                        m.WriteFloat(dir.Z);
+
+                        client.Send(m);
+                    }
+                }
+
+                if (id == 2)
+                {
+                    int count = (int)msg.ReadUnsignedInteger();
+
+                    for (int i = 0; i < count; i++)
+                    {
+                        var guid = msg.ReadGuid();
+
+                        var x = msg.ReadFloat();
+                        var y = msg.ReadFloat();
+                        var z = msg.ReadFloat();
+
+                        var pos = new Vector3(x, y, z);
+
+                        x = msg.ReadFloat();
+                        y = msg.ReadFloat();
+                        z = msg.ReadFloat();
+
+                        var dir = new Vector3(x, y, z);
+
+                        if (guid == ClientID)
+                            continue;
+
+                        //TODO - update entities in WorldMP
+                    }
+                }
+            };
+
+            client.Connect(ip, port);
+
+            Console.WriteLine("Connected to server");
+        }
+
+        public void OnDisconnect()
+        {
+            client.Dispose();
         }
     }
 }

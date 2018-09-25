@@ -5,4 +5,9 @@
     <TargetFramework>netcoreapp2.1</TargetFramework>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="InvertedTomato.Feather2.Net" Version="0.3.0" />
+    <PackageReference Include="OpenTK" Version="3.0.1" />
+  </ItemGroup>
+
 </Project>
