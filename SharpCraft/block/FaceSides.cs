@@ -1,7 +1,7 @@
 ﻿using OpenTK;
+using SharpCraft.texture;
 using SharpCraft.world.chunk;
 using System.Collections.Generic;
-using SharpCraft.texture;
 
 namespace SharpCraft.block
 {

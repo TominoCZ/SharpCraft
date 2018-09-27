@@ -28,7 +28,7 @@ namespace SharpCraft.gui
         public override void Render(int mouseX, int mouseY)
         {
             //if (visible == false)
-              //  return;
+            //  return;
 
             for (int i = 0; i < Buttons.Count; i++)
             {

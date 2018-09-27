@@ -19,13 +19,13 @@ uniform float fogDistance;
 void main(void) {
 	vec4 worldPos = transformationMatrix * vec4(position, 1.0);
 	gl_Position = projectionMatrix * viewMatrix * worldPos;
-	
+
     vec4 positionRelativeToCam = viewMatrix * worldPos;
-	
+
 	float distance = length(positionRelativeToCam.xyz) * 2.5f / fogDistance;
     visibility = exp(-pow((distance*density), gradient));
     visibility = clamp(visibility, 0.0, 1.0);
-	
+
 	pass_uv = textureCoords;
 
 	float lightY = 0.875;

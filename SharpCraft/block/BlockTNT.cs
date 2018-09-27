@@ -1,18 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using OpenTK;
+﻿using OpenTK;
 using SharpCraft.entity;
 using SharpCraft.item;
-using SharpCraft.util;
 using SharpCraft.world;
-using SharpCraft.world.chunk;
 
 namespace SharpCraft.block
 {
-    class BlockTNT : Block
+    internal class BlockTNT : Block
     {
         public BlockTNT() : base(Material.GetMaterial("grass"))
         {
@@ -71,7 +64,7 @@ namespace SharpCraft.block
 
                             if (oldState.Block is BlockAir)
                                 continue;
-                            
+
                             World.SetBlockState(pos, air);
 
                             SharpCraft.Instance.World.AddEntity(new EntityItem(World, pos.ToVec(),

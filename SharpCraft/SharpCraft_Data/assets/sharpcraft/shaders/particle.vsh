@@ -27,7 +27,7 @@ void main(void)
 {
 	vec4 worldPos = transformationMatrix * vec4(position, 1);
 	gl_Position = projectionMatrix * viewMatrix * worldPos;
-	
+
 	int i = gl_VertexID % 6;
 
 	if (i == 0) {

@@ -3,7 +3,6 @@ using OpenTK.Input;
 using SharpCraft.block;
 using SharpCraft.gui;
 using SharpCraft.item;
-using SharpCraft.model;
 using SharpCraft.util;
 using SharpCraft.world;
 using System;

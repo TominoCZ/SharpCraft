@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Drawing;
-using System.IO;
-using System.Linq;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using OpenTK;
 using SharpCraft.block;
 using SharpCraft.item;
@@ -12,6 +6,12 @@ using SharpCraft.model;
 using SharpCraft.render.shader;
 using SharpCraft.texture;
 using SharpCraft.util;
+using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Drawing;
+using System.IO;
+using System.Linq;
 using Bitmap = System.Drawing.Bitmap;
 using Image = System.Drawing.Image;
 
@@ -90,7 +90,6 @@ namespace SharpCraft.json
                     }
                     catch
                     {
-
                     }
                 }
 

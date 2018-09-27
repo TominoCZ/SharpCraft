@@ -1,9 +1,8 @@
-﻿using System;
-using SharpCraft.model;
+﻿using SharpCraft.block;
+using SharpCraft.json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using SharpCraft.block;
-using SharpCraft.json;
 
 #pragma warning disable 618
 

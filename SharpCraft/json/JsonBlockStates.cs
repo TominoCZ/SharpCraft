@@ -10,7 +10,7 @@ namespace SharpCraft.json
     }
 
     public class JsonBlockState
-    { 
+    {
         [JsonProperty] public readonly string model;
     }
 }

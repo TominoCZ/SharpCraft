@@ -1,4 +1,6 @@
-﻿using OpenTK;
+﻿using InvertedTomato.IO.Messages;
+using InvertedTomato.Net.Feather;
+using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Input;
@@ -6,9 +8,11 @@ using SharpCraft.block;
 using SharpCraft.entity;
 using SharpCraft.gui;
 using SharpCraft.item;
+using SharpCraft.json;
 using SharpCraft.model;
 using SharpCraft.render;
 using SharpCraft.render.shader;
+using SharpCraft.sound;
 using SharpCraft.texture;
 using SharpCraft.util;
 using SharpCraft.world;
@@ -22,12 +26,8 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
-using SharpCraft.json;
-using SharpCraft.sound;
 using Bitmap = System.Drawing.Bitmap;
 using Rectangle = System.Drawing.Rectangle;
-using InvertedTomato.Net.Feather;
-using InvertedTomato.IO.Messages;
 
 #pragma warning disable 618
 
@@ -371,7 +371,7 @@ namespace SharpCraft
 
                 BlockPos playerPos = new BlockPos(0, 10, 0);//MathUtil.NextFloat(-100, 100));
 
-                World = new World("MyWorld", "Tomlow's Fuckaround", SettingsManager.GetString("worldseed"));
+                World = new WorldClient("MyWorld", "Tomlow's Fuckaround", SettingsManager.GetString("worldseed"));
 
                 Player = new EntityPlayerSp(World, playerPos.ToVec());
 
@@ -405,12 +405,14 @@ namespace SharpCraft
                 WorldLoader.SaveWorld(World);
             }
 
-            World?.DestroyChunkModels();
+            var wmp = (WorldClientServer)World;
+
+            wmp?.DestroyChunkModels();
 
             Player = null;
 
-            World?.ChunkData.Cleanup();
-            World?.LoadManager.Cleanup();
+            wmp?.ChunkData.Cleanup();
+            wmp?.LoadManager.Cleanup();
             World = null;
         }
 
@@ -810,6 +812,7 @@ namespace SharpCraft
         }
 
         private bool _ticked;
+
         protected override void OnUpdateFrame(FrameEventArgs e)
         {
             _ticked = true;
@@ -906,14 +909,6 @@ namespace SharpCraft
 
             switch (e.Key)
             {
-                case Key.P:
-                    if (AllowIngameInput())
-                    {
-                        Player?.World?.AddWaypoint(new BlockPos(Player.Pos).Offset(FaceSides.Up),
-                            Color.FromArgb(255, 0, 0, 127), "TEST");
-                    }
-                    break;
-
                 case Key.Escape:
                     if (GuiScreen is GuiScreenMainMenu || KeyboardState.IsKeyDown(Key.Escape))
                         return;
@@ -1014,7 +1009,7 @@ namespace SharpCraft
                         if (e.Shift)
                         {
                             JsonModelLoader.Reload();
-                            World?.DestroyChunkModels();
+                            //TODO - World?.DestroyChunkModels();
                         }
 
                         break;
@@ -1079,7 +1074,7 @@ namespace SharpCraft
         }
     }
 
-    class ServerHander
+    internal class ServerHander
     {
         private FeatherTcpClient<GenericMessage> client;
 

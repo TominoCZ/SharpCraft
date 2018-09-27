@@ -1,10 +1,10 @@
 ﻿using OpenTK;
 using SharpCraft.block;
+using SharpCraft.json;
+using SharpCraft.texture;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using SharpCraft.json;
-using SharpCraft.texture;
 
 namespace SharpCraft.model
 {

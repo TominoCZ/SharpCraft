@@ -1,9 +1,8 @@
 ﻿using SharpCraft.entity;
-using SharpCraft.model;
+using SharpCraft.json;
 using SharpCraft.render.shader;
 using SharpCraft.world;
 using System.Collections.Generic;
-using SharpCraft.json;
 
 namespace SharpCraft.block
 {

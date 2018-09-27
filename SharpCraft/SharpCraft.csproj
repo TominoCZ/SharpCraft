@@ -152,7 +152,6 @@
     <Compile Include="util\RayHelper.cs" />
     <Compile Include="util\Texture.cs" />
     <Compile Include="world\DestroyProgress.cs" />
-    <Compile Include="world\Waypoint.cs" />
     <Compile Include="world\World.cs" />
     <Compile Include="world\WorldDataNode.cs" />
     <Compile Include="world\WorldLoader.cs" />

@@ -1,6 +1,4 @@
-﻿using System.Net;
-using OpenTK.Input;
-using SharpCraft.entity;
+﻿using OpenTK.Input;
 using SharpCraft.texture;
 
 namespace SharpCraft.gui
@@ -41,11 +39,13 @@ namespace SharpCraft.gui
                     SharpCraft.Instance.CloseGuiScreen();
                     SharpCraft.Instance.StartGame();
                     break;
+
                 case 1:
                     SharpCraft.Instance.CloseGuiScreen();
                     SharpCraft.Instance.StartGame();
                     SharpCraft.Instance.ConnectToServer("127.0.0.1", 25566);
                     break;
+
                 case 2:
                     SharpCraft.Instance.Close();
                     break;

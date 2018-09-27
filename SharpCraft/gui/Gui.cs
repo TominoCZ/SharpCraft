@@ -2,12 +2,12 @@
 using OpenTK.Graphics.OpenGL;
 using SharpCraft.block;
 using SharpCraft.item;
+using SharpCraft.json;
 using SharpCraft.model;
 using SharpCraft.render;
 using SharpCraft.render.shader;
 using SharpCraft.util;
 using System;
-using SharpCraft.json;
 
 #pragma warning disable 618
 
@@ -79,7 +79,7 @@ namespace SharpCraft.gui
             GL.BindVertexArray(GuiRenderer.GuiQuad.VaoID);
 
             GL.EnableVertexAttribArray(0);
-            
+
             GL.BindTexture(TextureTarget.Texture2D, tex.ID);
             GL.DrawArrays(PrimitiveType.Triangles, 0, 6);
 

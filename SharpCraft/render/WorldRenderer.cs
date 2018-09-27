@@ -4,6 +4,7 @@ using OpenTK.Input;
 using SharpCraft.block;
 using SharpCraft.entity;
 using SharpCraft.item;
+using SharpCraft.json;
 using SharpCraft.model;
 using SharpCraft.render.shader;
 using SharpCraft.texture;
@@ -12,7 +13,6 @@ using SharpCraft.world;
 using SharpCraft.world.chunk;
 using System;
 using System.Collections.Generic;
-using SharpCraft.json;
 using GL = OpenTK.Graphics.OpenGL.GL;
 using TextureTarget = OpenTK.Graphics.OpenGL.TextureTarget;
 
@@ -144,7 +144,6 @@ namespace SharpCraft.render
 
             RenderChunks(world, partialTicks);
             RenderHand(partialTicks);
-            RenderWorldWaypoints(world);
             RenderDestroyProgress(world);
 
             float partialFov = _lastFov + (_fov - _lastFov) * partialTicks;
@@ -166,36 +165,6 @@ namespace SharpCraft.render
 
                 chunk.Render(partialTicks);
             }
-        }
-
-        private void RenderWorldWaypoints(World world)
-        {
-            var wps = world.GetWaypoints();
-
-            if (wps.Count == 0)
-                return;
-
-            GL.BindTexture(TextureTarget.Texture2D, JsonModelLoader.TextureBlocks);
-
-            ModelBlock model = BlockRegistry.GetBlock<BlockRare>().GetState().Model;
-
-            float size = 0.25f;
-
-            GL.DepthRange(0, Camera.NearPlane);
-            model.Bind();
-
-            foreach (Waypoint wp in wps)
-            {
-                var mat = MatrixHelper.CreateTransformationMatrix(wp.Pos.ToVec() + Vector3.One / 2 * (1 - size),
-                    new Vector3(45, 30, 35.264f), size);
-                model.Shader.SetMatrix4("transformationMatrix", mat);
-
-                model.RawModel.Render();
-            }
-
-            model.Unbind();
-
-            GL.DepthRange(0, 1);
         }
 
         private void RenderDestroyProgress(World world)

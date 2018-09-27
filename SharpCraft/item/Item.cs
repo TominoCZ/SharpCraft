@@ -13,7 +13,7 @@ namespace SharpCraft.item
         {
             SetUnlocalizedName(modid + ".item." + unlocalizedName);
         }
-        
+
         protected void SetUnlocalizedName(string mergedUnlocalizedName)
         {
             UnlocalizedName = mergedUnlocalizedName;

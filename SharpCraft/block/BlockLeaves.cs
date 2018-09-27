@@ -7,7 +7,5 @@
             SetUnlocalizedName("sharpcraft", "leaves");
             Hardness = 8;
         }
-
-        
     }
 }

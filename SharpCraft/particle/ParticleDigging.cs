@@ -1,12 +1,12 @@
 ﻿using OpenTK;
 using OpenTK.Graphics.OpenGL;
 using SharpCraft.block;
+using SharpCraft.json;
 using SharpCraft.model;
 using SharpCraft.render;
 using SharpCraft.util;
 using SharpCraft.world;
 using System;
-using SharpCraft.json;
 using Vector2 = OpenTK.Vector2;
 using Vector3 = OpenTK.Vector3;
 
@@ -28,7 +28,7 @@ namespace SharpCraft.particle
         public ParticleDigging(World world, Vector3 pos, Vector3 motion, float particleScale, BlockState state, FaceSides side) : base(world, pos, motion, particleScale, JsonModelLoader.TextureBlocks)
         {
             State = state;
-            
+
             if (state.Model.RawModel is ModelBlockRaw)
             {
                 var tex = state.Model.ParticleTexture;

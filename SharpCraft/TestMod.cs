@@ -24,7 +24,7 @@ namespace SharpCraft
         }
     }
 
-    class SumBlock : Block
+    internal class SumBlock : Block
     {
         public SumBlock() : base(Material.GetMaterial("stone"))
         {

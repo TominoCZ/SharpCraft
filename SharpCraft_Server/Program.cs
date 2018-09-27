@@ -2,31 +2,27 @@
 using InvertedTomato.Net.Feather;
 using System;
 using System.Collections.Concurrent;
-using System.Diagnostics;
-using System.Linq;
 using System.Net;
-using System.Net.Sockets;
 using System.Numerics;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace SharpCraft_Server
 {
-    class Program
+    internal class Program
     {
         private static ServerHandler _serverHandler;
 
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
             _serverHandler = new ServerHandler();
         }
     }
 
-    class ServerHandler
+    internal class ServerHandler
     {
-        ConcurrentDictionary<EndPoint, Entity> _entities = new ConcurrentDictionary<EndPoint, Entity>();
+        private ConcurrentDictionary<EndPoint, Entity> _entities = new ConcurrentDictionary<EndPoint, Entity>();
 
-        FeatherTcpServer<GenericMessage> _server;
+        private FeatherTcpServer<GenericMessage> _server;
 
         public ServerHandler()
         {
@@ -91,9 +87,9 @@ namespace SharpCraft_Server
             _server.Dispose();
         }
 
-        TimeSpan TickTime = TimeSpan.FromMilliseconds(50);
+        private TimeSpan TickTime = TimeSpan.FromMilliseconds(50);
 
-        void TickThread()
+        private void TickThread()
         {
             while (true)
             {
@@ -109,14 +105,14 @@ namespace SharpCraft_Server
             }
         }
 
-        void Tick()
+        private void Tick()
         {
             RequestPlayerData();
 
             SendEntities();
         }
 
-        void RequestPlayerData()
+        private void RequestPlayerData()
         {
             foreach (var endPoint in _server.RemoteEndPoints)
             {
@@ -128,7 +124,7 @@ namespace SharpCraft_Server
             }
         }
 
-        void ProcessPlayerData(Entity e, GenericMessage msg)
+        private void ProcessPlayerData(Entity e, GenericMessage msg)
         {
             var x = msg.ReadFloat();
             var y = msg.ReadFloat();
@@ -145,7 +141,7 @@ namespace SharpCraft_Server
             e.Update(pos, dir);
         }
 
-        void SendEntities()
+        private void SendEntities()
         {
             var msg = new GenericMessage();
             msg.WriteUnsignedInteger(2);
@@ -171,7 +167,7 @@ namespace SharpCraft_Server
         }
     }
 
-    class Entity
+    internal class Entity
     {
         public Guid ID = Guid.NewGuid();
 
@@ -229,7 +225,6 @@ namespace SharpCraft_Server
 
         private void AcceptMessage()
         {
-
         }
     }*/
 }

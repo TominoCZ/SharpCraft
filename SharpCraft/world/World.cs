@@ -7,36 +7,31 @@ using SharpCraft.world.chunk.region;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
 
 namespace SharpCraft.world
 {
-    public class World
+    public abstract class World
     {
+        protected readonly WorldLut _worldLut = new WorldLut();
+
+        private readonly NoiseUtil _noiseUtil;
+
+        private bool _initalLoad = true; //just dirty hack needs to be removed soon
+
         public ConcurrentDictionary<ChunkPos, Chunk> Chunks { get; } = new ConcurrentDictionary<ChunkPos, Chunk>();
+
+        public readonly ChunkDataManager<RegionStaticImpl<ChunkPos>, ChunkPos> ChunkData;
 
         public List<Entity> Entities = new List<Entity>();
 
         public readonly string Seed;
         public readonly string LevelName;
 
-        private readonly NoiseUtil _noiseUtil;
         public readonly int Dimension = 0;
         public readonly string SaveRoot;
 
-        public readonly ChunkDataManager<RegionStaticImpl<ChunkPos>, ChunkPos> ChunkData;
-
-        private bool _initalLoad = true; //just dirty hack needs to be removed soon
-
-        public ChunkLoadManager LoadManager { get; } = new ChunkLoadManager();
-
-        //TODO - clientside only
-        private readonly Dictionary<BlockPos, Waypoint> _waypoints = new Dictionary<BlockPos, Waypoint>();
-
-        private readonly WorldLut _worldLut;
-
-        public World(string saveName, string levelName, string seed)
+        protected World(string saveName, string levelName, string seed)
         {
             _noiseUtil = new NoiseUtil((Seed = seed).GetHashCode());
             _noiseUtil.SetFractalType(NoiseUtil.FractalType.FBM);
@@ -48,18 +43,94 @@ namespace SharpCraft.world
                 new RegionInfo<ChunkPos>(new[] { 12, 12 }, 2 * Chunk.ChunkSize * Chunk.ChunkHeight * Chunk.ChunkSize),
                 RegionStaticImpl<ChunkPos>.Ctor,
                 ChunkPos.Ctor);
-
-            _worldLut = new WorldLut();
-
-            foreach (var block in BlockRegistry.AllBlocks())
-            {
-                _worldLut.Put(block.UnlocalizedName);
-            }
         }
 
-        public short GetLocalBlockId(string unlocalizedName)
+        public ChunkLoadManager LoadManager { get; } = new ChunkLoadManager();
+
+        public virtual void AddEntity(Entity e)
         {
-            return _worldLut.Translate(unlocalizedName);
+            if (!Entities.Contains(e))
+                Entities.Add(e);
+        }
+
+        public void UpdateEntities()
+        {
+            Entities.RemoveAll(e =>
+            {
+                if (!IsChunkLoaded(ChunkPos.FromWorldSpace(e.Pos))) return false;
+                if (e.IsAlive)
+                {
+                    e.Update();
+                    return !e.IsAlive;
+                }
+
+                return true;
+            });
+        }
+
+        public void Update(EntityPlayerSp player, int renderDistance)
+        {//TODO use EntityPlayer instead
+            LoadManager.LoadImportantChunks();
+            LoadManager.UpdateLoad(player, renderDistance, _initalLoad);
+            _initalLoad = false;
+
+            foreach (Chunk chunk in Chunks.Values)
+            {
+                chunk.Update();
+
+                if (chunk.Pos.DistanceTo(player.Pos.Xz) > renderDistance * Chunk.ChunkSize + 50) UnloadChunk(chunk.Pos);
+            }
+
+            UpdateEntities();
+        }
+
+        public int GetHeightAtPos(float x, float z)
+        {
+            BlockPos pos = new BlockPos(x, 0, z);
+
+            Chunk chunk = GetChunk(pos.ChunkPos());
+            if (chunk == null || !chunk.HasData)
+                return 0;
+
+            return chunk.GetHeightAtPos(MathUtil.ToLocal(pos.X, Chunk.ChunkSize),
+                MathUtil.ToLocal(pos.Z, Chunk.ChunkSize));
+        }
+
+        public virtual Chunk GetChunk(ChunkPos pos)
+        {
+            return Chunks.TryGetValue(pos, out Chunk chunk) ? chunk : null;
+        }
+
+        public virtual BlockState GetBlockState(BlockPos pos)
+        {
+            if (pos.Y < 0 || pos.Y >= Chunk.ChunkHeight)
+                return BlockRegistry.GetBlock<BlockAir>().GetState();
+
+            Chunk chunk = GetChunk(ChunkPos.FromWorldSpace(pos));
+            if (chunk == null || !chunk.HasData)
+                return BlockRegistry.GetBlock<BlockAir>().GetState();
+
+            return chunk.GetBlockState(ChunkPos.ToChunkLocal(pos));
+        }
+
+        public virtual void SetBlockState(BlockPos pos, BlockState state)
+        {
+            Chunk chunk = GetChunk(ChunkPos.FromWorldSpace(pos));
+            if (chunk == null || !chunk.HasData)
+                return;
+
+            _worldLut.Put(state.Block.UnlocalizedName);
+
+            var localPos = ChunkPos.ToChunkLocal(pos);
+
+            chunk.SetBlockState(localPos, state);
+
+            if (state.Block.CreateTileEntity(this, pos) is TileEntity te)
+            {
+                chunk.AddTileEntity(localPos, te);
+            }
+
+            chunk.Save();
         }
 
         public string GetLocalBlockName(short localId)
@@ -67,13 +138,12 @@ namespace SharpCraft.world
             return _worldLut.Translate(localId);
         }
 
-        public void AddEntity(Entity e)
+        public short GetLocalBlockId(string unlocalizedName)
         {
-            if (!Entities.Contains(e))
-                Entities.Add(e);
+            return _worldLut.Translate(unlocalizedName);
         }
 
-        public void RemoveTileEntity(BlockPos pos)
+        public virtual void RemoveTileEntity(BlockPos pos)
         {
             GetChunk(pos.ChunkPos())?.RemoveTileEntity(ChunkPos.ToChunkLocal(pos));
         }
@@ -88,97 +158,9 @@ namespace SharpCraft.world
             GetChunk(pos.ChunkPos())?.SaveTileEntity(ChunkPos.ToChunkLocal(pos));
         }
 
-        private void UpdateEntities()
-        {
-            Entities.RemoveAll(e =>
-            {
-                if (!IsChunkLoaded(ChunkPos.FromWorldSpace(e.Pos))) return false;
-                if (e.IsAlive)
-                {
-                    e.Update();
-                    return !e.IsAlive;
-                }
-                return true;
-            });
-        }
-
         public bool IsChunkLoaded(ChunkPos pos)
         {
             return GetChunk(pos) is Chunk chunk && chunk.HasData;
-        }
-
-        public List<AxisAlignedBb> GetIntersectingEntitiesBBs(AxisAlignedBb with)
-        {
-            return (from entity in Entities where !(entity is EntityItem) select entity.GetEntityBoundingBox() into bb where bb.IntersectsWith(with) select bb).ToList();
-        }
-
-        public List<AxisAlignedBb> GetBlockCollisionBoxes(AxisAlignedBb box)
-        {
-            List<AxisAlignedBb> blocks = new List<AxisAlignedBb>();
-
-            AxisAlignedBb bb = box.Union(box);
-
-            var air = BlockRegistry.GetBlock<BlockAir>();
-
-            for (int x = (int)bb.Min.X, maxX = (int)bb.Max.X; x < maxX; x++)
-            {
-                for (int y = (int)bb.Min.Y, maxY = (int)bb.Max.Y; y < maxY; y++)
-                {
-                    for (int z = (int)bb.Min.Z, maxZ = (int)bb.Max.Z; z < maxZ; z++)
-                    {
-                        BlockPos pos = new BlockPos(x, y, z);
-                        BlockState state = SharpCraft.Instance.World.GetBlockState(pos);
-                        if (state.Block == air || state.Block.Material.CanWalkThrough)
-                            continue;
-
-                        blocks.Add(state.Block.BoundingBox.Offset(pos.ToVec()));
-                    }
-                }
-            }
-
-            return blocks;
-        }
-
-        public Chunk GetChunk(ChunkPos pos)
-        {
-            return Chunks.TryGetValue(pos, out Chunk chunkData) ? chunkData : null;
-        }
-
-        public bool IsAir(BlockPos pos)
-        {
-            return GetBlockState(pos).Block == BlockRegistry.GetBlock<BlockAir>();
-        }
-
-        public BlockState GetBlockState(BlockPos pos)
-        {
-            if (pos.Y < 0 || pos.Y >= Chunk.ChunkHeight)
-                return BlockRegistry.GetBlock<BlockAir>().GetState();
-
-            Chunk chunk = GetChunk(ChunkPos.FromWorldSpace(pos));
-            if (chunk == null || !chunk.HasData)
-                return BlockRegistry.GetBlock<BlockAir>().GetState();
-
-            return chunk.GetBlockState(ChunkPos.ToChunkLocal(pos));
-        }
-
-        public void SetBlockState(BlockPos pos, BlockState state, bool rebuild = true)
-        {
-            Chunk chunk = GetChunk(ChunkPos.FromWorldSpace(pos));
-            if (chunk == null || !chunk.HasData)
-                return;
-
-            _worldLut.Put(state.Block.UnlocalizedName);
-
-            var localPos = ChunkPos.ToChunkLocal(pos);
-
-            chunk.SetBlockState(localPos, state, rebuild);
-
-            if (state.Block.CreateTileEntity(this, pos) is TileEntity te)
-            {
-                chunk.AddTileEntity(localPos, te);
-            }
-
-            chunk.Save();
         }
 
         public void UnloadChunk(ChunkPos pos)
@@ -198,7 +180,12 @@ namespace SharpCraft.world
             short[,,] blockData = new short[Chunk.ChunkSize, Chunk.ChunkHeight, Chunk.ChunkSize];
             Buffer.BlockCopy(data, 0, blockData, 0, data.Length);
 
-            var chunk = CreateChunk(chunkPos, blockData);
+            Chunk chunk = null;
+
+            lock (Chunks)
+            {
+                chunk = PutChunk(chunkPos, blockData);
+            }
 
             if (chunk != null)
             {
@@ -231,79 +218,16 @@ namespace SharpCraft.world
             return true;
         }
 
-        public void SaveAllChunks()
+        //TODO move this to some chunk generator
+        public void GenerateChunk(ChunkPos chunkPos, bool updateContainingEntities)
         {
-            foreach (Chunk data in Chunks.Values)
-            {
-                if (data.HasData)
-                    data.Save();
-            }
-        }
+            Chunk chunk = null;
 
-        public void DestroyChunkModels()
-        {
-            foreach (Chunk data in Chunks.Values)
-            {
-                data.DestroyModel();
-            }
-
-            GC.Collect();
-        }
-
-        /*
-        public int GetMetadata(BlockPos pos)
-        {
-            Chunk chunk = GetChunk(ChunkPos.FromWorldSpace(pos));
-            if (chunk == null || !chunk.HasData)
-                return -1;
-
-            return chunk.GetMetadata(ChunkPos.ToChunkLocal(pos));
-        }*/
-
-        /*
-        public void SetMetadata(BlockPos pos, int meta)
-        {
-            Chunk chunk = GetChunk(ChunkPos.FromWorldSpace(pos));
-            if (chunk == null || !chunk.HasData)
-                return;
-
-            chunk.SetMetadata(ChunkPos.ToChunkLocal(pos), meta);
-        }*/
-
-        public int GetHeightAtPos(float x, float z)
-        {
-            BlockPos pos = new BlockPos(x, 0, z);
-
-            Chunk chunk = GetChunk(pos.ChunkPos());
-            if (chunk == null || !chunk.HasData)
-                return 0;
-
-            return chunk.GetHeightAtPos(MathUtil.ToLocal(pos.X, Chunk.ChunkSize), MathUtil.ToLocal(pos.Z, Chunk.ChunkSize));
-        }
-
-        public IEnumerable<Chunk> GetNeighbourChunks(ChunkPos pos)
-        {
-            return FaceSides.YPlane.Select(dir => GetChunk(pos + dir));
-        }
-
-        private Chunk CreateChunk(ChunkPos pos, short[,,] data)
-        {
             lock (Chunks)
             {
-                Chunk chunk = data == null ? new Chunk(pos, this) : new Chunk(pos, this, data);
-                if (!Chunks.TryAdd(chunk.Pos, chunk))
-                {
-                    Console.Error.WriteLine("Chunk already exists at " + chunk.Pos);
-                    return null;
-                }
-                // throw new Exception("Chunk already exists at " + chunk.Pos);
-                return chunk;
+                chunk = PutChunk(chunkPos, null);
             }
-        }
 
-        public void GenerateChunk(ChunkPos chunkPos, bool updateContainingEntities) //TODO - something is causing this to be extremely slow and ran many times simultaneously for one chunk
-        {
-            Chunk chunk = CreateChunk(chunkPos, null);
             if (chunk == null)
                 return;
 
@@ -432,7 +356,7 @@ namespace SharpCraft.world
                                     float leavesSeed = (peakY - 32) / 32f;
 
                                     BlockState leaves = leavesGreen;
-                                        
+
                                     if (leavesSeed > 0.2f && leavesSeed <= 0.4f)
                                         leaves = leavesYellow;
                                     else if (leavesSeed > 0.4f && leavesSeed <= 0.55f)
@@ -461,7 +385,8 @@ namespace SharpCraft.world
 
                     if (chunk.Pos == pos.ChunkPos())
                     {
-                        int height = chunk.GetHeightAtPos(MathUtil.ToLocal(pos.X, Chunk.ChunkSize), MathUtil.ToLocal(pos.Z, Chunk.ChunkSize));
+                        int height = chunk.GetHeightAtPos(MathUtil.ToLocal(pos.X, Chunk.ChunkSize),
+                            MathUtil.ToLocal(pos.Z, Chunk.ChunkSize));
 
                         if (entity.Pos.Y < height)
                             entity.TeleportTo(new Vector3(entity.Pos.X, entity.LastPos.Y = height, entity.Pos.Z));
@@ -470,150 +395,26 @@ namespace SharpCraft.world
             }
         }
 
-        public bool AreNeighbourChunksGenerated(ChunkPos pos)
+        protected virtual Chunk PutChunk(ChunkPos pos, short[,,] data)
         {
-            return GetNeighbourChunks(pos).All(chunk => chunk != null && chunk.HasData);
-        }
-
-        public void Update(EntityPlayerSp player, int renderDistance)
-        {
-            if (player == null) return;
-
-            LoadManager.LoadImportantChunks();
-            LoadManager.UpdateLoad(player, renderDistance, _initalLoad);
-            _initalLoad = false;
-
-            foreach (Chunk chunk in Chunks.Values)
+            Chunk chunk = data == null ? new ChunkClient(pos, this) : new ChunkClient(pos, this, data);
+            if (!Chunks.TryAdd(chunk.Pos, chunk))
             {
-                chunk.Update();
-
-                if (chunk.Pos.DistanceTo(player.Pos.Xz) > renderDistance * Chunk.ChunkSize + 50) UnloadChunk(chunk.Pos);
+                Console.Error.WriteLine("Chunk already exists at " + chunk.Pos);
+                return null;
             }
-
-            UpdateEntities();
-        }
-
-        public void AddWaypoint(BlockPos pos, Color color, string name)
-        {
-            if (!_waypoints.ContainsKey(pos))
-                _waypoints.Add(pos, new Waypoint(pos, color, name));
-        }
-
-        public void RemoveWaypoint(BlockPos pos)
-        {
-            _waypoints.Remove(pos);
-        }
-
-        public void EditWaypoint(BlockPos pos, Color color, string name)
-        {
-            if (_waypoints.TryGetValue(pos, out Waypoint wp))
-            {
-                wp.Color = color;
-                wp.Name = name;
-            }
-        }
-
-        public Dictionary<BlockPos, Waypoint>.ValueCollection GetWaypoints()
-        {
-            return _waypoints.Values;
-        }
-    }
-
-    public class WorldMp
-    {
-        public ConcurrentDictionary<ChunkPos, ChunkMp> Chunks { get; } = new ConcurrentDictionary<ChunkPos, ChunkMp>();
-
-        public List<Entity> Entities = new List<Entity>();
-        
-        public readonly int Dimension = 0;
-
-        private bool _initalLoad = true; //just dirty hack needs to be removed soon
-        
-        //TODO - clientside only
-        private readonly Dictionary<BlockPos, Waypoint> _waypoints = new Dictionary<BlockPos, Waypoint>();
-
-        private readonly WorldLut _worldLut;
-
-        public WorldMp(string saveName, string levelName, string seed)
-        {
-            _noiseUtil = new NoiseUtil((Seed = seed).GetHashCode());
-            _noiseUtil.SetFractalType(NoiseUtil.FractalType.FBM);
-
-            LevelName = levelName;
-            SaveRoot = $"{SharpCraft.Instance.GameFolderDir}/saves/{saveName}/";
-            ChunkData = new ChunkDataManager<RegionStaticImpl<ChunkPos>, ChunkPos>(
-                $"{SaveRoot}{Dimension}/region",
-                new RegionInfo<ChunkPos>(new[] {12, 12}, 2 * Chunk.ChunkSize * Chunk.ChunkHeight * Chunk.ChunkSize),
-                RegionStaticImpl<ChunkPos>.Ctor,
-                ChunkPos.Ctor);
-
-            _worldLut = new WorldLut();
-
-            foreach (var block in BlockRegistry.AllBlocks())
-            {
-                _worldLut.Put(block.UnlocalizedName);
-            }
-        }
-
-        public short GetLocalBlockId(string unlocalizedName)
-        {
-            return _worldLut.Translate(unlocalizedName);
-        }
-
-        public string GetLocalBlockName(short localId)
-        {
-            return _worldLut.Translate(localId);
-        }
-
-        public void AddEntity(Entity e)
-        {
-            if (!Entities.Contains(e))
-                Entities.Add(e);
-        }
-
-        public void RemoveTileEntity(BlockPos pos)
-        {
-            GetChunk(pos.ChunkPos())?.RemoveTileEntity(ChunkPos.ToChunkLocal(pos));
-        }
-
-        public TileEntity GetTileEntity(BlockPos pos)
-        {
-            return GetChunk(pos.ChunkPos())?.GetTileEntity(ChunkPos.ToChunkLocal(pos));
-        }
-
-        public void SaveTileEntity(BlockPos pos)
-        {
-            GetChunk(pos.ChunkPos())?.SaveTileEntity(ChunkPos.ToChunkLocal(pos));
-        }
-
-        private void UpdateEntities()
-        {
-            Entities.RemoveAll(e =>
-            {
-                if (!IsChunkLoaded(ChunkPos.FromWorldSpace(e.Pos))) return false;
-                if (e.IsAlive)
-                {
-                    e.Update();
-                    return !e.IsAlive;
-                }
-
-                return true;
-            });
-        }
-
-        public bool IsChunkLoaded(ChunkPos pos)
-        {
-            return GetChunk(pos) is Chunk chunk && chunk.HasData;
+            // throw new Exception("Chunk already exists at " + chunk.Pos);
+            return chunk;
         }
 
         public List<AxisAlignedBb> GetIntersectingEntitiesBBs(AxisAlignedBb with)
         {
             return (from entity in Entities
-                where !(entity is EntityItem)
-                select entity.GetEntityBoundingBox()
+                    where !(entity is EntityItem)
+                    select entity.GetEntityBoundingBox()
                 into bb
-                where bb.IntersectsWith(with)
-                select bb).ToList();
+                    where bb.IntersectsWith(with)
+                    select bb).ToList();
         }
 
         public List<AxisAlignedBb> GetBlockCollisionBoxes(AxisAlignedBb box)
@@ -624,11 +425,11 @@ namespace SharpCraft.world
 
             var air = BlockRegistry.GetBlock<BlockAir>();
 
-            for (int x = (int) bb.Min.X, maxX = (int) bb.Max.X; x < maxX; x++)
+            for (int x = (int)bb.Min.X, maxX = (int)bb.Max.X; x < maxX; x++)
             {
-                for (int y = (int) bb.Min.Y, maxY = (int) bb.Max.Y; y < maxY; y++)
+                for (int y = (int)bb.Min.Y, maxY = (int)bb.Max.Y; y < maxY; y++)
                 {
-                    for (int z = (int) bb.Min.Z, maxZ = (int) bb.Max.Z; z < maxZ; z++)
+                    for (int z = (int)bb.Min.Z, maxZ = (int)bb.Max.Z; z < maxZ; z++)
                     {
                         BlockPos pos = new BlockPos(x, y, z);
                         BlockState state = SharpCraft.Instance.World.GetBlockState(pos);
@@ -642,10 +443,17 @@ namespace SharpCraft.world
 
             return blocks;
         }
+    }
 
-        public Chunk GetChunk(ChunkPos pos)
+    public class WorldClient : World
+    {
+        //TODO - clientside only
+        public WorldClient(string saveName, string levelName, string seed) : base(saveName, levelName, seed)
         {
-            return Chunks.TryGetValue(pos, out Chunk chunkData) ? chunkData : null;
+            foreach (var block in BlockRegistry.AllBlocks())
+            {
+                _worldLut.Put(block.UnlocalizedName);
+            }
         }
 
         public bool IsAir(BlockPos pos)
@@ -653,19 +461,7 @@ namespace SharpCraft.world
             return GetBlockState(pos).Block == BlockRegistry.GetBlock<BlockAir>();
         }
 
-        public BlockState GetBlockState(BlockPos pos)
-        {
-            if (pos.Y < 0 || pos.Y >= Chunk.ChunkHeight)
-                return BlockRegistry.GetBlock<BlockAir>().GetState();
-
-            Chunk chunk = GetChunk(ChunkPos.FromWorldSpace(pos));
-            if (chunk == null || !chunk.HasData)
-                return BlockRegistry.GetBlock<BlockAir>().GetState();
-
-            return chunk.GetBlockState(ChunkPos.ToChunkLocal(pos));
-        }
-
-        public void SetBlockState(BlockPos pos, BlockState state, bool rebuild = true)
+        /*public void SetBlockState(BlockPos pos, BlockState state, bool rebuild = true)
         {
             Chunk chunk = GetChunk(ChunkPos.FromWorldSpace(pos));
             if (chunk == null || !chunk.HasData)
@@ -683,70 +479,21 @@ namespace SharpCraft.world
             }
 
             chunk.Save();
-        }
-
-        public void UnloadChunk(ChunkPos pos)
-        {
-            if (Chunks.TryRemove(pos, out Chunk chunk)) // && data.model.isGenerated)
-            {
-                chunk.DestroyModel();
-                chunk.Save();
-            }
-        }
-
-        public bool LoadChunk(ChunkPos chunkPos)
-        {
-            byte[] data = ChunkData.GetChunkData(chunkPos);
-            if (data == null) return false;
-
-            short[,,] blockData = new short[Chunk.ChunkSize, Chunk.ChunkHeight, Chunk.ChunkSize];
-            Buffer.BlockCopy(data, 0, blockData, 0, data.Length);
-
-            var chunk = CreateChunk(chunkPos, blockData);
-
-            if (chunk != null)
-            {
-                var air = BlockRegistry.GetBlock<BlockAir>();
-
-                Enumerable.Range(0, Chunk.ChunkHeight).AsParallel().ForAll(y =>
-                {
-                    for (int x = 0; x < Chunk.ChunkSize; x++)
-                    {
-                        for (int z = 0; z < Chunk.ChunkSize; z++)
-                        {
-                            var localPos = new BlockPos(x, y, z);
-
-                            var state = chunk.GetBlockState(localPos);
-
-                            if (state.Block == air)
-                                continue;
-
-                            var worldPos = new BlockPos(chunkPos.ToVec() + localPos.ToVec());
-
-                            if (state.Block.CreateTileEntity(this, worldPos) is TileEntity te)
-                            {
-                                chunk.AddTileEntity(localPos, te);
-                            }
-                        }
-                    }
-                });
-            }
-
-            return true;
-        }
-
+        }*/
+        /*
         public void SaveAllChunks()
         {
-            foreach (ChunkMp data in Chunks.Values)
+            foreach (Chunk data in Chunks.Values)
             {
                 if (data.HasData)
                     data.Save();
             }
         }
+        */
 
         public void DestroyChunkModels()
         {
-            foreach (ChunkMp data in Chunks.Values)
+            foreach (Chunk data in Chunks.Values)
             {
                 data.DestroyModel();
             }
@@ -774,50 +521,67 @@ namespace SharpCraft.world
             chunk.SetMetadata(ChunkPos.ToChunkLocal(pos), meta);
         }*/
 
-        public int GetHeightAtPos(float x, float z)
-        {
-            BlockPos pos = new BlockPos(x, 0, z);
-
-            Chunk chunk = GetChunk(pos.ChunkPos());
-            if (chunk == null || !chunk.HasData)
-                return 0;
-
-            return chunk.GetHeightAtPos(MathUtil.ToLocal(pos.X, Chunk.ChunkSize),
-                MathUtil.ToLocal(pos.Z, Chunk.ChunkSize));
-        }
-
         public IEnumerable<Chunk> GetNeighbourChunks(ChunkPos pos)
         {
             return FaceSides.YPlane.Select(dir => GetChunk(pos + dir));
         }
+    }
 
-        private Chunk CreateChunk(ChunkPos pos, short[,,] data)
+    public class WorldClientServer : World
+    {
+        public ConcurrentDictionary<ChunkPos, Chunk> Chunks { get; } = new ConcurrentDictionary<ChunkPos, Chunk>();
+
+        private bool _initalLoad = true; //just dirty hack needs to be removed soon
+
+        public WorldClientServer() : base("", "", "")
         {
-            lock (Chunks) //TODO use ChunkBase
+            foreach (var block in BlockRegistry.AllBlocks())
             {
-                Chunk chunk = data == null ? new ChunkMp(pos, this) : new ChunkMp(pos, this, data);
-                if (!Chunks.TryAdd(chunk.Pos, chunk))
-                {
-                    Console.Error.WriteLine("Chunk already exists at " + chunk.Pos);
-                    return null;
-                }
-
-                // throw new Exception("Chunk already exists at " + chunk.Pos);
-                return chunk;
+                _worldLut.Put(block.UnlocalizedName);
             }
         }
-        
-        public bool AreNeighbourChunksGenerated(ChunkPos pos)
+
+        public override void RemoveTileEntity(BlockPos pos)
         {
-            return GetNeighbourChunks(pos).All(chunk => chunk != null && chunk.HasData);
+            GetChunk(pos.ChunkPos())?.RemoveTileEntity(ChunkPos.ToChunkLocal(pos));
         }
+
+        public void DestroyChunkModels()
+        {
+            foreach (Chunk data in Chunks.Values)
+            {
+                data.DestroyModel();
+            }
+
+            GC.Collect();
+        }
+
+        /*
+        public int GetMetadata(BlockPos pos)
+        {
+            Chunk chunk = GetChunk(ChunkPos.FromWorldSpace(pos));
+            if (chunk == null || !chunk.HasData)
+                return -1;
+
+            return chunk.GetMetadata(ChunkPos.ToChunkLocal(pos));
+        }*/
+
+        /*
+        public void SetMetadata(BlockPos pos, int meta)
+        {
+            Chunk chunk = GetChunk(ChunkPos.FromWorldSpace(pos));
+            if (chunk == null || !chunk.HasData)
+                return;
+
+            chunk.SetMetadata(ChunkPos.ToChunkLocal(pos), meta);
+        }*/
 
         public void Update(EntityPlayerSp player, int renderDistance)
         {
             if (player == null) return;
             _initalLoad = false;
 
-            foreach (ChunkMp chunk in Chunks.Values)
+            foreach (Chunk chunk in Chunks.Values)
             {
                 chunk.Update();
 

@@ -1,17 +1,14 @@
-﻿using System;
+﻿using NAudio.Vorbis;
+using OpenTK.Audio;
+using OpenTK.Audio.OpenAL;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using NAudio.Vorbis;
-using OpenTK.Audio;
-using OpenTK.Audio.OpenAL;
 
 namespace SharpCraft.sound
 {
-    static class SoundEngine
+    internal static class SoundEngine
     {
         private static readonly ConcurrentDictionary<string, ValueTuple<int, int>> Sounds = new ConcurrentDictionary<string, (int, int)>();
 
@@ -19,7 +16,7 @@ namespace SharpCraft.sound
 
         static SoundEngine()
         {
-           _audioContext = new AudioContext();
+            _audioContext = new AudioContext();
         }
 
         public static void RegisterSound(string soundName)
@@ -31,7 +28,7 @@ namespace SharpCraft.sound
                 Console.WriteLine($"ERROR: Couldn't find sound '{soundName}'");
                 return;
             }
-            
+
             using (var wr = new VorbisWaveReader(file))
             {
                 byte[] data = new byte[wr.Length];
@@ -53,7 +50,7 @@ namespace SharpCraft.sound
         {
             //if (Sounds.TryGetValue(soundName, out var sound))
             //{
-                //AL.SourcePlay(sound.Item1);
+            //AL.SourcePlay(sound.Item1);
             //}
         }
 
@@ -61,7 +58,7 @@ namespace SharpCraft.sound
         {
             //if (Sounds.TryGetValue(soundName, out var sound))
             //{
-                //AL.SourceStop(sound.Item1);
+            //AL.SourceStop(sound.Item1);
             //}
         }
 

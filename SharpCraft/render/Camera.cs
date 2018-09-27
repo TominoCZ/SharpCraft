@@ -1,7 +1,7 @@
 ﻿using OpenTK;
 using SharpCraft.render.shader;
-using System;
 using SharpCraft.util;
+using System;
 
 #pragma warning disable CS0675 // Bitwise-or operator used on a sign-extended operand
 

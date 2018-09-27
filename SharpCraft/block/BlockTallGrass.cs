@@ -8,7 +8,7 @@ namespace SharpCraft.block
         public BlockTallGrass() : base(Material.GetMaterial("tallgrass"))
         {
             SetUnlocalizedName("sharpcraft", "tallgrass");
-            
+
             IsFullCube = false;
             IsReplaceable = true;
 

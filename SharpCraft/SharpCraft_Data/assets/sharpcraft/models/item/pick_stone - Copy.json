@@ -6,7 +6,7 @@
     "material": "blocks/log_top",
 	"item": "items/pick_stone"
 },
-"elements": [ 
+"elements": [
 {
     "__comment": "Material",
     "from": [ 1.3125, 1.4375, 7.5 ],

@@ -1,9 +1,9 @@
 ﻿using OpenTK;
+using SharpCraft.entity;
 using SharpCraft.item;
 using SharpCraft.texture;
 using System;
 using System.Drawing;
-using SharpCraft.entity;
 
 namespace SharpCraft.gui
 {

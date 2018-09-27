@@ -1,7 +1,6 @@
-﻿using System;
-using OpenTK;
-using SharpCraft.block;
+﻿using OpenTK;
 using SharpCraft.world.chunk;
+using System;
 
 namespace SharpCraft.util
 {
@@ -34,7 +33,7 @@ namespace SharpCraft.util
 
             return s * t;
         }
-        
+
         public static Matrix4 CreateTransformationMatrix(ChunkPos translation, Vector3 scale)
         {
             Matrix4 s = Matrix4.CreateScale(scale.X, scale.Y, scale.Z);
@@ -42,7 +41,7 @@ namespace SharpCraft.util
 
             return s * t;
         }
-        
+
         public static Matrix4 CreateTransformationMatrix(ChunkPos translation)
         {
             return Matrix4.CreateTranslation(translation.x * Chunk.ChunkSize, 0, translation.z * Chunk.ChunkSize);

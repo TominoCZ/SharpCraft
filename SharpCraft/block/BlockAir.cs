@@ -5,7 +5,7 @@
         public BlockAir() : base(Material.GetMaterial("air"))
         {
             SetUnlocalizedName("sharpcraft", "air");
-            
+
             IsOpaque = false;
         }
     }

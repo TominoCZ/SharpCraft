@@ -2,11 +2,10 @@
 using OpenTK.Graphics.OpenGL;
 using SharpCraft.entity;
 using SharpCraft.item;
-using SharpCraft.model;
+using SharpCraft.json;
 using SharpCraft.util;
 using SharpCraft.world;
 using System;
-using SharpCraft.json;
 
 #pragma warning disable 618
 

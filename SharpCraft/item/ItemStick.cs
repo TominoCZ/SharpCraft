@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace SharpCraft.item
+﻿namespace SharpCraft.item
 {
-    class ItemStick : Item
+    internal class ItemStick : Item
     {
         public ItemStick()
         {

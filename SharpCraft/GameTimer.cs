@@ -1,17 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using OpenTK;
+using System;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using OpenTK;
 
 namespace SharpCraft
 {
-    class GameTimer
+    internal class GameTimer
     {
         /** The number of timer ticks per second of real time */
-        float ticksPerSecond;
+        private float ticksPerSecond;
 
         /**
          * The time reported by the high-resolution clock at the last call of updateTimer(), in seconds
@@ -68,6 +64,7 @@ namespace SharpCraft
         /**
          * Updates all fields of the Timer using the current time
          */
+
         public void updateTimer()
         {
             long i = Stopwatch.GetTimestamp();
