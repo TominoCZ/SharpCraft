@@ -1,9 +1,9 @@
 ﻿using OpenTK;
 using OpenTK.Graphics.OpenGL;
-using SharpCraft.texture;
-using SharpCraft.util;
+using SharpCraft_Client.texture;
+using SharpCraft_Client.util;
 
-namespace SharpCraft.gui
+namespace SharpCraft_Client.gui
 {
     internal class GuiCrosshair : Gui
     {

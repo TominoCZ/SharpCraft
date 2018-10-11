@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 
-namespace SharpCraft.render.shader
+namespace SharpCraft_Client.render.shader
 {
     public sealed class Shader
     {

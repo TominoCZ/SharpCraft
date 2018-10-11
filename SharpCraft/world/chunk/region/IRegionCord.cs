@@ -1,4 +1,4 @@
-﻿namespace SharpCraft.world.chunk.region
+﻿namespace SharpCraft_Client.world.chunk.region
 {
     public interface IRegionCord
     {

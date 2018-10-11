@@ -1,7 +1,7 @@
 ﻿using OpenTK;
-using SharpCraft.entity;
+using SharpCraft_Client.entity;
 
-namespace SharpCraft.block
+namespace SharpCraft_Client.block
 {
     public class BlockTulipOrange : Block
     {

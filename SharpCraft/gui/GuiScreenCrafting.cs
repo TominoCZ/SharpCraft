@@ -1,4 +1,4 @@
-﻿namespace SharpCraft.gui
+﻿namespace SharpCraft_Client.gui
 {
     internal class GuiScreenCrafting : GuiScreen
     {

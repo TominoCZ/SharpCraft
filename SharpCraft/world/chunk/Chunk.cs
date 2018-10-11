@@ -1,28 +1,28 @@
 ﻿using OpenTK;
 using OpenTK.Graphics.OpenGL;
-using SharpCraft.block;
-using SharpCraft.entity;
-using SharpCraft.json;
-using SharpCraft.model;
-using SharpCraft.util;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using SharpCraft_Client.block;
+using SharpCraft_Client.entity;
+using SharpCraft_Client.json;
+using SharpCraft_Client.model;
+using SharpCraft_Client.util;
 using Buffer = System.Buffer;
 
 #pragma warning disable 618
 
-namespace SharpCraft.world.chunk
+namespace SharpCraft_Client.world.chunk
 {
     public abstract class Chunk
     {
         public const int ChunkSize = 16;
         public const int ChunkHeight = 256;
 
-        private short[,,] _chunkBlocks;
+        private short[,,] ChunkBlocks;
 
         private bool NeedsSave { get; set; }
 
@@ -41,7 +41,7 @@ namespace SharpCraft.world.chunk
         public bool ModelBuilding;
         public bool QueuedForModelBuild;
 
-        public bool HasData => _chunkBlocks != null;
+        public bool HasData => ChunkBlocks != null;
 
         protected Chunk(ChunkPos pos, World world)
         {
@@ -55,9 +55,14 @@ namespace SharpCraft.world.chunk
 
         protected Chunk(ChunkPos pos, World world, short[,,] blockData) : this(pos, world)
         {
-            _chunkBlocks = blockData;
+            ChunkBlocks = blockData;
             BuildChunkModel();
             NeedsSave = false;
+        }
+
+        public short[,,] GetRaw()
+        {
+            return ChunkBlocks;
         }
 
         public void Update()
@@ -95,9 +100,9 @@ namespace SharpCraft.world.chunk
             short value = (short)(id << 4 | meta);
 #pragma warning restore CS0675 // Bitwise-or operator used on a sign-extended operand
 
-            if (_chunkBlocks[localPos.X, localPos.Y, localPos.Z] != value)
+            if (ChunkBlocks[localPos.X, localPos.Y, localPos.Z] != value)
             {
-                _chunkBlocks[localPos.X, localPos.Y, localPos.Z] = value;
+                ChunkBlocks[localPos.X, localPos.Y, localPos.Z] = value;
 
                 if (rebuild) //this is so that we prevent double chunk build calls and invisible placed blocks(if the model is already generating, there is a chance that the block on this position was already processed, so the rebuild is queued again)
                 {
@@ -116,7 +121,7 @@ namespace SharpCraft.world.chunk
 
             CheckPosXZ(localPos);
 
-            short value = _chunkBlocks[localPos.X, localPos.Y, localPos.Z];
+            short value = ChunkBlocks[localPos.X, localPos.Y, localPos.Z];
             short id = (short)(value >> 4);
             short meta = (short)(value & 15);
 
@@ -410,48 +415,15 @@ namespace SharpCraft.world.chunk
 
             byte[] data = new byte[World.ChunkData.Info.ChunkByteSize];
 
-            Buffer.BlockCopy(_chunkBlocks, 0, data, 0, data.Length);
+            Buffer.BlockCopy(ChunkBlocks, 0, data, 0, data.Length);
             World.ChunkData.WriteChunkData(Pos, data);
         }
 
-        public void GeneratedData(short[,,] chunkData)
+        public virtual void GeneratedData(short[,,] chunkData)
         {
-            _chunkBlocks = chunkData;
+            ChunkBlocks = chunkData;
             NeedsSave = true;
             BuildChunkModel();
-        }
-    }
-
-    public class ChunkClient : Chunk
-    {
-        public ChunkClient(ChunkPos pos, World world) : base(pos, world)
-        {
-        }
-
-        public ChunkClient(ChunkPos pos, World world, short[,,] blockData) : base(pos, world, blockData)
-        {
-        }
-    }
-
-    public class ChunkServer : Chunk
-    {
-        public ChunkServer(ChunkPos pos, World world) : base(pos, world)
-        {
-        }
-
-        public ChunkServer(ChunkPos pos, World world, short[,,] blockData) : base(pos, world, blockData)
-        {
-        }
-    }
-
-    public class ChunkClientServer : Chunk
-    {
-        public ChunkClientServer(ChunkPos pos, World world) : base(pos, world)
-        {
-        }
-
-        public ChunkClientServer(ChunkPos pos, World world, short[,,] blockData) : base(pos, world, blockData)
-        {
         }
     }
 }

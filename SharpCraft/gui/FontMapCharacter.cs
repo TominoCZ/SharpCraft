@@ -1,6 +1,6 @@
-﻿using SharpCraft.texture;
+﻿using SharpCraft_Client.texture;
 
-namespace SharpCraft.gui
+namespace SharpCraft_Client.gui
 {
     public struct FontMapCharacter
     {

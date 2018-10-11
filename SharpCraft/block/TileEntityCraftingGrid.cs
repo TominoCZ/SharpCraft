@@ -1,15 +1,15 @@
 ﻿using OpenTK;
 using OpenTK.Graphics.OpenGL;
-using SharpCraft.entity;
-using SharpCraft.item;
-using SharpCraft.json;
-using SharpCraft.util;
-using SharpCraft.world;
 using System;
+using SharpCraft_Client.entity;
+using SharpCraft_Client.item;
+using SharpCraft_Client.json;
+using SharpCraft_Client.util;
+using SharpCraft_Client.world;
 
 #pragma warning disable 618
 
-namespace SharpCraft.block
+namespace SharpCraft_Client.block
 {
     public class TileEntityCraftingGrid : TileEntity
     {

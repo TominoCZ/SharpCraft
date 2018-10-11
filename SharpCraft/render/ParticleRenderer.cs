@@ -1,15 +1,15 @@
 ﻿using OpenTK;
-using SharpCraft.block;
-using SharpCraft.entity;
-using SharpCraft.model;
-using SharpCraft.particle;
-using SharpCraft.render.shader;
-using SharpCraft.util;
-using SharpCraft.world;
 using System;
 using System.Collections.Generic;
+using SharpCraft_Client.block;
+using SharpCraft_Client.entity;
+using SharpCraft_Client.model;
+using SharpCraft_Client.particle;
+using SharpCraft_Client.render.shader;
+using SharpCraft_Client.util;
+using SharpCraft_Client.world;
 
-namespace SharpCraft.render
+namespace SharpCraft_Client.render
 {
     internal class ParticleRenderer
     {

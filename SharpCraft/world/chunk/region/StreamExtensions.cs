@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 
-namespace SharpCraft.world.chunk.region
+namespace SharpCraft_Client.world.chunk.region
 {
     public static class StreamExtensions
     {

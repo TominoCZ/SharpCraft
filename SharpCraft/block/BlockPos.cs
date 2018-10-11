@@ -1,8 +1,8 @@
 ﻿using OpenTK;
-using SharpCraft.world.chunk;
 using System;
+using SharpCraft_Client.world.chunk;
 
-namespace SharpCraft.block
+namespace SharpCraft_Client.block
 {
     [Serializable]
     public struct BlockPos

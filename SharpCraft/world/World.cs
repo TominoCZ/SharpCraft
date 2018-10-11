@@ -1,15 +1,16 @@
 ﻿using OpenTK;
-using SharpCraft.block;
-using SharpCraft.entity;
-using SharpCraft.util;
-using SharpCraft.world.chunk;
-using SharpCraft.world.chunk.region;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
+using SharpCraft_Client.block;
+using SharpCraft_Client.entity;
+using SharpCraft_Client.util;
+using SharpCraft_Client.world.chunk;
+using SharpCraft_Client.world.chunk.region;
 
-namespace SharpCraft.world
+namespace SharpCraft_Client.world
 {
     public abstract class World
     {
@@ -37,7 +38,7 @@ namespace SharpCraft.world
             _noiseUtil.SetFractalType(NoiseUtil.FractalType.FBM);
 
             LevelName = levelName;
-            SaveRoot = $"{SharpCraft.Instance.GameFolderDir}/saves/{saveName}/";
+            SaveRoot = $"./";
             ChunkData = new ChunkDataManager<RegionStaticImpl<ChunkPos>, ChunkPos>(
                 $"{SaveRoot}{Dimension}/region",
                 new RegionInfo<ChunkPos>(new[] { 12, 12 }, 2 * Chunk.ChunkSize * Chunk.ChunkHeight * Chunk.ChunkSize),
@@ -68,17 +69,18 @@ namespace SharpCraft.world
             });
         }
 
-        public void Update(EntityPlayerSp player, int renderDistance)
-        {//TODO use EntityPlayer instead
+        public virtual void Update(Vector3 playerPos, int renderDistance)
+        {
+            //TODO use EntityPlayer instead
             LoadManager.LoadImportantChunks();
-            LoadManager.UpdateLoad(player, renderDistance, _initalLoad);
+            LoadManager.UpdateLoad(this, playerPos, renderDistance, _initalLoad);
             _initalLoad = false;
 
             foreach (Chunk chunk in Chunks.Values)
             {
                 chunk.Update();
 
-                if (chunk.Pos.DistanceTo(player.Pos.Xz) > renderDistance * Chunk.ChunkSize + 50) UnloadChunk(chunk.Pos);
+                if (chunk.Pos.DistanceTo(playerPos.Xz) > renderDistance * Chunk.ChunkSize + 50) UnloadChunk(chunk.Pos);
             }
 
             UpdateEntities();
@@ -158,6 +160,11 @@ namespace SharpCraft.world
             GetChunk(pos.ChunkPos())?.SaveTileEntity(ChunkPos.ToChunkLocal(pos));
         }
 
+        public bool IsAir(BlockPos pos)
+        {
+            return GetBlockState(pos).Block == BlockRegistry.GetBlock<BlockAir>();
+        }
+
         public bool IsChunkLoaded(ChunkPos pos)
         {
             return GetChunk(pos) is Chunk chunk && chunk.HasData;
@@ -172,7 +179,7 @@ namespace SharpCraft.world
             }
         }
 
-        public bool LoadChunk(ChunkPos chunkPos)
+        public virtual bool LoadChunk(ChunkPos chunkPos)
         {
             byte[] data = ChunkData.GetChunkData(chunkPos);
             if (data == null) return false;
@@ -219,7 +226,7 @@ namespace SharpCraft.world
         }
 
         //TODO move this to some chunk generator
-        public void GenerateChunk(ChunkPos chunkPos, bool updateContainingEntities)
+        public short[,,] GenerateChunk(ChunkPos chunkPos, bool updateContainingEntities)
         {
             Chunk chunk = null;
 
@@ -229,7 +236,7 @@ namespace SharpCraft.world
             }
 
             if (chunk == null)
-                return;
+                return null;
 
             var air = BlockRegistry.GetBlock<BlockAir>().GetState();
 
@@ -375,6 +382,8 @@ namespace SharpCraft.world
                 }
             }
 
+            return chunkData;
+
             chunk.GeneratedData(chunkData);
 
             if (updateContainingEntities)
@@ -395,7 +404,7 @@ namespace SharpCraft.world
             }
         }
 
-        protected virtual Chunk PutChunk(ChunkPos pos, short[,,] data)
+        public virtual Chunk PutChunk(ChunkPos pos, short[,,] data)
         {
             Chunk chunk = data == null ? new ChunkClient(pos, this) : new ChunkClient(pos, this, data);
             if (!Chunks.TryAdd(chunk.Pos, chunk))
@@ -442,153 +451,6 @@ namespace SharpCraft.world
             }
 
             return blocks;
-        }
-    }
-
-    public class WorldClient : World
-    {
-        //TODO - clientside only
-        public WorldClient(string saveName, string levelName, string seed) : base(saveName, levelName, seed)
-        {
-            foreach (var block in BlockRegistry.AllBlocks())
-            {
-                _worldLut.Put(block.UnlocalizedName);
-            }
-        }
-
-        public bool IsAir(BlockPos pos)
-        {
-            return GetBlockState(pos).Block == BlockRegistry.GetBlock<BlockAir>();
-        }
-
-        /*public void SetBlockState(BlockPos pos, BlockState state, bool rebuild = true)
-        {
-            Chunk chunk = GetChunk(ChunkPos.FromWorldSpace(pos));
-            if (chunk == null || !chunk.HasData)
-                return;
-
-            _worldLut.Put(state.Block.UnlocalizedName);
-
-            var localPos = ChunkPos.ToChunkLocal(pos);
-
-            chunk.SetBlockState(localPos, state, rebuild);
-
-            if (state.Block.CreateTileEntity(this, pos) is TileEntity te)
-            {
-                chunk.AddTileEntity(localPos, te);
-            }
-
-            chunk.Save();
-        }*/
-        /*
-        public void SaveAllChunks()
-        {
-            foreach (Chunk data in Chunks.Values)
-            {
-                if (data.HasData)
-                    data.Save();
-            }
-        }
-        */
-
-        public void DestroyChunkModels()
-        {
-            foreach (Chunk data in Chunks.Values)
-            {
-                data.DestroyModel();
-            }
-
-            GC.Collect();
-        }
-
-        /*
-        public int GetMetadata(BlockPos pos)
-        {
-            Chunk chunk = GetChunk(ChunkPos.FromWorldSpace(pos));
-            if (chunk == null || !chunk.HasData)
-                return -1;
-
-            return chunk.GetMetadata(ChunkPos.ToChunkLocal(pos));
-        }*/
-
-        /*
-        public void SetMetadata(BlockPos pos, int meta)
-        {
-            Chunk chunk = GetChunk(ChunkPos.FromWorldSpace(pos));
-            if (chunk == null || !chunk.HasData)
-                return;
-
-            chunk.SetMetadata(ChunkPos.ToChunkLocal(pos), meta);
-        }*/
-
-        public IEnumerable<Chunk> GetNeighbourChunks(ChunkPos pos)
-        {
-            return FaceSides.YPlane.Select(dir => GetChunk(pos + dir));
-        }
-    }
-
-    public class WorldClientServer : World
-    {
-        public ConcurrentDictionary<ChunkPos, Chunk> Chunks { get; } = new ConcurrentDictionary<ChunkPos, Chunk>();
-
-        private bool _initalLoad = true; //just dirty hack needs to be removed soon
-
-        public WorldClientServer() : base("", "", "")
-        {
-            foreach (var block in BlockRegistry.AllBlocks())
-            {
-                _worldLut.Put(block.UnlocalizedName);
-            }
-        }
-
-        public override void RemoveTileEntity(BlockPos pos)
-        {
-            GetChunk(pos.ChunkPos())?.RemoveTileEntity(ChunkPos.ToChunkLocal(pos));
-        }
-
-        public void DestroyChunkModels()
-        {
-            foreach (Chunk data in Chunks.Values)
-            {
-                data.DestroyModel();
-            }
-
-            GC.Collect();
-        }
-
-        /*
-        public int GetMetadata(BlockPos pos)
-        {
-            Chunk chunk = GetChunk(ChunkPos.FromWorldSpace(pos));
-            if (chunk == null || !chunk.HasData)
-                return -1;
-
-            return chunk.GetMetadata(ChunkPos.ToChunkLocal(pos));
-        }*/
-
-        /*
-        public void SetMetadata(BlockPos pos, int meta)
-        {
-            Chunk chunk = GetChunk(ChunkPos.FromWorldSpace(pos));
-            if (chunk == null || !chunk.HasData)
-                return;
-
-            chunk.SetMetadata(ChunkPos.ToChunkLocal(pos), meta);
-        }*/
-
-        public void Update(EntityPlayerSp player, int renderDistance)
-        {
-            if (player == null) return;
-            _initalLoad = false;
-
-            foreach (Chunk chunk in Chunks.Values)
-            {
-                chunk.Update();
-
-                if (chunk.Pos.DistanceTo(player.Pos.Xz) > renderDistance * Chunk.ChunkSize + 50) UnloadChunk(chunk.Pos);
-            }
-
-            UpdateEntities();
         }
     }
 }

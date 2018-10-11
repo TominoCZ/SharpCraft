@@ -1,10 +1,10 @@
-﻿using SharpCraft.entity;
-using SharpCraft.json;
-using SharpCraft.render.shader;
-using SharpCraft.world;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using SharpCraft_Client.entity;
+using SharpCraft_Client.json;
+using SharpCraft_Client.render.shader;
+using SharpCraft_Client.world;
 
-namespace SharpCraft.block
+namespace SharpCraft_Client.block
 {
     public abstract class Block
     {

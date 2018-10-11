@@ -1,8 +1,9 @@
-﻿using SharpCraft.entity;
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using System.Threading;
+using OpenTK;
+using SharpCraft_Client.entity;
 
-namespace SharpCraft.world.chunk
+namespace SharpCraft_Client.world.chunk
 {
     public class ChunkLoadManager
     {
@@ -27,7 +28,7 @@ namespace SharpCraft.world.chunk
 #pragma warning restore CS0642 // Possible mistaken empty statement
                 else
                 {
-                    w.GenerateChunk(c, true);
+                    w.PutChunk(c, w.GenerateChunk(c, true));
                     //Console.WriteLine($"chunk generated @ {c.x} x {c.z}");
                 }
             },
@@ -118,18 +119,16 @@ namespace SharpCraft.world.chunk
             }
         }
 
-        public void UpdateLoad(EntityPlayerSp player, int renderDistance, bool important)
+        public void UpdateLoad(World world, Vector3 playerPos, int renderDistance, bool important)
         {
-            World world = SharpCraft.Instance.World;
-
-            ChunkPos playerChunkPos = ChunkPos.FromWorldSpace(SharpCraft.Instance.Player.Pos);
+            ChunkPos playerChunkPos = ChunkPos.FromWorldSpace(playerPos);
 
             for (int z = -renderDistance; z <= renderDistance; z++)
             {
                 for (int x = -renderDistance; x <= renderDistance; x++)
                 {
                     ChunkPos pos = new ChunkPos(playerChunkPos.x + x, playerChunkPos.z + z);
-                    if (pos.DistanceTo(player.Pos.Xz) < renderDistance * Chunk.ChunkSize)
+                    if (pos.DistanceTo(playerPos.Xz) < renderDistance * Chunk.ChunkSize)
                     {
                         if (world.GetChunk(pos) == null)
                         {

@@ -1,9 +1,9 @@
-﻿using SharpCraft.util;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using SharpCraft_Client.util;
 
-namespace SharpCraft.world.chunk.region
+namespace SharpCraft_Client.world.chunk.region
 {
     //WHAT THE FUCK FACES MADE THIS SHIT?! WHAT THE FUCKING HELL?!
     public class ChunkDataManager<TReg, TCord> where TReg : IRegion where TCord : IRegionCord, new()

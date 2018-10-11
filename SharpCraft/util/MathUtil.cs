@@ -1,7 +1,7 @@
 ﻿using OpenTK;
 using System;
 
-namespace SharpCraft.util
+namespace SharpCraft_Client.util
 {
     internal static class MathUtil
     {

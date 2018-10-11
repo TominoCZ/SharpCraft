@@ -4,9 +4,9 @@ using System.IO;
 using System.Linq;
 using System.Text;
 
-namespace SharpCraft
+namespace SharpCraft_Client
 {
-    internal class SettingsManager
+    public class SettingsManager
     {
         private static readonly Dictionary<string, string> _settings = new Dictionary<string, string>();
 

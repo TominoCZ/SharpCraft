@@ -1,7 +1,7 @@
 ﻿using OpenTK.Input;
 using System.Drawing;
 
-namespace SharpCraft.gui
+namespace SharpCraft_Client.gui
 {
     internal class GuiScreenIngameMenu : GuiScreen
     {

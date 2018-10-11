@@ -1,7 +1,7 @@
-﻿using SharpCraft.block;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using SharpCraft_Client.block;
 
-namespace SharpCraft.item
+namespace SharpCraft_Client.item
 {
     public abstract class Item
     {

@@ -1,6 +1,6 @@
-﻿namespace SharpCraft.item
+﻿namespace SharpCraft_Client.item
 {
-    internal class ItemStick : Item
+    public class ItemStick : Item
     {
         public ItemStick()
         {

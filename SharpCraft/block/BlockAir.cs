@@ -1,4 +1,4 @@
-﻿namespace SharpCraft.block
+﻿namespace SharpCraft_Client.block
 {
     public class BlockAir : Block
     {

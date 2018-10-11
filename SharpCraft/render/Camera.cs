@@ -1,11 +1,11 @@
 ﻿using OpenTK;
-using SharpCraft.render.shader;
-using SharpCraft.util;
 using System;
+using SharpCraft_Client.render.shader;
+using SharpCraft_Client.util;
 
 #pragma warning disable CS0675 // Bitwise-or operator used on a sign-extended operand
 
-namespace SharpCraft.render
+namespace SharpCraft_Client.render
 {
     public class Camera
     {

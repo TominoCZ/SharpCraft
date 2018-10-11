@@ -1,7 +1,7 @@
-﻿using SharpCraft.json;
-using SharpCraft.model;
+﻿using SharpCraft_Client.json;
+using SharpCraft_Client.model;
 
-namespace SharpCraft.block
+namespace SharpCraft_Client.block
 {
     public struct BlockState
     {

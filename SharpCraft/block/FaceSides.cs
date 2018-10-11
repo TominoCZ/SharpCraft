@@ -1,9 +1,9 @@
 ﻿using OpenTK;
-using SharpCraft.texture;
-using SharpCraft.world.chunk;
 using System.Collections.Generic;
+using SharpCraft_Client.texture;
+using SharpCraft_Client.world.chunk;
 
-namespace SharpCraft.block
+namespace SharpCraft_Client.block
 {
     public struct FaceSides
     {

@@ -1,8 +1,8 @@
 ﻿using OpenTK;
-using SharpCraft.util;
 using System;
+using SharpCraft_Client.util;
 
-namespace SharpCraft.item
+namespace SharpCraft_Client.item
 {
     [Serializable]
     public class ItemStack

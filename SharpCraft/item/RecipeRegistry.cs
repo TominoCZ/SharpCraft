@@ -2,9 +2,9 @@
 using System.Collections.Concurrent;
 using System.Linq;
 
-namespace SharpCraft.item
+namespace SharpCraft_Client.item
 {
-    internal class RecipeRegistry
+    public class RecipeRegistry
     {
         private static readonly BlockingCollection<Recipe> _registry = new BlockingCollection<Recipe>();
 
@@ -59,6 +59,14 @@ namespace SharpCraft.item
 
             public bool Matches(Item[] table)
             {
+                //TODO
+                /*
+                   while(top row is all empty) move all items up 1 spot
+                   while(left column is all empty) move all items left 1 spot
+                   do the same with recipe registry entries
+                   so it kinda serves as a normalise function
+                */
+
                 if (Shapeless)
                     return MatchesShapeless(table);
 

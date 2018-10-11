@@ -1,7 +1,8 @@
 ﻿using OpenTK.Input;
-using SharpCraft.texture;
+using SharpCraft_Client.texture;
+using SharpCraft_Client.world;
 
-namespace SharpCraft.gui
+namespace SharpCraft_Client.gui
 {
     internal class GuiScreenMainMenu : GuiScreen
     {
@@ -39,13 +40,12 @@ namespace SharpCraft.gui
                     SharpCraft.Instance.CloseGuiScreen();
                     SharpCraft.Instance.StartGame();
                     break;
-
                 case 1:
-                    SharpCraft.Instance.CloseGuiScreen();
-                    SharpCraft.Instance.StartGame();
-                    SharpCraft.Instance.ConnectToServer("127.0.0.1", 25566);
+                    if (SharpCraft.Instance.ConnectToServer("127.0.0.1", 25566))
+                    {
+                        SharpCraft.Instance.CloseGuiScreen();
+                    }
                     break;
-
                 case 2:
                     SharpCraft.Instance.Close();
                     break;

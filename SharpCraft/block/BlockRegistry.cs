@@ -1,11 +1,11 @@
-﻿using SharpCraft.json;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using SharpCraft_Client.json;
 
-namespace SharpCraft.block
+namespace SharpCraft_Client.block
 {
-    internal class BlockRegistry
+    public class BlockRegistry
     {
         private static readonly Dictionary<string, Block> Registry = new Dictionary<string, Block>();
         private static readonly Dictionary<Type, string> TypeRegistry = new Dictionary<Type, string>();

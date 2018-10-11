@@ -1,10 +1,10 @@
 ﻿using OpenTK;
 using OpenTK.Input;
-using SharpCraft.texture;
 using System;
 using System.Collections.Generic;
+using SharpCraft_Client.texture;
 
-namespace SharpCraft.gui
+namespace SharpCraft_Client.gui
 {
     internal class GuiScreen : Gui
     {

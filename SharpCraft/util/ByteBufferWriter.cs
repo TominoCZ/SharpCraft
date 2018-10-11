@@ -2,7 +2,7 @@
 using System;
 using System.IO;
 
-namespace SharpCraft.util
+namespace SharpCraft_Client.util
 {
     public class ByteBufferWriter : IDisposable
     {

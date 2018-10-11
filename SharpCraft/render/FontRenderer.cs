@@ -1,16 +1,16 @@
 ﻿using OpenTK;
 using OpenTK.Graphics.OpenGL;
-using SharpCraft.gui;
-using SharpCraft.render.shader;
-using SharpCraft.texture;
-using SharpCraft.util;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Text.RegularExpressions;
+using SharpCraft_Client.gui;
+using SharpCraft_Client.render.shader;
+using SharpCraft_Client.texture;
+using SharpCraft_Client.util;
 using Color = System.Drawing.Color;
 
-namespace SharpCraft.render
+namespace SharpCraft_Client.render
 {
     internal class FontRenderer
     {

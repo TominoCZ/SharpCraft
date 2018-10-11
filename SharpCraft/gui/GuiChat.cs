@@ -1,12 +1,12 @@
 ﻿using OpenTK;
 using OpenTK.Input;
-using SharpCraft.item;
 using System.Collections.Generic;
 using System.Linq;
+using SharpCraft_Client.item;
 
 #pragma warning disable 618
 
-namespace SharpCraft.gui
+namespace SharpCraft_Client.gui
 {
     internal class GuiChat : GuiScreen
     {

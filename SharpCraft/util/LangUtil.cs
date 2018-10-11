@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-namespace SharpCraft.util
+namespace SharpCraft_Client.util
 {
     public static class LangUtil
     {

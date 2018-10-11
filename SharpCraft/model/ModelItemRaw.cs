@@ -1,4 +1,4 @@
-﻿namespace SharpCraft.model
+﻿namespace SharpCraft_Client.model
 {
     public class ModelItemRaw : ModelRaw
     {

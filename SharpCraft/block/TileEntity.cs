@@ -1,7 +1,7 @@
-﻿using SharpCraft.util;
-using SharpCraft.world;
+﻿using SharpCraft_Client.util;
+using SharpCraft_Client.world;
 
-namespace SharpCraft.block
+namespace SharpCraft_Client.block
 {
     public class TileEntity
     {

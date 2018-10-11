@@ -9,7 +9,7 @@ using FN_DECIMAL = System.Single;
 
 using System.Runtime.CompilerServices;
 
-namespace SharpCraft.util
+namespace SharpCraft_Client.util
 {
     public class NoiseUtil
     {

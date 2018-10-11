@@ -1,17 +1,17 @@
 ﻿using Newtonsoft.Json;
 using OpenTK;
-using SharpCraft.block;
-using SharpCraft.item;
-using SharpCraft.model;
-using SharpCraft.render.shader;
-using SharpCraft.texture;
-using SharpCraft.util;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using SharpCraft_Client.block;
+using SharpCraft_Client.item;
+using SharpCraft_Client.model;
+using SharpCraft_Client.render.shader;
+using SharpCraft_Client.texture;
+using SharpCraft_Client.util;
 using Bitmap = System.Drawing.Bitmap;
 using Image = System.Drawing.Image;
 
@@ -19,7 +19,7 @@ using Image = System.Drawing.Image;
 
 #pragma warning disable 612
 
-namespace SharpCraft.json
+namespace SharpCraft_Client.json
 {
     public class JsonModelLoader
     {

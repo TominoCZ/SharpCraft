@@ -1,14 +1,14 @@
-﻿using SharpCraft.block;
-using SharpCraft.json;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using SharpCraft_Client.block;
+using SharpCraft_Client.json;
 
 #pragma warning disable 618
 
-namespace SharpCraft.item
+namespace SharpCraft_Client.item
 {
-    internal class ItemRegistry
+    public class ItemRegistry
     {
         private static readonly Dictionary<string, Item> Registry = new Dictionary<string, Item>();
 

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace SharpCraft.world.chunk.region
+namespace SharpCraft_Client.world.chunk.region
 {
     public class RegionInfo<TCord> where TCord : IRegionCord
     {

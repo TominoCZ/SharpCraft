@@ -1,6 +1,6 @@
-﻿using SharpCraft.entity;
+﻿using SharpCraft_Client.entity;
 
-namespace SharpCraft.render
+namespace SharpCraft_Client.render
 {
     internal class EntityRenderer
     {

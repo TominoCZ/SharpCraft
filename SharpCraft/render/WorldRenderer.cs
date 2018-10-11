@@ -1,22 +1,22 @@
 ﻿using OpenTK;
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Input;
-using SharpCraft.block;
-using SharpCraft.entity;
-using SharpCraft.item;
-using SharpCraft.json;
-using SharpCraft.model;
-using SharpCraft.render.shader;
-using SharpCraft.texture;
-using SharpCraft.util;
-using SharpCraft.world;
-using SharpCraft.world.chunk;
 using System;
 using System.Collections.Generic;
+using SharpCraft_Client.block;
+using SharpCraft_Client.entity;
+using SharpCraft_Client.item;
+using SharpCraft_Client.json;
+using SharpCraft_Client.model;
+using SharpCraft_Client.render.shader;
+using SharpCraft_Client.texture;
+using SharpCraft_Client.util;
+using SharpCraft_Client.world;
+using SharpCraft_Client.world.chunk;
 using GL = OpenTK.Graphics.OpenGL.GL;
 using TextureTarget = OpenTK.Graphics.OpenGL.TextureTarget;
 
-namespace SharpCraft.render
+namespace SharpCraft_Client.render
 {
     internal class WorldRenderer
     {

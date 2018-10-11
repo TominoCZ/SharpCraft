@@ -6,11 +6,11 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 
-namespace SharpCraft.sound
+namespace SharpCraft_Client.sound
 {
     internal static class SoundEngine
     {
-        private static readonly ConcurrentDictionary<string, ValueTuple<int, int>> Sounds = new ConcurrentDictionary<string, (int, int)>();
+        //private static readonly ConcurrentDictionary<string, Tuple<int, int>> Sounds = new ConcurrentDictionary<string, (int, int)>();
 
         private static AudioContext _audioContext;
 
@@ -42,7 +42,7 @@ namespace SharpCraft.sound
                 AL.Source(source, ALSourcei.Buffer, buffer);
                 AL.BindBufferToSource(source, buffer);
 
-                Sounds.TryAdd(soundName, new ValueTuple<int, int>(source, buffer));
+                //Sounds.TryAdd(soundName, new ValueTuple<int, int>(source, buffer));
             }
         }
 
@@ -64,28 +64,28 @@ namespace SharpCraft.sound
 
         public static void Reload()
         {
-            var bkp = new Dictionary<string, ValueTuple<int, int>>(Sounds);
+            //var bkp = new Dictionary<string, ValueTuple<int, int>>(Sounds);
 
             Destroy();
 
-            foreach (var pair in bkp)
+            //foreach (var pair in bkp)
             {
-                RegisterSound(pair.Key);
+                //RegisterSound(pair.Key);
             }
         }
 
         public static void Destroy()
         {
-            foreach (var pair in Sounds)
+            //foreach (var pair in Sounds)
             {
-                var source = pair.Value.Item1;
-                var buffer = pair.Value.Item2;
+                //var source = pair.Value.Item1;
+                //var buffer = pair.Value.Item2;
 
-                AL.DeleteSource(source);
-                AL.DeleteBuffer(buffer);
+               // AL.DeleteSource(source);
+                //AL.DeleteBuffer(buffer);
             }
 
-            Sounds.Clear();
+            //Sounds.Clear();
         }
     }
 }

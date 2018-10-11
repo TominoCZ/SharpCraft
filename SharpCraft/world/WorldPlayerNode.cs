@@ -1,14 +1,14 @@
 ﻿using Newtonsoft.Json;
 using OpenTK;
-using SharpCraft.entity;
-using SharpCraft.item;
 using System.Collections.Generic;
+using SharpCraft_Client.entity;
+using SharpCraft_Client.item;
 
 // ReSharper disable InconsistentNaming
 
 #pragma warning disable 618
 
-namespace SharpCraft.world
+namespace SharpCraft_Client.world
 {
     internal class WorldPlayerNode
     {

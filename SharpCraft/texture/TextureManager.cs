@@ -1,17 +1,17 @@
 ﻿using OpenTK;
 using OpenTK.Graphics.OpenGL;
-using SharpCraft.block;
-using SharpCraft.gui;
-using SharpCraft.util;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
+using SharpCraft_Client.block;
+using SharpCraft_Client.gui;
+using SharpCraft_Client.util;
 using PixelFormat = System.Drawing.Imaging.PixelFormat;
 
-namespace SharpCraft.texture
+namespace SharpCraft_Client.texture
 {
     internal class TextureManager
     {

@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace SharpCraft.block
+namespace SharpCraft_Client.block
 {
     public class Material
     {

@@ -1,7 +1,7 @@
 ﻿using OpenTK.Graphics.OpenGL;
 using System.Collections.Generic;
 
-namespace SharpCraft.model
+namespace SharpCraft_Client.model
 {
     internal class ModelManager
     {

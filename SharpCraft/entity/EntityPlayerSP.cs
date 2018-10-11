@@ -1,17 +1,17 @@
 ﻿using OpenTK;
 using OpenTK.Input;
-using SharpCraft.block;
-using SharpCraft.gui;
-using SharpCraft.item;
-using SharpCraft.util;
-using SharpCraft.world;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using SharpCraft_Client.block;
+using SharpCraft_Client.gui;
+using SharpCraft_Client.item;
+using SharpCraft_Client.util;
+using SharpCraft_Client.world;
 
 // ReSharper disable AssignmentInConditionalExpression
 
-namespace SharpCraft.entity
+namespace SharpCraft_Client.entity
 {
     public class EntityPlayerSp : Entity
     {
@@ -703,11 +703,5 @@ namespace SharpCraft.entity
             else
                 HotbarIndex = HotbarIndex - 1;
         }
-    }
-
-    public enum GameMode
-    {
-        Survival,
-        Creative
     }
 }

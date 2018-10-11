@@ -1,11 +1,11 @@
 ﻿using OpenTK;
-using SharpCraft.entity;
-using SharpCraft.item;
-using SharpCraft.texture;
 using System;
 using System.Drawing;
+using SharpCraft_Client.entity;
+using SharpCraft_Client.item;
+using SharpCraft_Client.texture;
 
-namespace SharpCraft.gui
+namespace SharpCraft_Client.gui
 {
     internal class GuiHud : Gui
     {

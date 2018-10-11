@@ -1,7 +1,7 @@
 ﻿using OpenTK;
-using SharpCraft.util;
+using SharpCraft_Client.util;
 
-namespace SharpCraft.gui
+namespace SharpCraft_Client.gui
 {
     internal class GuiTexture : Texture
     {

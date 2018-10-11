@@ -1,6 +1,6 @@
-﻿using SharpCraft.block;
+﻿using SharpCraft_Client.block;
 
-namespace SharpCraft.item
+namespace SharpCraft_Client.item
 {
     public class ItemPickaxe : Item
     {

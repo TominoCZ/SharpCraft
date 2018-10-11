@@ -1,7 +1,7 @@
 ﻿using OpenTK.Graphics.OpenGL;
 using System;
 
-namespace SharpCraft.render
+namespace SharpCraft_Client.render
 {
     public class FBO
     {

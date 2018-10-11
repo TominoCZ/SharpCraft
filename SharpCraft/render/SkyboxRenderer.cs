@@ -1,12 +1,12 @@
 ﻿using OpenTK;
 using OpenTK.Graphics.OpenGL;
-using SharpCraft.model;
-using SharpCraft.render.shader;
-using SharpCraft.texture;
-using SharpCraft.util;
+using SharpCraft_Client.model;
+using SharpCraft_Client.render.shader;
+using SharpCraft_Client.texture;
+using SharpCraft_Client.util;
 using Vector3 = OpenTK.Vector3;
 
-namespace SharpCraft.render
+namespace SharpCraft_Client.render
 {
     internal class SkyboxRenderer
     {

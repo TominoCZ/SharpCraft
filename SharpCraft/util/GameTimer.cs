@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 
-namespace SharpCraft.util
+namespace SharpCraft_Client.util
 {
     public class GameTimer
     {

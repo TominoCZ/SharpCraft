@@ -1,17 +1,17 @@
 ﻿using OpenTK;
 using OpenTK.Graphics.OpenGL;
-using SharpCraft.block;
-using SharpCraft.item;
-using SharpCraft.json;
-using SharpCraft.model;
-using SharpCraft.render.shader;
-using SharpCraft.util;
-using SharpCraft.world;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using SharpCraft_Client.block;
+using SharpCraft_Client.item;
+using SharpCraft_Client.json;
+using SharpCraft_Client.model;
+using SharpCraft_Client.render.shader;
+using SharpCraft_Client.util;
+using SharpCraft_Client.world;
 
-namespace SharpCraft.entity
+namespace SharpCraft_Client.entity
 {
     public class EntityItem : Entity
     {

@@ -2,9 +2,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27130.2027
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpCraft", "SharpCraft\SharpCraft.csproj", "{503E5225-3B2F-4BE4-AE72-73F02076719F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpCraft_Client", "SharpCraft\SharpCraft_Client.csproj", "{503E5225-3B2F-4BE4-AE72-73F02076719F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpCraft_Server", "SharpCraft_Server\SharpCraft_Server.csproj", "{05235347-10F5-4C6E-A054-63C1F569EC88}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpCraft_Server", "SharpCraft_Server\SharpCraft_Server.csproj", "{7C0831FA-6214-422B-9EA3-5DF74FF0AFB3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -20,14 +20,14 @@ Global
 		{503E5225-3B2F-4BE4-AE72-73F02076719F}.Release|Any CPU.ActiveCfg = Release|x86
 		{503E5225-3B2F-4BE4-AE72-73F02076719F}.Release|x86.ActiveCfg = Release|x86
 		{503E5225-3B2F-4BE4-AE72-73F02076719F}.Release|x86.Build.0 = Release|x86
-		{05235347-10F5-4C6E-A054-63C1F569EC88}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{05235347-10F5-4C6E-A054-63C1F569EC88}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{05235347-10F5-4C6E-A054-63C1F569EC88}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{05235347-10F5-4C6E-A054-63C1F569EC88}.Debug|x86.Build.0 = Debug|Any CPU
-		{05235347-10F5-4C6E-A054-63C1F569EC88}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{05235347-10F5-4C6E-A054-63C1F569EC88}.Release|Any CPU.Build.0 = Release|Any CPU
-		{05235347-10F5-4C6E-A054-63C1F569EC88}.Release|x86.ActiveCfg = Release|Any CPU
-		{05235347-10F5-4C6E-A054-63C1F569EC88}.Release|x86.Build.0 = Release|Any CPU
+		{7C0831FA-6214-422B-9EA3-5DF74FF0AFB3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7C0831FA-6214-422B-9EA3-5DF74FF0AFB3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7C0831FA-6214-422B-9EA3-5DF74FF0AFB3}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{7C0831FA-6214-422B-9EA3-5DF74FF0AFB3}.Debug|x86.Build.0 = Debug|Any CPU
+		{7C0831FA-6214-422B-9EA3-5DF74FF0AFB3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7C0831FA-6214-422B-9EA3-5DF74FF0AFB3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7C0831FA-6214-422B-9EA3-5DF74FF0AFB3}.Release|x86.ActiveCfg = Release|Any CPU
+		{7C0831FA-6214-422B-9EA3-5DF74FF0AFB3}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

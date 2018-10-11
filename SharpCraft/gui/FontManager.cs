@@ -1,11 +1,11 @@
-﻿using SharpCraft.texture;
-using SharpCraft.util;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
+using SharpCraft_Client.texture;
+using SharpCraft_Client.util;
 
-namespace SharpCraft.gui
+namespace SharpCraft_Client.gui
 {
     internal class FontManager
     {

@@ -1,8 +1,8 @@
 ﻿using OpenTK;
-using SharpCraft.block;
-using SharpCraft.entity;
+using SharpCraft_Client.block;
+using SharpCraft_Client.entity;
 
-namespace SharpCraft.world
+namespace SharpCraft_Client.world
 {
     internal class DestroyProgress
     {

@@ -1,12 +1,12 @@
 ﻿using Newtonsoft.Json;
-using SharpCraft.block;
-using SharpCraft.entity;
 using System;
 using System.IO;
+using SharpCraft_Client.block;
+using SharpCraft_Client.entity;
 
 // ReSharper disable InconsistentNaming
 
-namespace SharpCraft.world
+namespace SharpCraft_Client.world
 {
     internal class WorldLoader
     {

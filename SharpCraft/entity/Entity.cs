@@ -1,11 +1,11 @@
 ﻿using OpenTK;
-using SharpCraft.block;
-using SharpCraft.world;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using SharpCraft_Client.block;
+using SharpCraft_Client.world;
 
-namespace SharpCraft.entity
+namespace SharpCraft_Client.entity
 {
     public class Entity
     {

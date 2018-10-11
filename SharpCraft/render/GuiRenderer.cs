@@ -1,10 +1,10 @@
 ﻿using OpenTK.Graphics.OpenGL;
 using OpenTK.Input;
-using SharpCraft.gui;
-using SharpCraft.model;
 using System.Drawing;
+using SharpCraft_Client.gui;
+using SharpCraft_Client.model;
 
-namespace SharpCraft.render
+namespace SharpCraft_Client.render
 {
     internal class GuiRenderer
     {

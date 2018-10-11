@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace SharpCraft
+namespace SharpCraft_Client
 {
     internal class ModInfo
     {

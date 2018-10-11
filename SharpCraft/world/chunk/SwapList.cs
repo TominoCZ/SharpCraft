@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace SharpCraft.world.chunk
+namespace SharpCraft_Client.world.chunk
 {
     internal class SwapList<T>
     {

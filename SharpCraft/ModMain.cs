@@ -1,4 +1,4 @@
-﻿namespace SharpCraft
+﻿namespace SharpCraft_Client
 {
     internal abstract class ModMain
     {

@@ -3,7 +3,7 @@ using System.IO;
 using System.Text;
 using System.Threading;
 
-namespace SharpCraft.world.chunk.region
+namespace SharpCraft_Client.world.chunk.region
 {
     public class RegionStaticImpl<TCord> : IRegion where TCord : IRegionCord
     {

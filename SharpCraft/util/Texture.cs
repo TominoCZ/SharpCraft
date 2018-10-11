@@ -1,6 +1,6 @@
 ﻿using System.Drawing;
 
-namespace SharpCraft.util
+namespace SharpCraft_Client.util
 {
     public class Texture
     {

@@ -1,0 +1,30 @@
+﻿{
+  "name": "SharpCraft",
+  "runtimes": {
+    "win": {}
+  },
+  "dependencies": {
+    "InvertedTomato.Feather2.Net": "0.3.0",
+    "Microsoft.CSharp": "4.0.0.0",
+    "Newtonsoft.Json": "11.0.2",
+    "OpenTK": "3.0.1",
+    "System": "4.0.0.0",
+    "System.Drawing.Common": "4.5.0"
+  },
+  "buildOptions": {
+    "warningsAsErrors": false,
+    "nowarn": [
+      "CS0168",
+      "CS0219"
+    ],
+    "xmlDoc": true,
+    "preserveCompilationContext": true,
+    "outputName": "SharpCraft",
+    "debugType": "portable",
+    "allowUnsafe": false,
+    "define": []
+  },
+  "frameworks": {
+    "net471": {}
+  }
+}

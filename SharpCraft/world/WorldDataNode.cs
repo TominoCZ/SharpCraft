@@ -2,7 +2,7 @@ using Newtonsoft.Json;
 
 // ReSharper disable InconsistentNaming
 
-namespace SharpCraft.world
+namespace SharpCraft_Client.world
 {
     public class WorldDataNode
     {
@@ -19,9 +19,10 @@ namespace SharpCraft.world
             seed = w.Seed;
         }
 
-        public World GetWorld(string saveName)
-        {
-            return new World(saveName, levelName, seed);
+        public WorldClient GetWorld(string saveName)
+        { //TODO what about servers?
+
+            return new WorldClient(saveName, levelName, seed);
         }
     }
 }

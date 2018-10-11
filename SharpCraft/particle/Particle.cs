@@ -1,12 +1,12 @@
 ﻿using OpenTK;
 using OpenTK.Graphics.OpenGL;
-using SharpCraft.entity;
-using SharpCraft.model;
-using SharpCraft.render;
-using SharpCraft.util;
-using SharpCraft.world;
+using SharpCraft_Client.entity;
+using SharpCraft_Client.model;
+using SharpCraft_Client.render;
+using SharpCraft_Client.util;
+using SharpCraft_Client.world;
 
-namespace SharpCraft.particle
+namespace SharpCraft_Client.particle
 {
     public class Particle : Entity
     {

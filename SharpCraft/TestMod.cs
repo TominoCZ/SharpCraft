@@ -1,6 +1,4 @@
-﻿using SharpCraft.block;
-
-namespace SharpCraft
+﻿namespace SharpCraft_Client
 {
     internal class TestMod : ModMain
     {
@@ -21,16 +19,6 @@ namespace SharpCraft
 
         public override void OnRecipeRegistry(RecipeRegistryEventArgs args)
         {
-        }
-    }
-
-    internal class SumBlock : Block
-    {
-        public SumBlock() : base(Material.GetMaterial("stone"))
-        {
-            SetUnlocalizedName(TestMod.Instance.ModInfo.ID, "sum_block");
-
-            IsFullCube = false;
         }
     }
 }

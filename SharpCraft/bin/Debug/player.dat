@@ -1,0 +1,16 @@
+{
+  "pitch": 0.5680001,
+  "yaw": -13.6231451,
+  "x": 0.6999998,
+  "y": 45.0,
+  "z": 10.1515522,
+  "hotbar": {
+    "1": {
+      "id": "sharpcraft.block.tnt",
+      "count": 6,
+      "meta": 0
+    }
+  },
+  "inventory": {},
+  "health": 100.0
+}

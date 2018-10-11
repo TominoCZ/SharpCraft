@@ -1,4 +1,4 @@
-﻿namespace SharpCraft.texture
+﻿namespace SharpCraft_Client.texture
 {
     public enum Facing //THE ORDER MUST BE THIS WAY!!!
     {

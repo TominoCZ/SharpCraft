@@ -1,8 +1,8 @@
 ﻿using OpenTK;
-using SharpCraft.entity;
 using System;
+using SharpCraft_Client.entity;
 
-namespace SharpCraft.util
+namespace SharpCraft_Client.util
 {
     internal class RayHelper
     {

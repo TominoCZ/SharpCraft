@@ -1,21 +1,7 @@
-﻿using InvertedTomato.IO.Messages;
-using InvertedTomato.Net.Feather;
-using OpenTK;
+﻿using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Input;
-using SharpCraft.block;
-using SharpCraft.entity;
-using SharpCraft.gui;
-using SharpCraft.item;
-using SharpCraft.json;
-using SharpCraft.model;
-using SharpCraft.render;
-using SharpCraft.render.shader;
-using SharpCraft.sound;
-using SharpCraft.texture;
-using SharpCraft.util;
-using SharpCraft.world;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -26,12 +12,24 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
+using SharpCraft_Client.block;
+using SharpCraft_Client.entity;
+using SharpCraft_Client.gui;
+using SharpCraft_Client.item;
+using SharpCraft_Client.json;
+using SharpCraft_Client.model;
+using SharpCraft_Client.render;
+using SharpCraft_Client.render.shader;
+using SharpCraft_Client.sound;
+using SharpCraft_Client.texture;
+using SharpCraft_Client.util;
+using SharpCraft_Client.world;
 using Bitmap = System.Drawing.Bitmap;
 using Rectangle = System.Drawing.Rectangle;
 
 #pragma warning disable 618
 
-namespace SharpCraft
+namespace SharpCraft_Client
 {
     internal class SharpCraft : GameWindow
     {
@@ -94,7 +92,6 @@ namespace SharpCraft
         private DateTime _lastFpsDate = DateTime.Now;
         private WindowState _lastWindowState;
         private readonly Thread _renderThread = Thread.CurrentThread;
-        private SpinWait _spinner = new SpinWait();
 
         public static SharpCraft Instance { get; private set; }
 
@@ -106,7 +103,6 @@ namespace SharpCraft
         private float _mouseWheelLast;
 
         public bool IsPaused { get; private set; }
-        public bool IsLocal { get; } = true;
         public long GameTicks { get; private set; }
 
         private bool _takeScreenshot;
@@ -157,7 +153,10 @@ namespace SharpCraft
 
             SettingsManager.Load();
 
+            //load settings
             Camera.SetTargetFov(SettingsManager.GetFloat("fov"));
+            _sensitivity = SettingsManager.GetFloat("sensitivity");
+            WorldRenderer.RenderDistance = SettingsManager.GetInt("renderdistance");
 
             OpenGuiScreen(new GuiScreenMainMenu());
         }
@@ -346,10 +345,6 @@ namespace SharpCraft
 
         public void StartGame()
         {
-            //load settings
-            _sensitivity = SettingsManager.GetFloat("sensitivity");
-            WorldRenderer.RenderDistance = SettingsManager.GetInt("renderdistance");
-
             LoadWorld("MyWorld");
 
             Player?.OnPickup(ItemRegistry.GetItemStack(BlockRegistry.GetBlock<BlockTNT>().GetState()));
@@ -390,9 +385,31 @@ namespace SharpCraft
             _mouseLast = new Point(state.X, state.Y);
         }
 
-        public void ConnectToServer(string ip, int port)
+        public bool ConnectToServer(string ip, int port)
         {
-            ServerHandler.Connect(ip, port);
+            var b = ServerHandler.Connect(ip, port);
+
+            if (b)
+            {
+                ParticleRenderer = new ParticleRenderer();
+                SkyboxRenderer = new SkyboxRenderer();
+
+                BlockPos playerPos = new BlockPos(0, 100, 0);//MathUtil.NextFloat(-100, 100));
+
+                World = new WorldClientServer();
+
+                Player = new EntityPlayerSp(World, playerPos.ToVec());
+
+                World.AddEntity(Player);
+
+                Player.SetItemStackInInventory(0, new ItemStack(ItemRegistry.GetItem(BlockRegistry.GetBlock<BlockCraftingTable>())));
+                ResetMouse();
+
+                MouseState state = Mouse.GetState();
+                _mouseLast = new Point(state.X, state.Y);
+            }
+
+            return b;
         }
 
         public void Disconnect()
@@ -400,9 +417,9 @@ namespace SharpCraft
             ParticleRenderer = null;
             SkyboxRenderer = null;
 
-            if (IsLocal)
+            if (World is WorldClient wc)
             {
-                WorldLoader.SaveWorld(World);
+                WorldLoader.SaveWorld(wc);
             }
 
             var wmp = (WorldClientServer)World;
@@ -497,9 +514,9 @@ namespace SharpCraft
                 }
                 else
                     ResetDestroyProgress(Player);
+                
+                World?.Update(Player.Pos, WorldRenderer.RenderDistance);
             }
-
-            World?.Update(Player, WorldRenderer.RenderDistance);
 
             WorldRenderer?.Update();
             SkyboxRenderer?.Update();
@@ -822,6 +839,8 @@ namespace SharpCraft
 
             GameLoop();
 
+            ServerHandler.Tick();
+
             _updateTimer = DateTime.Now;
         }
 
@@ -1067,96 +1086,10 @@ namespace SharpCraft
             TextureManager.Destroy();
             SoundEngine.Destroy();
 
-            if (World != null)
-                WorldLoader.SaveWorld(World);
+            if (World is WorldClient wc)
+                WorldLoader.SaveWorld(wc);
 
             base.OnClosing(e);
-        }
-    }
-
-    internal class ServerHander
-    {
-        private FeatherTcpClient<GenericMessage> client;
-
-        private Guid ClientID;
-
-        public void Connect(string ip, int port)
-        {
-            client = new FeatherTcpClient<GenericMessage>();
-
-            client.OnDisconnected += (endPoint) =>
-            {
-                Console.WriteLine($"{endPoint} disconnected.");
-                OnDisconnect();
-            };
-
-            client.OnMessageReceived += (msg) =>
-            {
-                var id = msg.ReadUnsignedInteger();
-
-                if (id == 0)
-                {
-                    ClientID = msg.ReadGuid();
-                }
-
-                if (id == 1)
-                {
-                    if (SharpCraft.Instance.Player != null)
-                    {
-                        var m = new GenericMessage();
-                        m.WriteUnsignedInteger(1);
-
-                        var pos = SharpCraft.Instance.Player.Pos;
-                        var dir = SharpCraft.Instance.Camera.GetLookVec();
-
-                        m.WriteFloat(pos.X);
-                        m.WriteFloat(pos.Y);
-                        m.WriteFloat(pos.Z);
-
-                        m.WriteFloat(dir.X);
-                        m.WriteFloat(dir.Y);
-                        m.WriteFloat(dir.Z);
-
-                        client.Send(m);
-                    }
-                }
-
-                if (id == 2)
-                {
-                    int count = (int)msg.ReadUnsignedInteger();
-
-                    for (int i = 0; i < count; i++)
-                    {
-                        var guid = msg.ReadGuid();
-
-                        var x = msg.ReadFloat();
-                        var y = msg.ReadFloat();
-                        var z = msg.ReadFloat();
-
-                        var pos = new Vector3(x, y, z);
-
-                        x = msg.ReadFloat();
-                        y = msg.ReadFloat();
-                        z = msg.ReadFloat();
-
-                        var dir = new Vector3(x, y, z);
-
-                        if (guid == ClientID)
-                            continue;
-
-                        //TODO - update entities in WorldMP
-                    }
-                }
-            };
-
-            client.Connect(ip, port);
-
-            Console.WriteLine("Connected to server");
-        }
-
-        public void OnDisconnect()
-        {
-            client.Dispose();
         }
     }
 }

@@ -1,10 +1,10 @@
 ﻿using OpenTK;
-using SharpCraft.block;
-using SharpCraft.util;
-using SharpCraft.world.chunk.region;
 using System;
+using SharpCraft_Client.block;
+using SharpCraft_Client.util;
+using SharpCraft_Client.world.chunk.region;
 
-namespace SharpCraft.world.chunk
+namespace SharpCraft_Client.world.chunk
 {
     public struct ChunkPos : IRegionCord
     {

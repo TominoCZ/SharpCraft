@@ -1,8 +1,8 @@
 ﻿using OpenTK;
-using SharpCraft.util;
 using System;
+using SharpCraft_Client.util;
 
-namespace SharpCraft.entity
+namespace SharpCraft_Client.entity
 {
     public class AxisAlignedBb
     {

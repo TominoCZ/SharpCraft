@@ -1,8 +1,8 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
-using SharpCraft.model;
+using SharpCraft_Client.model;
 
-namespace SharpCraft.json
+namespace SharpCraft_Client.json
 {
     public class JsonModelRotation
     {

@@ -1,8 +1,8 @@
 ﻿using OpenTK;
-using SharpCraft.block;
-using SharpCraft.util;
+using SharpCraft_Client.block;
+using SharpCraft_Client.util;
 
-namespace SharpCraft.entity
+namespace SharpCraft_Client.entity
 {
     public struct MouseOverObject
     {

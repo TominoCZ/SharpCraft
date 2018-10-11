@@ -1,6 +1,6 @@
-﻿namespace SharpCraft.block
+﻿namespace SharpCraft_Client.block
 {
-    internal class BlockGlass : Block
+    public class BlockGlass : Block
     {
         public BlockGlass() : base(Material.GetMaterial("stone"))
         {

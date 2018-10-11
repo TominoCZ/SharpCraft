@@ -1,7 +1,7 @@
-﻿using SharpCraft.render.shader;
-using SharpCraft.texture;
+﻿using SharpCraft_Client.render.shader;
+using SharpCraft_Client.texture;
 
-namespace SharpCraft.model
+namespace SharpCraft_Client.model
 {
     public class ModelItem : ModelBaked
     {

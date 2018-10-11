@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 #pragma warning disable CS0649
 
-namespace SharpCraft.json
+namespace SharpCraft_Client.json
 {
     internal class JsonModel
     {

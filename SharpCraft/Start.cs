@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Threading;
+using SharpCraft;
 
-namespace SharpCraft
+namespace SharpCraft_Client
 {
     internal class Start
     {

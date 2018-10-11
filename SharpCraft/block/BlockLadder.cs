@@ -1,8 +1,8 @@
-﻿using SharpCraft.entity;
+﻿using SharpCraft_Client.entity;
 
-namespace SharpCraft.block
+namespace SharpCraft_Client.block
 {
-    internal class BlockLadder : Block
+    public class BlockLadder : Block
     {
         public BlockLadder() : base(Material.GetMaterial("wood"))
         {

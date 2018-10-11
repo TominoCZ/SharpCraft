@@ -1,16 +1,16 @@
 ﻿using OpenTK;
 using OpenTK.Graphics.OpenGL;
-using SharpCraft.block;
-using SharpCraft.json;
-using SharpCraft.model;
-using SharpCraft.render;
-using SharpCraft.util;
-using SharpCraft.world;
 using System;
+using SharpCraft_Client.block;
+using SharpCraft_Client.json;
+using SharpCraft_Client.model;
+using SharpCraft_Client.render;
+using SharpCraft_Client.util;
+using SharpCraft_Client.world;
 using Vector2 = OpenTK.Vector2;
 using Vector3 = OpenTK.Vector3;
 
-namespace SharpCraft.particle
+namespace SharpCraft_Client.particle
 {
     internal class ParticleDigging : Particle
     {

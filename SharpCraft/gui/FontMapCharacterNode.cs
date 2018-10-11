@@ -1,4 +1,4 @@
-﻿namespace SharpCraft.gui
+﻿namespace SharpCraft_Client.gui
 {
     public struct FontMapCharacterNode
     {

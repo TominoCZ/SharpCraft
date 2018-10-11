@@ -1,17 +1,17 @@
 ﻿using OpenTK;
 using OpenTK.Graphics.OpenGL;
-using SharpCraft.block;
-using SharpCraft.item;
-using SharpCraft.json;
-using SharpCraft.model;
-using SharpCraft.render;
-using SharpCraft.render.shader;
-using SharpCraft.util;
 using System;
+using SharpCraft_Client.block;
+using SharpCraft_Client.item;
+using SharpCraft_Client.json;
+using SharpCraft_Client.model;
+using SharpCraft_Client.render;
+using SharpCraft_Client.render.shader;
+using SharpCraft_Client.util;
 
 #pragma warning disable 618
 
-namespace SharpCraft.gui
+namespace SharpCraft_Client.gui
 {
     internal class Gui
     {

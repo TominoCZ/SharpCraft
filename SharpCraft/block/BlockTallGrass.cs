@@ -1,9 +1,9 @@
 ﻿using OpenTK;
-using SharpCraft.entity;
+using SharpCraft_Client.entity;
 
-namespace SharpCraft.block
+namespace SharpCraft_Client.block
 {
-    internal class BlockTallGrass : Block
+    public class BlockTallGrass : Block
     {
         public BlockTallGrass() : base(Material.GetMaterial("tallgrass"))
         {

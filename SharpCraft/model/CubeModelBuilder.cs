@@ -1,12 +1,12 @@
 ﻿using OpenTK;
-using SharpCraft.block;
-using SharpCraft.json;
-using SharpCraft.texture;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using SharpCraft_Client.block;
+using SharpCraft_Client.json;
+using SharpCraft_Client.texture;
 
-namespace SharpCraft.model
+namespace SharpCraft_Client.model
 {
     public static class CubeModelBuilder
     {

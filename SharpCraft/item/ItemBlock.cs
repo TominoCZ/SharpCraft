@@ -1,7 +1,7 @@
-﻿using SharpCraft.block;
-using System;
+﻿using System;
+using SharpCraft_Client.block;
 
-namespace SharpCraft.item
+namespace SharpCraft_Client.item
 {
     [Serializable]
     public class ItemBlock : Item

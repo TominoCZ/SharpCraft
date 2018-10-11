@@ -1,7 +1,7 @@
-﻿using SharpCraft.entity;
-using SharpCraft.world;
+﻿using SharpCraft_Client.entity;
+using SharpCraft_Client.world;
 
-namespace SharpCraft.block
+namespace SharpCraft_Client.block
 {
     public class BlockCraftingTable : Block
     {
